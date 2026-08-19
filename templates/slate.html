@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF DFS Challenge{% if week %} — Week {{ week }}{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <h1>FF DFS Challenge</h1>
+    {% if week %}
+        <p class="subtitle">Week {{ week }}, {{ year }} — DraftKings Thu-Mon Slate</p>
+    {% else %}
+        <p class="subtitle">No slate loaded yet. Run <code>flask ingest-slate --week N</code>.</p>
+    {% endif %}
+</header>
+
+<main>
+    {% if players %}
+    <div class="table-wrapper">
+        <table id="slate-table">
+            <thead>
+                <tr>
+                    <th data-col="position">POS</th>
+                    <th data-col="name">Player</th>
+                    <th data-col="team">Team</th>
+                    <th data-col="opponent">Opp</th>
+                    <th data-col="salary" class="right">Salary</th>
+                    <th data-col="projected_pts" class="right">Proj Pts</th>
+                    <th data-col="ownership_pct" class="right">Proj Own%</th>
+                    <th data-col="value" class="right">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in players %}
+                <tr class="pos-{{ p['position'] | lower }}">
+                    <td class="pos-badge">{{ p['position'] }}</td>
+                    <td class="player-name">{{ p['name'] }}</td>
+                    <td>{{ p['team'] }}</td>
+                    <td>{{ p['opponent'] }}</td>
+                    <td class="right">${{ "{:,}".format(p['salary']) if p['salary'] else '—' }}</td>
+                    <td class="right">{{ "%.1f"|format(p['projected_pts']) if p['projected_pts'] else '—' }}</td>
+                    <td class="right">{{ "%.1f"|format(p['ownership_pct']) if p['ownership_pct'] else '—' }}%</td>
+                    <td class="right">
+                        {% if p['salary'] and p['projected_pts'] %}
+                            {{ "%.2f"|format(p['projected_pts'] / (p['salary'] / 1000)) }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No player data found. Run <code>flask ingest-slate --week N</code> to load the slate.</p>
+    {% endif %}
+</main>
+
+<script src="{{ url_for('static', filename='slate.js') }}"></script>
+
+</body>
+</html>

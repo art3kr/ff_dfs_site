@@ -1,0 +1,151 @@
+/* -----------------------------------------------------------------------
+   FF DFS Challenge — base styles
+   Goal: clean data table, easy to read, no heavy framework.
+   ----------------------------------------------------------------------- */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg:           #0f1117;
+    --bg-surface:   #1a1d27;
+    --bg-row-alt:   #1e2130;
+    --border:       #2e3347;
+    --text:         #e2e8f0;
+    --text-muted:   #8892a4;
+    --accent:       #4f8ef7;
+    --pos-qb:       #e05c5c;
+    --pos-rb:       #5cb85c;
+    --pos-wr:       #5bc0de;
+    --pos-te:       #f0ad4e;
+    --pos-dst:      #9b59b6;
+    --font:         'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+/* --- Header --- */
+
+header {
+    padding: 24px 32px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+}
+
+header .subtitle {
+    margin-top: 4px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+header code {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.85em;
+    color: var(--accent);
+}
+
+/* --- Main content --- */
+
+main {
+    padding: 24px 32px;
+}
+
+.empty-state {
+    color: var(--text-muted);
+    padding: 48px 0;
+    text-align: center;
+}
+
+/* --- Table wrapper (horizontal scroll on small screens) --- */
+
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+/* --- Slate table --- */
+
+#slate-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+#slate-table thead th {
+    background: var(--bg-surface);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+}
+
+#slate-table thead th.right,
+#slate-table tbody td.right {
+    text-align: right;
+}
+
+/* Sort indicator */
+#slate-table thead th.sort-asc::after  { content: " ↑"; color: var(--accent); }
+#slate-table thead th.sort-desc::after { content: " ↓"; color: var(--accent); }
+
+#slate-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+}
+
+#slate-table tbody tr:nth-child(even) {
+    background: var(--bg-row-alt);
+}
+
+#slate-table tbody tr:hover {
+    background: #252a3a;
+}
+
+#slate-table tbody td {
+    padding: 9px 14px;
+    color: var(--text);
+}
+
+/* Position badge */
+.pos-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    width: 46px;
+}
+
+tr.pos-qb  .pos-badge { color: var(--pos-qb);  }
+tr.pos-rb  .pos-badge { color: var(--pos-rb);  }
+tr.pos-wr  .pos-badge { color: var(--pos-wr);  }
+tr.pos-te  .pos-badge { color: var(--pos-te);  }
+tr.pos-dst .pos-badge { color: var(--pos-dst); }
+
+.player-name {
+    font-weight: 500;
+}
