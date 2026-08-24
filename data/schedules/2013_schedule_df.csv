@@ -1,0 +1,257 @@
+year,week,team_1,team_2,date,time,location,boxscore_url
+2013,1,Denver Broncos,Baltimore Ravens,2013-09-05,9:13PM,Denver,/boxscores/201309050den.htm
+2013,1,New England Patriots,Buffalo Bills,2013-09-08,1:02PM,Buffalo,/boxscores/201309080buf.htm
+2013,1,Chicago Bears,Cincinnati Bengals,2013-09-08,1:02PM,Chicago,/boxscores/201309080chi.htm
+2013,1,Miami Dolphins,Cleveland Browns,2013-09-08,1:02PM,Cleveland,/boxscores/201309080cle.htm
+2013,1,Indianapolis Colts,Oakland Raiders,2013-09-08,1:02PM,Indianapolis,/boxscores/201309080clt.htm
+2013,1,Detroit Lions,Minnesota Vikings,2013-09-08,1:02PM,Detroit,/boxscores/201309080det.htm
+2013,1,Tennessee Titans,Pittsburgh Steelers,2013-09-08,1:02PM,Pittsburgh,/boxscores/201309080pit.htm
+2013,1,New Orleans Saints,Atlanta Falcons,2013-09-08,1:03PM,New Orleans,/boxscores/201309080nor.htm
+2013,1,Kansas City Chiefs,Jacksonville Jaguars,2013-09-08,1:03PM,Jacksonville,/boxscores/201309080jax.htm
+2013,1,New York Jets,Tampa Bay Buccaneers,2013-09-08,1:03PM,New York,/boxscores/201309080nyj.htm
+2013,1,Seattle Seahawks,Carolina Panthers,2013-09-08,1:04PM,Carolina,/boxscores/201309080car.htm
+2013,1,St. Louis Rams,Arizona Cardinals,2013-09-08,4:23PM,St. Louis,/boxscores/201309080ram.htm
+2013,1,San Francisco 49ers,Green Bay Packers,2013-09-08,4:26PM,San Francisco,/boxscores/201309080sfo.htm
+2013,1,Dallas Cowboys,New York Giants,2013-09-08,8:30PM,Dallas,/boxscores/201309080dal.htm
+2013,1,Philadelphia Eagles,Washington Redskins,2013-09-09,7:10PM,Washington,/boxscores/201309090was.htm
+2013,1,Houston Texans,San Diego Chargers,2013-09-09,10:25PM,San Diego,/boxscores/201309090sdg.htm
+2013,2,New England Patriots,New York Jets,2013-09-12,8:29PM,New England,/boxscores/201309120nwe.htm
+2013,2,Buffalo Bills,Carolina Panthers,2013-09-15,1:02PM,Buffalo,/boxscores/201309150buf.htm
+2013,2,Baltimore Ravens,Cleveland Browns,2013-09-15,1:02PM,Baltimore,/boxscores/201309150rav.htm
+2013,2,Miami Dolphins,Indianapolis Colts,2013-09-15,1:02PM,Indianapolis,/boxscores/201309150clt.htm
+2013,2,Kansas City Chiefs,Dallas Cowboys,2013-09-15,1:02PM,Kansas City,/boxscores/201309150kan.htm
+2013,2,Green Bay Packers,Washington Redskins,2013-09-15,1:02PM,Green Bay,/boxscores/201309150gnb.htm
+2013,2,San Diego Chargers,Philadelphia Eagles,2013-09-15,1:02PM,Philadelphia,/boxscores/201309150phi.htm
+2013,2,Atlanta Falcons,St. Louis Rams,2013-09-15,1:03PM,Atlanta,/boxscores/201309150atl.htm
+2013,2,Chicago Bears,Minnesota Vikings,2013-09-15,1:03PM,Chicago,/boxscores/201309150chi.htm
+2013,2,Houston Texans,Tennessee Titans,2013-09-15,1:03PM,Houston,/boxscores/201309150htx.htm
+2013,2,Arizona Cardinals,Detroit Lions,2013-09-15,4:05PM,Arizona,/boxscores/201309150crd.htm
+2013,2,New Orleans Saints,Tampa Bay Buccaneers,2013-09-15,4:05PM,Tampa Bay,/boxscores/201309150tam.htm
+2013,2,Denver Broncos,New York Giants,2013-09-15,4:25PM,New York,/boxscores/201309150nyg.htm
+2013,2,Oakland Raiders,Jacksonville Jaguars,2013-09-15,4:25PM,Oakland,/boxscores/201309150rai.htm
+2013,2,Seattle Seahawks,San Francisco 49ers,2013-09-15,8:31PM,Seattle,/boxscores/201309150sea.htm
+2013,2,Cincinnati Bengals,Pittsburgh Steelers,2013-09-16,8:41PM,Cincinnati,/boxscores/201309160cin.htm
+2013,3,Kansas City Chiefs,Philadelphia Eagles,2013-09-19,8:29PM,Philadelphia,/boxscores/201309190phi.htm
+2013,3,Dallas Cowboys,St. Louis Rams,2013-09-22,1:02PM,Dallas,/boxscores/201309220dal.htm
+2013,3,New England Patriots,Tampa Bay Buccaneers,2013-09-22,1:02PM,New England,/boxscores/201309220nwe.htm
+2013,3,Carolina Panthers,New York Giants,2013-09-22,1:03PM,Carolina,/boxscores/201309220car.htm
+2013,3,Cincinnati Bengals,Green Bay Packers,2013-09-22,1:03PM,Cincinnati,/boxscores/201309220cin.htm
+2013,3,New Orleans Saints,Arizona Cardinals,2013-09-22,1:03PM,New Orleans,/boxscores/201309220nor.htm
+2013,3,Detroit Lions,Washington Redskins,2013-09-22,1:03PM,Washington,/boxscores/201309220was.htm
+2013,3,Baltimore Ravens,Houston Texans,2013-09-22,1:03PM,Baltimore,/boxscores/201309220rav.htm
+2013,3,Tennessee Titans,San Diego Chargers,2013-09-22,1:03PM,Tennessee,/boxscores/201309220oti.htm
+2013,3,Cleveland Browns,Minnesota Vikings,2013-09-22,1:05PM,Minnesota,/boxscores/201309220min.htm
+2013,3,Miami Dolphins,Atlanta Falcons,2013-09-22,4:05PM,Miami,/boxscores/201309220mia.htm
+2013,3,New York Jets,Buffalo Bills,2013-09-22,4:25PM,New York,/boxscores/201309220nyj.htm
+2013,3,Indianapolis Colts,San Francisco 49ers,2013-09-22,4:25PM,San Francisco,/boxscores/201309220sfo.htm
+2013,3,Seattle Seahawks,Jacksonville Jaguars,2013-09-22,4:26PM,Seattle,/boxscores/201309220sea.htm
+2013,3,Chicago Bears,Pittsburgh Steelers,2013-09-22,8:30PM,Pittsburgh,/boxscores/201309220pit.htm
+2013,3,Denver Broncos,Oakland Raiders,2013-09-23,8:40PM,Denver,/boxscores/201309230den.htm
+2013,4,San Francisco 49ers,St. Louis Rams,2013-09-26,8:25PM,St. Louis,/boxscores/201309260ram.htm
+2013,4,Buffalo Bills,Baltimore Ravens,2013-09-29,1:02PM,Buffalo,/boxscores/201309290buf.htm
+2013,4,Kansas City Chiefs,New York Giants,2013-09-29,1:02PM,Kansas City,/boxscores/201309290kan.htm
+2013,4,Detroit Lions,Chicago Bears,2013-09-29,1:03PM,Detroit,/boxscores/201309290det.htm
+2013,4,Arizona Cardinals,Tampa Bay Buccaneers,2013-09-29,1:03PM,Tampa Bay,/boxscores/201309290tam.htm
+2013,4,Seattle Seahawks,Houston Texans,2013-09-29,1:03PM,Houston,/boxscores/201309290htx.htm
+2013,4,Cleveland Browns,Cincinnati Bengals,2013-09-29,1:06PM,Cleveland,/boxscores/201309290cle.htm
+2013,4,Indianapolis Colts,Jacksonville Jaguars,2013-09-29,1:06PM,Jacksonville,/boxscores/201309290jax.htm
+2013,4,Minnesota Vikings,Pittsburgh Steelers,2013-09-29,1:07PM,Minnesota,/boxscores/201309290min.htm
+2013,4,Tennessee Titans,New York Jets,2013-09-29,4:05PM,Tennessee,/boxscores/201309290oti.htm
+2013,4,San Diego Chargers,Dallas Cowboys,2013-09-29,4:25PM,San Diego,/boxscores/201309290sdg.htm
+2013,4,Denver Broncos,Philadelphia Eagles,2013-09-29,4:25PM,Denver,/boxscores/201309290den.htm
+2013,4,Washington Redskins,Oakland Raiders,2013-09-29,4:25PM,Oakland,/boxscores/201309290rai.htm
+2013,4,New England Patriots,Atlanta Falcons,2013-09-29,8:30PM,Atlanta,/boxscores/201309290atl.htm
+2013,4,New Orleans Saints,Miami Dolphins,2013-09-30,8:40PM,New Orleans,/boxscores/201309300nor.htm
+2013,5,Cleveland Browns,Buffalo Bills,2013-10-03,8:29PM,Cleveland,/boxscores/201310030cle.htm
+2013,5,St. Louis Rams,Jacksonville Jaguars,2013-10-06,1:00PM,St. Louis,/boxscores/201310060ram.htm
+2013,5,New Orleans Saints,Chicago Bears,2013-10-06,1:02PM,Chicago,/boxscores/201310060chi.htm
+2013,5,Cincinnati Bengals,New England Patriots,2013-10-06,1:02PM,Cincinnati,/boxscores/201310060cin.htm
+2013,5,Green Bay Packers,Detroit Lions,2013-10-06,1:02PM,Green Bay,/boxscores/201310060gnb.htm
+2013,5,Baltimore Ravens,Miami Dolphins,2013-10-06,1:02PM,Miami,/boxscores/201310060mia.htm
+2013,5,Philadelphia Eagles,New York Giants,2013-10-06,1:02PM,New York,/boxscores/201310060nyg.htm
+2013,5,Indianapolis Colts,Seattle Seahawks,2013-10-06,1:03PM,Indianapolis,/boxscores/201310060clt.htm
+2013,5,Kansas City Chiefs,Tennessee Titans,2013-10-06,1:03PM,Tennessee,/boxscores/201310060oti.htm
+2013,5,Arizona Cardinals,Carolina Panthers,2013-10-06,4:05PM,Arizona,/boxscores/201310060crd.htm
+2013,5,Denver Broncos,Dallas Cowboys,2013-10-06,4:25PM,Dallas,/boxscores/201310060dal.htm
+2013,5,San Francisco 49ers,Houston Texans,2013-10-06,8:31PM,San Francisco,/boxscores/201310060sfo.htm
+2013,5,Oakland Raiders,San Diego Chargers,2013-10-06,11:35PM,Oakland,/boxscores/201310060rai.htm
+2013,5,New York Jets,Atlanta Falcons,2013-10-07,8:40PM,Atlanta,/boxscores/201310070atl.htm
+2013,6,Chicago Bears,New York Giants,2013-10-10,8:29PM,Chicago,/boxscores/201310100chi.htm
+2013,6,Green Bay Packers,Baltimore Ravens,2013-10-13,1:02PM,Baltimore,/boxscores/201310130rav.htm
+2013,6,Cincinnati Bengals,Buffalo Bills,2013-10-13,1:02PM,Buffalo,/boxscores/201310130buf.htm
+2013,6,Detroit Lions,Cleveland Browns,2013-10-13,1:02PM,Cleveland,/boxscores/201310130cle.htm
+2013,6,Kansas City Chiefs,Oakland Raiders,2013-10-13,1:02PM,Kansas City,/boxscores/201310130kan.htm
+2013,6,St. Louis Rams,Houston Texans,2013-10-13,1:03PM,Houston,/boxscores/201310130htx.htm
+2013,6,Pittsburgh Steelers,New York Jets,2013-10-13,1:03PM,New York,/boxscores/201310130nyj.htm
+2013,6,Philadelphia Eagles,Tampa Bay Buccaneers,2013-10-13,1:03PM,Tampa Bay,/boxscores/201310130tam.htm
+2013,6,Carolina Panthers,Minnesota Vikings,2013-10-13,1:05PM,Minnesota,/boxscores/201310130min.htm
+2013,6,Denver Broncos,Jacksonville Jaguars,2013-10-13,4:05PM,Denver,/boxscores/201310130den.htm
+2013,6,Seattle Seahawks,Tennessee Titans,2013-10-13,4:06PM,Seattle,/boxscores/201310130sea.htm
+2013,6,San Francisco 49ers,Arizona Cardinals,2013-10-13,4:25PM,San Francisco,/boxscores/201310130sfo.htm
+2013,6,New England Patriots,New Orleans Saints,2013-10-13,4:25PM,New England,/boxscores/201310130nwe.htm
+2013,6,Dallas Cowboys,Washington Redskins,2013-10-13,8:31PM,Dallas,/boxscores/201310130dal.htm
+2013,6,San Diego Chargers,Indianapolis Colts,2013-10-14,8:40PM,San Diego,/boxscores/201310140sdg.htm
+2013,7,Seattle Seahawks,Arizona Cardinals,2013-10-17,8:25PM,Arizona,/boxscores/201310170crd.htm
+2013,7,Atlanta Falcons,Tampa Bay Buccaneers,2013-10-20,1:02PM,Atlanta,/boxscores/201310200atl.htm
+2013,7,Buffalo Bills,Miami Dolphins,2013-10-20,1:02PM,Miami,/boxscores/201310200mia.htm
+2013,7,Cincinnati Bengals,Detroit Lions,2013-10-20,1:02PM,Detroit,/boxscores/201310200det.htm
+2013,7,Dallas Cowboys,Philadelphia Eagles,2013-10-20,1:02PM,Philadelphia,/boxscores/201310200phi.htm
+2013,7,San Diego Chargers,Jacksonville Jaguars,2013-10-20,1:02PM,Jacksonville,/boxscores/201310200jax.htm
+2013,7,Carolina Panthers,St. Louis Rams,2013-10-20,1:03PM,Carolina,/boxscores/201310200car.htm
+2013,7,New York Jets,New England Patriots,2013-10-20,1:03PM,New York,/boxscores/201310200nyj.htm
+2013,7,Washington Redskins,Chicago Bears,2013-10-20,1:05PM,Washington,/boxscores/201310200was.htm
+2013,7,San Francisco 49ers,Tennessee Titans,2013-10-20,4:06PM,Tennessee,/boxscores/201310200oti.htm
+2013,7,Pittsburgh Steelers,Baltimore Ravens,2013-10-20,4:25PM,Pittsburgh,/boxscores/201310200pit.htm
+2013,7,Green Bay Packers,Cleveland Browns,2013-10-20,4:25PM,Green Bay,/boxscores/201310200gnb.htm
+2013,7,Kansas City Chiefs,Houston Texans,2013-10-20,4:26PM,Kansas City,/boxscores/201310200kan.htm
+2013,7,Indianapolis Colts,Denver Broncos,2013-10-20,8:31PM,Indianapolis,/boxscores/201310200clt.htm
+2013,7,New York Giants,Minnesota Vikings,2013-10-21,8:40PM,New York,/boxscores/201310210nyg.htm
+2013,8,Carolina Panthers,Tampa Bay Buccaneers,2013-10-24,8:29PM,Tampa Bay,/boxscores/201310240tam.htm
+2013,8,New England Patriots,Miami Dolphins,2013-10-27,1:02PM,New England,/boxscores/201310270nwe.htm
+2013,8,New Orleans Saints,Buffalo Bills,2013-10-27,1:02PM,New Orleans,/boxscores/201310270nor.htm
+2013,8,Kansas City Chiefs,Cleveland Browns,2013-10-27,1:02PM,Kansas City,/boxscores/201310270kan.htm
+2013,8,New York Giants,Philadelphia Eagles,2013-10-27,1:02PM,Philadelphia,/boxscores/201310270phi.htm
+2013,8,Detroit Lions,Dallas Cowboys,2013-10-27,1:03PM,Detroit,/boxscores/201310270det.htm
+2013,8,San Francisco 49ers,Jacksonville Jaguars,2013-10-27,1:07PM,Jacksonville,/boxscores/201310270jax.htm
+2013,8,Oakland Raiders,Pittsburgh Steelers,2013-10-27,4:05PM,Oakland,/boxscores/201310270rai.htm
+2013,8,Cincinnati Bengals,New York Jets,2013-10-27,4:06PM,Cincinnati,/boxscores/201310270cin.htm
+2013,8,Arizona Cardinals,Atlanta Falcons,2013-10-27,4:25PM,Arizona,/boxscores/201310270crd.htm
+2013,8,Denver Broncos,Washington Redskins,2013-10-27,4:25PM,Denver,/boxscores/201310270den.htm
+2013,8,Green Bay Packers,Minnesota Vikings,2013-10-27,8:30PM,Minnesota,/boxscores/201310270min.htm
+2013,8,Seattle Seahawks,St. Louis Rams,2013-10-28,8:30PM,St. Louis,/boxscores/201310280ram.htm
+2013,9,Miami Dolphins,Cincinnati Bengals,2013-10-31,8:29PM,Miami,/boxscores/201310310mia.htm
+2013,9,Tennessee Titans,St. Louis Rams,2013-11-03,1:00PM,St. Louis,/boxscores/201311030ram.htm
+2013,9,Kansas City Chiefs,Buffalo Bills,2013-11-03,1:02PM,Buffalo,/boxscores/201311030buf.htm
+2013,9,Carolina Panthers,Atlanta Falcons,2013-11-03,1:03PM,Carolina,/boxscores/201311030car.htm
+2013,9,Washington Redskins,San Diego Chargers,2013-11-03,1:03PM,Washington,/boxscores/201311030was.htm
+2013,9,Dallas Cowboys,Minnesota Vikings,2013-11-03,1:03PM,Dallas,/boxscores/201311030dal.htm
+2013,9,New York Jets,New Orleans Saints,2013-11-03,1:04PM,New York,/boxscores/201311030nyj.htm
+2013,9,Philadelphia Eagles,Oakland Raiders,2013-11-03,4:05PM,Oakland,/boxscores/201311030rai.htm
+2013,9,Seattle Seahawks,Tampa Bay Buccaneers,2013-11-03,4:05PM,Seattle,/boxscores/201311030sea.htm
+2013,9,Cleveland Browns,Baltimore Ravens,2013-11-03,4:25PM,Cleveland,/boxscores/201311030cle.htm
+2013,9,New England Patriots,Pittsburgh Steelers,2013-11-03,4:25PM,New England,/boxscores/201311030nwe.htm
+2013,9,Indianapolis Colts,Houston Texans,2013-11-03,8:30PM,Houston,/boxscores/201311030htx.htm
+2013,9,Chicago Bears,Green Bay Packers,2013-11-04,8:40PM,Green Bay,/boxscores/201311040gnb.htm
+2013,10,Minnesota Vikings,Washington Redskins,2013-11-07,8:35PM,Minnesota,/boxscores/201311070min.htm
+2013,10,Philadelphia Eagles,Green Bay Packers,2013-11-10,1:02PM,Green Bay,/boxscores/201311100gnb.htm
+2013,10,Jacksonville Jaguars,Tennessee Titans,2013-11-10,1:02PM,Tennessee,/boxscores/201311100oti.htm
+2013,10,Pittsburgh Steelers,Buffalo Bills,2013-11-10,1:02PM,Pittsburgh,/boxscores/201311100pit.htm
+2013,10,Baltimore Ravens,Cincinnati Bengals,2013-11-10,1:02PM,Baltimore,/boxscores/201311100rav.htm
+2013,10,Seattle Seahawks,Atlanta Falcons,2013-11-10,1:03PM,Atlanta,/boxscores/201311100atl.htm
+2013,10,Detroit Lions,Chicago Bears,2013-11-10,1:03PM,Chicago,/boxscores/201311100chi.htm
+2013,10,St. Louis Rams,Indianapolis Colts,2013-11-10,1:03PM,Indianapolis,/boxscores/201311100clt.htm
+2013,10,New York Giants,Oakland Raiders,2013-11-10,1:03PM,New York,/boxscores/201311100nyg.htm
+2013,10,Carolina Panthers,San Francisco 49ers,2013-11-10,4:05PM,San Francisco,/boxscores/201311100sfo.htm
+2013,10,Arizona Cardinals,Houston Texans,2013-11-10,4:25PM,Arizona,/boxscores/201311100crd.htm
+2013,10,Denver Broncos,San Diego Chargers,2013-11-10,4:25PM,San Diego,/boxscores/201311100sdg.htm
+2013,10,New Orleans Saints,Dallas Cowboys,2013-11-10,8:30PM,New Orleans,/boxscores/201311100nor.htm
+2013,10,Tampa Bay Buccaneers,Miami Dolphins,2013-11-11,8:40PM,Tampa Bay,/boxscores/201311110tam.htm
+2013,11,Indianapolis Colts,Tennessee Titans,2013-11-14,8:29PM,Tennessee,/boxscores/201311140oti.htm
+2013,11,Chicago Bears,Baltimore Ravens,2013-11-17,1:02PM,Chicago,/boxscores/201311170chi.htm
+2013,11,Pittsburgh Steelers,Detroit Lions,2013-11-17,1:02PM,Pittsburgh,/boxscores/201311170pit.htm
+2013,11,Buffalo Bills,New York Jets,2013-11-17,1:02PM,Buffalo,/boxscores/201311170buf.htm
+2013,11,Cincinnati Bengals,Cleveland Browns,2013-11-17,1:02PM,Cincinnati,/boxscores/201311170cin.htm
+2013,11,Philadelphia Eagles,Washington Redskins,2013-11-17,1:02PM,Philadelphia,/boxscores/201311170phi.htm
+2013,11,Tampa Bay Buccaneers,Atlanta Falcons,2013-11-17,1:03PM,Tampa Bay,/boxscores/201311170tam.htm
+2013,11,Oakland Raiders,Houston Texans,2013-11-17,1:03PM,Houston,/boxscores/201311170htx.htm
+2013,11,Arizona Cardinals,Jacksonville Jaguars,2013-11-17,1:04PM,Jacksonville,/boxscores/201311170jax.htm
+2013,11,Miami Dolphins,San Diego Chargers,2013-11-17,4:05PM,Miami,/boxscores/201311170mia.htm
+2013,11,New York Giants,Green Bay Packers,2013-11-17,4:25PM,New York,/boxscores/201311170nyg.htm
+2013,11,New Orleans Saints,San Francisco 49ers,2013-11-17,4:25PM,New Orleans,/boxscores/201311170nor.htm
+2013,11,Seattle Seahawks,Minnesota Vikings,2013-11-17,4:26PM,Seattle,/boxscores/201311170sea.htm
+2013,11,Denver Broncos,Kansas City Chiefs,2013-11-17,8:30PM,Denver,/boxscores/201311170den.htm
+2013,11,Carolina Panthers,New England Patriots,2013-11-18,8:42PM,Carolina,/boxscores/201311180car.htm
+2013,12,New Orleans Saints,Atlanta Falcons,2013-11-21,8:30PM,Atlanta,/boxscores/201311210atl.htm
+2013,12,St. Louis Rams,Chicago Bears,2013-11-24,1:00PM,St. Louis,/boxscores/201311240ram.htm
+2013,12,Minnesota Vikings,Green Bay Packers,2013-11-24,1:02PM,Green Bay,/boxscores/201311240gnb.htm
+2013,12,Jacksonville Jaguars,Houston Texans,2013-11-24,1:02PM,Houston,/boxscores/201311240htx.htm
+2013,12,Baltimore Ravens,New York Jets,2013-11-24,1:02PM,Baltimore,/boxscores/201311240rav.htm
+2013,12,Carolina Panthers,Miami Dolphins,2013-11-24,1:03PM,Miami,/boxscores/201311240mia.htm
+2013,12,Pittsburgh Steelers,Cleveland Browns,2013-11-24,1:03PM,Cleveland,/boxscores/201311240cle.htm
+2013,12,Tampa Bay Buccaneers,Detroit Lions,2013-11-24,1:03PM,Detroit,/boxscores/201311240det.htm
+2013,12,San Diego Chargers,Kansas City Chiefs,2013-11-24,1:03PM,Kansas City,/boxscores/201311240kan.htm
+2013,12,Arizona Cardinals,Indianapolis Colts,2013-11-24,4:05PM,Arizona,/boxscores/201311240crd.htm
+2013,12,Tennessee Titans,Oakland Raiders,2013-11-24,4:05PM,Oakland,/boxscores/201311240rai.htm
+2013,12,Dallas Cowboys,New York Giants,2013-11-24,4:25PM,New York,/boxscores/201311240nyg.htm
+2013,12,New England Patriots,Denver Broncos,2013-11-24,8:30PM,New England,/boxscores/201311240nwe.htm
+2013,12,San Francisco 49ers,Washington Redskins,2013-11-25,8:40PM,Washington,/boxscores/201311250was.htm
+2013,13,Detroit Lions,Green Bay Packers,2013-11-28,12:36PM,Detroit,/boxscores/201311280det.htm
+2013,13,Dallas Cowboys,Oakland Raiders,2013-11-28,4:31PM,Dallas,/boxscores/201311280dal.htm
+2013,13,Baltimore Ravens,Pittsburgh Steelers,2013-11-28,8:31PM,Baltimore,/boxscores/201311280rav.htm
+2013,13,Jacksonville Jaguars,Cleveland Browns,2013-12-01,1:02PM,Cleveland,/boxscores/201312010cle.htm
+2013,13,Indianapolis Colts,Tennessee Titans,2013-12-01,1:02PM,Indianapolis,/boxscores/201312010clt.htm
+2013,13,Philadelphia Eagles,Arizona Cardinals,2013-12-01,1:02PM,Philadelphia,/boxscores/201312010phi.htm
+2013,13,New England Patriots,Houston Texans,2013-12-01,1:02PM,Houston,/boxscores/201312010htx.htm
+2013,13,Miami Dolphins,New York Jets,2013-12-01,1:02PM,New York,/boxscores/201312010nyj.htm
+2013,13,Carolina Panthers,Tampa Bay Buccaneers,2013-12-01,1:04PM,Carolina,/boxscores/201312010car.htm
+2013,13,Minnesota Vikings,Chicago Bears,2013-12-01,1:05PM,Minnesota,/boxscores/201312010min.htm
+2013,13,Atlanta Falcons,Buffalo Bills,2013-12-01,4:05PM,Buffalo,/boxscores/201312010buf.htm
+2013,13,San Francisco 49ers,St. Louis Rams,2013-12-01,4:05PM,San Francisco,/boxscores/201312010sfo.htm
+2013,13,Cincinnati Bengals,San Diego Chargers,2013-12-01,4:25PM,San Diego,/boxscores/201312010sdg.htm
+2013,13,Denver Broncos,Kansas City Chiefs,2013-12-01,4:26PM,Kansas City,/boxscores/201312010kan.htm
+2013,13,New York Giants,Washington Redskins,2013-12-01,8:31PM,Washington,/boxscores/201312010was.htm
+2013,13,Seattle Seahawks,New Orleans Saints,2013-12-02,8:41PM,Seattle,/boxscores/201312020sea.htm
+2013,14,Jacksonville Jaguars,Houston Texans,2013-12-05,8:29PM,Jacksonville,/boxscores/201312050jax.htm
+2013,14,Green Bay Packers,Atlanta Falcons,2013-12-08,1:02PM,Green Bay,/boxscores/201312080gnb.htm
+2013,14,Tampa Bay Buccaneers,Buffalo Bills,2013-12-08,1:02PM,Tampa Bay,/boxscores/201312080tam.htm
+2013,14,Cincinnati Bengals,Indianapolis Colts,2013-12-08,1:02PM,Cincinnati,/boxscores/201312080cin.htm
+2013,14,New England Patriots,Cleveland Browns,2013-12-08,1:02PM,New England,/boxscores/201312080nwe.htm
+2013,14,Philadelphia Eagles,Detroit Lions,2013-12-08,1:02PM,Philadelphia,/boxscores/201312080phi.htm
+2013,14,Miami Dolphins,Pittsburgh Steelers,2013-12-08,1:02PM,Pittsburgh,/boxscores/201312080pit.htm
+2013,14,New York Jets,Oakland Raiders,2013-12-08,1:02PM,New York,/boxscores/201312080nyj.htm
+2013,14,Kansas City Chiefs,Washington Redskins,2013-12-08,1:03PM,Washington,/boxscores/201312080was.htm
+2013,14,Baltimore Ravens,Minnesota Vikings,2013-12-08,1:03PM,Baltimore,/boxscores/201312080rav.htm
+2013,14,Denver Broncos,Tennessee Titans,2013-12-08,4:05PM,Denver,/boxscores/201312080den.htm
+2013,14,Arizona Cardinals,St. Louis Rams,2013-12-08,4:25PM,Arizona,/boxscores/201312080crd.htm
+2013,14,San Diego Chargers,New York Giants,2013-12-08,4:25PM,San Diego,/boxscores/201312080sdg.htm
+2013,14,San Francisco 49ers,Seattle Seahawks,2013-12-08,4:26PM,San Francisco,/boxscores/201312080sfo.htm
+2013,14,New Orleans Saints,Carolina Panthers,2013-12-08,8:30PM,New Orleans,/boxscores/201312080nor.htm
+2013,14,Chicago Bears,Dallas Cowboys,2013-12-09,8:40PM,Chicago,/boxscores/201312090chi.htm
+2013,15,San Diego Chargers,Denver Broncos,2013-12-12,8:29PM,Denver,/boxscores/201312120den.htm
+2013,15,Buffalo Bills,Jacksonville Jaguars,2013-12-15,1:02PM,Jacksonville,/boxscores/201312150jax.htm
+2013,15,Indianapolis Colts,Houston Texans,2013-12-15,1:02PM,Indianapolis,/boxscores/201312150clt.htm
+2013,15,Miami Dolphins,New England Patriots,2013-12-15,1:02PM,Miami,/boxscores/201312150mia.htm
+2013,15,Minnesota Vikings,Philadelphia Eagles,2013-12-15,1:02PM,Minnesota,/boxscores/201312150min.htm
+2013,15,San Francisco 49ers,Tampa Bay Buccaneers,2013-12-15,1:02PM,Tampa Bay,/boxscores/201312150tam.htm
+2013,15,Atlanta Falcons,Washington Redskins,2013-12-15,1:03PM,Atlanta,/boxscores/201312150atl.htm
+2013,15,Chicago Bears,Cleveland Browns,2013-12-15,1:03PM,Cleveland,/boxscores/201312150cle.htm
+2013,15,Seattle Seahawks,New York Giants,2013-12-15,1:03PM,New York,/boxscores/201312150nyg.htm
+2013,15,Carolina Panthers,New York Jets,2013-12-15,4:05PM,Carolina,/boxscores/201312150car.htm
+2013,15,Kansas City Chiefs,Oakland Raiders,2013-12-15,4:05PM,Oakland,/boxscores/201312150rai.htm
+2013,15,Green Bay Packers,Dallas Cowboys,2013-12-15,4:25PM,Dallas,/boxscores/201312150dal.htm
+2013,15,St. Louis Rams,New Orleans Saints,2013-12-15,4:25PM,St. Louis,/boxscores/201312150ram.htm
+2013,15,Arizona Cardinals,Tennessee Titans,2013-12-15,4:27PM,Tennessee,/boxscores/201312150oti.htm
+2013,15,Pittsburgh Steelers,Cincinnati Bengals,2013-12-15,8:30PM,Pittsburgh,/boxscores/201312150pit.htm
+2013,15,Baltimore Ravens,Detroit Lions,2013-12-16,8:40PM,Detroit,/boxscores/201312160det.htm
+2013,16,St. Louis Rams,Tampa Bay Buccaneers,2013-12-22,1:00PM,St. Louis,/boxscores/201312220ram.htm
+2013,16,Buffalo Bills,Miami Dolphins,2013-12-22,1:02PM,Buffalo,/boxscores/201312220buf.htm
+2013,16,Cincinnati Bengals,Minnesota Vikings,2013-12-22,1:02PM,Cincinnati,/boxscores/201312220cin.htm
+2013,16,New York Jets,Cleveland Browns,2013-12-22,1:02PM,New York,/boxscores/201312220nyj.htm
+2013,16,Indianapolis Colts,Kansas City Chiefs,2013-12-22,1:02PM,Kansas City,/boxscores/201312220kan.htm
+2013,16,Denver Broncos,Houston Texans,2013-12-22,1:02PM,Houston,/boxscores/201312220htx.htm
+2013,16,Tennessee Titans,Jacksonville Jaguars,2013-12-22,1:02PM,Jacksonville,/boxscores/201312220jax.htm
+2013,16,Dallas Cowboys,Washington Redskins,2013-12-22,1:03PM,Washington,/boxscores/201312220was.htm
+2013,16,Carolina Panthers,New Orleans Saints,2013-12-22,1:04PM,Carolina,/boxscores/201312220car.htm
+2013,16,New York Giants,Detroit Lions,2013-12-22,4:05PM,Detroit,/boxscores/201312220det.htm
+2013,16,Arizona Cardinals,Seattle Seahawks,2013-12-22,4:06PM,Seattle,/boxscores/201312220sea.htm
+2013,16,Pittsburgh Steelers,Green Bay Packers,2013-12-22,4:25PM,Green Bay,/boxscores/201312220gnb.htm
+2013,16,New England Patriots,Baltimore Ravens,2013-12-22,4:25PM,Baltimore,/boxscores/201312220rav.htm
+2013,16,San Diego Chargers,Oakland Raiders,2013-12-22,4:25PM,San Diego,/boxscores/201312220sdg.htm
+2013,16,Philadelphia Eagles,Chicago Bears,2013-12-22,8:30PM,Philadelphia,/boxscores/201312220phi.htm
+2013,16,San Francisco 49ers,Atlanta Falcons,2013-12-23,8:40PM,San Francisco,/boxscores/201312230sfo.htm
+2013,17,Cincinnati Bengals,Baltimore Ravens,2013-12-29,1:02PM,Cincinnati,/boxscores/201312290cin.htm
+2013,17,Pittsburgh Steelers,Cleveland Browns,2013-12-29,1:02PM,Pittsburgh,/boxscores/201312290pit.htm
+2013,17,Indianapolis Colts,Jacksonville Jaguars,2013-12-29,1:02PM,Indianapolis,/boxscores/201312290clt.htm
+2013,17,Tennessee Titans,Houston Texans,2013-12-29,1:02PM,Tennessee,/boxscores/201312290oti.htm
+2013,17,New York Jets,Miami Dolphins,2013-12-29,1:02PM,Miami,/boxscores/201312290mia.htm
+2013,17,New York Giants,Washington Redskins,2013-12-29,1:04PM,New York,/boxscores/201312290nyg.htm
+2013,17,Carolina Panthers,Atlanta Falcons,2013-12-29,1:05PM,Atlanta,/boxscores/201312290atl.htm
+2013,17,Minnesota Vikings,Detroit Lions,2013-12-29,1:05PM,Minnesota,/boxscores/201312290min.htm
+2013,17,New England Patriots,Buffalo Bills,2013-12-29,4:25PM,New England,/boxscores/201312290nwe.htm
+2013,17,Green Bay Packers,Chicago Bears,2013-12-29,4:25PM,Chicago,/boxscores/201312290chi.htm
+2013,17,San Francisco 49ers,Arizona Cardinals,2013-12-29,4:25PM,Arizona,/boxscores/201312290crd.htm
+2013,17,Denver Broncos,Oakland Raiders,2013-12-29,4:25PM,Oakland,/boxscores/201312290rai.htm
+2013,17,New Orleans Saints,Tampa Bay Buccaneers,2013-12-29,4:25PM,New Orleans,/boxscores/201312290nor.htm
+2013,17,San Diego Chargers,Kansas City Chiefs,2013-12-29,4:26PM,San Diego,/boxscores/201312290sdg.htm
+2013,17,Seattle Seahawks,St. Louis Rams,2013-12-29,4:26PM,Seattle,/boxscores/201312290sea.htm
+2013,17,Philadelphia Eagles,Dallas Cowboys,2013-12-29,8:30PM,Dallas,/boxscores/201312290dal.htm

@@ -165,3 +165,111 @@ Season standings page at `/standings`:
 - Columns: Rank, Participant, Wk1, Wk2, … WkN, Total (drop lowest)
 - Pulls from `lineups` table — shows submitted vs. not-yet-scored
 - Scoring engine port: `flask score-week --week N` CLI command that runs the PFR scrape and writes scores back to `lineups`
+
+---
+
+## [Step 3b] — Switch to PostgreSQL (persistent DB on Render free tier)
+
+### What was built
+- **`app.py`** — full dual-driver rewrite:
+  - Detects `DATABASE_URL` at startup: if it starts with `postgres` → uses `psycopg2`; otherwise → uses `sqlite3`
+  - `_connect()` / `_cursor()` / `_ph()` helpers abstract the driver differences
+  - `db_fetchone()`, `db_fetchall()`, `db_execute()` replace raw sqlite3 calls throughout
+  - All SQL uses `%s` placeholders for Postgres, `?` for SQLite
+  - `ON CONFLICT` upserts work in both (syntax is identical between SQLite 3.24+ and Postgres)
+  - `_auto_init()` creates tables using the correct DDL for each driver (SERIAL vs AUTOINCREMENT, NOW() vs datetime('now'))
+  - CLI commands (create-user, list-users, delete-user, ingest-slate) all updated
+- **`requirements.txt`** — added `psycopg2-binary>=2.9`
+
+### Key decisions made
+- `psycopg2-binary` (not `psycopg2`) — includes compiled C extension, no system libpq needed on Render
+- SQLite still works locally — no Postgres install required for development
+- `DATABASE_URL` is the single config knob: set it in Render env vars, leave it unset locally
+
+### Deployment steps
+1. **Create Render Postgres DB:**
+   - Render dashboard → New + → PostgreSQL
+   - Name it `ff-dfs-db`, region same as your web service, instance type Free
+   - Copy the **Internal Database URL** (starts with `postgres://...`)
+
+2. **Link to web service:**
+   - Go to your web service → Environment tab
+   - Add env var: `DATABASE_URL` = (paste Internal Database URL)
+   - The `BOOTSTRAP_USER` / `BOOTSTRAP_PASS` vars create your first user on deploy
+
+3. **Push the code:**
+   ```bash
+   git add app.py requirements.txt
+   git commit -m "Step 3b: PostgreSQL support, dual SQLite/Postgres driver"
+   git push
+   ```
+
+4. **Render auto-redeploys** — watch logs for "Bootstrap user created" and no errors
+
+### Note on local dev
+- Locally, `DATABASE_URL` is unset → SQLite (`ff_dfs.db`) is used as before
+- `flask ingest-slate --week 1 --slate-id 2000` still works locally for testing
+
+### Open questions / deferred items
+- 1-player scraper bug still unresolved (needs a valid 2026 slate or raw API debug output)
+- Standings page not yet built
+- Scoring engine not yet ported
+
+### Next proposed step (Step 4)
+Standings page at `/standings` + scoring engine:
+- `flask score-week --week N` CLI command — runs PFR scrape, calculates each lineup's score, writes to DB
+- Public `/standings` page — leaderboard table: Rank, Participant, Wk1…WkN, Total (drop lowest)
+
+---
+
+## [Step 4a] — Historical data scrapers (RotoGuru + PFR)
+
+### What was built
+Two standalone scraper scripts in `scrapers/`. These run locally, produce
+flat files, and only need re-running once per season.
+
+**`scrapers/scrape_rotoguru.py`**
+- Scrapes RotoGuru's historical DraftKings data 2014–2021 (all weeks)
+- URL format confirmed from uploaded HTML: `?week=W&year=Y&game=dk&scsv=1`
+- scsv columns: `Week;Year;GID;Name;Pos;Team;h/a;Oppt;DK points;DK salary`
+- Output: `data/rotoguru_dk_2014_2021.csv.gz`
+- Resume-safe (skips already-done year/week pairs), 2s polite sleep
+- Adds `name_normalized` (lowercase, no punctuation) for joining with PFR
+
+**`scrapers/scrape_pfr.py`**
+- Extended version of `Weekly_Scores_Scrape.py` with full stat columns
+- Player stats: dk_pts + pass_cmp/att/yds/td/int, rush_att/yds/td, rec_tgt/rec/yds/td, snap_pct
+- Game info: roof, surface, weather, attendance, vegas_line, over_under (from boxscores)
+- Two outputs: `data/pfr_player_stats_2014_2025.csv.gz` and `data/pfr_game_info_2014_2025.csv.gz`
+- Resume-safe (checkpoints every 20 players), 4s sleep between player pages
+- CLI: `python scrapers/scrape_pfr.py --years 2014-2025` (or `--skip-players`, `--skip-games`)
+- Expected runtime: ~8-10 hours for full 12-year run
+
+**`scrapers/README.md`** — full workflow documentation
+
+### Key decisions made
+- **gzipped CSV** over parquet — simpler (no pyarrow), still small, pandas reads natively
+- **name_normalized** is the join key between RotoGuru and PFR data (lowercase, no punctuation)
+- **RotoGuru GID** preserved as `rg_id` for future player mapping table
+- **PFR slug** (`pfr_id`) is the gold-standard player identifier
+- Game info (weather, Vegas) scraped in same pass as schedule to avoid duplicate PFR hits
+- 2022–2025 DFS salary gap: covered by RotoWire live ingest (existing `flask ingest-slate`)
+
+### Data coverage
+| Years     | DFS Salaries       | Detailed stats |
+|-----------|--------------------|----------------|
+| 2014–2021 | RotoGuru           | PFR scraper    |
+| 2022–2025 | RotoWire backfill  | PFR scraper    |
+| 2026+     | RotoWire live      | PFR (weekly)   |
+
+### Open questions / deferred items
+- `flask load-history` CLI command not yet built (loads flat files → DB)
+- `/history` and `/players/<name>` web routes not yet built
+- RotoWire 2022–2025 salary backfill requires manual slate ID discovery
+- Player ID mapping table (rg_id → pfr_id) not yet built
+
+### Next proposed step (Step 4b)
+- Add `hist_dfs_salaries` and `hist_player_stats` tables to DB schema
+- Add `flask load-history` CLI command to bulk-load the CSV.gz files
+- Build `/history` route: filterable table by year/week/position
+- Build `/players/<name>` route: player career page with salary + stat history

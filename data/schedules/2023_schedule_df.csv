@@ -1,0 +1,273 @@
+year,week,team_1,team_2,date,time,location,boxscore_url
+2023,1,Detroit Lions,Kansas City Chiefs,2023-09-07,8:20PM,Kansas City,/boxscores/202309070kan.htm
+2023,1,Atlanta Falcons,Carolina Panthers,2023-09-10,1:00PM,Atlanta,/boxscores/202309100atl.htm
+2023,1,Cleveland Browns,Cincinnati Bengals,2023-09-10,1:00PM,Cleveland,/boxscores/202309100cle.htm
+2023,1,Jacksonville Jaguars,Indianapolis Colts,2023-09-10,1:00PM,Indianapolis,/boxscores/202309100clt.htm
+2023,1,Washington Commanders,Arizona Cardinals,2023-09-10,1:00PM,Washington,/boxscores/202309100was.htm
+2023,1,Baltimore Ravens,Houston Texans,2023-09-10,1:00PM,Baltimore,/boxscores/202309100rav.htm
+2023,1,Tampa Bay Buccaneers,Minnesota Vikings,2023-09-10,1:00PM,Minnesota,/boxscores/202309100min.htm
+2023,1,New Orleans Saints,Tennessee Titans,2023-09-10,1:00PM,New Orleans,/boxscores/202309100nor.htm
+2023,1,San Francisco 49ers,Pittsburgh Steelers,2023-09-10,1:00PM,Pittsburgh,/boxscores/202309100pit.htm
+2023,1,Green Bay Packers,Chicago Bears,2023-09-10,4:25PM,Chicago,/boxscores/202309100chi.htm
+2023,1,Las Vegas Raiders,Denver Broncos,2023-09-10,4:25PM,Denver,/boxscores/202309100den.htm
+2023,1,Miami Dolphins,Los Angeles Chargers,2023-09-10,4:25PM,Los Angeles,/boxscores/202309100sdg.htm
+2023,1,Philadelphia Eagles,New England Patriots,2023-09-10,4:25PM,New England,/boxscores/202309100nwe.htm
+2023,1,Los Angeles Rams,Seattle Seahawks,2023-09-10,4:25PM,Seattle,/boxscores/202309100sea.htm
+2023,1,Dallas Cowboys,New York Giants,2023-09-10,8:20PM,New York,/boxscores/202309100nyg.htm
+2023,1,New York Jets,Buffalo Bills,2023-09-11,8:15PM,New York,/boxscores/202309110nyj.htm
+2023,2,Philadelphia Eagles,Minnesota Vikings,2023-09-14,8:15PM,Philadelphia,/boxscores/202309140phi.htm
+2023,2,Atlanta Falcons,Green Bay Packers,2023-09-17,1:00PM,Atlanta,/boxscores/202309170atl.htm
+2023,2,Buffalo Bills,Las Vegas Raiders,2023-09-17,1:00PM,Buffalo,/boxscores/202309170buf.htm
+2023,2,Tampa Bay Buccaneers,Chicago Bears,2023-09-17,1:00PM,Tampa Bay,/boxscores/202309170tam.htm
+2023,2,Baltimore Ravens,Cincinnati Bengals,2023-09-17,1:00PM,Cincinnati,/boxscores/202309170cin.htm
+2023,2,Indianapolis Colts,Houston Texans,2023-09-17,1:00PM,Houston,/boxscores/202309170htx.htm
+2023,2,Seattle Seahawks,Detroit Lions,2023-09-17,1:00PM,Detroit,/boxscores/202309170det.htm
+2023,2,Kansas City Chiefs,Jacksonville Jaguars,2023-09-17,1:00PM,Jacksonville,/boxscores/202309170jax.htm
+2023,2,Tennessee Titans,Los Angeles Chargers,2023-09-17,1:00PM,Tennessee,/boxscores/202309170oti.htm
+2023,2,New York Giants,Arizona Cardinals,2023-09-17,4:05PM,Arizona,/boxscores/202309170crd.htm
+2023,2,San Francisco 49ers,Los Angeles Rams,2023-09-17,4:05PM,Los Angeles,/boxscores/202309170ram.htm
+2023,2,Dallas Cowboys,New York Jets,2023-09-17,4:25PM,Dallas,/boxscores/202309170dal.htm
+2023,2,Washington Commanders,Denver Broncos,2023-09-17,4:25PM,Denver,/boxscores/202309170den.htm
+2023,2,Miami Dolphins,New England Patriots,2023-09-17,8:20PM,New England,/boxscores/202309170nwe.htm
+2023,2,New Orleans Saints,Carolina Panthers,2023-09-18,7:15PM,Carolina,/boxscores/202309180car.htm
+2023,2,Pittsburgh Steelers,Cleveland Browns,2023-09-18,8:15PM,Pittsburgh,/boxscores/202309180pit.htm
+2023,3,San Francisco 49ers,New York Giants,2023-09-21,8:15PM,San Francisco,/boxscores/202309210sfo.htm
+2023,3,Detroit Lions,Atlanta Falcons,2023-09-24,1:00PM,Detroit,/boxscores/202309240det.htm
+2023,3,Buffalo Bills,Washington Commanders,2023-09-24,1:00PM,Washington,/boxscores/202309240was.htm
+2023,3,Cleveland Browns,Tennessee Titans,2023-09-24,1:00PM,Cleveland,/boxscores/202309240cle.htm
+2023,3,Indianapolis Colts,Baltimore Ravens,2023-09-24,1:00PM,Baltimore,/boxscores/202309240rav.htm
+2023,3,Miami Dolphins,Denver Broncos,2023-09-24,1:00PM,Miami,/boxscores/202309240mia.htm
+2023,3,Green Bay Packers,New Orleans Saints,2023-09-24,1:00PM,Green Bay,/boxscores/202309240gnb.htm
+2023,3,Houston Texans,Jacksonville Jaguars,2023-09-24,1:00PM,Jacksonville,/boxscores/202309240jax.htm
+2023,3,Los Angeles Chargers,Minnesota Vikings,2023-09-24,1:00PM,Minnesota,/boxscores/202309240min.htm
+2023,3,New England Patriots,New York Jets,2023-09-24,1:00PM,New York,/boxscores/202309240nyj.htm
+2023,3,Seattle Seahawks,Carolina Panthers,2023-09-24,4:05PM,Seattle,/boxscores/202309240sea.htm
+2023,3,Kansas City Chiefs,Chicago Bears,2023-09-24,4:25PM,Kansas City,/boxscores/202309240kan.htm
+2023,3,Arizona Cardinals,Dallas Cowboys,2023-09-24,4:25PM,Arizona,/boxscores/202309240crd.htm
+2023,3,Pittsburgh Steelers,Las Vegas Raiders,2023-09-24,8:20PM,Las Vegas,/boxscores/202309240rai.htm
+2023,3,Philadelphia Eagles,Tampa Bay Buccaneers,2023-09-25,7:15PM,Tampa Bay,/boxscores/202309250tam.htm
+2023,3,Cincinnati Bengals,Los Angeles Rams,2023-09-25,8:15PM,Cincinnati,/boxscores/202309250cin.htm
+2023,4,Detroit Lions,Green Bay Packers,2023-09-28,8:15PM,Green Bay,/boxscores/202309280gnb.htm
+2023,4,Jacksonville Jaguars,Atlanta Falcons,2023-10-01,9:30AM,Jacksonville,/boxscores/202310010jax.htm
+2023,4,Buffalo Bills,Miami Dolphins,2023-10-01,1:00PM,Buffalo,/boxscores/202310010buf.htm
+2023,4,Minnesota Vikings,Carolina Panthers,2023-10-01,1:00PM,Carolina,/boxscores/202310010car.htm
+2023,4,Denver Broncos,Chicago Bears,2023-10-01,1:00PM,Chicago,/boxscores/202310010chi.htm
+2023,4,Tennessee Titans,Cincinnati Bengals,2023-10-01,1:00PM,Tennessee,/boxscores/202310010oti.htm
+2023,4,Baltimore Ravens,Cleveland Browns,2023-10-01,1:00PM,Cleveland,/boxscores/202310010cle.htm
+2023,4,Los Angeles Rams,Indianapolis Colts,2023-10-01,1:00PM,Indianapolis,/boxscores/202310010clt.htm
+2023,4,Houston Texans,Pittsburgh Steelers,2023-10-01,1:00PM,Houston,/boxscores/202310010htx.htm
+2023,4,Tampa Bay Buccaneers,New Orleans Saints,2023-10-01,1:00PM,New Orleans,/boxscores/202310010nor.htm
+2023,4,Philadelphia Eagles,Washington Commanders,2023-10-01,1:00PM,Philadelphia,/boxscores/202310010phi.htm
+2023,4,Los Angeles Chargers,Las Vegas Raiders,2023-10-01,4:05PM,Los Angeles,/boxscores/202310010sdg.htm
+2023,4,San Francisco 49ers,Arizona Cardinals,2023-10-01,4:25PM,San Francisco,/boxscores/202310010sfo.htm
+2023,4,Dallas Cowboys,New England Patriots,2023-10-01,4:25PM,Dallas,/boxscores/202310010dal.htm
+2023,4,Kansas City Chiefs,New York Jets,2023-10-01,8:20PM,New York,/boxscores/202310010nyj.htm
+2023,4,Seattle Seahawks,New York Giants,2023-10-02,8:15PM,New York,/boxscores/202310020nyg.htm
+2023,5,Chicago Bears,Washington Commanders,2023-10-05,8:15PM,Washington,/boxscores/202310050was.htm
+2023,5,Jacksonville Jaguars,Buffalo Bills,2023-10-08,9:30AM,Buffalo,/boxscores/202310080buf.htm
+2023,5,Atlanta Falcons,Houston Texans,2023-10-08,1:00PM,Atlanta,/boxscores/202310080atl.htm
+2023,5,Detroit Lions,Carolina Panthers,2023-10-08,1:00PM,Detroit,/boxscores/202310080det.htm
+2023,5,Indianapolis Colts,Tennessee Titans,2023-10-08,1:00PM,Indianapolis,/boxscores/202310080clt.htm
+2023,5,Miami Dolphins,New York Giants,2023-10-08,1:00PM,Miami,/boxscores/202310080mia.htm
+2023,5,New Orleans Saints,New England Patriots,2023-10-08,1:00PM,New England,/boxscores/202310080nwe.htm
+2023,5,Pittsburgh Steelers,Baltimore Ravens,2023-10-08,1:00PM,Pittsburgh,/boxscores/202310080pit.htm
+2023,5,Cincinnati Bengals,Arizona Cardinals,2023-10-08,4:05PM,Arizona,/boxscores/202310080crd.htm
+2023,5,Philadelphia Eagles,Los Angeles Rams,2023-10-08,4:05PM,Los Angeles,/boxscores/202310080ram.htm
+2023,5,New York Jets,Denver Broncos,2023-10-08,4:25PM,Denver,/boxscores/202310080den.htm
+2023,5,Kansas City Chiefs,Minnesota Vikings,2023-10-08,4:25PM,Minnesota,/boxscores/202310080min.htm
+2023,5,San Francisco 49ers,Dallas Cowboys,2023-10-08,8:20PM,San Francisco,/boxscores/202310080sfo.htm
+2023,5,Las Vegas Raiders,Green Bay Packers,2023-10-09,8:15PM,Las Vegas,/boxscores/202310090rai.htm
+2023,6,Kansas City Chiefs,Denver Broncos,2023-10-12,8:15PM,Kansas City,/boxscores/202310120kan.htm
+2023,6,Baltimore Ravens,Tennessee Titans,2023-10-15,9:30AM,Tennessee,/boxscores/202310150oti.htm
+2023,6,Cleveland Browns,San Francisco 49ers,2023-10-15,1:00PM,Cleveland,/boxscores/202310150cle.htm
+2023,6,Washington Commanders,Atlanta Falcons,2023-10-15,1:00PM,Atlanta,/boxscores/202310150atl.htm
+2023,6,Miami Dolphins,Carolina Panthers,2023-10-15,1:00PM,Miami,/boxscores/202310150mia.htm
+2023,6,Minnesota Vikings,Chicago Bears,2023-10-15,1:00PM,Chicago,/boxscores/202310150chi.htm
+2023,6,Cincinnati Bengals,Seattle Seahawks,2023-10-15,1:00PM,Cincinnati,/boxscores/202310150cin.htm
+2023,6,Jacksonville Jaguars,Indianapolis Colts,2023-10-15,1:00PM,Jacksonville,/boxscores/202310150jax.htm
+2023,6,Houston Texans,New Orleans Saints,2023-10-15,1:00PM,Houston,/boxscores/202310150htx.htm
+2023,6,Las Vegas Raiders,New England Patriots,2023-10-15,4:05PM,Las Vegas,/boxscores/202310150rai.htm
+2023,6,Los Angeles Rams,Arizona Cardinals,2023-10-15,4:25PM,Los Angeles,/boxscores/202310150ram.htm
+2023,6,Detroit Lions,Tampa Bay Buccaneers,2023-10-15,4:25PM,Tampa Bay,/boxscores/202310150tam.htm
+2023,6,New York Jets,Philadelphia Eagles,2023-10-15,4:25PM,New York,/boxscores/202310150nyj.htm
+2023,6,Buffalo Bills,New York Giants,2023-10-15,8:20PM,Buffalo,/boxscores/202310150buf.htm
+2023,6,Dallas Cowboys,Los Angeles Chargers,2023-10-16,8:15PM,Los Angeles,/boxscores/202310160sdg.htm
+2023,7,Jacksonville Jaguars,New Orleans Saints,2023-10-19,8:15PM,New Orleans,/boxscores/202310190nor.htm
+2023,7,Cleveland Browns,Indianapolis Colts,2023-10-22,1:00PM,Indianapolis,/boxscores/202310220clt.htm
+2023,7,Atlanta Falcons,Tampa Bay Buccaneers,2023-10-22,1:00PM,Tampa Bay,/boxscores/202310220tam.htm
+2023,7,New England Patriots,Buffalo Bills,2023-10-22,1:00PM,New England,/boxscores/202310220nwe.htm
+2023,7,Chicago Bears,Las Vegas Raiders,2023-10-22,1:00PM,Chicago,/boxscores/202310220chi.htm
+2023,7,Baltimore Ravens,Detroit Lions,2023-10-22,1:00PM,Baltimore,/boxscores/202310220rav.htm
+2023,7,New York Giants,Washington Commanders,2023-10-22,1:00PM,New York,/boxscores/202310220nyg.htm
+2023,7,Pittsburgh Steelers,Los Angeles Rams,2023-10-22,4:05PM,Los Angeles,/boxscores/202310220ram.htm
+2023,7,Seattle Seahawks,Arizona Cardinals,2023-10-22,4:05PM,Seattle,/boxscores/202310220sea.htm
+2023,7,Denver Broncos,Green Bay Packers,2023-10-22,4:25PM,Denver,/boxscores/202310220den.htm
+2023,7,Kansas City Chiefs,Los Angeles Chargers,2023-10-22,4:25PM,Kansas City,/boxscores/202310220kan.htm
+2023,7,Philadelphia Eagles,Miami Dolphins,2023-10-22,8:20PM,Philadelphia,/boxscores/202310220phi.htm
+2023,7,Minnesota Vikings,San Francisco 49ers,2023-10-23,8:15PM,Minnesota,/boxscores/202310230min.htm
+2023,8,Buffalo Bills,Tampa Bay Buccaneers,2023-10-26,8:15PM,Buffalo,/boxscores/202310260buf.htm
+2023,8,Carolina Panthers,Houston Texans,2023-10-29,1:00PM,Carolina,/boxscores/202310290car.htm
+2023,8,Dallas Cowboys,Los Angeles Rams,2023-10-29,1:00PM,Dallas,/boxscores/202310290dal.htm
+2023,8,Minnesota Vikings,Green Bay Packers,2023-10-29,1:00PM,Green Bay,/boxscores/202310290gnb.htm
+2023,8,Tennessee Titans,Atlanta Falcons,2023-10-29,1:00PM,Tennessee,/boxscores/202310290oti.htm
+2023,8,New Orleans Saints,Indianapolis Colts,2023-10-29,1:00PM,Indianapolis,/boxscores/202310290clt.htm
+2023,8,Jacksonville Jaguars,Pittsburgh Steelers,2023-10-29,1:00PM,Pittsburgh,/boxscores/202310290pit.htm
+2023,8,Miami Dolphins,New England Patriots,2023-10-29,1:00PM,Miami,/boxscores/202310290mia.htm
+2023,8,New York Jets,New York Giants,2023-10-29,1:00PM,New York,/boxscores/202310290nyg.htm
+2023,8,Philadelphia Eagles,Washington Commanders,2023-10-29,1:00PM,Washington,/boxscores/202310290was.htm
+2023,8,Seattle Seahawks,Cleveland Browns,2023-10-29,4:05PM,Seattle,/boxscores/202310290sea.htm
+2023,8,Cincinnati Bengals,San Francisco 49ers,2023-10-29,4:25PM,San Francisco,/boxscores/202310290sfo.htm
+2023,8,Baltimore Ravens,Arizona Cardinals,2023-10-29,4:25PM,Arizona,/boxscores/202310290crd.htm
+2023,8,Denver Broncos,Kansas City Chiefs,2023-10-29,4:25PM,Denver,/boxscores/202310290den.htm
+2023,8,Los Angeles Chargers,Chicago Bears,2023-10-29,8:20PM,Los Angeles,/boxscores/202310290sdg.htm
+2023,8,Detroit Lions,Las Vegas Raiders,2023-10-30,8:15PM,Detroit,/boxscores/202310300det.htm
+2023,9,Pittsburgh Steelers,Tennessee Titans,2023-11-02,8:15PM,Pittsburgh,/boxscores/202311020pit.htm
+2023,9,Kansas City Chiefs,Miami Dolphins,2023-11-05,9:30AM,Kansas City,/boxscores/202311050kan.htm
+2023,9,Cleveland Browns,Arizona Cardinals,2023-11-05,1:00PM,Cleveland,/boxscores/202311050cle.htm
+2023,9,Green Bay Packers,Los Angeles Rams,2023-11-05,1:00PM,Green Bay,/boxscores/202311050gnb.htm
+2023,9,Houston Texans,Tampa Bay Buccaneers,2023-11-05,1:00PM,Houston,/boxscores/202311050htx.htm
+2023,9,Minnesota Vikings,Atlanta Falcons,2023-11-05,1:00PM,Atlanta,/boxscores/202311050atl.htm
+2023,9,New Orleans Saints,Chicago Bears,2023-11-05,1:00PM,New Orleans,/boxscores/202311050nor.htm
+2023,9,Washington Commanders,New England Patriots,2023-11-05,1:00PM,New England,/boxscores/202311050nwe.htm
+2023,9,Baltimore Ravens,Seattle Seahawks,2023-11-05,1:00PM,Baltimore,/boxscores/202311050rav.htm
+2023,9,Indianapolis Colts,Carolina Panthers,2023-11-05,4:05PM,Carolina,/boxscores/202311050car.htm
+2023,9,Philadelphia Eagles,Dallas Cowboys,2023-11-05,4:25PM,Philadelphia,/boxscores/202311050phi.htm
+2023,9,Las Vegas Raiders,New York Giants,2023-11-05,4:25PM,Las Vegas,/boxscores/202311050rai.htm
+2023,9,Cincinnati Bengals,Buffalo Bills,2023-11-05,8:20PM,Cincinnati,/boxscores/202311050cin.htm
+2023,9,Los Angeles Chargers,New York Jets,2023-11-06,8:15PM,New York,/boxscores/202311060nyj.htm
+2023,10,Chicago Bears,Carolina Panthers,2023-11-09,8:15PM,Chicago,/boxscores/202311090chi.htm
+2023,10,Indianapolis Colts,New England Patriots,2023-11-12,9:30AM,New England,/boxscores/202311120nwe.htm
+2023,10,Houston Texans,Cincinnati Bengals,2023-11-12,1:00PM,Cincinnati,/boxscores/202311120cin.htm
+2023,10,Cleveland Browns,Baltimore Ravens,2023-11-12,1:00PM,Baltimore,/boxscores/202311120rav.htm
+2023,10,Pittsburgh Steelers,Green Bay Packers,2023-11-12,1:00PM,Pittsburgh,/boxscores/202311120pit.htm
+2023,10,San Francisco 49ers,Jacksonville Jaguars,2023-11-12,1:00PM,Jacksonville,/boxscores/202311120jax.htm
+2023,10,Tampa Bay Buccaneers,Tennessee Titans,2023-11-12,1:00PM,Tampa Bay,/boxscores/202311120tam.htm
+2023,10,Minnesota Vikings,New Orleans Saints,2023-11-12,1:00PM,Minnesota,/boxscores/202311120min.htm
+2023,10,Detroit Lions,Los Angeles Chargers,2023-11-12,4:05PM,Los Angeles,/boxscores/202311120sdg.htm
+2023,10,Arizona Cardinals,Atlanta Falcons,2023-11-12,4:05PM,Arizona,/boxscores/202311120crd.htm
+2023,10,Dallas Cowboys,New York Giants,2023-11-12,4:25PM,Dallas,/boxscores/202311120dal.htm
+2023,10,Seattle Seahawks,Washington Commanders,2023-11-12,4:25PM,Seattle,/boxscores/202311120sea.htm
+2023,10,Las Vegas Raiders,New York Jets,2023-11-12,8:20PM,Las Vegas,/boxscores/202311120rai.htm
+2023,10,Denver Broncos,Buffalo Bills,2023-11-13,8:15PM,Buffalo,/boxscores/202311130buf.htm
+2023,11,Baltimore Ravens,Cincinnati Bengals,2023-11-16,8:15PM,Baltimore,/boxscores/202311160rav.htm
+2023,11,Dallas Cowboys,Carolina Panthers,2023-11-19,1:00PM,Carolina,/boxscores/202311190car.htm
+2023,11,Cleveland Browns,Pittsburgh Steelers,2023-11-19,1:00PM,Cleveland,/boxscores/202311190cle.htm
+2023,11,Green Bay Packers,Los Angeles Chargers,2023-11-19,1:00PM,Green Bay,/boxscores/202311190gnb.htm
+2023,11,Jacksonville Jaguars,Tennessee Titans,2023-11-19,1:00PM,Jacksonville,/boxscores/202311190jax.htm
+2023,11,Miami Dolphins,Las Vegas Raiders,2023-11-19,1:00PM,Miami,/boxscores/202311190mia.htm
+2023,11,Detroit Lions,Chicago Bears,2023-11-19,1:00PM,Detroit,/boxscores/202311190det.htm
+2023,11,Houston Texans,Arizona Cardinals,2023-11-19,1:00PM,Houston,/boxscores/202311190htx.htm
+2023,11,New York Giants,Washington Commanders,2023-11-19,1:00PM,Washington,/boxscores/202311190was.htm
+2023,11,San Francisco 49ers,Tampa Bay Buccaneers,2023-11-19,4:05PM,San Francisco,/boxscores/202311190sfo.htm
+2023,11,Los Angeles Rams,Seattle Seahawks,2023-11-19,4:25PM,Los Angeles,/boxscores/202311190ram.htm
+2023,11,Buffalo Bills,New York Jets,2023-11-19,4:25PM,Buffalo,/boxscores/202311190buf.htm
+2023,11,Denver Broncos,Minnesota Vikings,2023-11-19,8:20PM,Denver,/boxscores/202311190den.htm
+2023,11,Philadelphia Eagles,Kansas City Chiefs,2023-11-20,8:15PM,Kansas City,/boxscores/202311200kan.htm
+2023,12,Green Bay Packers,Detroit Lions,2023-11-23,12:30PM,Detroit,/boxscores/202311230det.htm
+2023,12,Dallas Cowboys,Washington Commanders,2023-11-23,4:30PM,Dallas,/boxscores/202311230dal.htm
+2023,12,San Francisco 49ers,Seattle Seahawks,2023-11-23,8:20PM,Seattle,/boxscores/202311230sea.htm
+2023,12,Miami Dolphins,New York Jets,2023-11-24,3:00PM,New York,/boxscores/202311240nyj.htm
+2023,12,Atlanta Falcons,New Orleans Saints,2023-11-26,1:00PM,Atlanta,/boxscores/202311260atl.htm
+2023,12,Tennessee Titans,Carolina Panthers,2023-11-26,1:00PM,Tennessee,/boxscores/202311260oti.htm
+2023,12,Pittsburgh Steelers,Cincinnati Bengals,2023-11-26,1:00PM,Cincinnati,/boxscores/202311260cin.htm
+2023,12,Indianapolis Colts,Tampa Bay Buccaneers,2023-11-26,1:00PM,Indianapolis,/boxscores/202311260clt.htm
+2023,12,Jacksonville Jaguars,Houston Texans,2023-11-26,1:00PM,Houston,/boxscores/202311260htx.htm
+2023,12,New York Giants,New England Patriots,2023-11-26,1:00PM,New York,/boxscores/202311260nyg.htm
+2023,12,Denver Broncos,Cleveland Browns,2023-11-26,4:05PM,Denver,/boxscores/202311260den.htm
+2023,12,Los Angeles Rams,Arizona Cardinals,2023-11-26,4:05PM,Arizona,/boxscores/202311260crd.htm
+2023,12,Kansas City Chiefs,Las Vegas Raiders,2023-11-26,4:25PM,Las Vegas,/boxscores/202311260rai.htm
+2023,12,Philadelphia Eagles,Buffalo Bills,2023-11-26,4:25PM,Philadelphia,/boxscores/202311260phi.htm
+2023,12,Baltimore Ravens,Los Angeles Chargers,2023-11-26,8:20PM,Los Angeles,/boxscores/202311260sdg.htm
+2023,12,Chicago Bears,Minnesota Vikings,2023-11-27,8:15PM,Minnesota,/boxscores/202311270min.htm
+2023,13,Dallas Cowboys,Seattle Seahawks,2023-11-30,8:15PM,Dallas,/boxscores/202311300dal.htm
+2023,13,Atlanta Falcons,New York Jets,2023-12-03,1:00PM,New York,/boxscores/202312030nyj.htm
+2023,13,Indianapolis Colts,Tennessee Titans,2023-12-03,1:00PM,Tennessee,/boxscores/202312030oti.htm
+2023,13,Houston Texans,Denver Broncos,2023-12-03,1:00PM,Houston,/boxscores/202312030htx.htm
+2023,13,Detroit Lions,New Orleans Saints,2023-12-03,1:00PM,New Orleans,/boxscores/202312030nor.htm
+2023,13,Miami Dolphins,Washington Commanders,2023-12-03,1:00PM,Washington,/boxscores/202312030was.htm
+2023,13,Los Angeles Chargers,New England Patriots,2023-12-03,1:00PM,New England,/boxscores/202312030nwe.htm
+2023,13,Arizona Cardinals,Pittsburgh Steelers,2023-12-03,1:00PM,Pittsburgh,/boxscores/202312030pit.htm
+2023,13,Tampa Bay Buccaneers,Carolina Panthers,2023-12-03,4:05PM,Tampa Bay,/boxscores/202312030tam.htm
+2023,13,Los Angeles Rams,Cleveland Browns,2023-12-03,4:25PM,Los Angeles,/boxscores/202312030ram.htm
+2023,13,San Francisco 49ers,Philadelphia Eagles,2023-12-03,4:25PM,Philadelphia,/boxscores/202312030phi.htm
+2023,13,Green Bay Packers,Kansas City Chiefs,2023-12-03,8:20PM,Green Bay,/boxscores/202312030gnb.htm
+2023,13,Cincinnati Bengals,Jacksonville Jaguars,2023-12-04,8:15PM,Jacksonville,/boxscores/202312040jax.htm
+2023,14,New England Patriots,Pittsburgh Steelers,2023-12-07,8:15PM,Pittsburgh,/boxscores/202312070pit.htm
+2023,14,Tampa Bay Buccaneers,Atlanta Falcons,2023-12-10,1:00PM,Atlanta,/boxscores/202312100atl.htm
+2023,14,New Orleans Saints,Carolina Panthers,2023-12-10,1:00PM,New Orleans,/boxscores/202312100nor.htm
+2023,14,Chicago Bears,Detroit Lions,2023-12-10,1:00PM,Chicago,/boxscores/202312100chi.htm
+2023,14,Cincinnati Bengals,Indianapolis Colts,2023-12-10,1:00PM,Cincinnati,/boxscores/202312100cin.htm
+2023,14,Cleveland Browns,Jacksonville Jaguars,2023-12-10,1:00PM,Cleveland,/boxscores/202312100cle.htm
+2023,14,New York Jets,Houston Texans,2023-12-10,1:00PM,New York,/boxscores/202312100nyj.htm
+2023,14,Baltimore Ravens,Los Angeles Rams,2023-12-10,1:00PM,Baltimore,/boxscores/202312100rav.htm
+2023,14,Minnesota Vikings,Las Vegas Raiders,2023-12-10,4:05PM,Las Vegas,/boxscores/202312100rai.htm
+2023,14,San Francisco 49ers,Seattle Seahawks,2023-12-10,4:05PM,San Francisco,/boxscores/202312100sfo.htm
+2023,14,Buffalo Bills,Kansas City Chiefs,2023-12-10,4:25PM,Kansas City,/boxscores/202312100kan.htm
+2023,14,Denver Broncos,Los Angeles Chargers,2023-12-10,4:25PM,Los Angeles,/boxscores/202312100sdg.htm
+2023,14,Dallas Cowboys,Philadelphia Eagles,2023-12-10,8:20PM,Dallas,/boxscores/202312100dal.htm
+2023,14,New York Giants,Green Bay Packers,2023-12-11,8:15PM,New York,/boxscores/202312110nyg.htm
+2023,14,Tennessee Titans,Miami Dolphins,2023-12-11,8:15PM,Miami,/boxscores/202312110mia.htm
+2023,15,Las Vegas Raiders,Los Angeles Chargers,2023-12-14,8:15PM,Las Vegas,/boxscores/202312140rai.htm
+2023,15,Cincinnati Bengals,Minnesota Vikings,2023-12-16,1:00PM,Cincinnati,/boxscores/202312160cin.htm
+2023,15,Indianapolis Colts,Pittsburgh Steelers,2023-12-16,4:30PM,Indianapolis,/boxscores/202312160clt.htm
+2023,15,Detroit Lions,Denver Broncos,2023-12-16,8:15PM,Detroit,/boxscores/202312160det.htm
+2023,15,Carolina Panthers,Atlanta Falcons,2023-12-17,1:00PM,Carolina,/boxscores/202312170car.htm
+2023,15,Cleveland Browns,Chicago Bears,2023-12-17,1:00PM,Cleveland,/boxscores/202312170cle.htm
+2023,15,Tampa Bay Buccaneers,Green Bay Packers,2023-12-17,1:00PM,Green Bay,/boxscores/202312170gnb.htm
+2023,15,Houston Texans,Tennessee Titans,2023-12-17,1:00PM,Tennessee,/boxscores/202312170oti.htm
+2023,15,Kansas City Chiefs,New England Patriots,2023-12-17,1:00PM,New England,/boxscores/202312170nwe.htm
+2023,15,Miami Dolphins,New York Jets,2023-12-17,1:00PM,Miami,/boxscores/202312170mia.htm
+2023,15,New Orleans Saints,New York Giants,2023-12-17,1:00PM,New Orleans,/boxscores/202312170nor.htm
+2023,15,San Francisco 49ers,Arizona Cardinals,2023-12-17,4:05PM,Arizona,/boxscores/202312170crd.htm
+2023,15,Los Angeles Rams,Washington Commanders,2023-12-17,4:05PM,Los Angeles,/boxscores/202312170ram.htm
+2023,15,Buffalo Bills,Dallas Cowboys,2023-12-17,4:25PM,Buffalo,/boxscores/202312170buf.htm
+2023,15,Baltimore Ravens,Jacksonville Jaguars,2023-12-17,8:20PM,Jacksonville,/boxscores/202312170jax.htm
+2023,15,Seattle Seahawks,Philadelphia Eagles,2023-12-18,8:15PM,Seattle,/boxscores/202312180sea.htm
+2023,16,Los Angeles Rams,New Orleans Saints,2023-12-21,8:15PM,Los Angeles,/boxscores/202312210ram.htm
+2023,16,Pittsburgh Steelers,Cincinnati Bengals,2023-12-23,4:30PM,Pittsburgh,/boxscores/202312230pit.htm
+2023,16,Buffalo Bills,Los Angeles Chargers,2023-12-23,8:00PM,Los Angeles,/boxscores/202312230sdg.htm
+2023,16,Atlanta Falcons,Indianapolis Colts,2023-12-24,1:00PM,Atlanta,/boxscores/202312240atl.htm
+2023,16,Green Bay Packers,Carolina Panthers,2023-12-24,1:00PM,Carolina,/boxscores/202312240car.htm
+2023,16,Cleveland Browns,Houston Texans,2023-12-24,1:00PM,Houston,/boxscores/202312240htx.htm
+2023,16,Detroit Lions,Minnesota Vikings,2023-12-24,1:00PM,Minnesota,/boxscores/202312240min.htm
+2023,16,New York Jets,Washington Commanders,2023-12-24,1:00PM,New York,/boxscores/202312240nyj.htm
+2023,16,Seattle Seahawks,Tennessee Titans,2023-12-24,1:00PM,Tennessee,/boxscores/202312240oti.htm
+2023,16,Tampa Bay Buccaneers,Jacksonville Jaguars,2023-12-24,4:05PM,Tampa Bay,/boxscores/202312240tam.htm
+2023,16,Chicago Bears,Arizona Cardinals,2023-12-24,4:25PM,Chicago,/boxscores/202312240chi.htm
+2023,16,Miami Dolphins,Dallas Cowboys,2023-12-24,4:25PM,Miami,/boxscores/202312240mia.htm
+2023,16,New England Patriots,Denver Broncos,2023-12-24,8:15PM,Denver,/boxscores/202312240den.htm
+2023,16,Las Vegas Raiders,Kansas City Chiefs,2023-12-25,1:00PM,Kansas City,/boxscores/202312250kan.htm
+2023,16,Philadelphia Eagles,New York Giants,2023-12-25,4:30PM,Philadelphia,/boxscores/202312250phi.htm
+2023,16,Baltimore Ravens,San Francisco 49ers,2023-12-25,8:15PM,San Francisco,/boxscores/202312250sfo.htm
+2023,17,Cleveland Browns,New York Jets,2023-12-28,8:15PM,Cleveland,/boxscores/202312280cle.htm
+2023,17,Dallas Cowboys,Detroit Lions,2023-12-30,8:15PM,Dallas,/boxscores/202312300dal.htm
+2023,17,Chicago Bears,Atlanta Falcons,2023-12-31,1:00PM,Chicago,/boxscores/202312310chi.htm
+2023,17,Buffalo Bills,New England Patriots,2023-12-31,1:00PM,Buffalo,/boxscores/202312310buf.htm
+2023,17,Jacksonville Jaguars,Carolina Panthers,2023-12-31,1:00PM,Jacksonville,/boxscores/202312310jax.htm
+2023,17,Indianapolis Colts,Las Vegas Raiders,2023-12-31,1:00PM,Indianapolis,/boxscores/202312310clt.htm
+2023,17,Arizona Cardinals,Philadelphia Eagles,2023-12-31,1:00PM,Philadelphia,/boxscores/202312310phi.htm
+2023,17,Houston Texans,Tennessee Titans,2023-12-31,1:00PM,Houston,/boxscores/202312310htx.htm
+2023,17,Baltimore Ravens,Miami Dolphins,2023-12-31,1:00PM,Baltimore,/boxscores/202312310rav.htm
+2023,17,New Orleans Saints,Tampa Bay Buccaneers,2023-12-31,1:00PM,Tampa Bay,/boxscores/202312310tam.htm
+2023,17,Los Angeles Rams,New York Giants,2023-12-31,1:00PM,New York,/boxscores/202312310nyg.htm
+2023,17,San Francisco 49ers,Washington Commanders,2023-12-31,1:00PM,Washington,/boxscores/202312310was.htm
+2023,17,Pittsburgh Steelers,Seattle Seahawks,2023-12-31,4:05PM,Seattle,/boxscores/202312310sea.htm
+2023,17,Kansas City Chiefs,Cincinnati Bengals,2023-12-31,4:25PM,Kansas City,/boxscores/202312310kan.htm
+2023,17,Denver Broncos,Los Angeles Chargers,2023-12-31,4:25PM,Denver,/boxscores/202312310den.htm
+2023,17,Green Bay Packers,Minnesota Vikings,2023-12-31,8:20PM,Minnesota,/boxscores/202312310min.htm
+2023,18,Pittsburgh Steelers,Baltimore Ravens,2024-01-06,4:30PM,Baltimore,/boxscores/202401060rav.htm
+2023,18,Houston Texans,Indianapolis Colts,2024-01-06,8:15PM,Indianapolis,/boxscores/202401060clt.htm
+2023,18,New Orleans Saints,Atlanta Falcons,2024-01-07,1:00PM,New Orleans,/boxscores/202401070nor.htm
+2023,18,Tampa Bay Buccaneers,Carolina Panthers,2024-01-07,1:00PM,Carolina,/boxscores/202401070car.htm
+2023,18,Cincinnati Bengals,Cleveland Browns,2024-01-07,1:00PM,Cincinnati,/boxscores/202401070cin.htm
+2023,18,Detroit Lions,Minnesota Vikings,2024-01-07,1:00PM,Detroit,/boxscores/202401070det.htm
+2023,18,Tennessee Titans,Jacksonville Jaguars,2024-01-07,1:00PM,Tennessee,/boxscores/202401070oti.htm
+2023,18,New York Jets,New England Patriots,2024-01-07,1:00PM,New England,/boxscores/202401070nwe.htm
+2023,18,Green Bay Packers,Chicago Bears,2024-01-07,4:25PM,Green Bay,/boxscores/202401070gnb.htm
+2023,18,Seattle Seahawks,Arizona Cardinals,2024-01-07,4:25PM,Arizona,/boxscores/202401070crd.htm
+2023,18,Dallas Cowboys,Washington Commanders,2024-01-07,4:25PM,Washington,/boxscores/202401070was.htm
+2023,18,Las Vegas Raiders,Denver Broncos,2024-01-07,4:25PM,Las Vegas,/boxscores/202401070rai.htm
+2023,18,Kansas City Chiefs,Los Angeles Chargers,2024-01-07,4:25PM,Los Angeles,/boxscores/202401070sdg.htm
+2023,18,New York Giants,Philadelphia Eagles,2024-01-07,4:25PM,New York,/boxscores/202401070nyg.htm
+2023,18,Los Angeles Rams,San Francisco 49ers,2024-01-07,4:25PM,San Francisco,/boxscores/202401070sfo.htm
+2023,18,Buffalo Bills,Miami Dolphins,2024-01-07,8:20PM,Miami,/boxscores/202401070mia.htm

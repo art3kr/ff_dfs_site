@@ -1,0 +1,257 @@
+year,week,team_1,team_2,date,time,location,boxscore_url
+2010,1,New Orleans Saints,Minnesota Vikings,2010-09-09,8:41PM,New Orleans,/boxscores/201009090nor.htm
+2010,1,Pittsburgh Steelers,Atlanta Falcons,2010-09-12,1:02PM,Pittsburgh,/boxscores/201009120pit.htm
+2010,1,Miami Dolphins,Buffalo Bills,2010-09-12,1:02PM,Buffalo,/boxscores/201009120buf.htm
+2010,1,Chicago Bears,Detroit Lions,2010-09-12,1:02PM,Chicago,/boxscores/201009120chi.htm
+2010,1,New England Patriots,Cincinnati Bengals,2010-09-12,1:02PM,New England,/boxscores/201009120nwe.htm
+2010,1,Tampa Bay Buccaneers,Cleveland Browns,2010-09-12,1:02PM,Tampa Bay,/boxscores/201009120tam.htm
+2010,1,Houston Texans,Indianapolis Colts,2010-09-12,1:02PM,Houston,/boxscores/201009120htx.htm
+2010,1,Tennessee Titans,Oakland Raiders,2010-09-12,1:02PM,Tennessee,/boxscores/201009120oti.htm
+2010,1,Jacksonville Jaguars,Denver Broncos,2010-09-12,1:03PM,Jacksonville,/boxscores/201009120jax.htm
+2010,1,New York Giants,Carolina Panthers,2010-09-12,1:04PM,New York,/boxscores/201009120nyg.htm
+2010,1,Arizona Cardinals,St. Louis Rams,2010-09-12,4:15PM,St. Louis,/boxscores/201009120ram.htm
+2010,1,Green Bay Packers,Philadelphia Eagles,2010-09-12,4:16PM,Philadelphia,/boxscores/201009120phi.htm
+2010,1,Seattle Seahawks,San Francisco 49ers,2010-09-12,4:16PM,Seattle,/boxscores/201009120sea.htm
+2010,1,Washington Redskins,Dallas Cowboys,2010-09-12,8:31PM,Washington,/boxscores/201009120was.htm
+2010,1,Baltimore Ravens,New York Jets,2010-09-13,7:26PM,New York,/boxscores/201009130nyj.htm
+2010,1,Kansas City Chiefs,San Diego Chargers,2010-09-13,10:20PM,Kansas City,/boxscores/201009130kan.htm
+2010,2,Green Bay Packers,Buffalo Bills,2010-09-19,1:02PM,Green Bay,/boxscores/201009190gnb.htm
+2010,2,Cincinnati Bengals,Baltimore Ravens,2010-09-19,1:02PM,Cincinnati,/boxscores/201009190cin.htm
+2010,2,Kansas City Chiefs,Cleveland Browns,2010-09-19,1:02PM,Cleveland,/boxscores/201009190cle.htm
+2010,2,Philadelphia Eagles,Detroit Lions,2010-09-19,1:02PM,Detroit,/boxscores/201009190det.htm
+2010,2,Pittsburgh Steelers,Tennessee Titans,2010-09-19,1:02PM,Tennessee,/boxscores/201009190oti.htm
+2010,2,Atlanta Falcons,Arizona Cardinals,2010-09-19,1:03PM,Atlanta,/boxscores/201009190atl.htm
+2010,2,Tampa Bay Buccaneers,Carolina Panthers,2010-09-19,1:03PM,Carolina,/boxscores/201009190car.htm
+2010,2,Chicago Bears,Dallas Cowboys,2010-09-19,1:05PM,Dallas,/boxscores/201009190dal.htm
+2010,2,Miami Dolphins,Minnesota Vikings,2010-09-19,1:05PM,Minnesota,/boxscores/201009190min.htm
+2010,2,Oakland Raiders,St. Louis Rams,2010-09-19,4:05PM,Oakland,/boxscores/201009190rai.htm
+2010,2,Denver Broncos,Seattle Seahawks,2010-09-19,4:06PM,Denver,/boxscores/201009190den.htm
+2010,2,Houston Texans,Washington Redskins,2010-09-19,4:15PM,Washington,/boxscores/201009190was.htm
+2010,2,San Diego Chargers,Jacksonville Jaguars,2010-09-19,4:15PM,San Diego,/boxscores/201009190sdg.htm
+2010,2,New York Jets,New England Patriots,2010-09-19,4:16PM,New York,/boxscores/201009190nyj.htm
+2010,2,Indianapolis Colts,New York Giants,2010-09-19,8:31PM,Indianapolis,/boxscores/201009190clt.htm
+2010,2,New Orleans Saints,San Francisco 49ers,2010-09-20,8:36PM,San Francisco,/boxscores/201009200sfo.htm
+2010,3,New England Patriots,Buffalo Bills,2010-09-26,1:02PM,New England,/boxscores/201009260nwe.htm
+2010,3,Cincinnati Bengals,Carolina Panthers,2010-09-26,1:02PM,Carolina,/boxscores/201009260car.htm
+2010,3,Baltimore Ravens,Cleveland Browns,2010-09-26,1:02PM,Baltimore,/boxscores/201009260rav.htm
+2010,3,Dallas Cowboys,Houston Texans,2010-09-26,1:02PM,Houston,/boxscores/201009260htx.htm
+2010,3,Tennessee Titans,New York Giants,2010-09-26,1:02PM,New York,/boxscores/201009260nyg.htm
+2010,3,Atlanta Falcons,New Orleans Saints,2010-09-26,1:03PM,New Orleans,/boxscores/201009260nor.htm
+2010,3,Pittsburgh Steelers,Tampa Bay Buccaneers,2010-09-26,1:03PM,Tampa Bay,/boxscores/201009260tam.htm
+2010,3,Kansas City Chiefs,San Francisco 49ers,2010-09-26,1:04PM,Kansas City,/boxscores/201009260kan.htm
+2010,3,Minnesota Vikings,Detroit Lions,2010-09-26,1:05PM,Minnesota,/boxscores/201009260min.htm
+2010,3,Philadelphia Eagles,Jacksonville Jaguars,2010-09-26,4:05PM,Jacksonville,/boxscores/201009260jax.htm
+2010,3,St. Louis Rams,Washington Redskins,2010-09-26,4:05PM,St. Louis,/boxscores/201009260ram.htm
+2010,3,Arizona Cardinals,Oakland Raiders,2010-09-26,4:15PM,Arizona,/boxscores/201009260crd.htm
+2010,3,Indianapolis Colts,Denver Broncos,2010-09-26,4:16PM,Denver,/boxscores/201009260den.htm
+2010,3,Seattle Seahawks,San Diego Chargers,2010-09-26,4:16PM,Seattle,/boxscores/201009260sea.htm
+2010,3,New York Jets,Miami Dolphins,2010-09-26,8:30PM,Miami,/boxscores/201009260mia.htm
+2010,3,Chicago Bears,Green Bay Packers,2010-09-27,8:40PM,Chicago,/boxscores/201009270chi.htm
+2010,4,St. Louis Rams,Seattle Seahawks,2010-10-03,1:00PM,St. Louis,/boxscores/201010030ram.htm
+2010,4,New York Jets,Buffalo Bills,2010-10-03,1:02PM,Buffalo,/boxscores/201010030buf.htm
+2010,4,Cleveland Browns,Cincinnati Bengals,2010-10-03,1:02PM,Cleveland,/boxscores/201010030cle.htm
+2010,4,Denver Broncos,Tennessee Titans,2010-10-03,1:02PM,Tennessee,/boxscores/201010030oti.htm
+2010,4,Green Bay Packers,Detroit Lions,2010-10-03,1:02PM,Green Bay,/boxscores/201010030gnb.htm
+2010,4,Baltimore Ravens,Pittsburgh Steelers,2010-10-03,1:02PM,Pittsburgh,/boxscores/201010030pit.htm
+2010,4,Atlanta Falcons,San Francisco 49ers,2010-10-03,1:03PM,Atlanta,/boxscores/201010030atl.htm
+2010,4,New Orleans Saints,Carolina Panthers,2010-10-03,1:03PM,New Orleans,/boxscores/201010030nor.htm
+2010,4,Jacksonville Jaguars,Indianapolis Colts,2010-10-03,4:05PM,Jacksonville,/boxscores/201010030jax.htm
+2010,4,Houston Texans,Oakland Raiders,2010-10-03,4:05PM,Oakland,/boxscores/201010030rai.htm
+2010,4,San Diego Chargers,Arizona Cardinals,2010-10-03,4:15PM,San Diego,/boxscores/201010030sdg.htm
+2010,4,Washington Redskins,Philadelphia Eagles,2010-10-03,4:15PM,Philadelphia,/boxscores/201010030phi.htm
+2010,4,New York Giants,Chicago Bears,2010-10-03,8:31PM,New York,/boxscores/201010030nyg.htm
+2010,4,New England Patriots,Miami Dolphins,2010-10-04,8:41PM,Miami,/boxscores/201010040mia.htm
+2010,5,Detroit Lions,St. Louis Rams,2010-10-10,12:56PM,Detroit,/boxscores/201010100det.htm
+2010,5,Jacksonville Jaguars,Buffalo Bills,2010-10-10,1:02PM,Buffalo,/boxscores/201010100buf.htm
+2010,5,Baltimore Ravens,Denver Broncos,2010-10-10,1:02PM,Baltimore,/boxscores/201010100rav.htm
+2010,5,Washington Redskins,Green Bay Packers,2010-10-10,1:02PM,Washington,/boxscores/201010100was.htm
+2010,5,Atlanta Falcons,Cleveland Browns,2010-10-10,1:03PM,Cleveland,/boxscores/201010100cle.htm
+2010,5,Chicago Bears,Carolina Panthers,2010-10-10,1:03PM,Carolina,/boxscores/201010100car.htm
+2010,5,Tampa Bay Buccaneers,Cincinnati Bengals,2010-10-10,1:03PM,Cincinnati,/boxscores/201010100cin.htm
+2010,5,Indianapolis Colts,Kansas City Chiefs,2010-10-10,1:03PM,Indianapolis,/boxscores/201010100clt.htm
+2010,5,New York Giants,Houston Texans,2010-10-10,1:03PM,Houston,/boxscores/201010100htx.htm
+2010,5,Arizona Cardinals,New Orleans Saints,2010-10-10,4:05PM,Arizona,/boxscores/201010100crd.htm
+2010,5,Oakland Raiders,San Diego Chargers,2010-10-10,4:15PM,Oakland,/boxscores/201010100rai.htm
+2010,5,Tennessee Titans,Dallas Cowboys,2010-10-10,4:16PM,Dallas,/boxscores/201010100dal.htm
+2010,5,Philadelphia Eagles,San Francisco 49ers,2010-10-10,8:30PM,San Francisco,/boxscores/201010100sfo.htm
+2010,5,New York Jets,Minnesota Vikings,2010-10-11,9:15PM,New York,/boxscores/201010110nyj.htm
+2010,6,St. Louis Rams,San Diego Chargers,2010-10-17,1:00PM,St. Louis,/boxscores/201010170ram.htm
+2010,6,New England Patriots,Baltimore Ravens,2010-10-17,1:02PM,New England,/boxscores/201010170nwe.htm
+2010,6,Philadelphia Eagles,Atlanta Falcons,2010-10-17,1:02PM,Philadelphia,/boxscores/201010170phi.htm
+2010,6,Seattle Seahawks,Chicago Bears,2010-10-17,1:02PM,Chicago,/boxscores/201010170chi.htm
+2010,6,Pittsburgh Steelers,Cleveland Browns,2010-10-17,1:02PM,Pittsburgh,/boxscores/201010170pit.htm
+2010,6,Miami Dolphins,Green Bay Packers,2010-10-17,1:02PM,Green Bay,/boxscores/201010170gnb.htm
+2010,6,New Orleans Saints,Tampa Bay Buccaneers,2010-10-17,1:02PM,Tampa Bay,/boxscores/201010170tam.htm
+2010,6,New York Giants,Detroit Lions,2010-10-17,1:03PM,New York,/boxscores/201010170nyg.htm
+2010,6,Houston Texans,Kansas City Chiefs,2010-10-17,1:03PM,Houston,/boxscores/201010170htx.htm
+2010,6,New York Jets,Denver Broncos,2010-10-17,4:05PM,Denver,/boxscores/201010170den.htm
+2010,6,San Francisco 49ers,Oakland Raiders,2010-10-17,4:05PM,San Francisco,/boxscores/201010170sfo.htm
+2010,6,Minnesota Vikings,Dallas Cowboys,2010-10-17,4:15PM,Minnesota,/boxscores/201010170min.htm
+2010,6,Indianapolis Colts,Washington Redskins,2010-10-17,8:31PM,Washington,/boxscores/201010170was.htm
+2010,6,Tennessee Titans,Jacksonville Jaguars,2010-10-18,8:40PM,Jacksonville,/boxscores/201010180jax.htm
+2010,7,Baltimore Ravens,Buffalo Bills,2010-10-24,1:02PM,Baltimore,/boxscores/201010240rav.htm
+2010,7,Pittsburgh Steelers,Miami Dolphins,2010-10-24,1:02PM,Miami,/boxscores/201010240mia.htm
+2010,7,Cleveland Browns,New Orleans Saints,2010-10-24,1:02PM,New Orleans,/boxscores/201010240nor.htm
+2010,7,Tennessee Titans,Philadelphia Eagles,2010-10-24,1:02PM,Tennessee,/boxscores/201010240oti.htm
+2010,7,Tampa Bay Buccaneers,St. Louis Rams,2010-10-24,1:02PM,Tampa Bay,/boxscores/201010240tam.htm
+2010,7,Carolina Panthers,San Francisco 49ers,2010-10-24,1:03PM,Carolina,/boxscores/201010240car.htm
+2010,7,Kansas City Chiefs,Jacksonville Jaguars,2010-10-24,1:03PM,Kansas City,/boxscores/201010240kan.htm
+2010,7,Washington Redskins,Chicago Bears,2010-10-24,1:04PM,Chicago,/boxscores/201010240chi.htm
+2010,7,Atlanta Falcons,Cincinnati Bengals,2010-10-24,1:05PM,Atlanta,/boxscores/201010240atl.htm
+2010,7,Seattle Seahawks,Arizona Cardinals,2010-10-24,4:06PM,Seattle,/boxscores/201010240sea.htm
+2010,7,New England Patriots,San Diego Chargers,2010-10-24,4:15PM,San Diego,/boxscores/201010240sdg.htm
+2010,7,Oakland Raiders,Denver Broncos,2010-10-24,4:15PM,Denver,/boxscores/201010240den.htm
+2010,7,Green Bay Packers,Minnesota Vikings,2010-10-24,8:30PM,Green Bay,/boxscores/201010240gnb.htm
+2010,7,New York Giants,Dallas Cowboys,2010-10-25,8:41PM,Dallas,/boxscores/201010250dal.htm
+2010,8,St. Louis Rams,Carolina Panthers,2010-10-31,1:00PM,St. Louis,/boxscores/201010310ram.htm
+2010,8,Detroit Lions,Washington Redskins,2010-10-31,1:02PM,Detroit,/boxscores/201010310det.htm
+2010,8,Green Bay Packers,New York Jets,2010-10-31,1:03PM,New York,/boxscores/201010310nyj.htm
+2010,8,Jacksonville Jaguars,Dallas Cowboys,2010-10-31,1:05PM,Dallas,/boxscores/201010310dal.htm
+2010,8,Miami Dolphins,Cincinnati Bengals,2010-10-31,1:06PM,Cincinnati,/boxscores/201010310cin.htm
+2010,8,San Francisco 49ers,Denver Broncos,2010-10-31,1:07PM,San Francisco,/boxscores/201010310sfo.htm
+2010,8,Kansas City Chiefs,Buffalo Bills,2010-10-31,1:08PM,Kansas City,/boxscores/201010310kan.htm
+2010,8,San Diego Chargers,Tennessee Titans,2010-10-31,4:05PM,San Diego,/boxscores/201010310sdg.htm
+2010,8,Tampa Bay Buccaneers,Arizona Cardinals,2010-10-31,4:15PM,Arizona,/boxscores/201010310crd.htm
+2010,8,New England Patriots,Minnesota Vikings,2010-10-31,4:15PM,New England,/boxscores/201010310nwe.htm
+2010,8,Oakland Raiders,Seattle Seahawks,2010-10-31,4:15PM,Oakland,/boxscores/201010310rai.htm
+2010,8,New Orleans Saints,Pittsburgh Steelers,2010-10-31,8:30PM,New Orleans,/boxscores/201010310nor.htm
+2010,8,Indianapolis Colts,Houston Texans,2010-11-01,8:41PM,Indianapolis,/boxscores/201011010clt.htm
+2010,9,Atlanta Falcons,Tampa Bay Buccaneers,2010-11-07,1:02PM,Atlanta,/boxscores/201011070atl.htm
+2010,9,Chicago Bears,Buffalo Bills,2010-11-07,1:02PM,Buffalo,/boxscores/201011070buf.htm
+2010,9,Cleveland Browns,New England Patriots,2010-11-07,1:02PM,Cleveland,/boxscores/201011070cle.htm
+2010,9,San Diego Chargers,Houston Texans,2010-11-07,1:02PM,Houston,/boxscores/201011070htx.htm
+2010,9,Baltimore Ravens,Miami Dolphins,2010-11-07,1:02PM,Baltimore,/boxscores/201011070rav.htm
+2010,9,New York Jets,Detroit Lions,2010-11-07,1:03PM,Detroit,/boxscores/201011070det.htm
+2010,9,New Orleans Saints,Carolina Panthers,2010-11-07,1:04PM,Carolina,/boxscores/201011070car.htm
+2010,9,Minnesota Vikings,Arizona Cardinals,2010-11-07,1:05PM,Minnesota,/boxscores/201011070min.htm
+2010,9,New York Giants,Seattle Seahawks,2010-11-07,4:05PM,Seattle,/boxscores/201011070sea.htm
+2010,9,Oakland Raiders,Kansas City Chiefs,2010-11-07,4:15PM,Oakland,/boxscores/201011070rai.htm
+2010,9,Philadelphia Eagles,Indianapolis Colts,2010-11-07,4:16PM,Philadelphia,/boxscores/201011070phi.htm
+2010,9,Green Bay Packers,Dallas Cowboys,2010-11-07,8:30PM,Green Bay,/boxscores/201011070gnb.htm
+2010,9,Pittsburgh Steelers,Cincinnati Bengals,2010-11-08,8:40PM,Cincinnati,/boxscores/201011080cin.htm
+2010,10,Atlanta Falcons,Baltimore Ravens,2010-11-11,8:31PM,Atlanta,/boxscores/201011110atl.htm
+2010,10,Buffalo Bills,Detroit Lions,2010-11-14,1:02PM,Buffalo,/boxscores/201011140buf.htm
+2010,10,Tampa Bay Buccaneers,Carolina Panthers,2010-11-14,1:02PM,Tampa Bay,/boxscores/201011140tam.htm
+2010,10,Chicago Bears,Minnesota Vikings,2010-11-14,1:02PM,Chicago,/boxscores/201011140chi.htm
+2010,10,Indianapolis Colts,Cincinnati Bengals,2010-11-14,1:02PM,Indianapolis,/boxscores/201011140clt.htm
+2010,10,New York Jets,Cleveland Browns,2010-11-14,1:02PM,Cleveland,/boxscores/201011140cle.htm
+2010,10,Miami Dolphins,Tennessee Titans,2010-11-14,1:02PM,Miami,/boxscores/201011140mia.htm
+2010,10,Jacksonville Jaguars,Houston Texans,2010-11-14,1:04PM,Jacksonville,/boxscores/201011140jax.htm
+2010,10,Denver Broncos,Kansas City Chiefs,2010-11-14,4:05PM,Denver,/boxscores/201011140den.htm
+2010,10,Seattle Seahawks,Arizona Cardinals,2010-11-14,4:15PM,Arizona,/boxscores/201011140crd.htm
+2010,10,Dallas Cowboys,New York Giants,2010-11-14,4:15PM,New York,/boxscores/201011140nyg.htm
+2010,10,San Francisco 49ers,St. Louis Rams,2010-11-14,4:15PM,San Francisco,/boxscores/201011140sfo.htm
+2010,10,New England Patriots,Pittsburgh Steelers,2010-11-14,8:30PM,Pittsburgh,/boxscores/201011140pit.htm
+2010,10,Philadelphia Eagles,Washington Redskins,2010-11-15,8:40PM,Washington,/boxscores/201011150was.htm
+2010,11,Chicago Bears,Miami Dolphins,2010-11-18,8:29PM,Miami,/boxscores/201011180mia.htm
+2010,11,Buffalo Bills,Cincinnati Bengals,2010-11-21,1:02PM,Cincinnati,/boxscores/201011210cin.htm
+2010,11,Dallas Cowboys,Detroit Lions,2010-11-21,1:02PM,Dallas,/boxscores/201011210dal.htm
+2010,11,Pittsburgh Steelers,Oakland Raiders,2010-11-21,1:02PM,Pittsburgh,/boxscores/201011210pit.htm
+2010,11,Jacksonville Jaguars,Cleveland Browns,2010-11-21,1:03PM,Jacksonville,/boxscores/201011210jax.htm
+2010,11,Kansas City Chiefs,Arizona Cardinals,2010-11-21,1:03PM,Kansas City,/boxscores/201011210kan.htm
+2010,11,New York Jets,Houston Texans,2010-11-21,1:03PM,New York,/boxscores/201011210nyj.htm
+2010,11,Washington Redskins,Tennessee Titans,2010-11-21,1:03PM,Tennessee,/boxscores/201011210oti.htm
+2010,11,Baltimore Ravens,Carolina Panthers,2010-11-21,1:04PM,Carolina,/boxscores/201011210car.htm
+2010,11,Green Bay Packers,Minnesota Vikings,2010-11-21,1:05PM,Minnesota,/boxscores/201011210min.htm
+2010,11,Atlanta Falcons,St. Louis Rams,2010-11-21,4:05PM,St. Louis,/boxscores/201011210ram.htm
+2010,11,New Orleans Saints,Seattle Seahawks,2010-11-21,4:05PM,New Orleans,/boxscores/201011210nor.htm
+2010,11,Tampa Bay Buccaneers,San Francisco 49ers,2010-11-21,4:05PM,San Francisco,/boxscores/201011210sfo.htm
+2010,11,New England Patriots,Indianapolis Colts,2010-11-21,4:15PM,New England,/boxscores/201011210nwe.htm
+2010,11,Philadelphia Eagles,New York Giants,2010-11-21,8:30PM,Philadelphia,/boxscores/201011210phi.htm
+2010,11,San Diego Chargers,Denver Broncos,2010-11-22,8:40PM,San Diego,/boxscores/201011220sdg.htm
+2010,12,New England Patriots,Detroit Lions,2010-11-25,12:38PM,Detroit,/boxscores/201011250det.htm
+2010,12,New Orleans Saints,Dallas Cowboys,2010-11-25,4:36PM,Dallas,/boxscores/201011250dal.htm
+2010,12,New York Jets,Cincinnati Bengals,2010-11-25,8:30PM,New York,/boxscores/201011250nyj.htm
+2010,12,Atlanta Falcons,Green Bay Packers,2010-11-28,1:02PM,Atlanta,/boxscores/201011280atl.htm
+2010,12,Pittsburgh Steelers,Buffalo Bills,2010-11-28,1:02PM,Buffalo,/boxscores/201011280buf.htm
+2010,12,Houston Texans,Tennessee Titans,2010-11-28,1:02PM,Houston,/boxscores/201011280htx.htm
+2010,12,New York Giants,Jacksonville Jaguars,2010-11-28,1:02PM,New York,/boxscores/201011280nyg.htm
+2010,12,Minnesota Vikings,Washington Redskins,2010-11-28,1:02PM,Washington,/boxscores/201011280was.htm
+2010,12,Cleveland Browns,Carolina Panthers,2010-11-28,1:03PM,Cleveland,/boxscores/201011280cle.htm
+2010,12,Miami Dolphins,Oakland Raiders,2010-11-28,4:05PM,Oakland,/boxscores/201011280rai.htm
+2010,12,Kansas City Chiefs,Seattle Seahawks,2010-11-28,4:06PM,Seattle,/boxscores/201011280sea.htm
+2010,12,Chicago Bears,Philadelphia Eagles,2010-11-28,4:15PM,Chicago,/boxscores/201011280chi.htm
+2010,12,Baltimore Ravens,Tampa Bay Buccaneers,2010-11-28,4:15PM,Baltimore,/boxscores/201011280rav.htm
+2010,12,St. Louis Rams,Denver Broncos,2010-11-28,4:16PM,Denver,/boxscores/201011280den.htm
+2010,12,San Diego Chargers,Indianapolis Colts,2010-11-28,8:30PM,Indianapolis,/boxscores/201011280clt.htm
+2010,12,San Francisco 49ers,Arizona Cardinals,2010-11-29,8:40PM,Arizona,/boxscores/201011290crd.htm
+2010,13,Philadelphia Eagles,Houston Texans,2010-12-02,8:30PM,Philadelphia,/boxscores/201012020phi.htm
+2010,13,Cleveland Browns,Miami Dolphins,2010-12-05,1:02PM,Miami,/boxscores/201012050mia.htm
+2010,13,Green Bay Packers,San Francisco 49ers,2010-12-05,1:02PM,Green Bay,/boxscores/201012050gnb.htm
+2010,13,New York Giants,Washington Redskins,2010-12-05,1:02PM,New York,/boxscores/201012050nyg.htm
+2010,13,Chicago Bears,Detroit Lions,2010-12-05,1:03PM,Detroit,/boxscores/201012050det.htm
+2010,13,New Orleans Saints,Cincinnati Bengals,2010-12-05,1:03PM,Cincinnati,/boxscores/201012050cin.htm
+2010,13,Kansas City Chiefs,Denver Broncos,2010-12-05,1:03PM,Kansas City,/boxscores/201012050kan.htm
+2010,13,Jacksonville Jaguars,Tennessee Titans,2010-12-05,1:03PM,Tennessee,/boxscores/201012050oti.htm
+2010,13,Minnesota Vikings,Buffalo Bills,2010-12-05,1:05PM,Minnesota,/boxscores/201012050min.htm
+2010,13,Oakland Raiders,San Diego Chargers,2010-12-05,4:05PM,San Diego,/boxscores/201012050sdg.htm
+2010,13,Dallas Cowboys,Indianapolis Colts,2010-12-05,4:15PM,Indianapolis,/boxscores/201012050clt.htm
+2010,13,St. Louis Rams,Arizona Cardinals,2010-12-05,4:15PM,Arizona,/boxscores/201012050crd.htm
+2010,13,Atlanta Falcons,Tampa Bay Buccaneers,2010-12-05,4:16PM,Tampa Bay,/boxscores/201012050tam.htm
+2010,13,Seattle Seahawks,Carolina Panthers,2010-12-05,4:16PM,Seattle,/boxscores/201012050sea.htm
+2010,13,Pittsburgh Steelers,Baltimore Ravens,2010-12-05,8:30PM,Baltimore,/boxscores/201012050rav.htm
+2010,13,New England Patriots,New York Jets,2010-12-06,8:40PM,New England,/boxscores/201012060nwe.htm
+2010,14,Indianapolis Colts,Tennessee Titans,2010-12-09,8:29PM,Tennessee,/boxscores/201012090oti.htm
+2010,14,Buffalo Bills,Cleveland Browns,2010-12-12,1:02PM,Buffalo,/boxscores/201012120buf.htm
+2010,14,Pittsburgh Steelers,Cincinnati Bengals,2010-12-12,1:02PM,Pittsburgh,/boxscores/201012120pit.htm
+2010,14,Jacksonville Jaguars,Oakland Raiders,2010-12-12,1:02PM,Jacksonville,/boxscores/201012120jax.htm
+2010,14,Atlanta Falcons,Carolina Panthers,2010-12-12,1:03PM,Carolina,/boxscores/201012120car.htm
+2010,14,Detroit Lions,Green Bay Packers,2010-12-12,1:03PM,Detroit,/boxscores/201012120det.htm
+2010,14,Tampa Bay Buccaneers,Washington Redskins,2010-12-12,1:03PM,Washington,/boxscores/201012120was.htm
+2010,14,New Orleans Saints,St. Louis Rams,2010-12-12,4:05PM,New Orleans,/boxscores/201012120nor.htm
+2010,14,San Francisco 49ers,Seattle Seahawks,2010-12-12,4:05PM,San Francisco,/boxscores/201012120sfo.htm
+2010,14,Arizona Cardinals,Denver Broncos,2010-12-12,4:15PM,Arizona,/boxscores/201012120crd.htm
+2010,14,San Diego Chargers,Kansas City Chiefs,2010-12-12,4:15PM,San Diego,/boxscores/201012120sdg.htm
+2010,14,Miami Dolphins,New York Jets,2010-12-12,4:15PM,New York,/boxscores/201012120nyj.htm
+2010,14,New England Patriots,Chicago Bears,2010-12-12,4:16PM,Chicago,/boxscores/201012120chi.htm
+2010,14,Philadelphia Eagles,Dallas Cowboys,2010-12-12,8:30PM,Dallas,/boxscores/201012120dal.htm
+2010,14,New York Giants,Minnesota Vikings,2010-12-13,7:20PM,Minnesota,/boxscores/201012130min.htm
+2010,14,Baltimore Ravens,Houston Texans,2010-12-13,8:40PM,Houston,/boxscores/201012130htx.htm
+2010,15,San Diego Chargers,San Francisco 49ers,2010-12-16,8:20PM,San Diego,/boxscores/201012160sdg.htm
+2010,15,Kansas City Chiefs,St. Louis Rams,2010-12-19,1:00PM,St. Louis,/boxscores/201012190ram.htm
+2010,15,Buffalo Bills,Miami Dolphins,2010-12-19,1:02PM,Miami,/boxscores/201012190mia.htm
+2010,15,Cincinnati Bengals,Cleveland Browns,2010-12-19,1:02PM,Cincinnati,/boxscores/201012190cin.htm
+2010,15,Indianapolis Colts,Jacksonville Jaguars,2010-12-19,1:02PM,Indianapolis,/boxscores/201012190clt.htm
+2010,15,Tennessee Titans,Houston Texans,2010-12-19,1:02PM,Tennessee,/boxscores/201012190oti.htm
+2010,15,Dallas Cowboys,Washington Redskins,2010-12-19,1:03PM,Dallas,/boxscores/201012190dal.htm
+2010,15,Detroit Lions,Tampa Bay Buccaneers,2010-12-19,1:03PM,Tampa Bay,/boxscores/201012190tam.htm
+2010,15,Baltimore Ravens,New Orleans Saints,2010-12-19,1:03PM,Baltimore,/boxscores/201012190rav.htm
+2010,15,Philadelphia Eagles,New York Giants,2010-12-19,1:03PM,New York,/boxscores/201012190nyg.htm
+2010,15,Carolina Panthers,Arizona Cardinals,2010-12-19,1:04PM,Carolina,/boxscores/201012190car.htm
+2010,15,Atlanta Falcons,Seattle Seahawks,2010-12-19,4:06PM,Seattle,/boxscores/201012190sea.htm
+2010,15,Oakland Raiders,Denver Broncos,2010-12-19,4:15PM,Oakland,/boxscores/201012190rai.htm
+2010,15,New York Jets,Pittsburgh Steelers,2010-12-19,4:15PM,Pittsburgh,/boxscores/201012190pit.htm
+2010,15,New England Patriots,Green Bay Packers,2010-12-19,8:30PM,New England,/boxscores/201012190nwe.htm
+2010,15,Chicago Bears,Minnesota Vikings,2010-12-20,8:40PM,Minnesota,/boxscores/201012200min.htm
+2010,16,Pittsburgh Steelers,Carolina Panthers,2010-12-23,8:29PM,Pittsburgh,/boxscores/201012230pit.htm
+2010,16,Arizona Cardinals,Dallas Cowboys,2010-12-25,7:30PM,Arizona,/boxscores/201012250crd.htm
+2010,16,St. Louis Rams,San Francisco 49ers,2010-12-26,1:00PM,St. Louis,/boxscores/201012260ram.htm
+2010,16,New England Patriots,Buffalo Bills,2010-12-26,1:02PM,Buffalo,/boxscores/201012260buf.htm
+2010,16,Chicago Bears,New York Jets,2010-12-26,1:02PM,Chicago,/boxscores/201012260chi.htm
+2010,16,Baltimore Ravens,Cleveland Browns,2010-12-26,1:02PM,Cleveland,/boxscores/201012260cle.htm
+2010,16,Detroit Lions,Miami Dolphins,2010-12-26,1:03PM,Miami,/boxscores/201012260mia.htm
+2010,16,Washington Redskins,Jacksonville Jaguars,2010-12-26,1:03PM,Jacksonville,/boxscores/201012260jax.htm
+2010,16,Kansas City Chiefs,Tennessee Titans,2010-12-26,1:03PM,Kansas City,/boxscores/201012260kan.htm
+2010,16,Cincinnati Bengals,San Diego Chargers,2010-12-26,4:05PM,Cincinnati,/boxscores/201012260cin.htm
+2010,16,Indianapolis Colts,Oakland Raiders,2010-12-26,4:05PM,Oakland,/boxscores/201012260rai.htm
+2010,16,Denver Broncos,Houston Texans,2010-12-26,4:06PM,Denver,/boxscores/201012260den.htm
+2010,16,Green Bay Packers,New York Giants,2010-12-26,4:15PM,Green Bay,/boxscores/201012260gnb.htm
+2010,16,Tampa Bay Buccaneers,Seattle Seahawks,2010-12-26,4:16PM,Tampa Bay,/boxscores/201012260tam.htm
+2010,16,New Orleans Saints,Atlanta Falcons,2010-12-27,8:40PM,Atlanta,/boxscores/201012270atl.htm
+2010,16,Minnesota Vikings,Philadelphia Eagles,2010-12-28,8:06PM,Philadelphia,/boxscores/201012280phi.htm
+2010,17,Tampa Bay Buccaneers,New Orleans Saints,2011-01-02,1:00PM,New Orleans,/boxscores/201101020nor.htm
+2010,17,Baltimore Ravens,Cincinnati Bengals,2011-01-02,1:02PM,Baltimore,/boxscores/201101020rav.htm
+2010,17,Pittsburgh Steelers,Cleveland Browns,2011-01-02,1:02PM,Cleveland,/boxscores/201101020cle.htm
+2010,17,Oakland Raiders,Kansas City Chiefs,2011-01-02,1:02PM,Kansas City,/boxscores/201101020kan.htm
+2010,17,New England Patriots,Miami Dolphins,2011-01-02,1:02PM,New England,/boxscores/201101020nwe.htm
+2010,17,Atlanta Falcons,Carolina Panthers,2011-01-02,1:03PM,Atlanta,/boxscores/201101020atl.htm
+2010,17,New York Jets,Buffalo Bills,2011-01-02,1:03PM,New York,/boxscores/201101020nyj.htm
+2010,17,Detroit Lions,Minnesota Vikings,2011-01-02,1:03PM,Detroit,/boxscores/201101020det.htm
+2010,17,Green Bay Packers,Chicago Bears,2011-01-02,4:15PM,Green Bay,/boxscores/201101020gnb.htm
+2010,17,San Francisco 49ers,Arizona Cardinals,2011-01-02,4:15PM,San Francisco,/boxscores/201101020sfo.htm
+2010,17,Dallas Cowboys,Philadelphia Eagles,2011-01-02,4:15PM,Philadelphia,/boxscores/201101020phi.htm
+2010,17,San Diego Chargers,Denver Broncos,2011-01-02,4:15PM,Denver,/boxscores/201101020den.htm
+2010,17,Houston Texans,Jacksonville Jaguars,2011-01-02,4:15PM,Houston,/boxscores/201101020htx.htm
+2010,17,Indianapolis Colts,Tennessee Titans,2011-01-02,4:16PM,Indianapolis,/boxscores/201101020clt.htm
+2010,17,New York Giants,Washington Redskins,2011-01-02,4:16PM,Washington,/boxscores/201101020was.htm
+2010,17,Seattle Seahawks,St. Louis Rams,2011-01-02,8:31PM,Seattle,/boxscores/201101020sea.htm

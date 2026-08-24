@@ -1,0 +1,305 @@
+year,week,team_1,team_2,date,time,location,boxscore_url
+2025,1,Philadelphia Eagles,Dallas Cowboys,9/4/25,8:20PM,Philadelphia,/boxscores/202509040phi.htm
+2025,1,Los Angeles Chargers,Kansas City Chiefs,9/5/25,8:00PM,Los Angeles,/boxscores/202509050sdg.htm
+2025,1,Tampa Bay Buccaneers,Atlanta Falcons,9/7/25,1:00PM,Atlanta,/boxscores/202509070atl.htm
+2025,1,Jacksonville Jaguars,Carolina Panthers,9/7/25,1:00PM,Jacksonville,/boxscores/202509070jax.htm
+2025,1,Cincinnati Bengals,Cleveland Browns,9/7/25,1:00PM,Cleveland,/boxscores/202509070cle.htm
+2025,1,Indianapolis Colts,Miami Dolphins,9/7/25,1:00PM,Indianapolis,/boxscores/202509070clt.htm
+2025,1,Arizona Cardinals,New Orleans Saints,9/7/25,1:00PM,New Orleans,/boxscores/202509070nor.htm
+2025,1,Las Vegas Raiders,New England Patriots,9/7/25,1:00PM,New England,/boxscores/202509070nwe.htm
+2025,1,Washington Commanders,New York Giants,9/7/25,1:00PM,Washington,/boxscores/202509070was.htm
+2025,1,Pittsburgh Steelers,New York Jets,9/7/25,1:00PM,New York,/boxscores/202509070nyj.htm
+2025,1,Denver Broncos,Tennessee Titans,9/7/25,4:05PM,Denver,/boxscores/202509070den.htm
+2025,1,San Francisco 49ers,Seattle Seahawks,9/7/25,4:05PM,Seattle,/boxscores/202509070sea.htm
+2025,1,Green Bay Packers,Detroit Lions,9/7/25,4:25PM,Green Bay,/boxscores/202509070gnb.htm
+2025,1,Los Angeles Rams,Houston Texans,9/7/25,4:25PM,Los Angeles,/boxscores/202509070ram.htm
+2025,1,Buffalo Bills,Baltimore Ravens,9/7/25,8:20PM,Buffalo,/boxscores/202509070buf.htm
+2025,1,Minnesota Vikings,Chicago Bears,9/8/25,8:15PM,Chicago,/boxscores/202509080chi.htm
+2025,2,Green Bay Packers,Washington Commanders,9/11/25,8:15PM,Green Bay,/boxscores/202509110gnb.htm
+2025,2,Buffalo Bills,New York Jets,9/14/25,1:00PM,New York,/boxscores/202509140nyj.htm
+2025,2,Detroit Lions,Chicago Bears,9/14/25,1:00PM,Detroit,/boxscores/202509140det.htm
+2025,2,Cincinnati Bengals,Jacksonville Jaguars,9/14/25,1:00PM,Cincinnati,/boxscores/202509140cin.htm
+2025,2,Baltimore Ravens,Cleveland Browns,9/14/25,1:00PM,Baltimore,/boxscores/202509140rav.htm
+2025,2,Dallas Cowboys,New York Giants,9/14/25,1:00PM,Dallas,/boxscores/202509140dal.htm
+2025,2,New England Patriots,Miami Dolphins,9/14/25,1:00PM,Miami,/boxscores/202509140mia.htm
+2025,2,San Francisco 49ers,New Orleans Saints,9/14/25,1:00PM,New Orleans,/boxscores/202509140nor.htm
+2025,2,Los Angeles Rams,Tennessee Titans,9/14/25,1:00PM,Tennessee,/boxscores/202509140oti.htm
+2025,2,Seattle Seahawks,Pittsburgh Steelers,9/14/25,1:00PM,Pittsburgh,/boxscores/202509140pit.htm
+2025,2,Arizona Cardinals,Carolina Panthers,9/14/25,4:05PM,Arizona,/boxscores/202509140crd.htm
+2025,2,Indianapolis Colts,Denver Broncos,9/14/25,4:05PM,Indianapolis,/boxscores/202509140clt.htm
+2025,2,Philadelphia Eagles,Kansas City Chiefs,9/14/25,4:25PM,Kansas City,/boxscores/202509140kan.htm
+2025,2,Atlanta Falcons,Minnesota Vikings,9/14/25,8:20PM,Minnesota,/boxscores/202509140min.htm
+2025,2,Tampa Bay Buccaneers,Houston Texans,9/15/25,7:00PM,Houston,/boxscores/202509150htx.htm
+2025,2,Los Angeles Chargers,Las Vegas Raiders,9/15/25,10:00PM,Las Vegas,/boxscores/202509150rai.htm
+2025,3,Buffalo Bills,Miami Dolphins,9/18/25,8:15PM,Buffalo,/boxscores/202509180buf.htm
+2025,3,Carolina Panthers,Atlanta Falcons,9/21/25,1:00PM,Carolina,/boxscores/202509210car.htm
+2025,3,Minnesota Vikings,Cincinnati Bengals,9/21/25,1:00PM,Minnesota,/boxscores/202509210min.htm
+2025,3,Cleveland Browns,Green Bay Packers,9/21/25,1:00PM,Cleveland,/boxscores/202509210cle.htm
+2025,3,Indianapolis Colts,Tennessee Titans,9/21/25,1:00PM,Tennessee,/boxscores/202509210oti.htm
+2025,3,Jacksonville Jaguars,Houston Texans,9/21/25,1:00PM,Jacksonville,/boxscores/202509210jax.htm
+2025,3,Pittsburgh Steelers,New England Patriots,9/21/25,1:00PM,New England,/boxscores/202509210nwe.htm
+2025,3,Tampa Bay Buccaneers,New York Jets,9/21/25,1:00PM,Tampa Bay,/boxscores/202509210tam.htm
+2025,3,Philadelphia Eagles,Los Angeles Rams,9/21/25,1:00PM,Philadelphia,/boxscores/202509210phi.htm
+2025,3,Washington Commanders,Las Vegas Raiders,9/21/25,1:00PM,Washington,/boxscores/202509210was.htm
+2025,3,Los Angeles Chargers,Denver Broncos,9/21/25,4:05PM,Los Angeles,/boxscores/202509210sdg.htm
+2025,3,Seattle Seahawks,New Orleans Saints,9/21/25,4:05PM,Seattle,/boxscores/202509210sea.htm
+2025,3,Chicago Bears,Dallas Cowboys,9/21/25,4:25PM,Chicago,/boxscores/202509210chi.htm
+2025,3,San Francisco 49ers,Arizona Cardinals,9/21/25,4:25PM,San Francisco,/boxscores/202509210sfo.htm
+2025,3,Kansas City Chiefs,New York Giants,9/21/25,8:20PM,New York,/boxscores/202509210nyg.htm
+2025,3,Detroit Lions,Baltimore Ravens,9/22/25,8:15PM,Baltimore,/boxscores/202509220rav.htm
+2025,4,Seattle Seahawks,Arizona Cardinals,9/25/25,8:15PM,Arizona,/boxscores/202509250crd.htm
+2025,4,Pittsburgh Steelers,Minnesota Vikings,9/28/25,9:30AM,Pittsburgh,/boxscores/202509280pit.htm
+2025,4,Atlanta Falcons,Washington Commanders,9/28/25,1:00PM,Atlanta,/boxscores/202509280atl.htm
+2025,4,Buffalo Bills,New Orleans Saints,9/28/25,1:00PM,Buffalo,/boxscores/202509280buf.htm
+2025,4,New England Patriots,Carolina Panthers,9/28/25,1:00PM,New England,/boxscores/202509280nwe.htm
+2025,4,Detroit Lions,Cleveland Browns,9/28/25,1:00PM,Detroit,/boxscores/202509280det.htm
+2025,4,Houston Texans,Tennessee Titans,9/28/25,1:00PM,Houston,/boxscores/202509280htx.htm
+2025,4,New York Giants,Los Angeles Chargers,9/28/25,1:00PM,New York,/boxscores/202509280nyg.htm
+2025,4,Philadelphia Eagles,Tampa Bay Buccaneers,9/28/25,1:00PM,Tampa Bay,/boxscores/202509280tam.htm
+2025,4,Los Angeles Rams,Indianapolis Colts,9/28/25,4:05PM,Los Angeles,/boxscores/202509280ram.htm
+2025,4,Jacksonville Jaguars,San Francisco 49ers,9/28/25,4:05PM,San Francisco,/boxscores/202509280sfo.htm
+2025,4,Chicago Bears,Las Vegas Raiders,9/28/25,4:25PM,Las Vegas,/boxscores/202509280rai.htm
+2025,4,Kansas City Chiefs,Baltimore Ravens,9/28/25,4:25PM,Kansas City,/boxscores/202509280kan.htm
+2025,4,Green Bay Packers,Dallas Cowboys,9/28/25,8:20PM,Dallas,/boxscores/202509280dal.htm
+2025,4,Miami Dolphins,New York Jets,9/29/25,7:15PM,Miami,/boxscores/202509290mia.htm
+2025,4,Denver Broncos,Cincinnati Bengals,9/29/25,8:15PM,Denver,/boxscores/202509290den.htm
+2025,5,San Francisco 49ers,Los Angeles Rams,10/2/25,8:15PM,Los Angeles,/boxscores/202510020ram.htm
+2025,5,Minnesota Vikings,Cleveland Browns,10/5/25,9:30AM,Cleveland,/boxscores/202510050cle.htm
+2025,5,Carolina Panthers,Miami Dolphins,10/5/25,1:00PM,Carolina,/boxscores/202510050car.htm
+2025,5,Indianapolis Colts,Las Vegas Raiders,10/5/25,1:00PM,Indianapolis,/boxscores/202510050clt.htm
+2025,5,Dallas Cowboys,New York Jets,10/5/25,1:00PM,New York,/boxscores/202510050nyj.htm
+2025,5,Denver Broncos,Philadelphia Eagles,10/5/25,1:00PM,Philadelphia,/boxscores/202510050phi.htm
+2025,5,Houston Texans,Baltimore Ravens,10/5/25,1:00PM,Baltimore,/boxscores/202510050rav.htm
+2025,5,New Orleans Saints,New York Giants,10/5/25,1:00PM,New Orleans,/boxscores/202510050nor.htm
+2025,5,Tennessee Titans,Arizona Cardinals,10/5/25,4:05PM,Arizona,/boxscores/202510050crd.htm
+2025,5,Tampa Bay Buccaneers,Seattle Seahawks,10/5/25,4:05PM,Seattle,/boxscores/202510050sea.htm
+2025,5,Detroit Lions,Cincinnati Bengals,10/5/25,4:25PM,Cincinnati,/boxscores/202510050cin.htm
+2025,5,Washington Commanders,Los Angeles Chargers,10/5/25,4:25PM,Los Angeles,/boxscores/202510050sdg.htm
+2025,5,New England Patriots,Buffalo Bills,10/5/25,8:20PM,Buffalo,/boxscores/202510050buf.htm
+2025,5,Jacksonville Jaguars,Kansas City Chiefs,10/6/25,8:15PM,Jacksonville,/boxscores/202510060jax.htm
+2025,6,New York Giants,Philadelphia Eagles,10/9/25,8:15PM,New York,/boxscores/202510090nyg.htm
+2025,6,Denver Broncos,New York Jets,10/12/25,9:30AM,New York,/boxscores/202510120nyj.htm
+2025,6,Carolina Panthers,Dallas Cowboys,10/12/25,1:00PM,Carolina,/boxscores/202510120car.htm
+2025,6,Pittsburgh Steelers,Cleveland Browns,10/12/25,1:00PM,Pittsburgh,/boxscores/202510120pit.htm
+2025,6,Indianapolis Colts,Arizona Cardinals,10/12/25,1:00PM,Indianapolis,/boxscores/202510120clt.htm
+2025,6,Seattle Seahawks,Jacksonville Jaguars,10/12/25,1:00PM,Jacksonville,/boxscores/202510120jax.htm
+2025,6,Los Angeles Chargers,Miami Dolphins,10/12/25,1:00PM,Miami,/boxscores/202510120mia.htm
+2025,6,New England Patriots,New Orleans Saints,10/12/25,1:00PM,New Orleans,/boxscores/202510120nor.htm
+2025,6,Los Angeles Rams,Baltimore Ravens,10/12/25,1:00PM,Baltimore,/boxscores/202510120rav.htm
+2025,6,Las Vegas Raiders,Tennessee Titans,10/12/25,4:05PM,Las Vegas,/boxscores/202510120rai.htm
+2025,6,Green Bay Packers,Cincinnati Bengals,10/12/25,4:25PM,Green Bay,/boxscores/202510120gnb.htm
+2025,6,Tampa Bay Buccaneers,San Francisco 49ers,10/12/25,4:25PM,Tampa Bay,/boxscores/202510120tam.htm
+2025,6,Kansas City Chiefs,Detroit Lions,10/12/25,8:20PM,Kansas City,/boxscores/202510120kan.htm
+2025,6,Atlanta Falcons,Buffalo Bills,10/13/25,7:15PM,Atlanta,/boxscores/202510130atl.htm
+2025,6,Chicago Bears,Washington Commanders,10/13/25,8:15PM,Washington,/boxscores/202510130was.htm
+2025,7,Cincinnati Bengals,Pittsburgh Steelers,10/16/25,8:15PM,Cincinnati,/boxscores/202510160cin.htm
+2025,7,Los Angeles Rams,Jacksonville Jaguars,10/19/25,9:30AM,Jacksonville,/boxscores/202510190jax.htm
+2025,7,Chicago Bears,New Orleans Saints,10/19/25,1:00PM,Chicago,/boxscores/202510190chi.htm
+2025,7,Philadelphia Eagles,Minnesota Vikings,10/19/25,1:00PM,Minnesota,/boxscores/202510190min.htm
+2025,7,Carolina Panthers,New York Jets,10/19/25,1:00PM,New York,/boxscores/202510190nyj.htm
+2025,7,Cleveland Browns,Miami Dolphins,10/19/25,1:00PM,Cleveland,/boxscores/202510190cle.htm
+2025,7,Kansas City Chiefs,Las Vegas Raiders,10/19/25,1:00PM,Kansas City,/boxscores/202510190kan.htm
+2025,7,New England Patriots,Tennessee Titans,10/19/25,1:00PM,Tennessee,/boxscores/202510190oti.htm
+2025,7,Indianapolis Colts,Los Angeles Chargers,10/19/25,4:05PM,Los Angeles,/boxscores/202510190sdg.htm
+2025,7,Denver Broncos,New York Giants,10/19/25,4:05PM,Denver,/boxscores/202510190den.htm
+2025,7,Green Bay Packers,Arizona Cardinals,10/19/25,4:25PM,Arizona,/boxscores/202510190crd.htm
+2025,7,Dallas Cowboys,Washington Commanders,10/19/25,4:25PM,Dallas,/boxscores/202510190dal.htm
+2025,7,San Francisco 49ers,Atlanta Falcons,10/19/25,8:20PM,San Francisco,/boxscores/202510190sfo.htm
+2025,7,Detroit Lions,Tampa Bay Buccaneers,10/20/25,7:00PM,Detroit,/boxscores/202510200det.htm
+2025,7,Seattle Seahawks,Houston Texans,10/20/25,10:00PM,Seattle,/boxscores/202510200sea.htm
+2025,8,Los Angeles Chargers,Minnesota Vikings,10/23/25,8:15PM,Los Angeles,/boxscores/202510230sdg.htm
+2025,8,Miami Dolphins,Atlanta Falcons,10/26/25,1:00PM,Atlanta,/boxscores/202510260atl.htm
+2025,8,Buffalo Bills,Carolina Panthers,10/26/25,1:00PM,Carolina,/boxscores/202510260car.htm
+2025,8,Baltimore Ravens,Chicago Bears,10/26/25,1:00PM,Baltimore,/boxscores/202510260rav.htm
+2025,8,Houston Texans,San Francisco 49ers,10/26/25,1:00PM,Houston,/boxscores/202510260htx.htm
+2025,8,New York Jets,Cincinnati Bengals,10/26/25,1:00PM,Cincinnati,/boxscores/202510260cin.htm
+2025,8,New England Patriots,Cleveland Browns,10/26/25,1:00PM,New England,/boxscores/202510260nwe.htm
+2025,8,Philadelphia Eagles,New York Giants,10/26/25,1:00PM,Philadelphia,/boxscores/202510260phi.htm
+2025,8,Tampa Bay Buccaneers,New Orleans Saints,10/26/25,4:05PM,New Orleans,/boxscores/202510260nor.htm
+2025,8,Indianapolis Colts,Tennessee Titans,10/26/25,4:25PM,Indianapolis,/boxscores/202510260clt.htm
+2025,8,Denver Broncos,Dallas Cowboys,10/26/25,4:25PM,Denver,/boxscores/202510260den.htm
+2025,8,Green Bay Packers,Pittsburgh Steelers,10/26/25,8:20PM,Pittsburgh,/boxscores/202510260pit.htm
+2025,8,Kansas City Chiefs,Washington Commanders,10/27/25,8:15PM,Kansas City,/boxscores/202510270kan.htm
+2025,9,Baltimore Ravens,Miami Dolphins,10/30/25,8:15PM,Miami,/boxscores/202510300mia.htm
+2025,9,Atlanta Falcons,New England Patriots,11/2/25,1:00PM,New England,/boxscores/202511020nwe.htm
+2025,9,Carolina Panthers,Green Bay Packers,11/2/25,1:00PM,Green Bay,/boxscores/202511020gnb.htm
+2025,9,Chicago Bears,Cincinnati Bengals,11/2/25,1:00PM,Cincinnati,/boxscores/202511020cin.htm
+2025,9,Indianapolis Colts,Pittsburgh Steelers,11/2/25,1:00PM,Pittsburgh,/boxscores/202511020pit.htm
+2025,9,Denver Broncos,Houston Texans,11/2/25,1:00PM,Houston,/boxscores/202511020htx.htm
+2025,9,Minnesota Vikings,Detroit Lions,11/2/25,1:00PM,Detroit,/boxscores/202511020det.htm
+2025,9,Los Angeles Chargers,Tennessee Titans,11/2/25,1:00PM,Tennessee,/boxscores/202511020oti.htm
+2025,9,San Francisco 49ers,New York Giants,11/2/25,1:00PM,New York,/boxscores/202511020nyg.htm
+2025,9,Jacksonville Jaguars,Las Vegas Raiders,11/2/25,4:05PM,Las Vegas,/boxscores/202511020rai.htm
+2025,9,New Orleans Saints,Los Angeles Rams,11/2/25,4:05PM,Los Angeles,/boxscores/202511020ram.htm
+2025,9,Kansas City Chiefs,Buffalo Bills,11/2/25,4:25PM,Buffalo,/boxscores/202511020buf.htm
+2025,9,Seattle Seahawks,Washington Commanders,11/2/25,8:20PM,Washington,/boxscores/202511020was.htm
+2025,9,Arizona Cardinals,Dallas Cowboys,11/3/25,8:15PM,Dallas,/boxscores/202511030dal.htm
+2025,10,Las Vegas Raiders,Denver Broncos,11/6/25,8:15PM,Denver,/boxscores/202511060den.htm
+2025,10,Atlanta Falcons,Indianapolis Colts,11/9/25,9:30AM,Indianapolis,/boxscores/202511090clt.htm
+2025,10,Buffalo Bills,Miami Dolphins,11/9/25,1:00PM,Miami,/boxscores/202511090mia.htm
+2025,10,Cleveland Browns,New York Jets,11/9/25,1:00PM,New York,/boxscores/202511090nyj.htm
+2025,10,Jacksonville Jaguars,Houston Texans,11/9/25,1:00PM,Houston,/boxscores/202511090htx.htm
+2025,10,New Orleans Saints,Carolina Panthers,11/9/25,1:00PM,Carolina,/boxscores/202511090car.htm
+2025,10,New England Patriots,Tampa Bay Buccaneers,11/9/25,1:00PM,Tampa Bay,/boxscores/202511090tam.htm
+2025,10,New York Giants,Chicago Bears,11/9/25,1:00PM,Chicago,/boxscores/202511090chi.htm
+2025,10,Baltimore Ravens,Minnesota Vikings,11/9/25,1:00PM,Minnesota,/boxscores/202511090min.htm
+2025,10,Arizona Cardinals,Seattle Seahawks,11/9/25,4:05PM,Seattle,/boxscores/202511090sea.htm
+2025,10,Detroit Lions,Washington Commanders,11/9/25,4:25PM,Washington,/boxscores/202511090was.htm
+2025,10,Los Angeles Rams,San Francisco 49ers,11/9/25,4:25PM,San Francisco,/boxscores/202511090sfo.htm
+2025,10,Pittsburgh Steelers,Los Angeles Chargers,11/9/25,8:20PM,Los Angeles,/boxscores/202511090sdg.htm
+2025,10,Philadelphia Eagles,Green Bay Packers,11/10/25,8:15PM,Green Bay,/boxscores/202511100gnb.htm
+2025,11,New York Jets,New England Patriots,11/13/25,8:15PM,New England,/boxscores/202511130nwe.htm
+2025,11,Washington Commanders,Miami Dolphins,11/16/25,9:30AM,Miami,/boxscores/202511160mia.htm
+2025,11,Carolina Panthers,Atlanta Falcons,11/16/25,1:00PM,Atlanta,/boxscores/202511160atl.htm
+2025,11,Chicago Bears,Minnesota Vikings,11/16/25,1:00PM,Minnesota,/boxscores/202511160min.htm
+2025,11,Cincinnati Bengals,Pittsburgh Steelers,11/16/25,1:00PM,Pittsburgh,/boxscores/202511160pit.htm
+2025,11,Green Bay Packers,New York Giants,11/16/25,1:00PM,New York,/boxscores/202511160nyg.htm
+2025,11,Houston Texans,Tennessee Titans,11/16/25,1:00PM,Tennessee,/boxscores/202511160oti.htm
+2025,11,Los Angeles Chargers,Jacksonville Jaguars,11/16/25,1:00PM,Jacksonville,/boxscores/202511160jax.htm
+2025,11,Tampa Bay Buccaneers,Buffalo Bills,11/16/25,1:00PM,Buffalo,/boxscores/202511160buf.htm
+2025,11,Seattle Seahawks,Los Angeles Rams,11/16/25,4:05PM,Los Angeles,/boxscores/202511160ram.htm
+2025,11,San Francisco 49ers,Arizona Cardinals,11/16/25,4:05PM,Arizona,/boxscores/202511160crd.htm
+2025,11,Kansas City Chiefs,Denver Broncos,11/16/25,4:25PM,Denver,/boxscores/202511160den.htm
+2025,11,Baltimore Ravens,Cleveland Browns,11/16/25,4:25PM,Cleveland,/boxscores/202511160cle.htm
+2025,11,Detroit Lions,Philadelphia Eagles,11/16/25,8:20PM,Philadelphia,/boxscores/202511160phi.htm
+2025,11,Dallas Cowboys,Las Vegas Raiders,11/17/25,8:15PM,Las Vegas,/boxscores/202511170rai.htm
+2025,12,Buffalo Bills,Houston Texans,11/20/25,8:15PM,Houston,/boxscores/202511200htx.htm
+2025,12,Indianapolis Colts,Kansas City Chiefs,11/23/25,1:00PM,Kansas City,/boxscores/202511230kan.htm
+2025,12,Minnesota Vikings,Green Bay Packers,11/23/25,1:00PM,Green Bay,/boxscores/202511230gnb.htm
+2025,12,New England Patriots,Cincinnati Bengals,11/23/25,1:00PM,Cincinnati,/boxscores/202511230cin.htm
+2025,12,New York Giants,Detroit Lions,11/23/25,1:00PM,Detroit,/boxscores/202511230det.htm
+2025,12,New York Jets,Baltimore Ravens,11/23/25,1:00PM,Baltimore,/boxscores/202511230rav.htm
+2025,12,Pittsburgh Steelers,Chicago Bears,11/23/25,1:00PM,Chicago,/boxscores/202511230chi.htm
+2025,12,Seattle Seahawks,Tennessee Titans,11/23/25,1:00PM,Tennessee,/boxscores/202511230oti.htm
+2025,12,Cleveland Browns,Las Vegas Raiders,11/23/25,4:05PM,Las Vegas,/boxscores/202511230rai.htm
+2025,12,Jacksonville Jaguars,Arizona Cardinals,11/23/25,4:05PM,Arizona,/boxscores/202511230crd.htm
+2025,12,Atlanta Falcons,New Orleans Saints,11/23/25,4:25PM,New Orleans,/boxscores/202511230nor.htm
+2025,12,Philadelphia Eagles,Dallas Cowboys,11/23/25,4:25PM,Dallas,/boxscores/202511230dal.htm
+2025,12,Tampa Bay Buccaneers,Los Angeles Rams,11/23/25,8:20PM,Los Angeles,/boxscores/202511230ram.htm
+2025,12,Carolina Panthers,San Francisco 49ers,11/24/25,8:15PM,San Francisco,/boxscores/202511240sfo.htm
+2025,13,Green Bay Packers,Detroit Lions,11/27/25,1:00PM,Detroit,/boxscores/202511270det.htm
+2025,13,Kansas City Chiefs,Dallas Cowboys,11/27/25,4:30PM,Dallas,/boxscores/202511270dal.htm
+2025,13,Cincinnati Bengals,Baltimore Ravens,11/27/25,8:20PM,Baltimore,/boxscores/202511270rav.htm
+2025,13,Chicago Bears,Philadelphia Eagles,11/28/25,3:00PM,Philadelphia,/boxscores/202511280phi.htm
+2025,13,Atlanta Falcons,New York Jets,11/30/25,1:00PM,New York,/boxscores/202511300nyj.htm
+2025,13,Arizona Cardinals,Tampa Bay Buccaneers,11/30/25,1:00PM,Tampa Bay,/boxscores/202511300tam.htm
+2025,13,Houston Texans,Indianapolis Colts,11/30/25,1:00PM,Indianapolis,/boxscores/202511300clt.htm
+2025,13,Jacksonville Jaguars,Tennessee Titans,11/30/25,1:00PM,Tennessee,/boxscores/202511300oti.htm
+2025,13,New Orleans Saints,Miami Dolphins,11/30/25,1:00PM,Miami,/boxscores/202511300mia.htm
+2025,13,Los Angeles Rams,Carolina Panthers,11/30/25,1:00PM,Carolina,/boxscores/202511300car.htm
+2025,13,San Francisco 49ers,Cleveland Browns,11/30/25,1:00PM,Cleveland,/boxscores/202511300cle.htm
+2025,13,Minnesota Vikings,Seattle Seahawks,11/30/25,4:05PM,Seattle,/boxscores/202511300sea.htm
+2025,13,Buffalo Bills,Pittsburgh Steelers,11/30/25,4:25PM,Pittsburgh,/boxscores/202511300pit.htm
+2025,13,Las Vegas Raiders,Los Angeles Chargers,11/30/25,4:25PM,Los Angeles,/boxscores/202511300sdg.htm
+2025,13,Denver Broncos,Washington Commanders,11/30/25,8:20PM,Washington,/boxscores/202511300was.htm
+2025,13,New York Giants,New England Patriots,12/1/25,8:15PM,New England,/boxscores/202512010nwe.htm
+2025,14,Dallas Cowboys,Detroit Lions,12/4/25,8:15PM,Detroit,/boxscores/202512040det.htm
+2025,14,Chicago Bears,Green Bay Packers,12/7/25,1:00PM,Green Bay,/boxscores/202512070gnb.htm
+2025,14,Indianapolis Colts,Jacksonville Jaguars,12/7/25,1:00PM,Jacksonville,/boxscores/202512070jax.htm
+2025,14,Miami Dolphins,New York Jets,12/7/25,1:00PM,New York,/boxscores/202512070nyj.htm
+2025,14,New Orleans Saints,Tampa Bay Buccaneers,12/7/25,1:00PM,Tampa Bay,/boxscores/202512070tam.htm
+2025,14,Tennessee Titans,Cleveland Browns,12/7/25,1:00PM,Cleveland,/boxscores/202512070cle.htm
+2025,14,Pittsburgh Steelers,Baltimore Ravens,12/7/25,1:00PM,Baltimore,/boxscores/202512070rav.htm
+2025,14,Seattle Seahawks,Atlanta Falcons,12/7/25,1:00PM,Atlanta,/boxscores/202512070atl.htm
+2025,14,Washington Commanders,Minnesota Vikings,12/7/25,1:00PM,Minnesota,/boxscores/202512070min.htm
+2025,14,Denver Broncos,Las Vegas Raiders,12/7/25,4:05PM,Las Vegas,/boxscores/202512070rai.htm
+2025,14,Cincinnati Bengals,Buffalo Bills,12/7/25,4:25PM,Buffalo,/boxscores/202512070buf.htm
+2025,14,Los Angeles Rams,Arizona Cardinals,12/7/25,4:25PM,Arizona,/boxscores/202512070crd.htm
+2025,14,Houston Texans,Kansas City Chiefs,12/7/25,8:20PM,Kansas City,/boxscores/202512070kan.htm
+2025,14,Philadelphia Eagles,Los Angeles Chargers,12/8/25,8:15PM,Los Angeles,/boxscores/202512080sdg.htm
+2025,15,Atlanta Falcons,Tampa Bay Buccaneers,12/11/25,8:15PM,Tampa Bay,/boxscores/202512110tam.htm
+2025,15,Buffalo Bills,New England Patriots,12/14/25,1:00PM,New England,/boxscores/202512140nwe.htm
+2025,15,Cleveland Browns,Chicago Bears,12/14/25,1:00PM,Chicago,/boxscores/202512140chi.htm
+2025,15,Arizona Cardinals,Houston Texans,12/14/25,1:00PM,Houston,/boxscores/202512140htx.htm
+2025,15,New York Jets,Jacksonville Jaguars,12/14/25,1:00PM,Jacksonville,/boxscores/202512140jax.htm
+2025,15,Las Vegas Raiders,Philadelphia Eagles,12/14/25,1:00PM,Philadelphia,/boxscores/202512140phi.htm
+2025,15,Baltimore Ravens,Cincinnati Bengals,12/14/25,1:00PM,Cincinnati,/boxscores/202512140cin.htm
+2025,15,Los Angeles Chargers,Kansas City Chiefs,12/14/25,1:00PM,Kansas City,/boxscores/202512140kan.htm
+2025,15,Washington Commanders,New York Giants,12/14/25,1:00PM,New York,/boxscores/202512140nyg.htm
+2025,15,Carolina Panthers,New Orleans Saints,12/14/25,4:25PM,New Orleans,/boxscores/202512140nor.htm
+2025,15,Indianapolis Colts,Seattle Seahawks,12/14/25,4:25PM,Seattle,/boxscores/202512140sea.htm
+2025,15,Detroit Lions,Los Angeles Rams,12/14/25,4:25PM,Los Angeles,/boxscores/202512140ram.htm
+2025,15,Green Bay Packers,Denver Broncos,12/14/25,4:25PM,Denver,/boxscores/202512140den.htm
+2025,15,Tennessee Titans,San Francisco 49ers,12/14/25,4:25PM,San Francisco,/boxscores/202512140sfo.htm
+2025,15,Minnesota Vikings,Dallas Cowboys,12/14/25,8:20PM,Dallas,/boxscores/202512140dal.htm
+2025,15,Miami Dolphins,Pittsburgh Steelers,12/15/25,8:15PM,Pittsburgh,/boxscores/202512150pit.htm
+2025,16,Los Angeles Rams,Seattle Seahawks,12/18/25,8:15PM,Seattle,/boxscores/202512180sea.htm
+2025,16,Green Bay Packers,Chicago Bears,12/20/25,1:00PM,Chicago,/boxscores/202512200chi.htm
+2025,16,Philadelphia Eagles,Washington Commanders,12/20/25,1:00PM,Washington,/boxscores/202512200was.htm
+2025,16,Buffalo Bills,Cleveland Browns,12/21/25,1:00PM,Cleveland,/boxscores/202512210cle.htm
+2025,16,Kansas City Chiefs,Tennessee Titans,12/21/25,1:00PM,Tennessee,/boxscores/202512210oti.htm
+2025,16,Minnesota Vikings,New York Giants,12/21/25,1:00PM,New York,/boxscores/202512210nyg.htm
+2025,16,New England Patriots,Baltimore Ravens,12/21/25,1:00PM,Baltimore,/boxscores/202512210rav.htm
+2025,16,New York Jets,New Orleans Saints,12/21/25,1:00PM,New Orleans,/boxscores/202512210nor.htm
+2025,16,Los Angeles Chargers,Dallas Cowboys,12/21/25,1:00PM,Dallas,/boxscores/202512210dal.htm
+2025,16,Tampa Bay Buccaneers,Carolina Panthers,12/21/25,1:00PM,Carolina,/boxscores/202512210car.htm
+2025,16,Atlanta Falcons,Arizona Cardinals,12/21/25,4:05PM,Arizona,/boxscores/202512210crd.htm
+2025,16,Jacksonville Jaguars,Denver Broncos,12/21/25,4:05PM,Denver,/boxscores/202512210den.htm
+2025,16,Pittsburgh Steelers,Detroit Lions,12/21/25,4:25PM,Detroit,/boxscores/202512210det.htm
+2025,16,Las Vegas Raiders,Houston Texans,12/21/25,4:25PM,Houston,/boxscores/202512210htx.htm
+2025,16,Cincinnati Bengals,Miami Dolphins,12/21/25,8:20PM,Miami,/boxscores/202512210mia.htm
+2025,16,San Francisco 49ers,Indianapolis Colts,12/22/25,8:15PM,Indianapolis,/boxscores/202512220clt.htm
+2025,17,Dallas Cowboys,Washington Commanders,12/25/25,1:00PM,Washington,/boxscores/202512250was.htm
+2025,17,Detroit Lions,Minnesota Vikings,12/25/25,4:30PM,Minnesota,/boxscores/202512250min.htm
+2025,17,Denver Broncos,Kansas City Chiefs,12/25/25,8:15PM,Kansas City,/boxscores/202512250kan.htm
+2025,17,Arizona Cardinals,Cincinnati Bengals,12/28/25,1:00PM,Cincinnati,/boxscores/202512280cin.htm
+2025,17,Houston Texans,Los Angeles Chargers,12/28/25,1:00PM,Los Angeles,/boxscores/202512280sdg.htm
+2025,17,Jacksonville Jaguars,Indianapolis Colts,12/28/25,1:00PM,Indianapolis,/boxscores/202512280clt.htm
+2025,17,New Orleans Saints,Tennessee Titans,12/28/25,1:00PM,Tennessee,/boxscores/202512280oti.htm
+2025,17,New England Patriots,New York Jets,12/28/25,1:00PM,New York,/boxscores/202512280nyj.htm
+2025,17,New York Giants,Las Vegas Raiders,12/28/25,1:00PM,Las Vegas,/boxscores/202512280rai.htm
+2025,17,Pittsburgh Steelers,Cleveland Browns,12/28/25,1:00PM,Cleveland,/boxscores/202512280cle.htm
+2025,17,Baltimore Ravens,Green Bay Packers,12/28/25,1:00PM,Green Bay,/boxscores/202512280gnb.htm
+2025,17,Seattle Seahawks,Carolina Panthers,12/28/25,1:00PM,Carolina,/boxscores/202512280car.htm
+2025,17,Tampa Bay Buccaneers,Miami Dolphins,12/28/25,1:00PM,Miami,/boxscores/202512280mia.htm
+2025,17,Philadelphia Eagles,Buffalo Bills,12/28/25,4:25PM,Buffalo,/boxscores/202512280buf.htm
+2025,17,Chicago Bears,San Francisco 49ers,12/28/25,8:20PM,San Francisco,/boxscores/202512280sfo.htm
+2025,17,Los Angeles Rams,Atlanta Falcons,12/29/25,8:15PM,Atlanta,/boxscores/202512290atl.htm
+2025,18,Carolina Panthers,Tampa Bay Buccaneers,1/4/26,1:00PM,Tampa Bay,/boxscores/202601040tam.htm
+2025,18,Cleveland Browns,Cincinnati Bengals,1/4/26,1:00PM,Cincinnati,/boxscores/202601040cin.htm
+2025,18,Indianapolis Colts,Houston Texans,1/4/26,1:00PM,Houston,/boxscores/202601040htx.htm
+2025,18,Arizona Cardinals,Los Angeles Rams,1/4/26,1:00PM,Los Angeles,/boxscores/202601040ram.htm
+2025,18,Dallas Cowboys,New York Giants,1/4/26,1:00PM,New York,/boxscores/202601040nyg.htm
+2025,18,Detroit Lions,Chicago Bears,1/4/26,1:00PM,Chicago,/boxscores/202601040chi.htm
+2025,18,Green Bay Packers,Minnesota Vikings,1/4/26,1:00PM,Minnesota,/boxscores/202601040min.htm
+2025,18,Kansas City Chiefs,Las Vegas Raiders,1/4/26,1:00PM,Las Vegas,/boxscores/202601040rai.htm
+2025,18,Miami Dolphins,New England Patriots,1/4/26,1:00PM,New England,/boxscores/202601040nwe.htm
+2025,18,New Orleans Saints,Atlanta Falcons,1/4/26,1:00PM,Atlanta,/boxscores/202601040atl.htm
+2025,18,New York Jets,Buffalo Bills,1/4/26,1:00PM,Buffalo,/boxscores/202601040buf.htm
+2025,18,Tennessee Titans,Jacksonville Jaguars,1/4/26,1:00PM,Jacksonville,/boxscores/202601040jax.htm
+2025,18,Baltimore Ravens,Pittsburgh Steelers,1/4/26,1:00PM,Pittsburgh,/boxscores/202601040pit.htm
+2025,18,Los Angeles Chargers,Denver Broncos,1/4/26,1:00PM,Denver,/boxscores/202601040den.htm
+2025,18,Seattle Seahawks,San Francisco 49ers,1/4/26,1:00PM,San Francisco,/boxscores/202601040sfo.htm
+2025,18,Washington Commanders,Philadelphia Eagles,1/4/26,1:00PM,Philadelphia,/boxscores/202601040phi.htm
+2025,5,Chicago Bears,BYE,,,,
+2025,5,Green Bay Packers,BYE,,,,
+2025,5,Atlanta Falcons,BYE,,,,
+2025,5,Pittsburgh Steelers,BYE,,,,
+2025,6,Houston Texans,BYE,,,,
+2025,6,Minnesota Vikings,BYE,,,,
+2025,7,Buffalo Bills,BYE,,,,
+2025,7,Baltimore Ravens,BYE,,,,
+2025,8,Detroit Lions,BYE,,,,
+2025,8,Seattle Seahawks,BYE,,,,
+2025,8,Los Angeles Rams,BYE,,,,
+2025,8,Arizona Cardinals,BYE,,,,
+2025,8,Jacksonville Jaguars,BYE,,,,
+2025,8,Las Vegas Raiders,BYE,,,,
+2025,9,Tampa Bay Buccaneers,BYE,,,,
+2025,9,Philadelphia Eagles,BYE,,,,
+2025,9,New York Jets,BYE,,,,
+2025,9,Cleveland Browns,BYE,,,,
+2025,10,Dallas Cowboys,BYE,,,,
+2025,10,Kansas City Chiefs,BYE,,,,
+2025,10,Cincinnati Bengals,BYE,,,,
+2025,10,Tennessee Titans,BYE,,,,
+2025,11,Indianapolis Colts,BYE,,,,
+2025,11,New Orleans Saints,BYE,,,,
+2025,12,Los Angeles Chargers,BYE,,,,
+2025,12,Denver Broncos,BYE,,,,
+2025,12,Washington Commanders,BYE,,,,
+2025,12,Miami Dolphins,BYE,,,,
+2025,14,New England Patriots,BYE,,,,
+2025,14,San Francisco 49ers,BYE,,,,
+2025,14,New York Giants,BYE,,,,
+2025,14,Carolina Panthers,BYE,,,,

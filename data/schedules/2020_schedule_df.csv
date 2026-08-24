@@ -1,0 +1,257 @@
+year,week,team_1,team_2,date,time,location,boxscore_url
+2020,1,Kansas City Chiefs,Houston Texans,2020-09-10,8:20PM,Kansas City,/boxscores/202009100kan.htm
+2020,1,Seattle Seahawks,Atlanta Falcons,2020-09-13,1:00PM,Atlanta,/boxscores/202009130atl.htm
+2020,1,Buffalo Bills,New York Jets,2020-09-13,1:00PM,Buffalo,/boxscores/202009130buf.htm
+2020,1,Las Vegas Raiders,Carolina Panthers,2020-09-13,1:00PM,Carolina,/boxscores/202009130car.htm
+2020,1,Chicago Bears,Detroit Lions,2020-09-13,1:00PM,Detroit,/boxscores/202009130det.htm
+2020,1,Baltimore Ravens,Cleveland Browns,2020-09-13,1:00PM,Baltimore,/boxscores/202009130rav.htm
+2020,1,Jacksonville Jaguars,Indianapolis Colts,2020-09-13,1:00PM,Jacksonville,/boxscores/202009130jax.htm
+2020,1,Green Bay Packers,Minnesota Vikings,2020-09-13,1:00PM,Minnesota,/boxscores/202009130min.htm
+2020,1,New England Patriots,Miami Dolphins,2020-09-13,1:00PM,New England,/boxscores/202009130nwe.htm
+2020,1,Washington Football Team,Philadelphia Eagles,2020-09-13,1:00PM,Washington Football,/boxscores/202009130was.htm
+2020,1,Los Angeles Chargers,Cincinnati Bengals,2020-09-13,4:05PM,Cincinnati,/boxscores/202009130cin.htm
+2020,1,Arizona Cardinals,San Francisco 49ers,2020-09-13,4:25PM,San Francisco,/boxscores/202009130sfo.htm
+2020,1,New Orleans Saints,Tampa Bay Buccaneers,2020-09-13,4:25PM,New Orleans,/boxscores/202009130nor.htm
+2020,1,Los Angeles Rams,Dallas Cowboys,2020-09-13,8:20PM,Los Angeles,/boxscores/202009130ram.htm
+2020,1,Pittsburgh Steelers,New York Giants,2020-09-14,7:15PM,New York,/boxscores/202009140nyg.htm
+2020,1,Tennessee Titans,Denver Broncos,2020-09-14,10:10PM,Denver,/boxscores/202009140den.htm
+2020,2,Cleveland Browns,Cincinnati Bengals,2020-09-17,8:20PM,Cleveland,/boxscores/202009170cle.htm
+2020,2,Dallas Cowboys,Atlanta Falcons,2020-09-20,1:00PM,Dallas,/boxscores/202009200dal.htm
+2020,2,Buffalo Bills,Miami Dolphins,2020-09-20,1:00PM,Miami,/boxscores/202009200mia.htm
+2020,2,Tampa Bay Buccaneers,Carolina Panthers,2020-09-20,1:00PM,Tampa Bay,/boxscores/202009200tam.htm
+2020,2,Chicago Bears,New York Giants,2020-09-20,1:00PM,Chicago,/boxscores/202009200chi.htm
+2020,2,Indianapolis Colts,Minnesota Vikings,2020-09-20,1:00PM,Indianapolis,/boxscores/202009200clt.htm
+2020,2,Pittsburgh Steelers,Denver Broncos,2020-09-20,1:00PM,Pittsburgh,/boxscores/202009200pit.htm
+2020,2,Green Bay Packers,Detroit Lions,2020-09-20,1:00PM,Green Bay,/boxscores/202009200gnb.htm
+2020,2,Tennessee Titans,Jacksonville Jaguars,2020-09-20,1:00PM,Tennessee,/boxscores/202009200oti.htm
+2020,2,San Francisco 49ers,New York Jets,2020-09-20,1:00PM,New York,/boxscores/202009200nyj.htm
+2020,2,Los Angeles Rams,Philadelphia Eagles,2020-09-20,1:00PM,Philadelphia,/boxscores/202009200phi.htm
+2020,2,Arizona Cardinals,Washington Football Team,2020-09-20,4:05PM,Arizona,/boxscores/202009200crd.htm
+2020,2,Baltimore Ravens,Houston Texans,2020-09-20,4:25PM,Houston,/boxscores/202009200htx.htm
+2020,2,Kansas City Chiefs,Los Angeles Chargers,2020-09-20,4:25PM,Los Angeles,/boxscores/202009200sdg.htm
+2020,2,Seattle Seahawks,New England Patriots,2020-09-20,8:20PM,Seattle,/boxscores/202009200sea.htm
+2020,2,Las Vegas Raiders,New Orleans Saints,2020-09-21,8:15PM,Las Vegas,/boxscores/202009210rai.htm
+2020,3,Miami Dolphins,Jacksonville Jaguars,2020-09-24,8:20PM,Jacksonville,/boxscores/202009240jax.htm
+2020,3,Chicago Bears,Atlanta Falcons,2020-09-27,1:00PM,Atlanta,/boxscores/202009270atl.htm
+2020,3,Buffalo Bills,Los Angeles Rams,2020-09-27,1:00PM,Buffalo,/boxscores/202009270buf.htm
+2020,3,Philadelphia Eagles,Cincinnati Bengals,2020-09-27,1:00PM,Philadelphia,/boxscores/202009270phi.htm
+2020,3,Cleveland Browns,Washington Football Team,2020-09-27,1:00PM,Cleveland,/boxscores/202009270cle.htm
+2020,3,Pittsburgh Steelers,Houston Texans,2020-09-27,1:00PM,Pittsburgh,/boxscores/202009270pit.htm
+2020,3,Tennessee Titans,Minnesota Vikings,2020-09-27,1:00PM,Minnesota,/boxscores/202009270min.htm
+2020,3,New England Patriots,Las Vegas Raiders,2020-09-27,1:00PM,New England,/boxscores/202009270nwe.htm
+2020,3,San Francisco 49ers,New York Giants,2020-09-27,1:00PM,New York,/boxscores/202009270nyg.htm
+2020,3,Carolina Panthers,Los Angeles Chargers,2020-09-27,4:05PM,Los Angeles,/boxscores/202009270sdg.htm
+2020,3,Indianapolis Colts,New York Jets,2020-09-27,4:05PM,Indianapolis,/boxscores/202009270clt.htm
+2020,3,Detroit Lions,Arizona Cardinals,2020-09-27,4:25PM,Arizona,/boxscores/202009270crd.htm
+2020,3,Seattle Seahawks,Dallas Cowboys,2020-09-27,4:25PM,Seattle,/boxscores/202009270sea.htm
+2020,3,Tampa Bay Buccaneers,Denver Broncos,2020-09-27,4:25PM,Denver,/boxscores/202009270den.htm
+2020,3,Green Bay Packers,New Orleans Saints,2020-09-27,8:20PM,New Orleans,/boxscores/202009270nor.htm
+2020,3,Kansas City Chiefs,Baltimore Ravens,2020-09-28,8:15PM,Baltimore,/boxscores/202009280rav.htm
+2020,4,Denver Broncos,New York Jets,2020-10-01,8:20PM,New York,/boxscores/202010010nyj.htm
+2020,4,Carolina Panthers,Arizona Cardinals,2020-10-04,1:00PM,Carolina,/boxscores/202010040car.htm
+2020,4,Indianapolis Colts,Chicago Bears,2020-10-04,1:00PM,Chicago,/boxscores/202010040chi.htm
+2020,4,Cincinnati Bengals,Jacksonville Jaguars,2020-10-04,1:00PM,Cincinnati,/boxscores/202010040cin.htm
+2020,4,Cleveland Browns,Dallas Cowboys,2020-10-04,1:00PM,Dallas,/boxscores/202010040dal.htm
+2020,4,New Orleans Saints,Detroit Lions,2020-10-04,1:00PM,Detroit,/boxscores/202010040det.htm
+2020,4,Minnesota Vikings,Houston Texans,2020-10-04,1:00PM,Houston,/boxscores/202010040htx.htm
+2020,4,Seattle Seahawks,Miami Dolphins,2020-10-04,1:00PM,Miami,/boxscores/202010040mia.htm
+2020,4,Baltimore Ravens,Washington Football Team,2020-10-04,1:00PM,Washington Football,/boxscores/202010040was.htm
+2020,4,Tampa Bay Buccaneers,Los Angeles Chargers,2020-10-04,1:00PM,Tampa Bay,/boxscores/202010040tam.htm
+2020,4,Los Angeles Rams,New York Giants,2020-10-04,4:05PM,Los Angeles,/boxscores/202010040ram.htm
+2020,4,Buffalo Bills,Las Vegas Raiders,2020-10-04,4:25PM,Las Vegas,/boxscores/202010040rai.htm
+2020,4,Philadelphia Eagles,San Francisco 49ers,2020-10-04,8:20PM,San Francisco,/boxscores/202010040sfo.htm
+2020,4,Kansas City Chiefs,New England Patriots,2020-10-05,7:05PM,Kansas City,/boxscores/202010050kan.htm
+2020,4,Green Bay Packers,Atlanta Falcons,2020-10-05,8:15PM,Green Bay,/boxscores/202010050gnb.htm
+2020,5,Chicago Bears,Tampa Bay Buccaneers,2020-10-08,8:20PM,Chicago,/boxscores/202010080chi.htm
+2020,5,Carolina Panthers,Atlanta Falcons,2020-10-11,1:00PM,Atlanta,/boxscores/202010110atl.htm
+2020,5,Baltimore Ravens,Cincinnati Bengals,2020-10-11,1:00PM,Baltimore,/boxscores/202010110rav.htm
+2020,5,Arizona Cardinals,New York Jets,2020-10-11,1:00PM,New York,/boxscores/202010110nyj.htm
+2020,5,Houston Texans,Jacksonville Jaguars,2020-10-11,1:00PM,Houston,/boxscores/202010110htx.htm
+2020,5,Las Vegas Raiders,Kansas City Chiefs,2020-10-11,1:00PM,Kansas City,/boxscores/202010110kan.htm
+2020,5,Pittsburgh Steelers,Philadelphia Eagles,2020-10-11,1:00PM,Pittsburgh,/boxscores/202010110pit.htm
+2020,5,Los Angeles Rams,Washington Football Team,2020-10-11,1:00PM,Washington Football,/boxscores/202010110was.htm
+2020,5,Miami Dolphins,San Francisco 49ers,2020-10-11,4:05PM,San Francisco,/boxscores/202010110sfo.htm
+2020,5,Cleveland Browns,Indianapolis Colts,2020-10-11,4:25PM,Cleveland,/boxscores/202010110cle.htm
+2020,5,Dallas Cowboys,New York Giants,2020-10-11,4:25PM,Dallas,/boxscores/202010110dal.htm
+2020,5,Seattle Seahawks,Minnesota Vikings,2020-10-11,8:20PM,Seattle,/boxscores/202010110sea.htm
+2020,5,New Orleans Saints,Los Angeles Chargers,2020-10-12,8:15PM,New Orleans,/boxscores/202010120nor.htm
+2020,5,Tennessee Titans,Buffalo Bills,2020-10-13,7:00PM,Tennessee,/boxscores/202010130oti.htm
+2020,6,Denver Broncos,New England Patriots,2020-10-18,1:00PM,New England,/boxscores/202010180nwe.htm
+2020,6,Detroit Lions,Jacksonville Jaguars,2020-10-18,1:00PM,Jacksonville,/boxscores/202010180jax.htm
+2020,6,Atlanta Falcons,Minnesota Vikings,2020-10-18,1:00PM,Minnesota,/boxscores/202010180min.htm
+2020,6,Chicago Bears,Carolina Panthers,2020-10-18,1:00PM,Carolina,/boxscores/202010180car.htm
+2020,6,Indianapolis Colts,Cincinnati Bengals,2020-10-18,1:00PM,Indianapolis,/boxscores/202010180clt.htm
+2020,6,Pittsburgh Steelers,Cleveland Browns,2020-10-18,1:00PM,Pittsburgh,/boxscores/202010180pit.htm
+2020,6,Tennessee Titans,Houston Texans,2020-10-18,1:00PM,Tennessee,/boxscores/202010180oti.htm
+2020,6,New York Giants,Washington Football Team,2020-10-18,1:00PM,New York,/boxscores/202010180nyg.htm
+2020,6,Baltimore Ravens,Philadelphia Eagles,2020-10-18,1:00PM,Philadelphia,/boxscores/202010180phi.htm
+2020,6,Miami Dolphins,New York Jets,2020-10-18,4:05PM,Miami,/boxscores/202010180mia.htm
+2020,6,Tampa Bay Buccaneers,Green Bay Packers,2020-10-18,4:25PM,Tampa Bay,/boxscores/202010180tam.htm
+2020,6,San Francisco 49ers,Los Angeles Rams,2020-10-18,8:20PM,San Francisco,/boxscores/202010180sfo.htm
+2020,6,Kansas City Chiefs,Buffalo Bills,2020-10-19,5:00PM,Buffalo,/boxscores/202010190buf.htm
+2020,6,Arizona Cardinals,Dallas Cowboys,2020-10-19,8:15PM,Dallas,/boxscores/202010190dal.htm
+2020,7,Philadelphia Eagles,New York Giants,2020-10-22,8:20PM,Philadelphia,/boxscores/202010220phi.htm
+2020,7,Green Bay Packers,Houston Texans,2020-10-25,1:00PM,Houston,/boxscores/202010250htx.htm
+2020,7,Pittsburgh Steelers,Tennessee Titans,2020-10-25,1:00PM,Tennessee,/boxscores/202010250oti.htm
+2020,7,Detroit Lions,Atlanta Falcons,2020-10-25,1:00PM,Atlanta,/boxscores/202010250atl.htm
+2020,7,Buffalo Bills,New York Jets,2020-10-25,1:00PM,New York,/boxscores/202010250nyj.htm
+2020,7,New Orleans Saints,Carolina Panthers,2020-10-25,1:00PM,New Orleans,/boxscores/202010250nor.htm
+2020,7,Cleveland Browns,Cincinnati Bengals,2020-10-25,1:00PM,Cincinnati,/boxscores/202010250cin.htm
+2020,7,Washington Football Team,Dallas Cowboys,2020-10-25,1:00PM,Washington Football,/boxscores/202010250was.htm
+2020,7,Tampa Bay Buccaneers,Las Vegas Raiders,2020-10-25,4:05PM,Las Vegas,/boxscores/202010250rai.htm
+2020,7,Kansas City Chiefs,Denver Broncos,2020-10-25,4:25PM,Denver,/boxscores/202010250den.htm
+2020,7,San Francisco 49ers,New England Patriots,2020-10-25,4:25PM,New England,/boxscores/202010250nwe.htm
+2020,7,Los Angeles Chargers,Jacksonville Jaguars,2020-10-25,4:25PM,Los Angeles,/boxscores/202010250sdg.htm
+2020,7,Arizona Cardinals,Seattle Seahawks,2020-10-25,8:20PM,Arizona,/boxscores/202010250crd.htm
+2020,7,Los Angeles Rams,Chicago Bears,2020-10-26,8:15PM,Los Angeles,/boxscores/202010260ram.htm
+2020,8,Atlanta Falcons,Carolina Panthers,2020-10-29,8:20PM,Carolina,/boxscores/202010290car.htm
+2020,8,Indianapolis Colts,Detroit Lions,2020-11-01,1:00PM,Detroit,/boxscores/202011010det.htm
+2020,8,Minnesota Vikings,Green Bay Packers,2020-11-01,1:00PM,Green Bay,/boxscores/202011010gnb.htm
+2020,8,Miami Dolphins,Los Angeles Rams,2020-11-01,1:00PM,Miami,/boxscores/202011010mia.htm
+2020,8,Pittsburgh Steelers,Baltimore Ravens,2020-11-01,1:00PM,Baltimore,/boxscores/202011010rav.htm
+2020,8,Buffalo Bills,New England Patriots,2020-11-01,1:00PM,Buffalo,/boxscores/202011010buf.htm
+2020,8,Cincinnati Bengals,Tennessee Titans,2020-11-01,1:00PM,Cincinnati,/boxscores/202011010cin.htm
+2020,8,Las Vegas Raiders,Cleveland Browns,2020-11-01,1:00PM,Cleveland,/boxscores/202011010cle.htm
+2020,8,Kansas City Chiefs,New York Jets,2020-11-01,1:00PM,Kansas City,/boxscores/202011010kan.htm
+2020,8,Denver Broncos,Los Angeles Chargers,2020-11-01,4:05PM,Denver,/boxscores/202011010den.htm
+2020,8,Seattle Seahawks,San Francisco 49ers,2020-11-01,4:25PM,Seattle,/boxscores/202011010sea.htm
+2020,8,New Orleans Saints,Chicago Bears,2020-11-01,4:25PM,Chicago,/boxscores/202011010chi.htm
+2020,8,Philadelphia Eagles,Dallas Cowboys,2020-11-01,8:20PM,Philadelphia,/boxscores/202011010phi.htm
+2020,8,Tampa Bay Buccaneers,New York Giants,2020-11-02,8:15PM,New York,/boxscores/202011020nyg.htm
+2020,9,Green Bay Packers,San Francisco 49ers,2020-11-05,8:20PM,San Francisco,/boxscores/202011050sfo.htm
+2020,9,Baltimore Ravens,Indianapolis Colts,2020-11-08,1:00PM,Indianapolis,/boxscores/202011080clt.htm
+2020,9,Minnesota Vikings,Detroit Lions,2020-11-08,1:00PM,Minnesota,/boxscores/202011080min.htm
+2020,9,Houston Texans,Jacksonville Jaguars,2020-11-08,1:00PM,Jacksonville,/boxscores/202011080jax.htm
+2020,9,Atlanta Falcons,Denver Broncos,2020-11-08,1:00PM,Atlanta,/boxscores/202011080atl.htm
+2020,9,Buffalo Bills,Seattle Seahawks,2020-11-08,1:00PM,Buffalo,/boxscores/202011080buf.htm
+2020,9,Kansas City Chiefs,Carolina Panthers,2020-11-08,1:00PM,Kansas City,/boxscores/202011080kan.htm
+2020,9,Tennessee Titans,Chicago Bears,2020-11-08,1:00PM,Tennessee,/boxscores/202011080oti.htm
+2020,9,New York Giants,Washington Football Team,2020-11-08,1:00PM,Washington Football,/boxscores/202011080was.htm
+2020,9,Las Vegas Raiders,Los Angeles Chargers,2020-11-08,4:05PM,Los Angeles,/boxscores/202011080sdg.htm
+2020,9,Miami Dolphins,Arizona Cardinals,2020-11-08,4:25PM,Arizona,/boxscores/202011080crd.htm
+2020,9,Pittsburgh Steelers,Dallas Cowboys,2020-11-08,4:25PM,Dallas,/boxscores/202011080dal.htm
+2020,9,New Orleans Saints,Tampa Bay Buccaneers,2020-11-08,8:20PM,Tampa Bay,/boxscores/202011080tam.htm
+2020,9,New England Patriots,New York Jets,2020-11-09,8:15PM,New York,/boxscores/202011090nyj.htm
+2020,10,Indianapolis Colts,Tennessee Titans,2020-11-12,8:20PM,Tennessee,/boxscores/202011120oti.htm
+2020,10,Cleveland Browns,Houston Texans,2020-11-15,1:00PM,Cleveland,/boxscores/202011150cle.htm
+2020,10,Detroit Lions,Washington Football Team,2020-11-15,1:00PM,Detroit,/boxscores/202011150det.htm
+2020,10,Green Bay Packers,Jacksonville Jaguars,2020-11-15,1:00PM,Green Bay,/boxscores/202011150gnb.htm
+2020,10,Tampa Bay Buccaneers,Carolina Panthers,2020-11-15,1:00PM,Carolina,/boxscores/202011150car.htm
+2020,10,New York Giants,Philadelphia Eagles,2020-11-15,1:00PM,New York,/boxscores/202011150nyg.htm
+2020,10,Las Vegas Raiders,Denver Broncos,2020-11-15,4:05PM,Las Vegas,/boxscores/202011150rai.htm
+2020,10,Miami Dolphins,Los Angeles Chargers,2020-11-15,4:05PM,Miami,/boxscores/202011150mia.htm
+2020,10,Arizona Cardinals,Buffalo Bills,2020-11-15,4:05PM,Arizona,/boxscores/202011150crd.htm
+2020,10,Pittsburgh Steelers,Cincinnati Bengals,2020-11-15,4:25PM,Pittsburgh,/boxscores/202011150pit.htm
+2020,10,New Orleans Saints,San Francisco 49ers,2020-11-15,4:25PM,New Orleans,/boxscores/202011150nor.htm
+2020,10,Los Angeles Rams,Seattle Seahawks,2020-11-15,4:25PM,Los Angeles,/boxscores/202011150ram.htm
+2020,10,New England Patriots,Baltimore Ravens,2020-11-15,8:20PM,New England,/boxscores/202011150nwe.htm
+2020,10,Minnesota Vikings,Chicago Bears,2020-11-16,8:15PM,Chicago,/boxscores/202011160chi.htm
+2020,11,Seattle Seahawks,Arizona Cardinals,2020-11-19,8:20PM,Seattle,/boxscores/202011190sea.htm
+2020,11,New Orleans Saints,Atlanta Falcons,2020-11-22,1:00PM,New Orleans,/boxscores/202011220nor.htm
+2020,11,Washington Football Team,Cincinnati Bengals,2020-11-22,1:00PM,Washington Football,/boxscores/202011220was.htm
+2020,11,Cleveland Browns,Philadelphia Eagles,2020-11-22,1:00PM,Cleveland,/boxscores/202011220cle.htm
+2020,11,Houston Texans,New England Patriots,2020-11-22,1:00PM,Houston,/boxscores/202011220htx.htm
+2020,11,Pittsburgh Steelers,Jacksonville Jaguars,2020-11-22,1:00PM,Jacksonville,/boxscores/202011220jax.htm
+2020,11,Tennessee Titans,Baltimore Ravens,2020-11-22,1:00PM,Baltimore,/boxscores/202011220rav.htm
+2020,11,Carolina Panthers,Detroit Lions,2020-11-22,1:00PM,Carolina,/boxscores/202011220car.htm
+2020,11,Denver Broncos,Miami Dolphins,2020-11-22,4:05PM,Denver,/boxscores/202011220den.htm
+2020,11,Los Angeles Chargers,New York Jets,2020-11-22,4:05PM,Los Angeles,/boxscores/202011220sdg.htm
+2020,11,Indianapolis Colts,Green Bay Packers,2020-11-22,4:25PM,Indianapolis,/boxscores/202011220clt.htm
+2020,11,Dallas Cowboys,Minnesota Vikings,2020-11-22,4:25PM,Minnesota,/boxscores/202011220min.htm
+2020,11,Kansas City Chiefs,Las Vegas Raiders,2020-11-22,8:20PM,Las Vegas,/boxscores/202011220rai.htm
+2020,11,Los Angeles Rams,Tampa Bay Buccaneers,2020-11-23,8:15PM,Tampa Bay,/boxscores/202011230tam.htm
+2020,12,Houston Texans,Detroit Lions,2020-11-26,12:30PM,Detroit,/boxscores/202011260det.htm
+2020,12,Washington Football Team,Dallas Cowboys,2020-11-26,4:30PM,Dallas,/boxscores/202011260dal.htm
+2020,12,Atlanta Falcons,Las Vegas Raiders,2020-11-29,1:00PM,Atlanta,/boxscores/202011290atl.htm
+2020,12,Buffalo Bills,Los Angeles Chargers,2020-11-29,1:00PM,Buffalo,/boxscores/202011290buf.htm
+2020,12,New York Giants,Cincinnati Bengals,2020-11-29,1:00PM,Cincinnati,/boxscores/202011290cin.htm
+2020,12,Cleveland Browns,Jacksonville Jaguars,2020-11-29,1:00PM,Jacksonville,/boxscores/202011290jax.htm
+2020,12,Tennessee Titans,Indianapolis Colts,2020-11-29,1:00PM,Indianapolis,/boxscores/202011290clt.htm
+2020,12,New England Patriots,Arizona Cardinals,2020-11-29,1:00PM,New England,/boxscores/202011290nwe.htm
+2020,12,Miami Dolphins,New York Jets,2020-11-29,1:00PM,New York,/boxscores/202011290nyj.htm
+2020,12,Minnesota Vikings,Carolina Panthers,2020-11-29,1:00PM,Minnesota,/boxscores/202011290min.htm
+2020,12,New Orleans Saints,Denver Broncos,2020-11-29,4:05PM,Denver,/boxscores/202011290den.htm
+2020,12,San Francisco 49ers,Los Angeles Rams,2020-11-29,4:05PM,Los Angeles,/boxscores/202011290ram.htm
+2020,12,Kansas City Chiefs,Tampa Bay Buccaneers,2020-11-29,4:25PM,Tampa Bay,/boxscores/202011290tam.htm
+2020,12,Green Bay Packers,Chicago Bears,2020-11-29,8:20PM,Green Bay,/boxscores/202011290gnb.htm
+2020,12,Seattle Seahawks,Philadelphia Eagles,2020-11-30,8:15PM,Philadelphia,/boxscores/202011300phi.htm
+2020,12,Pittsburgh Steelers,Baltimore Ravens,2020-12-02,3:40PM,Pittsburgh,/boxscores/202012020pit.htm
+2020,13,New Orleans Saints,Atlanta Falcons,2020-12-06,1:00PM,Atlanta,/boxscores/202012060atl.htm
+2020,13,Detroit Lions,Chicago Bears,2020-12-06,1:00PM,Chicago,/boxscores/202012060chi.htm
+2020,13,Miami Dolphins,Cincinnati Bengals,2020-12-06,1:00PM,Miami,/boxscores/202012060mia.htm
+2020,13,Cleveland Browns,Tennessee Titans,2020-12-06,1:00PM,Tennessee,/boxscores/202012060oti.htm
+2020,13,Indianapolis Colts,Houston Texans,2020-12-06,1:00PM,Houston,/boxscores/202012060htx.htm
+2020,13,Minnesota Vikings,Jacksonville Jaguars,2020-12-06,1:00PM,Minnesota,/boxscores/202012060min.htm
+2020,13,Las Vegas Raiders,New York Jets,2020-12-06,1:00PM,New York,/boxscores/202012060nyj.htm
+2020,13,Los Angeles Rams,Arizona Cardinals,2020-12-06,4:05PM,Arizona,/boxscores/202012060crd.htm
+2020,13,New York Giants,Seattle Seahawks,2020-12-06,4:05PM,Seattle,/boxscores/202012060sea.htm
+2020,13,Green Bay Packers,Philadelphia Eagles,2020-12-06,4:25PM,Green Bay,/boxscores/202012060gnb.htm
+2020,13,New England Patriots,Los Angeles Chargers,2020-12-06,4:25PM,Los Angeles,/boxscores/202012060sdg.htm
+2020,13,Kansas City Chiefs,Denver Broncos,2020-12-06,8:20PM,Kansas City,/boxscores/202012060kan.htm
+2020,13,Washington Football Team,Pittsburgh Steelers,2020-12-07,5:00PM,Pittsburgh,/boxscores/202012070pit.htm
+2020,13,Buffalo Bills,San Francisco 49ers,2020-12-07,8:15PM,San Francisco,/boxscores/202012070sfo.htm
+2020,13,Baltimore Ravens,Dallas Cowboys,2020-12-08,8:05PM,Baltimore,/boxscores/202012080rav.htm
+2020,14,Los Angeles Rams,New England Patriots,2020-12-10,8:20PM,Los Angeles,/boxscores/202012100ram.htm
+2020,14,Denver Broncos,Carolina Panthers,2020-12-13,1:00PM,Carolina,/boxscores/202012130car.htm
+2020,14,Chicago Bears,Houston Texans,2020-12-13,1:00PM,Chicago,/boxscores/202012130chi.htm
+2020,14,Dallas Cowboys,Cincinnati Bengals,2020-12-13,1:00PM,Cincinnati,/boxscores/202012130cin.htm
+2020,14,Arizona Cardinals,New York Giants,2020-12-13,1:00PM,New York,/boxscores/202012130nyg.htm
+2020,14,Tennessee Titans,Jacksonville Jaguars,2020-12-13,1:00PM,Jacksonville,/boxscores/202012130jax.htm
+2020,14,Kansas City Chiefs,Miami Dolphins,2020-12-13,1:00PM,Miami,/boxscores/202012130mia.htm
+2020,14,Tampa Bay Buccaneers,Minnesota Vikings,2020-12-13,1:00PM,Tampa Bay,/boxscores/202012130tam.htm
+2020,14,Indianapolis Colts,Las Vegas Raiders,2020-12-13,4:05PM,Las Vegas,/boxscores/202012130rai.htm
+2020,14,Seattle Seahawks,New York Jets,2020-12-13,4:05PM,Seattle,/boxscores/202012130sea.htm
+2020,14,Los Angeles Chargers,Atlanta Falcons,2020-12-13,4:25PM,Los Angeles,/boxscores/202012130sdg.htm
+2020,14,Green Bay Packers,Detroit Lions,2020-12-13,4:25PM,Detroit,/boxscores/202012130det.htm
+2020,14,Philadelphia Eagles,New Orleans Saints,2020-12-13,4:25PM,Philadelphia,/boxscores/202012130phi.htm
+2020,14,Washington Football Team,San Francisco 49ers,2020-12-13,4:25PM,San Francisco,/boxscores/202012130sfo.htm
+2020,14,Buffalo Bills,Pittsburgh Steelers,2020-12-13,8:20PM,Buffalo,/boxscores/202012130buf.htm
+2020,14,Baltimore Ravens,Cleveland Browns,2020-12-14,8:15PM,Cleveland,/boxscores/202012140cle.htm
+2020,15,Los Angeles Chargers,Las Vegas Raiders,2020-12-17,8:20PM,Las Vegas,/boxscores/202012170rai.htm
+2020,15,Buffalo Bills,Denver Broncos,2020-12-19,4:30PM,Denver,/boxscores/202012190den.htm
+2020,15,Green Bay Packers,Carolina Panthers,2020-12-19,8:15PM,Green Bay,/boxscores/202012190gnb.htm
+2020,15,Tampa Bay Buccaneers,Atlanta Falcons,2020-12-20,1:00PM,Atlanta,/boxscores/202012200atl.htm
+2020,15,Chicago Bears,Minnesota Vikings,2020-12-20,1:00PM,Minnesota,/boxscores/202012200min.htm
+2020,15,Indianapolis Colts,Houston Texans,2020-12-20,1:00PM,Indianapolis,/boxscores/202012200clt.htm
+2020,15,Dallas Cowboys,San Francisco 49ers,2020-12-20,1:00PM,Dallas,/boxscores/202012200dal.htm
+2020,15,Tennessee Titans,Detroit Lions,2020-12-20,1:00PM,Tennessee,/boxscores/202012200oti.htm
+2020,15,Baltimore Ravens,Jacksonville Jaguars,2020-12-20,1:00PM,Baltimore,/boxscores/202012200rav.htm
+2020,15,Miami Dolphins,New England Patriots,2020-12-20,1:00PM,Miami,/boxscores/202012200mia.htm
+2020,15,Seattle Seahawks,Washington Football Team,2020-12-20,1:00PM,Washington Football,/boxscores/202012200was.htm
+2020,15,Arizona Cardinals,Philadelphia Eagles,2020-12-20,4:05PM,Arizona,/boxscores/202012200crd.htm
+2020,15,New York Jets,Los Angeles Rams,2020-12-20,4:05PM,Los Angeles,/boxscores/202012200ram.htm
+2020,15,Kansas City Chiefs,New Orleans Saints,2020-12-20,4:25PM,New Orleans,/boxscores/202012200nor.htm
+2020,15,Cleveland Browns,New York Giants,2020-12-20,8:20PM,New York,/boxscores/202012200nyg.htm
+2020,15,Cincinnati Bengals,Pittsburgh Steelers,2020-12-21,8:15PM,Cincinnati,/boxscores/202012210cin.htm
+2020,16,New Orleans Saints,Minnesota Vikings,2020-12-25,4:30PM,New Orleans,/boxscores/202012250nor.htm
+2020,16,Tampa Bay Buccaneers,Detroit Lions,2020-12-26,1:00PM,Detroit,/boxscores/202012260det.htm
+2020,16,San Francisco 49ers,Arizona Cardinals,2020-12-26,4:30PM,Arizona,/boxscores/202012260crd.htm
+2020,16,Miami Dolphins,Las Vegas Raiders,2020-12-26,8:15PM,Las Vegas,/boxscores/202012260rai.htm
+2020,16,Kansas City Chiefs,Atlanta Falcons,2020-12-27,1:00PM,Kansas City,/boxscores/202012270kan.htm
+2020,16,Chicago Bears,Jacksonville Jaguars,2020-12-27,1:00PM,Jacksonville,/boxscores/202012270jax.htm
+2020,16,Cincinnati Bengals,Houston Texans,2020-12-27,1:00PM,Houston,/boxscores/202012270htx.htm
+2020,16,New York Jets,Cleveland Browns,2020-12-27,1:00PM,New York,/boxscores/202012270nyj.htm
+2020,16,Pittsburgh Steelers,Indianapolis Colts,2020-12-27,1:00PM,Pittsburgh,/boxscores/202012270pit.htm
+2020,16,Baltimore Ravens,New York Giants,2020-12-27,1:00PM,Baltimore,/boxscores/202012270rav.htm
+2020,16,Carolina Panthers,Washington Football Team,2020-12-27,4:05PM,Washington Football,/boxscores/202012270was.htm
+2020,16,Los Angeles Chargers,Denver Broncos,2020-12-27,4:05PM,Los Angeles,/boxscores/202012270sdg.htm
+2020,16,Dallas Cowboys,Philadelphia Eagles,2020-12-27,4:25PM,Dallas,/boxscores/202012270dal.htm
+2020,16,Seattle Seahawks,Los Angeles Rams,2020-12-27,4:25PM,Seattle,/boxscores/202012270sea.htm
+2020,16,Green Bay Packers,Tennessee Titans,2020-12-27,8:20PM,Green Bay,/boxscores/202012270gnb.htm
+2020,16,Buffalo Bills,New England Patriots,2020-12-28,8:15PM,New England,/boxscores/202012280nwe.htm
+2020,17,Tampa Bay Buccaneers,Atlanta Falcons,2021-01-03,1:00PM,Tampa Bay,/boxscores/202101030tam.htm
+2020,17,Buffalo Bills,Miami Dolphins,2021-01-03,1:00PM,Buffalo,/boxscores/202101030buf.htm
+2020,17,Baltimore Ravens,Cincinnati Bengals,2021-01-03,1:00PM,Cincinnati,/boxscores/202101030cin.htm
+2020,17,Cleveland Browns,Pittsburgh Steelers,2021-01-03,1:00PM,Cleveland,/boxscores/202101030cle.htm
+2020,17,New York Giants,Dallas Cowboys,2021-01-03,1:00PM,New York,/boxscores/202101030nyg.htm
+2020,17,Minnesota Vikings,Detroit Lions,2021-01-03,1:00PM,Detroit,/boxscores/202101030det.htm
+2020,17,New England Patriots,New York Jets,2021-01-03,1:00PM,New England,/boxscores/202101030nwe.htm
+2020,17,New Orleans Saints,Carolina Panthers,2021-01-03,4:25PM,Carolina,/boxscores/202101030car.htm
+2020,17,Green Bay Packers,Chicago Bears,2021-01-03,4:25PM,Chicago,/boxscores/202101030chi.htm
+2020,17,Indianapolis Colts,Jacksonville Jaguars,2021-01-03,4:25PM,Indianapolis,/boxscores/202101030clt.htm
+2020,17,Los Angeles Rams,Arizona Cardinals,2021-01-03,4:25PM,Los Angeles,/boxscores/202101030ram.htm
+2020,17,Las Vegas Raiders,Denver Broncos,2021-01-03,4:25PM,Denver,/boxscores/202101030den.htm
+2020,17,Tennessee Titans,Houston Texans,2021-01-03,4:25PM,Houston,/boxscores/202101030htx.htm
+2020,17,Los Angeles Chargers,Kansas City Chiefs,2021-01-03,4:25PM,Kansas City,/boxscores/202101030kan.htm
+2020,17,Seattle Seahawks,San Francisco 49ers,2021-01-03,4:25PM,San Francisco,/boxscores/202101030sfo.htm
+2020,17,Washington Football Team,Philadelphia Eagles,2021-01-03,8:20PM,Philadelphia,/boxscores/202101030phi.htm

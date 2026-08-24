@@ -1,0 +1,273 @@
+year,week,team_1,team_2,date,time,location,boxscore_url
+2024,1,Kansas City Chiefs,Baltimore Ravens,2024-09-05,8:20PM,Kansas City,/boxscores/202409050kan.htm
+2024,1,Philadelphia Eagles,Green Bay Packers,2024-09-06,8:15PM,Philadelphia,/boxscores/202409060phi.htm
+2024,1,Pittsburgh Steelers,Atlanta Falcons,2024-09-08,1:00PM,Atlanta,/boxscores/202409080atl.htm
+2024,1,Buffalo Bills,Arizona Cardinals,2024-09-08,1:00PM,Buffalo,/boxscores/202409080buf.htm
+2024,1,New Orleans Saints,Carolina Panthers,2024-09-08,1:00PM,New Orleans,/boxscores/202409080nor.htm
+2024,1,Chicago Bears,Tennessee Titans,2024-09-08,1:00PM,Chicago,/boxscores/202409080chi.htm
+2024,1,New England Patriots,Cincinnati Bengals,2024-09-08,1:00PM,Cincinnati,/boxscores/202409080cin.htm
+2024,1,Houston Texans,Indianapolis Colts,2024-09-08,1:00PM,Indianapolis,/boxscores/202409080clt.htm
+2024,1,Miami Dolphins,Jacksonville Jaguars,2024-09-08,1:00PM,Miami,/boxscores/202409080mia.htm
+2024,1,Minnesota Vikings,New York Giants,2024-09-08,1:00PM,New York,/boxscores/202409080nyg.htm
+2024,1,Seattle Seahawks,Denver Broncos,2024-09-08,4:05PM,Seattle,/boxscores/202409080sea.htm
+2024,1,Los Angeles Chargers,Las Vegas Raiders,2024-09-08,4:05PM,Los Angeles,/boxscores/202409080sdg.htm
+2024,1,Dallas Cowboys,Cleveland Browns,2024-09-08,4:25PM,Cleveland,/boxscores/202409080cle.htm
+2024,1,Tampa Bay Buccaneers,Washington Commanders,2024-09-08,4:25PM,Tampa Bay,/boxscores/202409080tam.htm
+2024,1,Detroit Lions,Los Angeles Rams,2024-09-08,8:20PM,Detroit,/boxscores/202409080det.htm
+2024,1,San Francisco 49ers,New York Jets,2024-09-09,8:15PM,San Francisco,/boxscores/202409090sfo.htm
+2024,2,Buffalo Bills,Miami Dolphins,2024-09-12,8:15PM,Miami,/boxscores/202409120mia.htm
+2024,2,Los Angeles Chargers,Carolina Panthers,2024-09-15,1:00PM,Carolina,/boxscores/202409150car.htm
+2024,2,Cleveland Browns,Jacksonville Jaguars,2024-09-15,1:00PM,Jacksonville,/boxscores/202409150jax.htm
+2024,2,Green Bay Packers,Indianapolis Colts,2024-09-15,1:00PM,Green Bay,/boxscores/202409150gnb.htm
+2024,2,New Orleans Saints,Dallas Cowboys,2024-09-15,1:00PM,Dallas,/boxscores/202409150dal.htm
+2024,2,Tampa Bay Buccaneers,Detroit Lions,2024-09-15,1:00PM,Detroit,/boxscores/202409150det.htm
+2024,2,Minnesota Vikings,San Francisco 49ers,2024-09-15,1:00PM,Minnesota,/boxscores/202409150min.htm
+2024,2,Seattle Seahawks,New England Patriots,2024-09-15,1:00PM,New England,/boxscores/202409150nwe.htm
+2024,2,Washington Commanders,New York Giants,2024-09-15,1:00PM,Washington,/boxscores/202409150was.htm
+2024,2,New York Jets,Tennessee Titans,2024-09-15,1:00PM,Tennessee,/boxscores/202409150oti.htm
+2024,2,Las Vegas Raiders,Baltimore Ravens,2024-09-15,1:00PM,Baltimore,/boxscores/202409150rav.htm
+2024,2,Arizona Cardinals,Los Angeles Rams,2024-09-15,4:05PM,Arizona,/boxscores/202409150crd.htm
+2024,2,Kansas City Chiefs,Cincinnati Bengals,2024-09-15,4:25PM,Kansas City,/boxscores/202409150kan.htm
+2024,2,Pittsburgh Steelers,Denver Broncos,2024-09-15,4:25PM,Denver,/boxscores/202409150den.htm
+2024,2,Houston Texans,Chicago Bears,2024-09-15,8:20PM,Houston,/boxscores/202409150htx.htm
+2024,2,Atlanta Falcons,Philadelphia Eagles,2024-09-16,8:15PM,Philadelphia,/boxscores/202409160phi.htm
+2024,3,New York Jets,New England Patriots,2024-09-19,8:15PM,New York,/boxscores/202409190nyj.htm
+2024,3,Indianapolis Colts,Chicago Bears,2024-09-22,1:00PM,Indianapolis,/boxscores/202409220clt.htm
+2024,3,New York Giants,Cleveland Browns,2024-09-22,1:00PM,Cleveland,/boxscores/202409220cle.htm
+2024,3,Denver Broncos,Tampa Bay Buccaneers,2024-09-22,1:00PM,Tampa Bay,/boxscores/202409220tam.htm
+2024,3,Green Bay Packers,Tennessee Titans,2024-09-22,1:00PM,Tennessee,/boxscores/202409220oti.htm
+2024,3,Minnesota Vikings,Houston Texans,2024-09-22,1:00PM,Minnesota,/boxscores/202409220min.htm
+2024,3,Philadelphia Eagles,New Orleans Saints,2024-09-22,1:00PM,New Orleans,/boxscores/202409220nor.htm
+2024,3,Pittsburgh Steelers,Los Angeles Chargers,2024-09-22,1:00PM,Pittsburgh,/boxscores/202409220pit.htm
+2024,3,Carolina Panthers,Las Vegas Raiders,2024-09-22,4:05PM,Las Vegas,/boxscores/202409220rai.htm
+2024,3,Seattle Seahawks,Miami Dolphins,2024-09-22,4:05PM,Seattle,/boxscores/202409220sea.htm
+2024,3,Detroit Lions,Arizona Cardinals,2024-09-22,4:25PM,Arizona,/boxscores/202409220crd.htm
+2024,3,Baltimore Ravens,Dallas Cowboys,2024-09-22,4:25PM,Dallas,/boxscores/202409220dal.htm
+2024,3,Los Angeles Rams,San Francisco 49ers,2024-09-22,4:25PM,Los Angeles,/boxscores/202409220ram.htm
+2024,3,Kansas City Chiefs,Atlanta Falcons,2024-09-22,8:20PM,Atlanta,/boxscores/202409220atl.htm
+2024,3,Buffalo Bills,Jacksonville Jaguars,2024-09-23,7:30PM,Buffalo,/boxscores/202409230buf.htm
+2024,3,Washington Commanders,Cincinnati Bengals,2024-09-23,8:15PM,Cincinnati,/boxscores/202409230cin.htm
+2024,4,Dallas Cowboys,New York Giants,2024-09-26,8:15PM,New York,/boxscores/202409260nyg.htm
+2024,4,Atlanta Falcons,New Orleans Saints,2024-09-29,1:00PM,Atlanta,/boxscores/202409290atl.htm
+2024,4,Cincinnati Bengals,Carolina Panthers,2024-09-29,1:00PM,Carolina,/boxscores/202409290car.htm
+2024,4,Chicago Bears,Los Angeles Rams,2024-09-29,1:00PM,Chicago,/boxscores/202409290chi.htm
+2024,4,Indianapolis Colts,Pittsburgh Steelers,2024-09-29,1:00PM,Indianapolis,/boxscores/202409290clt.htm
+2024,4,Denver Broncos,New York Jets,2024-09-29,1:00PM,New York,/boxscores/202409290nyj.htm
+2024,4,Minnesota Vikings,Green Bay Packers,2024-09-29,1:00PM,Green Bay,/boxscores/202409290gnb.htm
+2024,4,Houston Texans,Jacksonville Jaguars,2024-09-29,1:00PM,Houston,/boxscores/202409290htx.htm
+2024,4,Tampa Bay Buccaneers,Philadelphia Eagles,2024-09-29,1:00PM,Tampa Bay,/boxscores/202409290tam.htm
+2024,4,Washington Commanders,Arizona Cardinals,2024-09-29,4:05PM,Arizona,/boxscores/202409290crd.htm
+2024,4,San Francisco 49ers,New England Patriots,2024-09-29,4:05PM,San Francisco,/boxscores/202409290sfo.htm
+2024,4,Las Vegas Raiders,Cleveland Browns,2024-09-29,4:25PM,Las Vegas,/boxscores/202409290rai.htm
+2024,4,Kansas City Chiefs,Los Angeles Chargers,2024-09-29,4:25PM,Los Angeles,/boxscores/202409290sdg.htm
+2024,4,Baltimore Ravens,Buffalo Bills,2024-09-29,8:20PM,Baltimore,/boxscores/202409290rav.htm
+2024,4,Tennessee Titans,Miami Dolphins,2024-09-30,7:30PM,Miami,/boxscores/202409300mia.htm
+2024,4,Detroit Lions,Seattle Seahawks,2024-09-30,8:15PM,Detroit,/boxscores/202409300det.htm
+2024,5,Atlanta Falcons,Tampa Bay Buccaneers,2024-10-03,8:15PM,Atlanta,/boxscores/202410030atl.htm
+2024,5,Minnesota Vikings,New York Jets,2024-10-06,9:30AM,Minnesota,/boxscores/202410060min.htm
+2024,5,Houston Texans,Buffalo Bills,2024-10-06,1:00PM,Houston,/boxscores/202410060htx.htm
+2024,5,Chicago Bears,Carolina Panthers,2024-10-06,1:00PM,Chicago,/boxscores/202410060chi.htm
+2024,5,Baltimore Ravens,Cincinnati Bengals,2024-10-06,1:00PM,Cincinnati,/boxscores/202410060cin.htm
+2024,5,Washington Commanders,Cleveland Browns,2024-10-06,1:00PM,Washington,/boxscores/202410060was.htm
+2024,5,Jacksonville Jaguars,Indianapolis Colts,2024-10-06,1:00PM,Jacksonville,/boxscores/202410060jax.htm
+2024,5,Miami Dolphins,New England Patriots,2024-10-06,1:00PM,New England,/boxscores/202410060nwe.htm
+2024,5,Arizona Cardinals,San Francisco 49ers,2024-10-06,4:05PM,San Francisco,/boxscores/202410060sfo.htm
+2024,5,Denver Broncos,Las Vegas Raiders,2024-10-06,4:05PM,Denver,/boxscores/202410060den.htm
+2024,5,Green Bay Packers,Los Angeles Rams,2024-10-06,4:25PM,Los Angeles,/boxscores/202410060ram.htm
+2024,5,New York Giants,Seattle Seahawks,2024-10-06,4:25PM,Seattle,/boxscores/202410060sea.htm
+2024,5,Dallas Cowboys,Pittsburgh Steelers,2024-10-06,8:20PM,Pittsburgh,/boxscores/202410060pit.htm
+2024,5,Kansas City Chiefs,New Orleans Saints,2024-10-07,8:15PM,Kansas City,/boxscores/202410070kan.htm
+2024,6,San Francisco 49ers,Seattle Seahawks,2024-10-10,8:15PM,Seattle,/boxscores/202410100sea.htm
+2024,6,Chicago Bears,Jacksonville Jaguars,2024-10-13,9:30AM,Chicago,/boxscores/202410130chi.htm
+2024,6,Philadelphia Eagles,Cleveland Browns,2024-10-13,1:00PM,Philadelphia,/boxscores/202410130phi.htm
+2024,6,Indianapolis Colts,Tennessee Titans,2024-10-13,1:00PM,Tennessee,/boxscores/202410130oti.htm
+2024,6,Green Bay Packers,Arizona Cardinals,2024-10-13,1:00PM,Green Bay,/boxscores/202410130gnb.htm
+2024,6,Houston Texans,New England Patriots,2024-10-13,1:00PM,New England,/boxscores/202410130nwe.htm
+2024,6,Tampa Bay Buccaneers,New Orleans Saints,2024-10-13,1:00PM,New Orleans,/boxscores/202410130nor.htm
+2024,6,Baltimore Ravens,Washington Commanders,2024-10-13,1:00PM,Baltimore,/boxscores/202410130rav.htm
+2024,6,Los Angeles Chargers,Denver Broncos,2024-10-13,4:05PM,Denver,/boxscores/202410130den.htm
+2024,6,Pittsburgh Steelers,Las Vegas Raiders,2024-10-13,4:05PM,Las Vegas,/boxscores/202410130rai.htm
+2024,6,Atlanta Falcons,Carolina Panthers,2024-10-13,4:25PM,Carolina,/boxscores/202410130car.htm
+2024,6,Detroit Lions,Dallas Cowboys,2024-10-13,4:25PM,Dallas,/boxscores/202410130dal.htm
+2024,6,Cincinnati Bengals,New York Giants,2024-10-13,8:20PM,New York,/boxscores/202410130nyg.htm
+2024,6,Buffalo Bills,New York Jets,2024-10-14,8:15PM,New York,/boxscores/202410140nyj.htm
+2024,7,Denver Broncos,New Orleans Saints,2024-10-17,8:15PM,New Orleans,/boxscores/202410170nor.htm
+2024,7,Jacksonville Jaguars,New England Patriots,2024-10-20,9:30AM,Jacksonville,/boxscores/202410200jax.htm
+2024,7,Detroit Lions,Minnesota Vikings,2024-10-20,1:00PM,Minnesota,/boxscores/202410200min.htm
+2024,7,Seattle Seahawks,Atlanta Falcons,2024-10-20,1:00PM,Atlanta,/boxscores/202410200atl.htm
+2024,7,Buffalo Bills,Tennessee Titans,2024-10-20,1:00PM,Buffalo,/boxscores/202410200buf.htm
+2024,7,Cincinnati Bengals,Cleveland Browns,2024-10-20,1:00PM,Cleveland,/boxscores/202410200cle.htm
+2024,7,Indianapolis Colts,Miami Dolphins,2024-10-20,1:00PM,Indianapolis,/boxscores/202410200clt.htm
+2024,7,Green Bay Packers,Houston Texans,2024-10-20,1:00PM,Green Bay,/boxscores/202410200gnb.htm
+2024,7,Philadelphia Eagles,New York Giants,2024-10-20,1:00PM,New York,/boxscores/202410200nyg.htm
+2024,7,Washington Commanders,Carolina Panthers,2024-10-20,4:05PM,Washington,/boxscores/202410200was.htm
+2024,7,Los Angeles Rams,Las Vegas Raiders,2024-10-20,4:05PM,Los Angeles,/boxscores/202410200ram.htm
+2024,7,Kansas City Chiefs,San Francisco 49ers,2024-10-20,4:25PM,San Francisco,/boxscores/202410200sfo.htm
+2024,7,Pittsburgh Steelers,New York Jets,2024-10-20,8:20PM,Pittsburgh,/boxscores/202410200pit.htm
+2024,7,Baltimore Ravens,Tampa Bay Buccaneers,2024-10-21,8:15PM,Tampa Bay,/boxscores/202410210tam.htm
+2024,7,Arizona Cardinals,Los Angeles Chargers,2024-10-21,9:00PM,Arizona,/boxscores/202410210crd.htm
+2024,8,Los Angeles Rams,Minnesota Vikings,2024-10-24,8:15PM,Los Angeles,/boxscores/202410240ram.htm
+2024,8,Detroit Lions,Tennessee Titans,2024-10-27,1:00PM,Detroit,/boxscores/202410270det.htm
+2024,8,Atlanta Falcons,Tampa Bay Buccaneers,2024-10-27,1:00PM,Tampa Bay,/boxscores/202410270tam.htm
+2024,8,Philadelphia Eagles,Cincinnati Bengals,2024-10-27,1:00PM,Cincinnati,/boxscores/202410270cin.htm
+2024,8,Cleveland Browns,Baltimore Ravens,2024-10-27,1:00PM,Cleveland,/boxscores/202410270cle.htm
+2024,8,Houston Texans,Indianapolis Colts,2024-10-27,1:00PM,Houston,/boxscores/202410270htx.htm
+2024,8,Arizona Cardinals,Miami Dolphins,2024-10-27,1:00PM,Miami,/boxscores/202410270mia.htm
+2024,8,Green Bay Packers,Jacksonville Jaguars,2024-10-27,1:00PM,Jacksonville,/boxscores/202410270jax.htm
+2024,8,New England Patriots,New York Jets,2024-10-27,1:00PM,New England,/boxscores/202410270nwe.htm
+2024,8,Buffalo Bills,Seattle Seahawks,2024-10-27,4:05PM,Seattle,/boxscores/202410270sea.htm
+2024,8,Los Angeles Chargers,New Orleans Saints,2024-10-27,4:05PM,Los Angeles,/boxscores/202410270sdg.htm
+2024,8,Washington Commanders,Chicago Bears,2024-10-27,4:25PM,Washington,/boxscores/202410270was.htm
+2024,8,Kansas City Chiefs,Las Vegas Raiders,2024-10-27,4:25PM,Las Vegas,/boxscores/202410270rai.htm
+2024,8,Denver Broncos,Carolina Panthers,2024-10-27,4:25PM,Denver,/boxscores/202410270den.htm
+2024,8,San Francisco 49ers,Dallas Cowboys,2024-10-27,8:20PM,San Francisco,/boxscores/202410270sfo.htm
+2024,8,Pittsburgh Steelers,New York Giants,2024-10-28,8:15PM,Pittsburgh,/boxscores/202410280pit.htm
+2024,9,New York Jets,Houston Texans,2024-10-31,8:15PM,New York,/boxscores/202410310nyj.htm
+2024,9,Atlanta Falcons,Dallas Cowboys,2024-11-03,1:00PM,Atlanta,/boxscores/202411030atl.htm
+2024,9,Buffalo Bills,Miami Dolphins,2024-11-03,1:00PM,Buffalo,/boxscores/202411030buf.htm
+2024,9,Carolina Panthers,New Orleans Saints,2024-11-03,1:00PM,Carolina,/boxscores/202411030car.htm
+2024,9,Cincinnati Bengals,Las Vegas Raiders,2024-11-03,1:00PM,Cincinnati,/boxscores/202411030cin.htm
+2024,9,Los Angeles Chargers,Cleveland Browns,2024-11-03,1:00PM,Cleveland,/boxscores/202411030cle.htm
+2024,9,Baltimore Ravens,Denver Broncos,2024-11-03,1:00PM,Baltimore,/boxscores/202411030rav.htm
+2024,9,Tennessee Titans,New England Patriots,2024-11-03,1:00PM,Tennessee,/boxscores/202411030oti.htm
+2024,9,Washington Commanders,New York Giants,2024-11-03,1:00PM,New York,/boxscores/202411030nyg.htm
+2024,9,Arizona Cardinals,Chicago Bears,2024-11-03,4:05PM,Arizona,/boxscores/202411030crd.htm
+2024,9,Philadelphia Eagles,Jacksonville Jaguars,2024-11-03,4:05PM,Philadelphia,/boxscores/202411030phi.htm
+2024,9,Detroit Lions,Green Bay Packers,2024-11-03,4:25PM,Green Bay,/boxscores/202411030gnb.htm
+2024,9,Los Angeles Rams,Seattle Seahawks,2024-11-03,4:25PM,Seattle,/boxscores/202411030sea.htm
+2024,9,Minnesota Vikings,Indianapolis Colts,2024-11-03,8:20PM,Minnesota,/boxscores/202411030min.htm
+2024,9,Kansas City Chiefs,Tampa Bay Buccaneers,2024-11-04,8:15PM,Kansas City,/boxscores/202411040kan.htm
+2024,10,Baltimore Ravens,Cincinnati Bengals,2024-11-07,8:15PM,Baltimore,/boxscores/202411070rav.htm
+2024,10,Carolina Panthers,New York Giants,2024-11-10,9:30AM,Carolina,/boxscores/202411100car.htm
+2024,10,New England Patriots,Chicago Bears,2024-11-10,1:00PM,Chicago,/boxscores/202411100chi.htm
+2024,10,Pittsburgh Steelers,Washington Commanders,2024-11-10,1:00PM,Washington,/boxscores/202411100was.htm
+2024,10,San Francisco 49ers,Tampa Bay Buccaneers,2024-11-10,1:00PM,Tampa Bay,/boxscores/202411100tam.htm
+2024,10,New Orleans Saints,Atlanta Falcons,2024-11-10,1:00PM,New Orleans,/boxscores/202411100nor.htm
+2024,10,Buffalo Bills,Indianapolis Colts,2024-11-10,1:00PM,Indianapolis,/boxscores/202411100clt.htm
+2024,10,Kansas City Chiefs,Denver Broncos,2024-11-10,1:00PM,Kansas City,/boxscores/202411100kan.htm
+2024,10,Minnesota Vikings,Jacksonville Jaguars,2024-11-10,1:00PM,Jacksonville,/boxscores/202411100jax.htm
+2024,10,Los Angeles Chargers,Tennessee Titans,2024-11-10,4:05PM,Los Angeles,/boxscores/202411100sdg.htm
+2024,10,Philadelphia Eagles,Dallas Cowboys,2024-11-10,4:25PM,Dallas,/boxscores/202411100dal.htm
+2024,10,Arizona Cardinals,New York Jets,2024-11-10,4:25PM,Arizona,/boxscores/202411100crd.htm
+2024,10,Detroit Lions,Houston Texans,2024-11-10,8:20PM,Houston,/boxscores/202411100htx.htm
+2024,10,Miami Dolphins,Los Angeles Rams,2024-11-11,8:15PM,Los Angeles,/boxscores/202411110ram.htm
+2024,11,Philadelphia Eagles,Washington Commanders,2024-11-14,8:15PM,Philadelphia,/boxscores/202411140phi.htm
+2024,11,Green Bay Packers,Chicago Bears,2024-11-17,1:00PM,Chicago,/boxscores/202411170chi.htm
+2024,11,New Orleans Saints,Cleveland Browns,2024-11-17,1:00PM,New Orleans,/boxscores/202411170nor.htm
+2024,11,Detroit Lions,Jacksonville Jaguars,2024-11-17,1:00PM,Detroit,/boxscores/202411170det.htm
+2024,11,Miami Dolphins,Las Vegas Raiders,2024-11-17,1:00PM,Miami,/boxscores/202411170mia.htm
+2024,11,Minnesota Vikings,Tennessee Titans,2024-11-17,1:00PM,Tennessee,/boxscores/202411170oti.htm
+2024,11,Pittsburgh Steelers,Baltimore Ravens,2024-11-17,1:00PM,Pittsburgh,/boxscores/202411170pit.htm
+2024,11,Indianapolis Colts,New York Jets,2024-11-17,1:00PM,New York,/boxscores/202411170nyj.htm
+2024,11,Los Angeles Rams,New England Patriots,2024-11-17,1:00PM,New England,/boxscores/202411170nwe.htm
+2024,11,Seattle Seahawks,San Francisco 49ers,2024-11-17,4:05PM,San Francisco,/boxscores/202411170sfo.htm
+2024,11,Denver Broncos,Atlanta Falcons,2024-11-17,4:05PM,Denver,/boxscores/202411170den.htm
+2024,11,Buffalo Bills,Kansas City Chiefs,2024-11-17,4:25PM,Buffalo,/boxscores/202411170buf.htm
+2024,11,Los Angeles Chargers,Cincinnati Bengals,2024-11-17,8:20PM,Los Angeles,/boxscores/202411170sdg.htm
+2024,11,Houston Texans,Dallas Cowboys,2024-11-18,8:15PM,Dallas,/boxscores/202411180dal.htm
+2024,12,Cleveland Browns,Pittsburgh Steelers,2024-11-21,8:15PM,Cleveland,/boxscores/202411210cle.htm
+2024,12,Kansas City Chiefs,Carolina Panthers,2024-11-24,1:00PM,Carolina,/boxscores/202411240car.htm
+2024,12,Minnesota Vikings,Chicago Bears,2024-11-24,1:00PM,Chicago,/boxscores/202411240chi.htm
+2024,12,Dallas Cowboys,Washington Commanders,2024-11-24,1:00PM,Washington,/boxscores/202411240was.htm
+2024,12,Miami Dolphins,New England Patriots,2024-11-24,1:00PM,Miami,/boxscores/202411240mia.htm
+2024,12,Tampa Bay Buccaneers,New York Giants,2024-11-24,1:00PM,New York,/boxscores/202411240nyg.htm
+2024,12,Detroit Lions,Indianapolis Colts,2024-11-24,1:00PM,Indianapolis,/boxscores/202411240clt.htm
+2024,12,Tennessee Titans,Houston Texans,2024-11-24,1:00PM,Houston,/boxscores/202411240htx.htm
+2024,12,Denver Broncos,Las Vegas Raiders,2024-11-24,4:05PM,Las Vegas,/boxscores/202411240rai.htm
+2024,12,Seattle Seahawks,Arizona Cardinals,2024-11-24,4:25PM,Seattle,/boxscores/202411240sea.htm
+2024,12,Green Bay Packers,San Francisco 49ers,2024-11-24,4:25PM,Green Bay,/boxscores/202411240gnb.htm
+2024,12,Philadelphia Eagles,Los Angeles Rams,2024-11-24,8:20PM,Los Angeles,/boxscores/202411240ram.htm
+2024,12,Baltimore Ravens,Los Angeles Chargers,2024-11-25,8:15PM,Los Angeles,/boxscores/202411250sdg.htm
+2024,13,Detroit Lions,Chicago Bears,2024-11-28,12:30PM,Detroit,/boxscores/202411280det.htm
+2024,13,Dallas Cowboys,New York Giants,2024-11-28,4:30PM,Dallas,/boxscores/202411280dal.htm
+2024,13,Green Bay Packers,Miami Dolphins,2024-11-28,8:20PM,Green Bay,/boxscores/202411280gnb.htm
+2024,13,Kansas City Chiefs,Las Vegas Raiders,2024-11-29,3:00PM,Kansas City,/boxscores/202411290kan.htm
+2024,13,Los Angeles Chargers,Atlanta Falcons,2024-12-01,1:00PM,Atlanta,/boxscores/202412010atl.htm
+2024,13,Pittsburgh Steelers,Cincinnati Bengals,2024-12-01,1:00PM,Cincinnati,/boxscores/202412010cin.htm
+2024,13,Minnesota Vikings,Arizona Cardinals,2024-12-01,1:00PM,Minnesota,/boxscores/202412010min.htm
+2024,13,Seattle Seahawks,New York Jets,2024-12-01,1:00PM,New York,/boxscores/202412010nyj.htm
+2024,13,Washington Commanders,Tennessee Titans,2024-12-01,1:00PM,Washington,/boxscores/202412010was.htm
+2024,13,Indianapolis Colts,New England Patriots,2024-12-01,1:00PM,New England,/boxscores/202412010nwe.htm
+2024,13,Houston Texans,Jacksonville Jaguars,2024-12-01,1:00PM,Jacksonville,/boxscores/202412010jax.htm
+2024,13,Tampa Bay Buccaneers,Carolina Panthers,2024-12-01,4:05PM,Carolina,/boxscores/202412010car.htm
+2024,13,Los Angeles Rams,New Orleans Saints,2024-12-01,4:05PM,New Orleans,/boxscores/202412010nor.htm
+2024,13,Philadelphia Eagles,Baltimore Ravens,2024-12-01,4:25PM,Baltimore,/boxscores/202412010rav.htm
+2024,13,Buffalo Bills,San Francisco 49ers,2024-12-01,8:20PM,Buffalo,/boxscores/202412010buf.htm
+2024,13,Denver Broncos,Cleveland Browns,2024-12-02,8:15PM,Denver,/boxscores/202412020den.htm
+2024,14,Detroit Lions,Green Bay Packers,2024-12-05,8:15PM,Detroit,/boxscores/202412050det.htm
+2024,14,Minnesota Vikings,Atlanta Falcons,2024-12-08,1:00PM,Minnesota,/boxscores/202412080min.htm
+2024,14,Philadelphia Eagles,Carolina Panthers,2024-12-08,1:00PM,Philadelphia,/boxscores/202412080phi.htm
+2024,14,Pittsburgh Steelers,Cleveland Browns,2024-12-08,1:00PM,Pittsburgh,/boxscores/202412080pit.htm
+2024,14,Jacksonville Jaguars,Tennessee Titans,2024-12-08,1:00PM,Tennessee,/boxscores/202412080oti.htm
+2024,14,Miami Dolphins,New York Jets,2024-12-08,1:00PM,Miami,/boxscores/202412080mia.htm
+2024,14,New Orleans Saints,New York Giants,2024-12-08,1:00PM,New York,/boxscores/202412080nyg.htm
+2024,14,Tampa Bay Buccaneers,Las Vegas Raiders,2024-12-08,1:00PM,Tampa Bay,/boxscores/202412080tam.htm
+2024,14,Seattle Seahawks,Arizona Cardinals,2024-12-08,4:05PM,Arizona,/boxscores/202412080crd.htm
+2024,14,Los Angeles Rams,Buffalo Bills,2024-12-08,4:25PM,Los Angeles,/boxscores/202412080ram.htm
+2024,14,San Francisco 49ers,Chicago Bears,2024-12-08,4:25PM,San Francisco,/boxscores/202412080sfo.htm
+2024,14,Kansas City Chiefs,Los Angeles Chargers,2024-12-08,8:20PM,Kansas City,/boxscores/202412080kan.htm
+2024,14,Cincinnati Bengals,Dallas Cowboys,2024-12-09,8:15PM,Dallas,/boxscores/202412090dal.htm
+2024,15,Los Angeles Rams,San Francisco 49ers,2024-12-12,8:15PM,San Francisco,/boxscores/202412120sfo.htm
+2024,15,Dallas Cowboys,Carolina Panthers,2024-12-15,1:00PM,Carolina,/boxscores/202412150car.htm
+2024,15,Cincinnati Bengals,Tennessee Titans,2024-12-15,1:00PM,Tennessee,/boxscores/202412150oti.htm
+2024,15,Kansas City Chiefs,Cleveland Browns,2024-12-15,1:00PM,Cleveland,/boxscores/202412150cle.htm
+2024,15,Houston Texans,Miami Dolphins,2024-12-15,1:00PM,Houston,/boxscores/202412150htx.htm
+2024,15,New York Jets,Jacksonville Jaguars,2024-12-15,1:00PM,Jacksonville,/boxscores/202412150jax.htm
+2024,15,Washington Commanders,New Orleans Saints,2024-12-15,1:00PM,New Orleans,/boxscores/202412150nor.htm
+2024,15,Baltimore Ravens,New York Giants,2024-12-15,1:00PM,New York,/boxscores/202412150nyg.htm
+2024,15,Buffalo Bills,Detroit Lions,2024-12-15,4:25PM,Detroit,/boxscores/202412150det.htm
+2024,15,Denver Broncos,Indianapolis Colts,2024-12-15,4:25PM,Denver,/boxscores/202412150den.htm
+2024,15,Arizona Cardinals,New England Patriots,2024-12-15,4:25PM,Arizona,/boxscores/202412150crd.htm
+2024,15,Philadelphia Eagles,Pittsburgh Steelers,2024-12-15,4:25PM,Philadelphia,/boxscores/202412150phi.htm
+2024,15,Tampa Bay Buccaneers,Los Angeles Chargers,2024-12-15,4:25PM,Los Angeles,/boxscores/202412150sdg.htm
+2024,15,Green Bay Packers,Seattle Seahawks,2024-12-15,8:20PM,Seattle,/boxscores/202412150sea.htm
+2024,15,Minnesota Vikings,Chicago Bears,2024-12-16,8:00PM,Minnesota,/boxscores/202412160min.htm
+2024,15,Atlanta Falcons,Las Vegas Raiders,2024-12-16,8:30PM,Las Vegas,/boxscores/202412160rai.htm
+2024,16,Los Angeles Chargers,Denver Broncos,2024-12-19,8:15PM,Los Angeles,/boxscores/202412190sdg.htm
+2024,16,Kansas City Chiefs,Houston Texans,2024-12-21,1:00PM,Kansas City,/boxscores/202412210kan.htm
+2024,16,Baltimore Ravens,Pittsburgh Steelers,2024-12-21,4:30PM,Baltimore,/boxscores/202412210rav.htm
+2024,16,Atlanta Falcons,New York Giants,2024-12-22,1:00PM,Atlanta,/boxscores/202412220atl.htm
+2024,16,Carolina Panthers,Arizona Cardinals,2024-12-22,1:00PM,Carolina,/boxscores/202412220car.htm
+2024,16,Detroit Lions,Chicago Bears,2024-12-22,1:00PM,Chicago,/boxscores/202412220chi.htm
+2024,16,Cincinnati Bengals,Cleveland Browns,2024-12-22,1:00PM,Cincinnati,/boxscores/202412220cin.htm
+2024,16,Indianapolis Colts,Tennessee Titans,2024-12-22,1:00PM,Indianapolis,/boxscores/202412220clt.htm
+2024,16,Los Angeles Rams,New York Jets,2024-12-22,1:00PM,New York,/boxscores/202412220nyj.htm
+2024,16,Washington Commanders,Philadelphia Eagles,2024-12-22,1:00PM,Washington,/boxscores/202412220was.htm
+2024,16,Minnesota Vikings,Seattle Seahawks,2024-12-22,4:05PM,Seattle,/boxscores/202412220sea.htm
+2024,16,Buffalo Bills,New England Patriots,2024-12-22,4:25PM,Buffalo,/boxscores/202412220buf.htm
+2024,16,Las Vegas Raiders,Jacksonville Jaguars,2024-12-22,4:25PM,Las Vegas,/boxscores/202412220rai.htm
+2024,16,Miami Dolphins,San Francisco 49ers,2024-12-22,4:25PM,Miami,/boxscores/202412220mia.htm
+2024,16,Dallas Cowboys,Tampa Bay Buccaneers,2024-12-22,8:20PM,Dallas,/boxscores/202412220dal.htm
+2024,16,Green Bay Packers,New Orleans Saints,2024-12-23,8:15PM,Green Bay,/boxscores/202412230gnb.htm
+2024,17,Kansas City Chiefs,Pittsburgh Steelers,2024-12-25,1:00PM,Pittsburgh,/boxscores/202412250pit.htm
+2024,17,Baltimore Ravens,Houston Texans,2024-12-25,4:30PM,Houston,/boxscores/202412250htx.htm
+2024,17,Seattle Seahawks,Chicago Bears,2024-12-26,8:15PM,Chicago,/boxscores/202412260chi.htm
+2024,17,Los Angeles Chargers,New England Patriots,2024-12-28,1:00PM,New England,/boxscores/202412280nwe.htm
+2024,17,Cincinnati Bengals,Denver Broncos,2024-12-28,4:30PM,Cincinnati,/boxscores/202412280cin.htm
+2024,17,Los Angeles Rams,Arizona Cardinals,2024-12-28,8:10PM,Los Angeles,/boxscores/202412280ram.htm
+2024,17,Buffalo Bills,New York Jets,2024-12-29,1:00PM,Buffalo,/boxscores/202412290buf.htm
+2024,17,Tampa Bay Buccaneers,Carolina Panthers,2024-12-29,1:00PM,Tampa Bay,/boxscores/202412290tam.htm
+2024,17,New York Giants,Indianapolis Colts,2024-12-29,1:00PM,New York,/boxscores/202412290nyg.htm
+2024,17,Philadelphia Eagles,Dallas Cowboys,2024-12-29,1:00PM,Philadelphia,/boxscores/202412290phi.htm
+2024,17,Jacksonville Jaguars,Tennessee Titans,2024-12-29,1:00PM,Jacksonville,/boxscores/202412290jax.htm
+2024,17,Las Vegas Raiders,New Orleans Saints,2024-12-29,1:00PM,New Orleans,/boxscores/202412290nor.htm
+2024,17,Miami Dolphins,Cleveland Browns,2024-12-29,4:05PM,Cleveland,/boxscores/202412290cle.htm
+2024,17,Minnesota Vikings,Green Bay Packers,2024-12-29,4:25PM,Minnesota,/boxscores/202412290min.htm
+2024,17,Washington Commanders,Atlanta Falcons,2024-12-29,8:20PM,Washington,/boxscores/202412290was.htm
+2024,17,Detroit Lions,San Francisco 49ers,2024-12-30,8:15PM,San Francisco,/boxscores/202412300sfo.htm
+2024,18,Baltimore Ravens,Cleveland Browns,2025-01-04,4:30PM,Baltimore,/boxscores/202501040rav.htm
+2024,18,Cincinnati Bengals,Pittsburgh Steelers,2025-01-04,8:00PM,Pittsburgh,/boxscores/202501040pit.htm
+2024,18,Carolina Panthers,Atlanta Falcons,2025-01-05,1:00PM,Atlanta,/boxscores/202501050atl.htm
+2024,18,New England Patriots,Buffalo Bills,2025-01-05,1:00PM,New England,/boxscores/202501050nwe.htm
+2024,18,Chicago Bears,Green Bay Packers,2025-01-05,1:00PM,Green Bay,/boxscores/202501050gnb.htm
+2024,18,Indianapolis Colts,Jacksonville Jaguars,2025-01-05,1:00PM,Indianapolis,/boxscores/202501050clt.htm
+2024,18,Washington Commanders,Dallas Cowboys,2025-01-05,1:00PM,Dallas,/boxscores/202501050dal.htm
+2024,18,Houston Texans,Tennessee Titans,2025-01-05,1:00PM,Tennessee,/boxscores/202501050oti.htm
+2024,18,Tampa Bay Buccaneers,New Orleans Saints,2025-01-05,1:00PM,Tampa Bay,/boxscores/202501050tam.htm
+2024,18,Philadelphia Eagles,New York Giants,2025-01-05,1:00PM,Philadelphia,/boxscores/202501050phi.htm
+2024,18,Arizona Cardinals,San Francisco 49ers,2025-01-05,4:25PM,Arizona,/boxscores/202501050crd.htm
+2024,18,Denver Broncos,Kansas City Chiefs,2025-01-05,4:25PM,Denver,/boxscores/202501050den.htm
+2024,18,New York Jets,Miami Dolphins,2025-01-05,4:25PM,New York,/boxscores/202501050nyj.htm
+2024,18,Los Angeles Chargers,Las Vegas Raiders,2025-01-05,4:25PM,Las Vegas,/boxscores/202501050rai.htm
+2024,18,Seattle Seahawks,Los Angeles Rams,2025-01-05,4:25PM,Los Angeles,/boxscores/202501050ram.htm
+2024,18,Detroit Lions,Minnesota Vikings,2025-01-05,8:20PM,Detroit,/boxscores/202501050det.htm

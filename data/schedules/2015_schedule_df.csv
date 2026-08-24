@@ -1,0 +1,257 @@
+year,week,team_1,team_2,date,time,location,boxscore_url
+2015,1,New England Patriots,Pittsburgh Steelers,2015-09-10,8:40PM,New England,/boxscores/201509100nwe.htm
+2015,1,Green Bay Packers,Chicago Bears,2015-09-13,1:00PM,Chicago,/boxscores/201509130chi.htm
+2015,1,St. Louis Rams,Seattle Seahawks,2015-09-13,1:00PM,St. Louis,/boxscores/201509130ram.htm
+2015,1,Kansas City Chiefs,Houston Texans,2015-09-13,1:02PM,Houston,/boxscores/201509130htx.htm
+2015,1,Miami Dolphins,Washington Redskins,2015-09-13,1:02PM,Washington,/boxscores/201509130was.htm
+2015,1,Buffalo Bills,Indianapolis Colts,2015-09-13,1:03PM,Buffalo,/boxscores/201509130buf.htm
+2015,1,Carolina Panthers,Jacksonville Jaguars,2015-09-13,1:03PM,Jacksonville,/boxscores/201509130jax.htm
+2015,1,New York Jets,Cleveland Browns,2015-09-13,1:04PM,New York,/boxscores/201509130nyj.htm
+2015,1,Arizona Cardinals,New Orleans Saints,2015-09-13,4:05PM,Arizona,/boxscores/201509130crd.htm
+2015,1,San Diego Chargers,Detroit Lions,2015-09-13,4:05PM,San Diego,/boxscores/201509130sdg.htm
+2015,1,Cincinnati Bengals,Oakland Raiders,2015-09-13,4:25PM,Oakland,/boxscores/201509130rai.htm
+2015,1,Denver Broncos,Baltimore Ravens,2015-09-13,4:25PM,Denver,/boxscores/201509130den.htm
+2015,1,Tennessee Titans,Tampa Bay Buccaneers,2015-09-13,4:25PM,Tampa Bay,/boxscores/201509130tam.htm
+2015,1,Dallas Cowboys,New York Giants,2015-09-13,8:31PM,Dallas,/boxscores/201509130dal.htm
+2015,1,Atlanta Falcons,Philadelphia Eagles,2015-09-14,7:10PM,Atlanta,/boxscores/201509140atl.htm
+2015,1,San Francisco 49ers,Minnesota Vikings,2015-09-14,10:20PM,San Francisco,/boxscores/201509140sfo.htm
+2015,2,Denver Broncos,Kansas City Chiefs,2015-09-17,8:29PM,Kansas City,/boxscores/201509170kan.htm
+2015,2,Arizona Cardinals,Chicago Bears,2015-09-20,1:00PM,Chicago,/boxscores/201509200chi.htm
+2015,2,Atlanta Falcons,New York Giants,2015-09-20,1:02PM,New York,/boxscores/201509200nyg.htm
+2015,2,New England Patriots,Buffalo Bills,2015-09-20,1:02PM,Buffalo,/boxscores/201509200buf.htm
+2015,2,Carolina Panthers,Houston Texans,2015-09-20,1:02PM,Carolina,/boxscores/201509200car.htm
+2015,2,Cleveland Browns,Tennessee Titans,2015-09-20,1:02PM,Cleveland,/boxscores/201509200cle.htm
+2015,2,Tampa Bay Buccaneers,New Orleans Saints,2015-09-20,1:02PM,New Orleans,/boxscores/201509200nor.htm
+2015,2,Pittsburgh Steelers,San Francisco 49ers,2015-09-20,1:02PM,Pittsburgh,/boxscores/201509200pit.htm
+2015,2,Cincinnati Bengals,San Diego Chargers,2015-09-20,1:03PM,Cincinnati,/boxscores/201509200cin.htm
+2015,2,Minnesota Vikings,Detroit Lions,2015-09-20,1:03PM,Minnesota,/boxscores/201509200min.htm
+2015,2,Washington Redskins,St. Louis Rams,2015-09-20,1:03PM,Washington,/boxscores/201509200was.htm
+2015,2,Jacksonville Jaguars,Miami Dolphins,2015-09-20,4:05PM,Jacksonville,/boxscores/201509200jax.htm
+2015,2,Oakland Raiders,Baltimore Ravens,2015-09-20,4:05PM,Oakland,/boxscores/201509200rai.htm
+2015,2,Dallas Cowboys,Philadelphia Eagles,2015-09-20,4:25PM,Philadelphia,/boxscores/201509200phi.htm
+2015,2,Green Bay Packers,Seattle Seahawks,2015-09-20,8:25PM,Green Bay,/boxscores/201509200gnb.htm
+2015,2,New York Jets,Indianapolis Colts,2015-09-21,8:30PM,Indianapolis,/boxscores/201509210clt.htm
+2015,3,New York Giants,Washington Redskins,2015-09-24,8:26PM,New York,/boxscores/201509240nyg.htm
+2015,3,Pittsburgh Steelers,St. Louis Rams,2015-09-27,1:00PM,St. Louis,/boxscores/201509270ram.htm
+2015,3,Cincinnati Bengals,Baltimore Ravens,2015-09-27,1:02PM,Baltimore,/boxscores/201509270rav.htm
+2015,3,Oakland Raiders,Cleveland Browns,2015-09-27,1:02PM,Cleveland,/boxscores/201509270cle.htm
+2015,3,Minnesota Vikings,San Diego Chargers,2015-09-27,1:02PM,Minnesota,/boxscores/201509270min.htm
+2015,3,Atlanta Falcons,Dallas Cowboys,2015-09-27,1:03PM,Dallas,/boxscores/201509270dal.htm
+2015,3,Carolina Panthers,New Orleans Saints,2015-09-27,1:03PM,Carolina,/boxscores/201509270car.htm
+2015,3,Indianapolis Colts,Tennessee Titans,2015-09-27,1:03PM,Tennessee,/boxscores/201509270oti.htm
+2015,3,Houston Texans,Tampa Bay Buccaneers,2015-09-27,1:03PM,Houston,/boxscores/201509270htx.htm
+2015,3,Philadelphia Eagles,New York Jets,2015-09-27,1:03PM,New York,/boxscores/201509270nyj.htm
+2015,3,New England Patriots,Jacksonville Jaguars,2015-09-27,1:06PM,New England,/boxscores/201509270nwe.htm
+2015,3,Arizona Cardinals,San Francisco 49ers,2015-09-27,4:05PM,Arizona,/boxscores/201509270crd.htm
+2015,3,Buffalo Bills,Miami Dolphins,2015-09-27,4:25PM,Miami,/boxscores/201509270mia.htm
+2015,3,Seattle Seahawks,Chicago Bears,2015-09-27,4:26PM,Seattle,/boxscores/201509270sea.htm
+2015,3,Denver Broncos,Detroit Lions,2015-09-27,8:30PM,Detroit,/boxscores/201509270det.htm
+2015,3,Green Bay Packers,Kansas City Chiefs,2015-09-28,8:30PM,Green Bay,/boxscores/201509280gnb.htm
+2015,4,Baltimore Ravens,Pittsburgh Steelers,2015-10-01,8:26PM,Pittsburgh,/boxscores/201510010pit.htm
+2015,4,New York Jets,Miami Dolphins,2015-10-04,9:37AM,Miami,/boxscores/201510040mia.htm
+2015,4,Atlanta Falcons,Houston Texans,2015-10-04,1:02PM,Atlanta,/boxscores/201510040atl.htm
+2015,4,New York Giants,Buffalo Bills,2015-10-04,1:02PM,Buffalo,/boxscores/201510040buf.htm
+2015,4,Chicago Bears,Oakland Raiders,2015-10-04,1:02PM,Chicago,/boxscores/201510040chi.htm
+2015,4,Indianapolis Colts,Jacksonville Jaguars,2015-10-04,1:02PM,Indianapolis,/boxscores/201510040clt.htm
+2015,4,Carolina Panthers,Tampa Bay Buccaneers,2015-10-04,1:03PM,Tampa Bay,/boxscores/201510040tam.htm
+2015,4,Cincinnati Bengals,Kansas City Chiefs,2015-10-04,1:03PM,Cincinnati,/boxscores/201510040cin.htm
+2015,4,Washington Redskins,Philadelphia Eagles,2015-10-04,1:03PM,Washington,/boxscores/201510040was.htm
+2015,4,San Diego Chargers,Cleveland Browns,2015-10-04,4:05PM,San Diego,/boxscores/201510040sdg.htm
+2015,4,St. Louis Rams,Arizona Cardinals,2015-10-04,4:25PM,Arizona,/boxscores/201510040crd.htm
+2015,4,Denver Broncos,Minnesota Vikings,2015-10-04,4:25PM,Denver,/boxscores/201510040den.htm
+2015,4,Green Bay Packers,San Francisco 49ers,2015-10-04,4:25PM,San Francisco,/boxscores/201510040sfo.htm
+2015,4,New Orleans Saints,Dallas Cowboys,2015-10-04,8:30PM,New Orleans,/boxscores/201510040nor.htm
+2015,4,Seattle Seahawks,Detroit Lions,2015-10-05,8:31PM,Seattle,/boxscores/201510050sea.htm
+2015,5,Indianapolis Colts,Houston Texans,2015-10-08,8:26PM,Houston,/boxscores/201510080htx.htm
+2015,5,Atlanta Falcons,Washington Redskins,2015-10-11,1:02PM,Atlanta,/boxscores/201510110atl.htm
+2015,5,Chicago Bears,Kansas City Chiefs,2015-10-11,1:02PM,Kansas City,/boxscores/201510110kan.htm
+2015,5,Cleveland Browns,Baltimore Ravens,2015-10-11,1:02PM,Baltimore,/boxscores/201510110rav.htm
+2015,5,Green Bay Packers,St. Louis Rams,2015-10-11,1:02PM,Green Bay,/boxscores/201510110gnb.htm
+2015,5,Tampa Bay Buccaneers,Jacksonville Jaguars,2015-10-11,1:02PM,Tampa Bay,/boxscores/201510110tam.htm
+2015,5,Buffalo Bills,Tennessee Titans,2015-10-11,1:03PM,Tennessee,/boxscores/201510110oti.htm
+2015,5,Cincinnati Bengals,Seattle Seahawks,2015-10-11,1:03PM,Cincinnati,/boxscores/201510110cin.htm
+2015,5,Philadelphia Eagles,New Orleans Saints,2015-10-11,1:04PM,Philadelphia,/boxscores/201510110phi.htm
+2015,5,Arizona Cardinals,Detroit Lions,2015-10-11,4:05PM,Detroit,/boxscores/201510110det.htm
+2015,5,New England Patriots,Dallas Cowboys,2015-10-11,4:25PM,Dallas,/boxscores/201510110dal.htm
+2015,5,Denver Broncos,Oakland Raiders,2015-10-11,4:25PM,Oakland,/boxscores/201510110rai.htm
+2015,5,New York Giants,San Francisco 49ers,2015-10-11,8:31PM,New York,/boxscores/201510110nyg.htm
+2015,5,Pittsburgh Steelers,San Diego Chargers,2015-10-12,8:30PM,San Diego,/boxscores/201510120sdg.htm
+2015,6,New Orleans Saints,Atlanta Falcons,2015-10-15,8:26PM,New Orleans,/boxscores/201510150nor.htm
+2015,6,New York Jets,Washington Redskins,2015-10-18,1:02PM,New York,/boxscores/201510180nyj.htm
+2015,6,Cincinnati Bengals,Buffalo Bills,2015-10-18,1:02PM,Buffalo,/boxscores/201510180buf.htm
+2015,6,Detroit Lions,Chicago Bears,2015-10-18,1:02PM,Detroit,/boxscores/201510180det.htm
+2015,6,Denver Broncos,Cleveland Browns,2015-10-18,1:02PM,Cleveland,/boxscores/201510180cle.htm
+2015,6,Houston Texans,Jacksonville Jaguars,2015-10-18,1:02PM,Jacksonville,/boxscores/201510180jax.htm
+2015,6,Minnesota Vikings,Kansas City Chiefs,2015-10-18,1:02PM,Minnesota,/boxscores/201510180min.htm
+2015,6,Miami Dolphins,Tennessee Titans,2015-10-18,1:03PM,Tennessee,/boxscores/201510180oti.htm
+2015,6,Pittsburgh Steelers,Arizona Cardinals,2015-10-18,1:04PM,Pittsburgh,/boxscores/201510180pit.htm
+2015,6,Carolina Panthers,Seattle Seahawks,2015-10-18,4:06PM,Seattle,/boxscores/201510180sea.htm
+2015,6,Green Bay Packers,San Diego Chargers,2015-10-18,4:25PM,Green Bay,/boxscores/201510180gnb.htm
+2015,6,San Francisco 49ers,Baltimore Ravens,2015-10-18,4:25PM,San Francisco,/boxscores/201510180sfo.htm
+2015,6,New England Patriots,Indianapolis Colts,2015-10-18,8:30PM,Indianapolis,/boxscores/201510180clt.htm
+2015,6,Philadelphia Eagles,New York Giants,2015-10-19,8:30PM,Philadelphia,/boxscores/201510190phi.htm
+2015,7,Seattle Seahawks,San Francisco 49ers,2015-10-22,8:26PM,San Francisco,/boxscores/201510220sfo.htm
+2015,7,Jacksonville Jaguars,Buffalo Bills,2015-10-25,8:35AM,Jacksonville,/boxscores/201510250jax.htm
+2015,7,St. Louis Rams,Cleveland Browns,2015-10-25,1:00PM,St. Louis,/boxscores/201510250ram.htm
+2015,7,New England Patriots,New York Jets,2015-10-25,1:02PM,New England,/boxscores/201510250nwe.htm
+2015,7,Atlanta Falcons,Tennessee Titans,2015-10-25,1:02PM,Tennessee,/boxscores/201510250oti.htm
+2015,7,Minnesota Vikings,Detroit Lions,2015-10-25,1:02PM,Detroit,/boxscores/201510250det.htm
+2015,7,Miami Dolphins,Houston Texans,2015-10-25,1:02PM,Miami,/boxscores/201510250mia.htm
+2015,7,New Orleans Saints,Indianapolis Colts,2015-10-25,1:03PM,Indianapolis,/boxscores/201510250clt.htm
+2015,7,Kansas City Chiefs,Pittsburgh Steelers,2015-10-25,1:03PM,Kansas City,/boxscores/201510250kan.htm
+2015,7,Washington Redskins,Tampa Bay Buccaneers,2015-10-25,1:04PM,Washington,/boxscores/201510250was.htm
+2015,7,Oakland Raiders,San Diego Chargers,2015-10-25,4:05PM,San Diego,/boxscores/201510250sdg.htm
+2015,7,New York Giants,Dallas Cowboys,2015-10-25,4:25PM,New York,/boxscores/201510250nyg.htm
+2015,7,Carolina Panthers,Philadelphia Eagles,2015-10-25,8:31PM,Carolina,/boxscores/201510250car.htm
+2015,7,Arizona Cardinals,Baltimore Ravens,2015-10-26,8:30PM,Arizona,/boxscores/201510260crd.htm
+2015,8,New England Patriots,Miami Dolphins,2015-10-29,8:26PM,New England,/boxscores/201510290nwe.htm
+2015,8,Kansas City Chiefs,Detroit Lions,2015-11-01,9:36AM,Kansas City,/boxscores/201511010kan.htm
+2015,8,Minnesota Vikings,Chicago Bears,2015-11-01,1:00PM,Chicago,/boxscores/201511010chi.htm
+2015,8,St. Louis Rams,San Francisco 49ers,2015-11-01,1:00PM,St. Louis,/boxscores/201511010ram.htm
+2015,8,Cincinnati Bengals,Pittsburgh Steelers,2015-11-01,1:02PM,Pittsburgh,/boxscores/201511010pit.htm
+2015,8,Tampa Bay Buccaneers,Atlanta Falcons,2015-11-01,1:02PM,Atlanta,/boxscores/201511010atl.htm
+2015,8,Arizona Cardinals,Cleveland Browns,2015-11-01,1:02PM,Cleveland,/boxscores/201511010cle.htm
+2015,8,Houston Texans,Tennessee Titans,2015-11-01,1:02PM,Houston,/boxscores/201511010htx.htm
+2015,8,New Orleans Saints,New York Giants,2015-11-01,1:02PM,New Orleans,/boxscores/201511010nor.htm
+2015,8,Baltimore Ravens,San Diego Chargers,2015-11-01,1:02PM,Baltimore,/boxscores/201511010rav.htm
+2015,8,Oakland Raiders,New York Jets,2015-11-01,4:05PM,Oakland,/boxscores/201511010rai.htm
+2015,8,Seattle Seahawks,Dallas Cowboys,2015-11-01,4:25PM,Dallas,/boxscores/201511010dal.htm
+2015,8,Denver Broncos,Green Bay Packers,2015-11-01,8:30PM,Denver,/boxscores/201511010den.htm
+2015,8,Carolina Panthers,Indianapolis Colts,2015-11-02,8:30PM,Carolina,/boxscores/201511020car.htm
+2015,9,Cincinnati Bengals,Cleveland Browns,2015-11-05,8:25PM,Cincinnati,/boxscores/201511050cin.htm
+2015,9,Buffalo Bills,Miami Dolphins,2015-11-08,1:02PM,Buffalo,/boxscores/201511080buf.htm
+2015,9,New York Jets,Jacksonville Jaguars,2015-11-08,1:02PM,New York,/boxscores/201511080nyj.htm
+2015,9,Minnesota Vikings,St. Louis Rams,2015-11-08,1:02PM,Minnesota,/boxscores/201511080min.htm
+2015,9,New England Patriots,Washington Redskins,2015-11-08,1:02PM,New England,/boxscores/201511080nwe.htm
+2015,9,Tennessee Titans,New Orleans Saints,2015-11-08,1:02PM,New Orleans,/boxscores/201511080nor.htm
+2015,9,Pittsburgh Steelers,Oakland Raiders,2015-11-08,1:02PM,Pittsburgh,/boxscores/201511080pit.htm
+2015,9,Carolina Panthers,Green Bay Packers,2015-11-08,1:04PM,Carolina,/boxscores/201511080car.htm
+2015,9,San Francisco 49ers,Atlanta Falcons,2015-11-08,4:05PM,San Francisco,/boxscores/201511080sfo.htm
+2015,9,New York Giants,Tampa Bay Buccaneers,2015-11-08,4:05PM,Tampa Bay,/boxscores/201511080tam.htm
+2015,9,Indianapolis Colts,Denver Broncos,2015-11-08,4:25PM,Indianapolis,/boxscores/201511080clt.htm
+2015,9,Philadelphia Eagles,Dallas Cowboys,2015-11-08,8:31PM,Dallas,/boxscores/201511080dal.htm
+2015,9,Chicago Bears,San Diego Chargers,2015-11-09,8:30PM,San Diego,/boxscores/201511090sdg.htm
+2015,10,Buffalo Bills,New York Jets,2015-11-12,8:26PM,New York,/boxscores/201511120nyj.htm
+2015,10,Chicago Bears,St. Louis Rams,2015-11-15,1:00PM,St. Louis,/boxscores/201511150ram.htm
+2015,10,Carolina Panthers,Tennessee Titans,2015-11-15,1:03PM,Tennessee,/boxscores/201511150oti.htm
+2015,10,Detroit Lions,Green Bay Packers,2015-11-15,1:04PM,Green Bay,/boxscores/201511150gnb.htm
+2015,10,Pittsburgh Steelers,Cleveland Browns,2015-11-15,1:04PM,Pittsburgh,/boxscores/201511150pit.htm
+2015,10,Tampa Bay Buccaneers,Dallas Cowboys,2015-11-15,1:05PM,Tampa Bay,/boxscores/201511150tam.htm
+2015,10,Jacksonville Jaguars,Baltimore Ravens,2015-11-15,1:05PM,Baltimore,/boxscores/201511150rav.htm
+2015,10,Miami Dolphins,Philadelphia Eagles,2015-11-15,1:05PM,Philadelphia,/boxscores/201511150phi.htm
+2015,10,Washington Redskins,New Orleans Saints,2015-11-15,1:05PM,Washington,/boxscores/201511150was.htm
+2015,10,Minnesota Vikings,Oakland Raiders,2015-11-15,4:05PM,Oakland,/boxscores/201511150rai.htm
+2015,10,Kansas City Chiefs,Denver Broncos,2015-11-15,4:30PM,Denver,/boxscores/201511150den.htm
+2015,10,New England Patriots,New York Giants,2015-11-15,4:31PM,New York,/boxscores/201511150nyg.htm
+2015,10,Arizona Cardinals,Seattle Seahawks,2015-11-15,8:35PM,Seattle,/boxscores/201511150sea.htm
+2015,10,Houston Texans,Cincinnati Bengals,2015-11-16,8:30PM,Cincinnati,/boxscores/201511160cin.htm
+2015,11,Jacksonville Jaguars,Tennessee Titans,2015-11-19,8:26PM,Jacksonville,/boxscores/201511190jax.htm
+2015,11,Indianapolis Colts,Atlanta Falcons,2015-11-22,1:02PM,Atlanta,/boxscores/201511220atl.htm
+2015,11,Carolina Panthers,Washington Redskins,2015-11-22,1:02PM,Carolina,/boxscores/201511220car.htm
+2015,11,Denver Broncos,Chicago Bears,2015-11-22,1:02PM,Chicago,/boxscores/201511220chi.htm
+2015,11,Detroit Lions,Oakland Raiders,2015-11-22,1:02PM,Detroit,/boxscores/201511220det.htm
+2015,11,Tampa Bay Buccaneers,Philadelphia Eagles,2015-11-22,1:02PM,Philadelphia,/boxscores/201511220phi.htm
+2015,11,Baltimore Ravens,St. Louis Rams,2015-11-22,1:02PM,Baltimore,/boxscores/201511220rav.htm
+2015,11,Dallas Cowboys,Miami Dolphins,2015-11-22,1:03PM,Miami,/boxscores/201511220mia.htm
+2015,11,Houston Texans,New York Jets,2015-11-22,1:03PM,Houston,/boxscores/201511220htx.htm
+2015,11,Kansas City Chiefs,San Diego Chargers,2015-11-22,4:05PM,San Diego,/boxscores/201511220sdg.htm
+2015,11,Green Bay Packers,Minnesota Vikings,2015-11-22,4:25PM,Minnesota,/boxscores/201511220min.htm
+2015,11,Seattle Seahawks,San Francisco 49ers,2015-11-22,4:27PM,Seattle,/boxscores/201511220sea.htm
+2015,11,Arizona Cardinals,Cincinnati Bengals,2015-11-22,8:30PM,Arizona,/boxscores/201511220crd.htm
+2015,11,New England Patriots,Buffalo Bills,2015-11-23,8:30PM,New England,/boxscores/201511230nwe.htm
+2015,12,Detroit Lions,Philadelphia Eagles,2015-11-26,12:35PM,Detroit,/boxscores/201511260det.htm
+2015,12,Carolina Panthers,Dallas Cowboys,2015-11-26,4:31PM,Dallas,/boxscores/201511260dal.htm
+2015,12,Chicago Bears,Green Bay Packers,2015-11-26,8:30PM,Green Bay,/boxscores/201511260gnb.htm
+2015,12,Minnesota Vikings,Atlanta Falcons,2015-11-29,1:02PM,Atlanta,/boxscores/201511290atl.htm
+2015,12,Cincinnati Bengals,St. Louis Rams,2015-11-29,1:02PM,Cincinnati,/boxscores/201511290cin.htm
+2015,12,Indianapolis Colts,Tampa Bay Buccaneers,2015-11-29,1:02PM,Indianapolis,/boxscores/201511290clt.htm
+2015,12,Houston Texans,New Orleans Saints,2015-11-29,1:02PM,Houston,/boxscores/201511290htx.htm
+2015,12,New York Jets,Miami Dolphins,2015-11-29,1:02PM,New York,/boxscores/201511290nyj.htm
+2015,12,Oakland Raiders,Tennessee Titans,2015-11-29,1:02PM,Tennessee,/boxscores/201511290oti.htm
+2015,12,Kansas City Chiefs,Buffalo Bills,2015-11-29,1:03PM,Kansas City,/boxscores/201511290kan.htm
+2015,12,San Diego Chargers,Jacksonville Jaguars,2015-11-29,1:03PM,Jacksonville,/boxscores/201511290jax.htm
+2015,12,Washington Redskins,New York Giants,2015-11-29,1:03PM,Washington,/boxscores/201511290was.htm
+2015,12,Arizona Cardinals,San Francisco 49ers,2015-11-29,4:05PM,San Francisco,/boxscores/201511290sfo.htm
+2015,12,Seattle Seahawks,Pittsburgh Steelers,2015-11-29,4:26PM,Seattle,/boxscores/201511290sea.htm
+2015,12,Denver Broncos,New England Patriots,2015-11-29,8:30PM,Denver,/boxscores/201511290den.htm
+2015,12,Baltimore Ravens,Cleveland Browns,2015-11-30,8:30PM,Cleveland,/boxscores/201511300cle.htm
+2015,13,Green Bay Packers,Detroit Lions,2015-12-03,8:26PM,Detroit,/boxscores/201512030det.htm
+2015,13,Arizona Cardinals,St. Louis Rams,2015-12-06,1:00PM,St. Louis,/boxscores/201512060ram.htm
+2015,13,Buffalo Bills,Houston Texans,2015-12-06,1:02PM,Buffalo,/boxscores/201512060buf.htm
+2015,13,San Francisco 49ers,Chicago Bears,2015-12-06,1:02PM,Chicago,/boxscores/201512060chi.htm
+2015,13,Tennessee Titans,Jacksonville Jaguars,2015-12-06,1:02PM,Tennessee,/boxscores/201512060oti.htm
+2015,13,Seattle Seahawks,Minnesota Vikings,2015-12-06,1:02PM,Minnesota,/boxscores/201512060min.htm
+2015,13,Tampa Bay Buccaneers,Atlanta Falcons,2015-12-06,1:03PM,Tampa Bay,/boxscores/201512060tam.htm
+2015,13,Cincinnati Bengals,Cleveland Browns,2015-12-06,1:03PM,Cleveland,/boxscores/201512060cle.htm
+2015,13,Miami Dolphins,Baltimore Ravens,2015-12-06,1:03PM,Miami,/boxscores/201512060mia.htm
+2015,13,New York Jets,New York Giants,2015-12-06,1:03PM,New York,/boxscores/201512060nyg.htm
+2015,13,Denver Broncos,San Diego Chargers,2015-12-06,4:05PM,San Diego,/boxscores/201512060sdg.htm
+2015,13,Kansas City Chiefs,Oakland Raiders,2015-12-06,4:05PM,Oakland,/boxscores/201512060rai.htm
+2015,13,Carolina Panthers,New Orleans Saints,2015-12-06,4:25PM,New Orleans,/boxscores/201512060nor.htm
+2015,13,Philadelphia Eagles,New England Patriots,2015-12-06,4:25PM,New England,/boxscores/201512060nwe.htm
+2015,13,Pittsburgh Steelers,Indianapolis Colts,2015-12-06,8:30PM,Pittsburgh,/boxscores/201512060pit.htm
+2015,13,Dallas Cowboys,Washington Redskins,2015-12-07,8:31PM,Washington,/boxscores/201512070was.htm
+2015,14,Arizona Cardinals,Minnesota Vikings,2015-12-10,8:25PM,Arizona,/boxscores/201512100crd.htm
+2015,14,Philadelphia Eagles,Buffalo Bills,2015-12-13,1:01PM,Philadelphia,/boxscores/201512130phi.htm
+2015,14,Washington Redskins,Chicago Bears,2015-12-13,1:02PM,Chicago,/boxscores/201512130chi.htm
+2015,14,Pittsburgh Steelers,Cincinnati Bengals,2015-12-13,1:02PM,Cincinnati,/boxscores/201512130cin.htm
+2015,14,Cleveland Browns,San Francisco 49ers,2015-12-13,1:02PM,Cleveland,/boxscores/201512130cle.htm
+2015,14,Jacksonville Jaguars,Indianapolis Colts,2015-12-13,1:02PM,Jacksonville,/boxscores/201512130jax.htm
+2015,14,St. Louis Rams,Detroit Lions,2015-12-13,1:02PM,St. Louis,/boxscores/201512130ram.htm
+2015,14,New Orleans Saints,Tampa Bay Buccaneers,2015-12-13,1:02PM,Tampa Bay,/boxscores/201512130tam.htm
+2015,14,New York Jets,Tennessee Titans,2015-12-13,1:02PM,New York,/boxscores/201512130nyj.htm
+2015,14,Seattle Seahawks,Baltimore Ravens,2015-12-13,1:02PM,Baltimore,/boxscores/201512130rav.htm
+2015,14,Carolina Panthers,Atlanta Falcons,2015-12-13,1:03PM,Carolina,/boxscores/201512130car.htm
+2015,14,Kansas City Chiefs,San Diego Chargers,2015-12-13,1:03PM,Kansas City,/boxscores/201512130kan.htm
+2015,14,Oakland Raiders,Denver Broncos,2015-12-13,4:05PM,Denver,/boxscores/201512130den.htm
+2015,14,Green Bay Packers,Dallas Cowboys,2015-12-13,4:25PM,Green Bay,/boxscores/201512130gnb.htm
+2015,14,New England Patriots,Houston Texans,2015-12-13,8:31PM,Houston,/boxscores/201512130htx.htm
+2015,14,New York Giants,Miami Dolphins,2015-12-14,8:30PM,Miami,/boxscores/201512140mia.htm
+2015,15,St. Louis Rams,Tampa Bay Buccaneers,2015-12-17,8:25PM,St. Louis,/boxscores/201512170ram.htm
+2015,15,New York Jets,Dallas Cowboys,2015-12-19,8:26PM,Dallas,/boxscores/201512190dal.htm
+2015,15,Atlanta Falcons,Jacksonville Jaguars,2015-12-20,1:02PM,Jacksonville,/boxscores/201512200jax.htm
+2015,15,Carolina Panthers,New York Giants,2015-12-20,1:02PM,New York,/boxscores/201512200nyg.htm
+2015,15,Minnesota Vikings,Chicago Bears,2015-12-20,1:02PM,Minnesota,/boxscores/201512200min.htm
+2015,15,Houston Texans,Indianapolis Colts,2015-12-20,1:02PM,Indianapolis,/boxscores/201512200clt.htm
+2015,15,Kansas City Chiefs,Baltimore Ravens,2015-12-20,1:02PM,Baltimore,/boxscores/201512200rav.htm
+2015,15,New England Patriots,Tennessee Titans,2015-12-20,1:02PM,New England,/boxscores/201512200nwe.htm
+2015,15,Washington Redskins,Buffalo Bills,2015-12-20,1:03PM,Washington,/boxscores/201512200was.htm
+2015,15,Green Bay Packers,Oakland Raiders,2015-12-20,4:05PM,Oakland,/boxscores/201512200rai.htm
+2015,15,Seattle Seahawks,Cleveland Browns,2015-12-20,4:06PM,Seattle,/boxscores/201512200sea.htm
+2015,15,Cincinnati Bengals,San Francisco 49ers,2015-12-20,4:25PM,San Francisco,/boxscores/201512200sfo.htm
+2015,15,Pittsburgh Steelers,Denver Broncos,2015-12-20,4:25PM,Pittsburgh,/boxscores/201512200pit.htm
+2015,15,San Diego Chargers,Miami Dolphins,2015-12-20,4:25PM,San Diego,/boxscores/201512200sdg.htm
+2015,15,Arizona Cardinals,Philadelphia Eagles,2015-12-20,8:31PM,Philadelphia,/boxscores/201512200phi.htm
+2015,15,Detroit Lions,New Orleans Saints,2015-12-21,8:30PM,New Orleans,/boxscores/201512210nor.htm
+2015,16,Oakland Raiders,San Diego Chargers,2015-12-24,8:26PM,Oakland,/boxscores/201512240rai.htm
+2015,16,Washington Redskins,Philadelphia Eagles,2015-12-26,8:26PM,Philadelphia,/boxscores/201512260phi.htm
+2015,16,Atlanta Falcons,Carolina Panthers,2015-12-27,1:02PM,Atlanta,/boxscores/201512270atl.htm
+2015,16,Buffalo Bills,Dallas Cowboys,2015-12-27,1:02PM,Buffalo,/boxscores/201512270buf.htm
+2015,16,Indianapolis Colts,Miami Dolphins,2015-12-27,1:02PM,Miami,/boxscores/201512270mia.htm
+2015,16,Houston Texans,Tennessee Titans,2015-12-27,1:02PM,Tennessee,/boxscores/201512270oti.htm
+2015,16,New York Jets,New England Patriots,2015-12-27,1:02PM,New York,/boxscores/201512270nyj.htm
+2015,16,Baltimore Ravens,Pittsburgh Steelers,2015-12-27,1:02PM,Baltimore,/boxscores/201512270rav.htm
+2015,16,Chicago Bears,Tampa Bay Buccaneers,2015-12-27,1:03PM,Tampa Bay,/boxscores/201512270tam.htm
+2015,16,Kansas City Chiefs,Cleveland Browns,2015-12-27,1:03PM,Kansas City,/boxscores/201512270kan.htm
+2015,16,Detroit Lions,San Francisco 49ers,2015-12-27,1:03PM,Detroit,/boxscores/201512270det.htm
+2015,16,New Orleans Saints,Jacksonville Jaguars,2015-12-27,4:05PM,New Orleans,/boxscores/201512270nor.htm
+2015,16,Arizona Cardinals,Green Bay Packers,2015-12-27,4:25PM,Arizona,/boxscores/201512270crd.htm
+2015,16,St. Louis Rams,Seattle Seahawks,2015-12-27,4:26PM,Seattle,/boxscores/201512270sea.htm
+2015,16,Minnesota Vikings,New York Giants,2015-12-27,8:30PM,Minnesota,/boxscores/201512270min.htm
+2015,16,Denver Broncos,Cincinnati Bengals,2015-12-28,8:30PM,Denver,/boxscores/201512280den.htm
+2015,17,New Orleans Saints,Atlanta Falcons,2016-01-03,1:02PM,Atlanta,/boxscores/201601030atl.htm
+2015,17,Buffalo Bills,New York Jets,2016-01-03,1:02PM,Buffalo,/boxscores/201601030buf.htm
+2015,17,Detroit Lions,Chicago Bears,2016-01-03,1:02PM,Chicago,/boxscores/201601030chi.htm
+2015,17,Cincinnati Bengals,Baltimore Ravens,2016-01-03,1:02PM,Cincinnati,/boxscores/201601030cin.htm
+2015,17,Pittsburgh Steelers,Cleveland Browns,2016-01-03,1:02PM,Cleveland,/boxscores/201601030cle.htm
+2015,17,Indianapolis Colts,Tennessee Titans,2016-01-03,1:02PM,Indianapolis,/boxscores/201601030clt.htm
+2015,17,Houston Texans,Jacksonville Jaguars,2016-01-03,1:02PM,Houston,/boxscores/201601030htx.htm
+2015,17,Miami Dolphins,New England Patriots,2016-01-03,1:02PM,Miami,/boxscores/201601030mia.htm
+2015,17,Washington Redskins,Dallas Cowboys,2016-01-03,1:03PM,Dallas,/boxscores/201601030dal.htm
+2015,17,Philadelphia Eagles,New York Giants,2016-01-03,1:03PM,New York,/boxscores/201601030nyg.htm
+2015,17,Carolina Panthers,Tampa Bay Buccaneers,2016-01-03,4:25PM,Carolina,/boxscores/201601030car.htm
+2015,17,Seattle Seahawks,Arizona Cardinals,2016-01-03,4:25PM,Arizona,/boxscores/201601030crd.htm
+2015,17,Denver Broncos,San Diego Chargers,2016-01-03,4:25PM,Denver,/boxscores/201601030den.htm
+2015,17,San Francisco 49ers,St. Louis Rams,2016-01-03,4:25PM,San Francisco,/boxscores/201601030sfo.htm
+2015,17,Kansas City Chiefs,Oakland Raiders,2016-01-03,4:26PM,Kansas City,/boxscores/201601030kan.htm
+2015,17,Minnesota Vikings,Green Bay Packers,2016-01-03,8:30PM,Green Bay,/boxscores/201601030gnb.htm

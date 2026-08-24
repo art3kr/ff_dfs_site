@@ -1,0 +1,257 @@
+year,week,team_1,team_2,date,time,location,boxscore_url
+2012,1,Dallas Cowboys,New York Giants,2012-09-05,8:41PM,New York,/boxscores/201209050nyg.htm
+2012,1,Chicago Bears,Indianapolis Colts,2012-09-09,1:02PM,Chicago,/boxscores/201209090chi.htm
+2012,1,Atlanta Falcons,Kansas City Chiefs,2012-09-09,1:03PM,Kansas City,/boxscores/201209090kan.htm
+2012,1,New York Jets,Buffalo Bills,2012-09-09,1:03PM,New York,/boxscores/201209090nyj.htm
+2012,1,Philadelphia Eagles,Cleveland Browns,2012-09-09,1:03PM,Cleveland,/boxscores/201209090cle.htm
+2012,1,Detroit Lions,St. Louis Rams,2012-09-09,1:03PM,Detroit,/boxscores/201209090det.htm
+2012,1,Houston Texans,Miami Dolphins,2012-09-09,1:03PM,Houston,/boxscores/201209090htx.htm
+2012,1,Washington Redskins,New Orleans Saints,2012-09-09,1:03PM,New Orleans,/boxscores/201209090nor.htm
+2012,1,New England Patriots,Tennessee Titans,2012-09-09,1:03PM,Tennessee,/boxscores/201209090oti.htm
+2012,1,Minnesota Vikings,Jacksonville Jaguars,2012-09-09,1:05PM,Minnesota,/boxscores/201209090min.htm
+2012,1,Arizona Cardinals,Seattle Seahawks,2012-09-09,4:25PM,Arizona,/boxscores/201209090crd.htm
+2012,1,San Francisco 49ers,Green Bay Packers,2012-09-09,4:25PM,Green Bay,/boxscores/201209090gnb.htm
+2012,1,Tampa Bay Buccaneers,Carolina Panthers,2012-09-09,4:26PM,Tampa Bay,/boxscores/201209090tam.htm
+2012,1,Denver Broncos,Pittsburgh Steelers,2012-09-09,8:31PM,Denver,/boxscores/201209090den.htm
+2012,1,Baltimore Ravens,Cincinnati Bengals,2012-09-10,7:10PM,Baltimore,/boxscores/201209100rav.htm
+2012,1,San Diego Chargers,Oakland Raiders,2012-09-10,10:25PM,Oakland,/boxscores/201209100rai.htm
+2012,2,Green Bay Packers,Chicago Bears,2012-09-13,8:29PM,Green Bay,/boxscores/201209130gnb.htm
+2012,2,Buffalo Bills,Kansas City Chiefs,2012-09-16,1:02PM,Buffalo,/boxscores/201209160buf.htm
+2012,2,Cincinnati Bengals,Cleveland Browns,2012-09-16,1:02PM,Cincinnati,/boxscores/201209160cin.htm
+2012,2,Arizona Cardinals,New England Patriots,2012-09-16,1:02PM,New England,/boxscores/201209160nwe.htm
+2012,2,Miami Dolphins,Oakland Raiders,2012-09-16,1:02PM,Miami,/boxscores/201209160mia.htm
+2012,2,Carolina Panthers,New Orleans Saints,2012-09-16,1:03PM,Carolina,/boxscores/201209160car.htm
+2012,2,Indianapolis Colts,Minnesota Vikings,2012-09-16,1:03PM,Indianapolis,/boxscores/201209160clt.htm
+2012,2,Houston Texans,Jacksonville Jaguars,2012-09-16,1:03PM,Jacksonville,/boxscores/201209160jax.htm
+2012,2,New York Giants,Tampa Bay Buccaneers,2012-09-16,1:03PM,New York,/boxscores/201209160nyg.htm
+2012,2,Philadelphia Eagles,Baltimore Ravens,2012-09-16,1:03PM,Philadelphia,/boxscores/201209160phi.htm
+2012,2,St. Louis Rams,Washington Redskins,2012-09-16,4:05PM,St. Louis,/boxscores/201209160ram.htm
+2012,2,Seattle Seahawks,Dallas Cowboys,2012-09-16,4:06PM,Seattle,/boxscores/201209160sea.htm
+2012,2,Pittsburgh Steelers,New York Jets,2012-09-16,4:25PM,Pittsburgh,/boxscores/201209160pit.htm
+2012,2,San Diego Chargers,Tennessee Titans,2012-09-16,4:25PM,San Diego,/boxscores/201209160sdg.htm
+2012,2,San Francisco 49ers,Detroit Lions,2012-09-16,8:30PM,San Francisco,/boxscores/201209160sfo.htm
+2012,2,Atlanta Falcons,Denver Broncos,2012-09-17,8:41PM,Atlanta,/boxscores/201209170atl.htm
+2012,3,New York Giants,Carolina Panthers,2012-09-20,8:20PM,Carolina,/boxscores/201209200car.htm
+2012,3,Buffalo Bills,Cleveland Browns,2012-09-23,1:02PM,Cleveland,/boxscores/201209230cle.htm
+2012,3,Kansas City Chiefs,New Orleans Saints,2012-09-23,1:02PM,New Orleans,/boxscores/201209230nor.htm
+2012,3,Cincinnati Bengals,Washington Redskins,2012-09-23,1:03PM,Washington,/boxscores/201209230was.htm
+2012,3,Jacksonville Jaguars,Indianapolis Colts,2012-09-23,1:03PM,Indianapolis,/boxscores/201209230clt.htm
+2012,3,Tennessee Titans,Detroit Lions,2012-09-23,1:03PM,Tennessee,/boxscores/201209230oti.htm
+2012,3,New York Jets,Miami Dolphins,2012-09-23,1:03PM,Miami,/boxscores/201209230mia.htm
+2012,3,Chicago Bears,St. Louis Rams,2012-09-23,1:04PM,Chicago,/boxscores/201209230chi.htm
+2012,3,Dallas Cowboys,Tampa Bay Buccaneers,2012-09-23,1:05PM,Dallas,/boxscores/201209230dal.htm
+2012,3,Minnesota Vikings,San Francisco 49ers,2012-09-23,1:05PM,Minnesota,/boxscores/201209230min.htm
+2012,3,Atlanta Falcons,San Diego Chargers,2012-09-23,4:05PM,San Diego,/boxscores/201209230sdg.htm
+2012,3,Arizona Cardinals,Philadelphia Eagles,2012-09-23,4:05PM,Arizona,/boxscores/201209230crd.htm
+2012,3,Houston Texans,Denver Broncos,2012-09-23,4:25PM,Denver,/boxscores/201209230den.htm
+2012,3,Oakland Raiders,Pittsburgh Steelers,2012-09-23,4:25PM,Oakland,/boxscores/201209230rai.htm
+2012,3,Baltimore Ravens,New England Patriots,2012-09-23,8:31PM,Baltimore,/boxscores/201209230rav.htm
+2012,3,Seattle Seahawks,Green Bay Packers,2012-09-24,8:41PM,Seattle,/boxscores/201209240sea.htm
+2012,4,Baltimore Ravens,Cleveland Browns,2012-09-27,8:30PM,Baltimore,/boxscores/201209270rav.htm
+2012,4,St. Louis Rams,Seattle Seahawks,2012-09-30,1:00PM,St. Louis,/boxscores/201209300ram.htm
+2012,4,New England Patriots,Buffalo Bills,2012-09-30,1:02PM,Buffalo,/boxscores/201209300buf.htm
+2012,4,Atlanta Falcons,Carolina Panthers,2012-09-30,1:03PM,Atlanta,/boxscores/201209300atl.htm
+2012,4,Minnesota Vikings,Detroit Lions,2012-09-30,1:03PM,Detroit,/boxscores/201209300det.htm
+2012,4,Houston Texans,Tennessee Titans,2012-09-30,1:03PM,Houston,/boxscores/201209300htx.htm
+2012,4,San Diego Chargers,Kansas City Chiefs,2012-09-30,1:03PM,Kansas City,/boxscores/201209300kan.htm
+2012,4,San Francisco 49ers,New York Jets,2012-09-30,1:03PM,New York,/boxscores/201209300nyj.htm
+2012,4,Cincinnati Bengals,Jacksonville Jaguars,2012-09-30,4:05PM,Jacksonville,/boxscores/201209300jax.htm
+2012,4,Arizona Cardinals,Miami Dolphins,2012-09-30,4:05PM,Arizona,/boxscores/201209300crd.htm
+2012,4,Denver Broncos,Oakland Raiders,2012-09-30,4:05PM,Denver,/boxscores/201209300den.htm
+2012,4,Green Bay Packers,New Orleans Saints,2012-09-30,4:25PM,Green Bay,/boxscores/201209300gnb.htm
+2012,4,Washington Redskins,Tampa Bay Buccaneers,2012-09-30,4:25PM,Tampa Bay,/boxscores/201209300tam.htm
+2012,4,Philadelphia Eagles,New York Giants,2012-09-30,8:30PM,Philadelphia,/boxscores/201209300phi.htm
+2012,4,Chicago Bears,Dallas Cowboys,2012-10-01,8:40PM,Dallas,/boxscores/201210010dal.htm
+2012,5,St. Louis Rams,Arizona Cardinals,2012-10-04,8:20PM,St. Louis,/boxscores/201210040ram.htm
+2012,5,New York Giants,Cleveland Browns,2012-10-07,1:02PM,New York,/boxscores/201210070nyg.htm
+2012,5,Baltimore Ravens,Kansas City Chiefs,2012-10-07,1:02PM,Kansas City,/boxscores/201210070kan.htm
+2012,5,Pittsburgh Steelers,Philadelphia Eagles,2012-10-07,1:02PM,Pittsburgh,/boxscores/201210070pit.htm
+2012,5,Indianapolis Colts,Green Bay Packers,2012-10-07,1:03PM,Indianapolis,/boxscores/201210070clt.htm
+2012,5,Miami Dolphins,Cincinnati Bengals,2012-10-07,1:03PM,Cincinnati,/boxscores/201210070cin.htm
+2012,5,Atlanta Falcons,Washington Redskins,2012-10-07,1:04PM,Washington,/boxscores/201210070was.htm
+2012,5,Seattle Seahawks,Carolina Panthers,2012-10-07,4:04PM,Carolina,/boxscores/201210070car.htm
+2012,5,Chicago Bears,Jacksonville Jaguars,2012-10-07,4:05PM,Jacksonville,/boxscores/201210070jax.htm
+2012,5,Minnesota Vikings,Tennessee Titans,2012-10-07,4:15PM,Minnesota,/boxscores/201210070min.htm
+2012,5,San Francisco 49ers,Buffalo Bills,2012-10-07,4:25PM,San Francisco,/boxscores/201210070sfo.htm
+2012,5,New England Patriots,Denver Broncos,2012-10-07,4:25PM,New England,/boxscores/201210070nwe.htm
+2012,5,New Orleans Saints,San Diego Chargers,2012-10-07,8:31PM,New Orleans,/boxscores/201210070nor.htm
+2012,5,Houston Texans,New York Jets,2012-10-08,8:40PM,New York,/boxscores/201210080nyj.htm
+2012,6,Tennessee Titans,Pittsburgh Steelers,2012-10-11,8:29PM,Tennessee,/boxscores/201210110oti.htm
+2012,6,Tampa Bay Buccaneers,Kansas City Chiefs,2012-10-14,1:00PM,Tampa Bay,/boxscores/201210140tam.htm
+2012,6,Miami Dolphins,St. Louis Rams,2012-10-14,1:00PM,Miami,/boxscores/201210140mia.htm
+2012,6,Atlanta Falcons,Oakland Raiders,2012-10-14,1:01PM,Atlanta,/boxscores/201210140atl.htm
+2012,6,New York Jets,Indianapolis Colts,2012-10-14,1:02PM,New York,/boxscores/201210140nyj.htm
+2012,6,Baltimore Ravens,Dallas Cowboys,2012-10-14,1:02PM,Baltimore,/boxscores/201210140rav.htm
+2012,6,Cleveland Browns,Cincinnati Bengals,2012-10-14,1:02PM,Cleveland,/boxscores/201210140cle.htm
+2012,6,Detroit Lions,Philadelphia Eagles,2012-10-14,1:03PM,Philadelphia,/boxscores/201210140phi.htm
+2012,6,Seattle Seahawks,New England Patriots,2012-10-14,4:04PM,Seattle,/boxscores/201210140sea.htm
+2012,6,Buffalo Bills,Arizona Cardinals,2012-10-14,4:05PM,Arizona,/boxscores/201210140crd.htm
+2012,6,New York Giants,San Francisco 49ers,2012-10-14,4:23PM,San Francisco,/boxscores/201210140sfo.htm
+2012,6,Washington Redskins,Minnesota Vikings,2012-10-14,4:24PM,Washington,/boxscores/201210140was.htm
+2012,6,Green Bay Packers,Houston Texans,2012-10-14,8:30PM,Houston,/boxscores/201210140htx.htm
+2012,6,Denver Broncos,San Diego Chargers,2012-10-15,8:40PM,San Diego,/boxscores/201210150sdg.htm
+2012,7,San Francisco 49ers,Seattle Seahawks,2012-10-18,8:29PM,San Francisco,/boxscores/201210180sfo.htm
+2012,7,Green Bay Packers,St. Louis Rams,2012-10-21,1:00PM,St. Louis,/boxscores/201210210ram.htm
+2012,7,New Orleans Saints,Tampa Bay Buccaneers,2012-10-21,1:02PM,Tampa Bay,/boxscores/201210210tam.htm
+2012,7,Tennessee Titans,Buffalo Bills,2012-10-21,1:02PM,Buffalo,/boxscores/201210210buf.htm
+2012,7,Indianapolis Colts,Cleveland Browns,2012-10-21,1:02PM,Indianapolis,/boxscores/201210210clt.htm
+2012,7,Houston Texans,Baltimore Ravens,2012-10-21,1:02PM,Houston,/boxscores/201210210htx.htm
+2012,7,Dallas Cowboys,Carolina Panthers,2012-10-21,1:03PM,Carolina,/boxscores/201210210car.htm
+2012,7,New York Giants,Washington Redskins,2012-10-21,1:03PM,New York,/boxscores/201210210nyg.htm
+2012,7,Minnesota Vikings,Arizona Cardinals,2012-10-21,1:05PM,Minnesota,/boxscores/201210210min.htm
+2012,7,Oakland Raiders,Jacksonville Jaguars,2012-10-21,4:25PM,Oakland,/boxscores/201210210rai.htm
+2012,7,New England Patriots,New York Jets,2012-10-21,4:25PM,New England,/boxscores/201210210nwe.htm
+2012,7,Pittsburgh Steelers,Cincinnati Bengals,2012-10-21,8:30PM,Cincinnati,/boxscores/201210210cin.htm
+2012,7,Chicago Bears,Detroit Lions,2012-10-22,8:40PM,Chicago,/boxscores/201210220chi.htm
+2012,8,Tampa Bay Buccaneers,Minnesota Vikings,2012-10-25,8:29PM,Minnesota,/boxscores/201210250min.htm
+2012,8,Pittsburgh Steelers,Washington Redskins,2012-10-28,1:02PM,Pittsburgh,/boxscores/201210280pit.htm
+2012,8,Atlanta Falcons,Philadelphia Eagles,2012-10-28,1:03PM,Philadelphia,/boxscores/201210280phi.htm
+2012,8,Chicago Bears,Carolina Panthers,2012-10-28,1:03PM,Chicago,/boxscores/201210280chi.htm
+2012,8,Detroit Lions,Seattle Seahawks,2012-10-28,1:03PM,Detroit,/boxscores/201210280det.htm
+2012,8,Green Bay Packers,Jacksonville Jaguars,2012-10-28,1:05PM,Green Bay,/boxscores/201210280gnb.htm
+2012,8,Indianapolis Colts,Tennessee Titans,2012-10-28,1:06PM,Tennessee,/boxscores/201210280oti.htm
+2012,8,Miami Dolphins,New York Jets,2012-10-28,1:06PM,New York,/boxscores/201210280nyj.htm
+2012,8,Cleveland Browns,San Diego Chargers,2012-10-28,1:06PM,Cleveland,/boxscores/201210280cle.htm
+2012,8,New England Patriots,St. Louis Rams,2012-10-28,1:06PM,St. Louis,/boxscores/201210280ram.htm
+2012,8,Oakland Raiders,Kansas City Chiefs,2012-10-28,4:06PM,Kansas City,/boxscores/201210280kan.htm
+2012,8,New York Giants,Dallas Cowboys,2012-10-28,4:25PM,Dallas,/boxscores/201210280dal.htm
+2012,8,Denver Broncos,New Orleans Saints,2012-10-28,8:30PM,Denver,/boxscores/201210280den.htm
+2012,8,San Francisco 49ers,Arizona Cardinals,2012-10-29,8:40PM,Arizona,/boxscores/201210290crd.htm
+2012,9,San Diego Chargers,Kansas City Chiefs,2012-11-01,8:27PM,San Diego,/boxscores/201211010sdg.htm
+2012,9,Houston Texans,Buffalo Bills,2012-11-04,1:02PM,Houston,/boxscores/201211040htx.htm
+2012,9,Denver Broncos,Cincinnati Bengals,2012-11-04,1:02PM,Cincinnati,/boxscores/201211040cin.htm
+2012,9,Indianapolis Colts,Miami Dolphins,2012-11-04,1:02PM,Indianapolis,/boxscores/201211040clt.htm
+2012,9,Green Bay Packers,Arizona Cardinals,2012-11-04,1:02PM,Green Bay,/boxscores/201211040gnb.htm
+2012,9,Baltimore Ravens,Cleveland Browns,2012-11-04,1:03PM,Cleveland,/boxscores/201211040cle.htm
+2012,9,Chicago Bears,Tennessee Titans,2012-11-04,1:04PM,Tennessee,/boxscores/201211040oti.htm
+2012,9,Detroit Lions,Jacksonville Jaguars,2012-11-04,1:04PM,Jacksonville,/boxscores/201211040jax.htm
+2012,9,Carolina Panthers,Washington Redskins,2012-11-04,1:05PM,Washington,/boxscores/201211040was.htm
+2012,9,Tampa Bay Buccaneers,Oakland Raiders,2012-11-04,4:05PM,Oakland,/boxscores/201211040rai.htm
+2012,9,Seattle Seahawks,Minnesota Vikings,2012-11-04,4:06PM,Seattle,/boxscores/201211040sea.htm
+2012,9,Pittsburgh Steelers,New York Giants,2012-11-04,4:26PM,New York,/boxscores/201211040nyg.htm
+2012,9,Atlanta Falcons,Dallas Cowboys,2012-11-04,8:31PM,Atlanta,/boxscores/201211040atl.htm
+2012,9,New Orleans Saints,Philadelphia Eagles,2012-11-05,8:40PM,New Orleans,/boxscores/201211050nor.htm
+2012,10,Indianapolis Colts,Jacksonville Jaguars,2012-11-08,8:30PM,Jacksonville,/boxscores/201211080jax.htm
+2012,10,New Orleans Saints,Atlanta Falcons,2012-11-11,1:02PM,New Orleans,/boxscores/201211110nor.htm
+2012,10,New England Patriots,Buffalo Bills,2012-11-11,1:02PM,New England,/boxscores/201211110nwe.htm
+2012,10,Denver Broncos,Carolina Panthers,2012-11-11,1:02PM,Carolina,/boxscores/201211110car.htm
+2012,10,Baltimore Ravens,Oakland Raiders,2012-11-11,1:02PM,Baltimore,/boxscores/201211110rav.htm
+2012,10,Cincinnati Bengals,New York Giants,2012-11-11,1:03PM,Cincinnati,/boxscores/201211110cin.htm
+2012,10,Tennessee Titans,Miami Dolphins,2012-11-11,1:03PM,Miami,/boxscores/201211110mia.htm
+2012,10,Tampa Bay Buccaneers,San Diego Chargers,2012-11-11,1:03PM,Tampa Bay,/boxscores/201211110tam.htm
+2012,10,Minnesota Vikings,Detroit Lions,2012-11-11,1:05PM,Minnesota,/boxscores/201211110min.htm
+2012,10,Seattle Seahawks,New York Jets,2012-11-11,4:06PM,Seattle,/boxscores/201211110sea.htm
+2012,10,Dallas Cowboys,Philadelphia Eagles,2012-11-11,4:25PM,Philadelphia,/boxscores/201211110phi.htm
+2012,10,San Francisco 49ers,St. Louis Rams,2012-11-11,4:25PM,San Francisco,/boxscores/201211110sfo.htm
+2012,10,Houston Texans,Chicago Bears,2012-11-11,8:31PM,Chicago,/boxscores/201211110chi.htm
+2012,10,Pittsburgh Steelers,Kansas City Chiefs,2012-11-12,8:40PM,Pittsburgh,/boxscores/201211120pit.htm
+2012,11,Buffalo Bills,Miami Dolphins,2012-11-15,8:29PM,Buffalo,/boxscores/201211150buf.htm
+2012,11,New York Jets,St. Louis Rams,2012-11-18,1:00PM,St. Louis,/boxscores/201211180ram.htm
+2012,11,Green Bay Packers,Detroit Lions,2012-11-18,1:02PM,Detroit,/boxscores/201211180det.htm
+2012,11,Atlanta Falcons,Arizona Cardinals,2012-11-18,1:03PM,Atlanta,/boxscores/201211180atl.htm
+2012,11,Cincinnati Bengals,Kansas City Chiefs,2012-11-18,1:03PM,Kansas City,/boxscores/201211180kan.htm
+2012,11,Houston Texans,Jacksonville Jaguars,2012-11-18,1:03PM,Houston,/boxscores/201211180htx.htm
+2012,11,Washington Redskins,Philadelphia Eagles,2012-11-18,1:03PM,Washington,/boxscores/201211180was.htm
+2012,11,Tampa Bay Buccaneers,Carolina Panthers,2012-11-18,1:04PM,Carolina,/boxscores/201211180car.htm
+2012,11,Dallas Cowboys,Cleveland Browns,2012-11-18,1:04PM,Dallas,/boxscores/201211180dal.htm
+2012,11,New Orleans Saints,Oakland Raiders,2012-11-18,4:05PM,Oakland,/boxscores/201211180rai.htm
+2012,11,New England Patriots,Indianapolis Colts,2012-11-18,4:25PM,New England,/boxscores/201211180nwe.htm
+2012,11,Denver Broncos,San Diego Chargers,2012-11-18,4:25PM,Denver,/boxscores/201211180den.htm
+2012,11,Baltimore Ravens,Pittsburgh Steelers,2012-11-18,8:30PM,Pittsburgh,/boxscores/201211180pit.htm
+2012,11,San Francisco 49ers,Chicago Bears,2012-11-19,8:40PM,San Francisco,/boxscores/201211190sfo.htm
+2012,12,Houston Texans,Detroit Lions,2012-11-22,12:39PM,Detroit,/boxscores/201211220det.htm
+2012,12,Washington Redskins,Dallas Cowboys,2012-11-22,4:41PM,Dallas,/boxscores/201211220dal.htm
+2012,12,New England Patriots,New York Jets,2012-11-22,8:31PM,New York,/boxscores/201211220nyj.htm
+2012,12,Chicago Bears,Minnesota Vikings,2012-11-25,1:00PM,Chicago,/boxscores/201211250chi.htm
+2012,12,Atlanta Falcons,Tampa Bay Buccaneers,2012-11-25,1:02PM,Tampa Bay,/boxscores/201211250tam.htm
+2012,12,Cincinnati Bengals,Oakland Raiders,2012-11-25,1:02PM,Cincinnati,/boxscores/201211250cin.htm
+2012,12,Cleveland Browns,Pittsburgh Steelers,2012-11-25,1:02PM,Cleveland,/boxscores/201211250cle.htm
+2012,12,Indianapolis Colts,Buffalo Bills,2012-11-25,1:03PM,Indianapolis,/boxscores/201211250clt.htm
+2012,12,Denver Broncos,Kansas City Chiefs,2012-11-25,1:03PM,Kansas City,/boxscores/201211250kan.htm
+2012,12,Jacksonville Jaguars,Tennessee Titans,2012-11-25,1:03PM,Jacksonville,/boxscores/201211250jax.htm
+2012,12,Miami Dolphins,Seattle Seahawks,2012-11-25,1:03PM,Miami,/boxscores/201211250mia.htm
+2012,12,Baltimore Ravens,San Diego Chargers,2012-11-25,4:05PM,San Diego,/boxscores/201211250sdg.htm
+2012,12,St. Louis Rams,Arizona Cardinals,2012-11-25,4:25PM,Arizona,/boxscores/201211250crd.htm
+2012,12,San Francisco 49ers,New Orleans Saints,2012-11-25,4:25PM,New Orleans,/boxscores/201211250nor.htm
+2012,12,New York Giants,Green Bay Packers,2012-11-25,8:30PM,New York,/boxscores/201211250nyg.htm
+2012,12,Carolina Panthers,Philadelphia Eagles,2012-11-26,8:32PM,Philadelphia,/boxscores/201211260phi.htm
+2012,13,Atlanta Falcons,New Orleans Saints,2012-11-29,8:29PM,Atlanta,/boxscores/201211290atl.htm
+2012,13,St. Louis Rams,San Francisco 49ers,2012-12-02,1:00PM,St. Louis,/boxscores/201212020ram.htm
+2012,13,Buffalo Bills,Jacksonville Jaguars,2012-12-02,1:02PM,Buffalo,/boxscores/201212020buf.htm
+2012,13,Green Bay Packers,Minnesota Vikings,2012-12-02,1:02PM,Green Bay,/boxscores/201212020gnb.htm
+2012,13,Houston Texans,Tennessee Titans,2012-12-02,1:02PM,Tennessee,/boxscores/201212020oti.htm
+2012,13,New England Patriots,Miami Dolphins,2012-12-02,1:02PM,Miami,/boxscores/201212020mia.htm
+2012,13,Kansas City Chiefs,Carolina Panthers,2012-12-02,1:03PM,Kansas City,/boxscores/201212020kan.htm
+2012,13,Seattle Seahawks,Chicago Bears,2012-12-02,1:03PM,Chicago,/boxscores/201212020chi.htm
+2012,13,Indianapolis Colts,Detroit Lions,2012-12-02,1:03PM,Detroit,/boxscores/201212020det.htm
+2012,13,New York Jets,Arizona Cardinals,2012-12-02,1:03PM,New York,/boxscores/201212020nyj.htm
+2012,13,Denver Broncos,Tampa Bay Buccaneers,2012-12-02,4:05PM,Denver,/boxscores/201212020den.htm
+2012,13,Cincinnati Bengals,San Diego Chargers,2012-12-02,4:25PM,San Diego,/boxscores/201212020sdg.htm
+2012,13,Cleveland Browns,Oakland Raiders,2012-12-02,4:25PM,Oakland,/boxscores/201212020rai.htm
+2012,13,Pittsburgh Steelers,Baltimore Ravens,2012-12-02,4:25PM,Baltimore,/boxscores/201212020rav.htm
+2012,13,Dallas Cowboys,Philadelphia Eagles,2012-12-02,8:20PM,Dallas,/boxscores/201212020dal.htm
+2012,13,Washington Redskins,New York Giants,2012-12-03,8:40PM,Washington,/boxscores/201212030was.htm
+2012,14,Denver Broncos,Oakland Raiders,2012-12-06,8:30PM,Oakland,/boxscores/201212060rai.htm
+2012,14,St. Louis Rams,Buffalo Bills,2012-12-09,1:02PM,Buffalo,/boxscores/201212090buf.htm
+2012,14,Cleveland Browns,Kansas City Chiefs,2012-12-09,1:02PM,Cleveland,/boxscores/201212090cle.htm
+2012,14,Indianapolis Colts,Tennessee Titans,2012-12-09,1:02PM,Indianapolis,/boxscores/201212090clt.htm
+2012,14,New York Jets,Jacksonville Jaguars,2012-12-09,1:02PM,Jacksonville,/boxscores/201212090jax.htm
+2012,14,San Diego Chargers,Pittsburgh Steelers,2012-12-09,1:02PM,Pittsburgh,/boxscores/201212090pit.htm
+2012,14,Dallas Cowboys,Cincinnati Bengals,2012-12-09,1:03PM,Cincinnati,/boxscores/201212090cin.htm
+2012,14,Philadelphia Eagles,Tampa Bay Buccaneers,2012-12-09,1:03PM,Tampa Bay,/boxscores/201212090tam.htm
+2012,14,Washington Redskins,Baltimore Ravens,2012-12-09,1:03PM,Washington,/boxscores/201212090was.htm
+2012,14,Carolina Panthers,Atlanta Falcons,2012-12-09,1:04PM,Carolina,/boxscores/201212090car.htm
+2012,14,Minnesota Vikings,Chicago Bears,2012-12-09,1:05PM,Minnesota,/boxscores/201212090min.htm
+2012,14,San Francisco 49ers,Miami Dolphins,2012-12-09,4:05PM,San Francisco,/boxscores/201212090sfo.htm
+2012,14,Seattle Seahawks,Arizona Cardinals,2012-12-09,4:26PM,Seattle,/boxscores/201212090sea.htm
+2012,14,New York Giants,New Orleans Saints,2012-12-09,4:26PM,New York,/boxscores/201212090nyg.htm
+2012,14,Green Bay Packers,Detroit Lions,2012-12-09,8:30PM,Green Bay,/boxscores/201212090gnb.htm
+2012,14,New England Patriots,Houston Texans,2012-12-10,8:40PM,New England,/boxscores/201212100nwe.htm
+2012,15,Cincinnati Bengals,Philadelphia Eagles,2012-12-13,8:30PM,Philadelphia,/boxscores/201212130phi.htm
+2012,15,Minnesota Vikings,St. Louis Rams,2012-12-16,1:00PM,St. Louis,/boxscores/201212160ram.htm
+2012,15,Houston Texans,Indianapolis Colts,2012-12-16,1:02PM,Houston,/boxscores/201212160htx.htm
+2012,15,Denver Broncos,Baltimore Ravens,2012-12-16,1:02PM,Baltimore,/boxscores/201212160rav.htm
+2012,15,Atlanta Falcons,New York Giants,2012-12-16,1:03PM,Atlanta,/boxscores/201212160atl.htm
+2012,15,Green Bay Packers,Chicago Bears,2012-12-16,1:03PM,Chicago,/boxscores/201212160chi.htm
+2012,15,Washington Redskins,Cleveland Browns,2012-12-16,1:03PM,Cleveland,/boxscores/201212160cle.htm
+2012,15,Miami Dolphins,Jacksonville Jaguars,2012-12-16,1:03PM,Miami,/boxscores/201212160mia.htm
+2012,15,New Orleans Saints,Tampa Bay Buccaneers,2012-12-16,1:03PM,New Orleans,/boxscores/201212160nor.htm
+2012,15,Seattle Seahawks,Buffalo Bills,2012-12-16,4:05PM,Buffalo,/boxscores/201212160buf.htm
+2012,15,Carolina Panthers,San Diego Chargers,2012-12-16,4:05PM,San Diego,/boxscores/201212160sdg.htm
+2012,15,Arizona Cardinals,Detroit Lions,2012-12-16,4:05PM,Arizona,/boxscores/201212160crd.htm
+2012,15,Dallas Cowboys,Pittsburgh Steelers,2012-12-16,4:25PM,Dallas,/boxscores/201212160dal.htm
+2012,15,Oakland Raiders,Kansas City Chiefs,2012-12-16,4:25PM,Oakland,/boxscores/201212160rai.htm
+2012,15,San Francisco 49ers,New England Patriots,2012-12-16,8:30PM,New England,/boxscores/201212160nwe.htm
+2012,15,Tennessee Titans,New York Jets,2012-12-17,8:40PM,Tennessee,/boxscores/201212170oti.htm
+2012,16,Atlanta Falcons,Detroit Lions,2012-12-22,8:40PM,Detroit,/boxscores/201212220det.htm
+2012,16,Miami Dolphins,Buffalo Bills,2012-12-23,1:02PM,Miami,/boxscores/201212230mia.htm
+2012,16,Cincinnati Bengals,Pittsburgh Steelers,2012-12-23,1:02PM,Pittsburgh,/boxscores/201212230pit.htm
+2012,16,New Orleans Saints,Dallas Cowboys,2012-12-23,1:02PM,Dallas,/boxscores/201212230dal.htm
+2012,16,Green Bay Packers,Tennessee Titans,2012-12-23,1:02PM,Green Bay,/boxscores/201212230gnb.htm
+2012,16,New England Patriots,Jacksonville Jaguars,2012-12-23,1:02PM,Jacksonville,/boxscores/201212230jax.htm
+2012,16,Indianapolis Colts,Kansas City Chiefs,2012-12-23,1:03PM,Kansas City,/boxscores/201212230kan.htm
+2012,16,Minnesota Vikings,Houston Texans,2012-12-23,1:03PM,Houston,/boxscores/201212230htx.htm
+2012,16,San Diego Chargers,New York Jets,2012-12-23,1:03PM,New York,/boxscores/201212230nyj.htm
+2012,16,Washington Redskins,Philadelphia Eagles,2012-12-23,1:03PM,Philadelphia,/boxscores/201212230phi.htm
+2012,16,St. Louis Rams,Tampa Bay Buccaneers,2012-12-23,1:03PM,Tampa Bay,/boxscores/201212230tam.htm
+2012,16,Carolina Panthers,Oakland Raiders,2012-12-23,1:04PM,Carolina,/boxscores/201212230car.htm
+2012,16,Denver Broncos,Cleveland Browns,2012-12-23,4:05PM,Denver,/boxscores/201212230den.htm
+2012,16,Chicago Bears,Arizona Cardinals,2012-12-23,4:25PM,Arizona,/boxscores/201212230crd.htm
+2012,16,Baltimore Ravens,New York Giants,2012-12-23,4:25PM,Baltimore,/boxscores/201212230rav.htm
+2012,16,Seattle Seahawks,San Francisco 49ers,2012-12-23,8:31PM,Seattle,/boxscores/201212230sea.htm
+2012,17,Tampa Bay Buccaneers,Atlanta Falcons,2012-12-30,1:02PM,Atlanta,/boxscores/201212300atl.htm
+2012,17,Buffalo Bills,New York Jets,2012-12-30,1:02PM,Buffalo,/boxscores/201212300buf.htm
+2012,17,Pittsburgh Steelers,Cleveland Browns,2012-12-30,1:02PM,Pittsburgh,/boxscores/201212300pit.htm
+2012,17,Indianapolis Colts,Houston Texans,2012-12-30,1:02PM,Indianapolis,/boxscores/201212300clt.htm
+2012,17,Tennessee Titans,Jacksonville Jaguars,2012-12-30,1:02PM,Tennessee,/boxscores/201212300oti.htm
+2012,17,Carolina Panthers,New Orleans Saints,2012-12-30,1:03PM,New Orleans,/boxscores/201212300nor.htm
+2012,17,Chicago Bears,Detroit Lions,2012-12-30,1:03PM,Detroit,/boxscores/201212300det.htm
+2012,17,Cincinnati Bengals,Baltimore Ravens,2012-12-30,1:03PM,Cincinnati,/boxscores/201212300cin.htm
+2012,17,New York Giants,Philadelphia Eagles,2012-12-30,1:04PM,New York,/boxscores/201212300nyg.htm
+2012,17,San Diego Chargers,Oakland Raiders,2012-12-30,4:21PM,San Diego,/boxscores/201212300sdg.htm
+2012,17,San Francisco 49ers,Arizona Cardinals,2012-12-30,4:25PM,San Francisco,/boxscores/201212300sfo.htm
+2012,17,Denver Broncos,Kansas City Chiefs,2012-12-30,4:25PM,Denver,/boxscores/201212300den.htm
+2012,17,Minnesota Vikings,Green Bay Packers,2012-12-30,4:25PM,Minnesota,/boxscores/201212300min.htm
+2012,17,New England Patriots,Miami Dolphins,2012-12-30,4:25PM,New England,/boxscores/201212300nwe.htm
+2012,17,Seattle Seahawks,St. Louis Rams,2012-12-30,4:26PM,Seattle,/boxscores/201212300sea.htm
+2012,17,Washington Redskins,Dallas Cowboys,2012-12-30,8:31PM,Washington,/boxscores/201212300was.htm

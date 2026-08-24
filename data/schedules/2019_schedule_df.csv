@@ -1,0 +1,257 @@
+year,week,team_1,team_2,date,time,location,boxscore_url
+2019,1,Green Bay Packers,Chicago Bears,2019-09-05,8:20PM,Chicago,/boxscores/201909050chi.htm
+2019,1,Minnesota Vikings,Atlanta Falcons,2019-09-08,1:00PM,Minnesota,/boxscores/201909080min.htm
+2019,1,Buffalo Bills,New York Jets,2019-09-08,1:00PM,New York,/boxscores/201909080nyj.htm
+2019,1,Los Angeles Rams,Carolina Panthers,2019-09-08,1:00PM,Carolina,/boxscores/201909080car.htm
+2019,1,Tennessee Titans,Cleveland Browns,2019-09-08,1:00PM,Cleveland,/boxscores/201909080cle.htm
+2019,1,Kansas City Chiefs,Jacksonville Jaguars,2019-09-08,1:00PM,Jacksonville,/boxscores/201909080jax.htm
+2019,1,Baltimore Ravens,Miami Dolphins,2019-09-08,1:00PM,Miami,/boxscores/201909080mia.htm
+2019,1,Philadelphia Eagles,Washington Redskins,2019-09-08,1:00PM,Philadelphia,/boxscores/201909080phi.htm
+2019,1,Seattle Seahawks,Cincinnati Bengals,2019-09-08,4:05PM,Seattle,/boxscores/201909080sea.htm
+2019,1,Los Angeles Chargers,Indianapolis Colts,2019-09-08,4:05PM,Los Angeles,/boxscores/201909080sdg.htm
+2019,1,Detroit Lions,Arizona Cardinals,2019-09-08,4:25PM,Arizona,/boxscores/201909080crd.htm
+2019,1,Dallas Cowboys,New York Giants,2019-09-08,4:25PM,Dallas,/boxscores/201909080dal.htm
+2019,1,San Francisco 49ers,Tampa Bay Buccaneers,2019-09-08,4:25PM,Tampa Bay,/boxscores/201909080tam.htm
+2019,1,New England Patriots,Pittsburgh Steelers,2019-09-08,8:20PM,New England,/boxscores/201909080nwe.htm
+2019,1,New Orleans Saints,Houston Texans,2019-09-09,7:10PM,New Orleans,/boxscores/201909090nor.htm
+2019,1,Oakland Raiders,Denver Broncos,2019-09-09,10:20PM,Oakland,/boxscores/201909090rai.htm
+2019,2,Tampa Bay Buccaneers,Carolina Panthers,2019-09-12,8:20PM,Carolina,/boxscores/201909120car.htm
+2019,2,Buffalo Bills,New York Giants,2019-09-15,1:00PM,New York,/boxscores/201909150nyg.htm
+2019,2,San Francisco 49ers,Cincinnati Bengals,2019-09-15,1:00PM,Cincinnati,/boxscores/201909150cin.htm
+2019,2,Indianapolis Colts,Tennessee Titans,2019-09-15,1:00PM,Tennessee,/boxscores/201909150oti.htm
+2019,2,Baltimore Ravens,Arizona Cardinals,2019-09-15,1:00PM,Baltimore,/boxscores/201909150rav.htm
+2019,2,Dallas Cowboys,Washington Redskins,2019-09-15,1:00PM,Washington,/boxscores/201909150was.htm
+2019,2,Detroit Lions,Los Angeles Chargers,2019-09-15,1:00PM,Detroit,/boxscores/201909150det.htm
+2019,2,Green Bay Packers,Minnesota Vikings,2019-09-15,1:00PM,Green Bay,/boxscores/201909150gnb.htm
+2019,2,Houston Texans,Jacksonville Jaguars,2019-09-15,1:00PM,Houston,/boxscores/201909150htx.htm
+2019,2,New England Patriots,Miami Dolphins,2019-09-15,1:00PM,Miami,/boxscores/201909150mia.htm
+2019,2,Seattle Seahawks,Pittsburgh Steelers,2019-09-15,1:00PM,Pittsburgh,/boxscores/201909150pit.htm
+2019,2,Kansas City Chiefs,Oakland Raiders,2019-09-15,4:05PM,Oakland,/boxscores/201909150rai.htm
+2019,2,Chicago Bears,Denver Broncos,2019-09-15,4:25PM,Denver,/boxscores/201909150den.htm
+2019,2,Los Angeles Rams,New Orleans Saints,2019-09-15,4:25PM,Los Angeles,/boxscores/201909150ram.htm
+2019,2,Atlanta Falcons,Philadelphia Eagles,2019-09-15,8:20PM,Atlanta,/boxscores/201909150atl.htm
+2019,2,Cleveland Browns,New York Jets,2019-09-16,8:15PM,New York,/boxscores/201909160nyj.htm
+2019,3,Jacksonville Jaguars,Tennessee Titans,2019-09-19,8:20PM,Jacksonville,/boxscores/201909190jax.htm
+2019,3,Indianapolis Colts,Atlanta Falcons,2019-09-22,1:00PM,Indianapolis,/boxscores/201909220clt.htm
+2019,3,Buffalo Bills,Cincinnati Bengals,2019-09-22,1:00PM,Buffalo,/boxscores/201909220buf.htm
+2019,3,Dallas Cowboys,Miami Dolphins,2019-09-22,1:00PM,Dallas,/boxscores/201909220dal.htm
+2019,3,Green Bay Packers,Denver Broncos,2019-09-22,1:00PM,Green Bay,/boxscores/201909220gnb.htm
+2019,3,Detroit Lions,Philadelphia Eagles,2019-09-22,1:00PM,Philadelphia,/boxscores/201909220phi.htm
+2019,3,Kansas City Chiefs,Baltimore Ravens,2019-09-22,1:00PM,Kansas City,/boxscores/201909220kan.htm
+2019,3,Minnesota Vikings,Oakland Raiders,2019-09-22,1:00PM,Minnesota,/boxscores/201909220min.htm
+2019,3,New England Patriots,New York Jets,2019-09-22,1:00PM,New England,/boxscores/201909220nwe.htm
+2019,3,Carolina Panthers,Arizona Cardinals,2019-09-22,4:05PM,Arizona,/boxscores/201909220crd.htm
+2019,3,New York Giants,Tampa Bay Buccaneers,2019-09-22,4:05PM,Tampa Bay,/boxscores/201909220tam.htm
+2019,3,Houston Texans,Los Angeles Chargers,2019-09-22,4:25PM,Los Angeles,/boxscores/201909220sdg.htm
+2019,3,New Orleans Saints,Seattle Seahawks,2019-09-22,4:25PM,Seattle,/boxscores/201909220sea.htm
+2019,3,San Francisco 49ers,Pittsburgh Steelers,2019-09-22,4:25PM,San Francisco,/boxscores/201909220sfo.htm
+2019,3,Los Angeles Rams,Cleveland Browns,2019-09-22,8:20PM,Cleveland,/boxscores/201909220cle.htm
+2019,3,Chicago Bears,Washington Redskins,2019-09-23,8:15PM,Washington,/boxscores/201909230was.htm
+2019,4,Philadelphia Eagles,Green Bay Packers,2019-09-26,8:20PM,Green Bay,/boxscores/201909260gnb.htm
+2019,4,Tennessee Titans,Atlanta Falcons,2019-09-29,1:00PM,Atlanta,/boxscores/201909290atl.htm
+2019,4,New England Patriots,Buffalo Bills,2019-09-29,1:00PM,Buffalo,/boxscores/201909290buf.htm
+2019,4,Carolina Panthers,Houston Texans,2019-09-29,1:00PM,Houston,/boxscores/201909290htx.htm
+2019,4,Cleveland Browns,Baltimore Ravens,2019-09-29,1:00PM,Baltimore,/boxscores/201909290rav.htm
+2019,4,Oakland Raiders,Indianapolis Colts,2019-09-29,1:00PM,Indianapolis,/boxscores/201909290clt.htm
+2019,4,Kansas City Chiefs,Detroit Lions,2019-09-29,1:00PM,Detroit,/boxscores/201909290det.htm
+2019,4,Los Angeles Chargers,Miami Dolphins,2019-09-29,1:00PM,Miami,/boxscores/201909290mia.htm
+2019,4,New York Giants,Washington Redskins,2019-09-29,1:00PM,New York,/boxscores/201909290nyg.htm
+2019,4,Seattle Seahawks,Arizona Cardinals,2019-09-29,4:05PM,Arizona,/boxscores/201909290crd.htm
+2019,4,Tampa Bay Buccaneers,Los Angeles Rams,2019-09-29,4:05PM,Los Angeles,/boxscores/201909290ram.htm
+2019,4,Chicago Bears,Minnesota Vikings,2019-09-29,4:25PM,Chicago,/boxscores/201909290chi.htm
+2019,4,Jacksonville Jaguars,Denver Broncos,2019-09-29,4:25PM,Denver,/boxscores/201909290den.htm
+2019,4,New Orleans Saints,Dallas Cowboys,2019-09-29,8:20PM,New Orleans,/boxscores/201909290nor.htm
+2019,4,Pittsburgh Steelers,Cincinnati Bengals,2019-09-30,8:15PM,Pittsburgh,/boxscores/201909300pit.htm
+2019,5,Seattle Seahawks,Los Angeles Rams,2019-10-03,8:20PM,Seattle,/boxscores/201910030sea.htm
+2019,5,Philadelphia Eagles,New York Jets,2019-10-06,1:00PM,Philadelphia,/boxscores/201910060phi.htm
+2019,5,Houston Texans,Atlanta Falcons,2019-10-06,1:00PM,Houston,/boxscores/201910060htx.htm
+2019,5,Buffalo Bills,Tennessee Titans,2019-10-06,1:00PM,Tennessee,/boxscores/201910060oti.htm
+2019,5,Carolina Panthers,Jacksonville Jaguars,2019-10-06,1:00PM,Carolina,/boxscores/201910060car.htm
+2019,5,Oakland Raiders,Chicago Bears,2019-10-06,1:00PM,Oakland,/boxscores/201910060rai.htm
+2019,5,Arizona Cardinals,Cincinnati Bengals,2019-10-06,1:00PM,Cincinnati,/boxscores/201910060cin.htm
+2019,5,Minnesota Vikings,New York Giants,2019-10-06,1:00PM,New York,/boxscores/201910060nyg.htm
+2019,5,New Orleans Saints,Tampa Bay Buccaneers,2019-10-06,1:00PM,New Orleans,/boxscores/201910060nor.htm
+2019,5,New England Patriots,Washington Redskins,2019-10-06,1:00PM,Washington,/boxscores/201910060was.htm
+2019,5,Baltimore Ravens,Pittsburgh Steelers,2019-10-06,1:00PM,Pittsburgh,/boxscores/201910060pit.htm
+2019,5,Denver Broncos,Los Angeles Chargers,2019-10-06,4:05PM,Los Angeles,/boxscores/201910060sdg.htm
+2019,5,Green Bay Packers,Dallas Cowboys,2019-10-06,4:25PM,Dallas,/boxscores/201910060dal.htm
+2019,5,Indianapolis Colts,Kansas City Chiefs,2019-10-06,8:20PM,Kansas City,/boxscores/201910060kan.htm
+2019,5,San Francisco 49ers,Cleveland Browns,2019-10-07,8:15PM,San Francisco,/boxscores/201910070sfo.htm
+2019,6,New England Patriots,New York Giants,2019-10-10,8:20PM,New England,/boxscores/201910100nwe.htm
+2019,6,Carolina Panthers,Tampa Bay Buccaneers,2019-10-13,9:30AM,Tampa Bay,/boxscores/201910130tam.htm
+2019,6,Washington Redskins,Miami Dolphins,2019-10-13,1:00PM,Miami,/boxscores/201910130mia.htm
+2019,6,Baltimore Ravens,Cincinnati Bengals,2019-10-13,1:00PM,Baltimore,/boxscores/201910130rav.htm
+2019,6,Seattle Seahawks,Cleveland Browns,2019-10-13,1:00PM,Cleveland,/boxscores/201910130cle.htm
+2019,6,Houston Texans,Kansas City Chiefs,2019-10-13,1:00PM,Kansas City,/boxscores/201910130kan.htm
+2019,6,New Orleans Saints,Jacksonville Jaguars,2019-10-13,1:00PM,Jacksonville,/boxscores/201910130jax.htm
+2019,6,Minnesota Vikings,Philadelphia Eagles,2019-10-13,1:00PM,Minnesota,/boxscores/201910130min.htm
+2019,6,Arizona Cardinals,Atlanta Falcons,2019-10-13,4:05PM,Arizona,/boxscores/201910130crd.htm
+2019,6,San Francisco 49ers,Los Angeles Rams,2019-10-13,4:05PM,Los Angeles,/boxscores/201910130ram.htm
+2019,6,New York Jets,Dallas Cowboys,2019-10-13,4:25PM,New York,/boxscores/201910130nyj.htm
+2019,6,Denver Broncos,Tennessee Titans,2019-10-13,4:25PM,Denver,/boxscores/201910130den.htm
+2019,6,Pittsburgh Steelers,Los Angeles Chargers,2019-10-13,8:20PM,Los Angeles,/boxscores/201910130sdg.htm
+2019,6,Green Bay Packers,Detroit Lions,2019-10-14,8:15PM,Green Bay,/boxscores/201910140gnb.htm
+2019,7,Kansas City Chiefs,Denver Broncos,2019-10-17,8:20PM,Denver,/boxscores/201910170den.htm
+2019,7,Buffalo Bills,Miami Dolphins,2019-10-20,1:00PM,Buffalo,/boxscores/201910200buf.htm
+2019,7,Indianapolis Colts,Houston Texans,2019-10-20,1:00PM,Indianapolis,/boxscores/201910200clt.htm
+2019,7,Minnesota Vikings,Detroit Lions,2019-10-20,1:00PM,Detroit,/boxscores/201910200det.htm
+2019,7,San Francisco 49ers,Washington Redskins,2019-10-20,1:00PM,Washington,/boxscores/201910200was.htm
+2019,7,Los Angeles Rams,Atlanta Falcons,2019-10-20,1:00PM,Atlanta,/boxscores/201910200atl.htm
+2019,7,Jacksonville Jaguars,Cincinnati Bengals,2019-10-20,1:00PM,Cincinnati,/boxscores/201910200cin.htm
+2019,7,Arizona Cardinals,New York Giants,2019-10-20,1:00PM,New York,/boxscores/201910200nyg.htm
+2019,7,Green Bay Packers,Oakland Raiders,2019-10-20,1:00PM,Green Bay,/boxscores/201910200gnb.htm
+2019,7,Tennessee Titans,Los Angeles Chargers,2019-10-20,4:05PM,Tennessee,/boxscores/201910200oti.htm
+2019,7,New Orleans Saints,Chicago Bears,2019-10-20,4:25PM,Chicago,/boxscores/201910200chi.htm
+2019,7,Baltimore Ravens,Seattle Seahawks,2019-10-20,4:25PM,Seattle,/boxscores/201910200sea.htm
+2019,7,Dallas Cowboys,Philadelphia Eagles,2019-10-20,8:20PM,Dallas,/boxscores/201910200dal.htm
+2019,7,New England Patriots,New York Jets,2019-10-21,8:15PM,New York,/boxscores/201910210nyj.htm
+2019,8,Minnesota Vikings,Washington Redskins,2019-10-24,8:20PM,Minnesota,/boxscores/201910240min.htm
+2019,8,Philadelphia Eagles,Buffalo Bills,2019-10-27,1:00PM,Buffalo,/boxscores/201910270buf.htm
+2019,8,Los Angeles Chargers,Chicago Bears,2019-10-27,1:00PM,Chicago,/boxscores/201910270chi.htm
+2019,8,Indianapolis Colts,Denver Broncos,2019-10-27,1:00PM,Indianapolis,/boxscores/201910270clt.htm
+2019,8,Detroit Lions,New York Giants,2019-10-27,1:00PM,Detroit,/boxscores/201910270det.htm
+2019,8,Seattle Seahawks,Atlanta Falcons,2019-10-27,1:00PM,Atlanta,/boxscores/201910270atl.htm
+2019,8,Los Angeles Rams,Cincinnati Bengals,2019-10-27,1:00PM,Los Angeles,/boxscores/201910270ram.htm
+2019,8,New Orleans Saints,Arizona Cardinals,2019-10-27,1:00PM,New Orleans,/boxscores/201910270nor.htm
+2019,8,Jacksonville Jaguars,New York Jets,2019-10-27,1:00PM,Jacksonville,/boxscores/201910270jax.htm
+2019,8,Tennessee Titans,Tampa Bay Buccaneers,2019-10-27,1:00PM,Tennessee,/boxscores/201910270oti.htm
+2019,8,San Francisco 49ers,Carolina Panthers,2019-10-27,4:05PM,San Francisco,/boxscores/201910270sfo.htm
+2019,8,New England Patriots,Cleveland Browns,2019-10-27,4:25PM,New England,/boxscores/201910270nwe.htm
+2019,8,Houston Texans,Oakland Raiders,2019-10-27,4:25PM,Houston,/boxscores/201910270htx.htm
+2019,8,Green Bay Packers,Kansas City Chiefs,2019-10-27,8:20PM,Kansas City,/boxscores/201910270kan.htm
+2019,8,Pittsburgh Steelers,Miami Dolphins,2019-10-28,8:15PM,Pittsburgh,/boxscores/201910280pit.htm
+2019,9,San Francisco 49ers,Arizona Cardinals,2019-10-31,8:20PM,Arizona,/boxscores/201910310crd.htm
+2019,9,Houston Texans,Jacksonville Jaguars,2019-11-03,9:30AM,Jacksonville,/boxscores/201911030jax.htm
+2019,9,Buffalo Bills,Washington Redskins,2019-11-03,1:00PM,Buffalo,/boxscores/201911030buf.htm
+2019,9,Carolina Panthers,Tennessee Titans,2019-11-03,1:00PM,Carolina,/boxscores/201911030car.htm
+2019,9,Philadelphia Eagles,Chicago Bears,2019-11-03,1:00PM,Philadelphia,/boxscores/201911030phi.htm
+2019,9,Pittsburgh Steelers,Indianapolis Colts,2019-11-03,1:00PM,Pittsburgh,/boxscores/201911030pit.htm
+2019,9,Miami Dolphins,New York Jets,2019-11-03,1:00PM,Miami,/boxscores/201911030mia.htm
+2019,9,Kansas City Chiefs,Minnesota Vikings,2019-11-03,1:00PM,Kansas City,/boxscores/201911030kan.htm
+2019,9,Oakland Raiders,Detroit Lions,2019-11-03,4:05PM,Oakland,/boxscores/201911030rai.htm
+2019,9,Seattle Seahawks,Tampa Bay Buccaneers,2019-11-03,4:05PM,Seattle,/boxscores/201911030sea.htm
+2019,9,Denver Broncos,Cleveland Browns,2019-11-03,4:25PM,Denver,/boxscores/201911030den.htm
+2019,9,Los Angeles Chargers,Green Bay Packers,2019-11-03,4:25PM,Los Angeles,/boxscores/201911030sdg.htm
+2019,9,Baltimore Ravens,New England Patriots,2019-11-03,8:20PM,Baltimore,/boxscores/201911030rav.htm
+2019,9,Dallas Cowboys,New York Giants,2019-11-04,8:15PM,New York,/boxscores/201911040nyg.htm
+2019,10,Oakland Raiders,Los Angeles Chargers,2019-11-07,8:20PM,Oakland,/boxscores/201911070rai.htm
+2019,10,Atlanta Falcons,New Orleans Saints,2019-11-10,1:00PM,New Orleans,/boxscores/201911100nor.htm
+2019,10,Cleveland Browns,Buffalo Bills,2019-11-10,1:00PM,Cleveland,/boxscores/201911100cle.htm
+2019,10,Chicago Bears,Detroit Lions,2019-11-10,1:00PM,Chicago,/boxscores/201911100chi.htm
+2019,10,Baltimore Ravens,Cincinnati Bengals,2019-11-10,1:00PM,Cincinnati,/boxscores/201911100cin.htm
+2019,10,Tampa Bay Buccaneers,Arizona Cardinals,2019-11-10,1:00PM,Tampa Bay,/boxscores/201911100tam.htm
+2019,10,Tennessee Titans,Kansas City Chiefs,2019-11-10,1:00PM,Tennessee,/boxscores/201911100oti.htm
+2019,10,New York Jets,New York Giants,2019-11-10,1:00PM,New York,/boxscores/201911100nyj.htm
+2019,10,Miami Dolphins,Indianapolis Colts,2019-11-10,4:05PM,Indianapolis,/boxscores/201911100clt.htm
+2019,10,Green Bay Packers,Carolina Panthers,2019-11-10,4:25PM,Green Bay,/boxscores/201911100gnb.htm
+2019,10,Pittsburgh Steelers,Los Angeles Rams,2019-11-10,4:25PM,Pittsburgh,/boxscores/201911100pit.htm
+2019,10,Minnesota Vikings,Dallas Cowboys,2019-11-10,8:20PM,Dallas,/boxscores/201911100dal.htm
+2019,10,Seattle Seahawks,San Francisco 49ers,2019-11-11,8:15PM,San Francisco,/boxscores/201911110sfo.htm
+2019,11,Cleveland Browns,Pittsburgh Steelers,2019-11-14,8:20PM,Cleveland,/boxscores/201911140cle.htm
+2019,11,Atlanta Falcons,Carolina Panthers,2019-11-17,1:00PM,Carolina,/boxscores/201911170car.htm
+2019,11,Buffalo Bills,Miami Dolphins,2019-11-17,1:00PM,Miami,/boxscores/201911170mia.htm
+2019,11,Indianapolis Colts,Jacksonville Jaguars,2019-11-17,1:00PM,Indianapolis,/boxscores/201911170clt.htm
+2019,11,Dallas Cowboys,Detroit Lions,2019-11-17,1:00PM,Detroit,/boxscores/201911170det.htm
+2019,11,Minnesota Vikings,Denver Broncos,2019-11-17,1:00PM,Minnesota,/boxscores/201911170min.htm
+2019,11,Baltimore Ravens,Houston Texans,2019-11-17,1:00PM,Baltimore,/boxscores/201911170rav.htm
+2019,11,New Orleans Saints,Tampa Bay Buccaneers,2019-11-17,1:00PM,Tampa Bay,/boxscores/201911170tam.htm
+2019,11,New York Jets,Washington Redskins,2019-11-17,1:00PM,Washington,/boxscores/201911170was.htm
+2019,11,San Francisco 49ers,Arizona Cardinals,2019-11-17,4:05PM,San Francisco,/boxscores/201911170sfo.htm
+2019,11,Oakland Raiders,Cincinnati Bengals,2019-11-17,4:25PM,Oakland,/boxscores/201911170rai.htm
+2019,11,New England Patriots,Philadelphia Eagles,2019-11-17,4:25PM,Philadelphia,/boxscores/201911170phi.htm
+2019,11,Los Angeles Rams,Chicago Bears,2019-11-17,8:20PM,Los Angeles,/boxscores/201911170ram.htm
+2019,11,Kansas City Chiefs,Los Angeles Chargers,2019-11-18,8:15PM,Los Angeles,/boxscores/201911180sdg.htm
+2019,12,Houston Texans,Indianapolis Colts,2019-11-21,8:20PM,Houston,/boxscores/201911210htx.htm
+2019,12,Tampa Bay Buccaneers,Atlanta Falcons,2019-11-24,1:00PM,Atlanta,/boxscores/201911240atl.htm
+2019,12,Buffalo Bills,Denver Broncos,2019-11-24,1:00PM,Buffalo,/boxscores/201911240buf.htm
+2019,12,New Orleans Saints,Carolina Panthers,2019-11-24,1:00PM,New Orleans,/boxscores/201911240nor.htm
+2019,12,Chicago Bears,New York Giants,2019-11-24,1:00PM,Chicago,/boxscores/201911240chi.htm
+2019,12,Pittsburgh Steelers,Cincinnati Bengals,2019-11-24,1:00PM,Cincinnati,/boxscores/201911240cin.htm
+2019,12,Cleveland Browns,Miami Dolphins,2019-11-24,1:00PM,Cleveland,/boxscores/201911240cle.htm
+2019,12,Washington Redskins,Detroit Lions,2019-11-24,1:00PM,Washington,/boxscores/201911240was.htm
+2019,12,New York Jets,Oakland Raiders,2019-11-24,1:00PM,New York,/boxscores/201911240nyj.htm
+2019,12,Seattle Seahawks,Philadelphia Eagles,2019-11-24,1:00PM,Philadelphia,/boxscores/201911240phi.htm
+2019,12,Tennessee Titans,Jacksonville Jaguars,2019-11-24,4:05PM,Tennessee,/boxscores/201911240oti.htm
+2019,12,New England Patriots,Dallas Cowboys,2019-11-24,4:25PM,New England,/boxscores/201911240nwe.htm
+2019,12,San Francisco 49ers,Green Bay Packers,2019-11-24,8:20PM,San Francisco,/boxscores/201911240sfo.htm
+2019,12,Baltimore Ravens,Los Angeles Rams,2019-11-25,8:15PM,Los Angeles,/boxscores/201911250ram.htm
+2019,13,Chicago Bears,Detroit Lions,2019-11-28,12:30PM,Detroit,/boxscores/201911280det.htm
+2019,13,Buffalo Bills,Dallas Cowboys,2019-11-28,4:30PM,Dallas,/boxscores/201911280dal.htm
+2019,13,New Orleans Saints,Atlanta Falcons,2019-11-28,8:20PM,Atlanta,/boxscores/201911280atl.htm
+2019,13,Washington Redskins,Carolina Panthers,2019-12-01,1:00PM,Carolina,/boxscores/201912010car.htm
+2019,13,Cincinnati Bengals,New York Jets,2019-12-01,1:00PM,Cincinnati,/boxscores/201912010cin.htm
+2019,13,Pittsburgh Steelers,Cleveland Browns,2019-12-01,1:00PM,Pittsburgh,/boxscores/201912010pit.htm
+2019,13,Tennessee Titans,Indianapolis Colts,2019-12-01,1:00PM,Indianapolis,/boxscores/201912010clt.htm
+2019,13,Green Bay Packers,New York Giants,2019-12-01,1:00PM,New York,/boxscores/201912010nyg.htm
+2019,13,Tampa Bay Buccaneers,Jacksonville Jaguars,2019-12-01,1:00PM,Jacksonville,/boxscores/201912010jax.htm
+2019,13,Miami Dolphins,Philadelphia Eagles,2019-12-01,1:00PM,Miami,/boxscores/201912010mia.htm
+2019,13,Baltimore Ravens,San Francisco 49ers,2019-12-01,1:00PM,Baltimore,/boxscores/201912010rav.htm
+2019,13,Los Angeles Rams,Arizona Cardinals,2019-12-01,4:05PM,Arizona,/boxscores/201912010crd.htm
+2019,13,Denver Broncos,Los Angeles Chargers,2019-12-01,4:25PM,Denver,/boxscores/201912010den.htm
+2019,13,Kansas City Chiefs,Oakland Raiders,2019-12-01,4:25PM,Kansas City,/boxscores/201912010kan.htm
+2019,13,Houston Texans,New England Patriots,2019-12-01,8:20PM,Houston,/boxscores/201912010htx.htm
+2019,13,Seattle Seahawks,Minnesota Vikings,2019-12-02,8:15PM,Seattle,/boxscores/201912020sea.htm
+2019,14,Chicago Bears,Dallas Cowboys,2019-12-05,8:20PM,Chicago,/boxscores/201912050chi.htm
+2019,14,Atlanta Falcons,Carolina Panthers,2019-12-08,1:00PM,Atlanta,/boxscores/201912080atl.htm
+2019,14,Baltimore Ravens,Buffalo Bills,2019-12-08,1:00PM,Buffalo,/boxscores/201912080buf.htm
+2019,14,Cleveland Browns,Cincinnati Bengals,2019-12-08,1:00PM,Cleveland,/boxscores/201912080cle.htm
+2019,14,Tampa Bay Buccaneers,Indianapolis Colts,2019-12-08,1:00PM,Tampa Bay,/boxscores/201912080tam.htm
+2019,14,Denver Broncos,Houston Texans,2019-12-08,1:00PM,Houston,/boxscores/201912080htx.htm
+2019,14,Minnesota Vikings,Detroit Lions,2019-12-08,1:00PM,Minnesota,/boxscores/201912080min.htm
+2019,14,Green Bay Packers,Washington Redskins,2019-12-08,1:00PM,Green Bay,/boxscores/201912080gnb.htm
+2019,14,New York Jets,Miami Dolphins,2019-12-08,1:00PM,New York,/boxscores/201912080nyj.htm
+2019,14,San Francisco 49ers,New Orleans Saints,2019-12-08,1:00PM,New Orleans,/boxscores/201912080nor.htm
+2019,14,Los Angeles Chargers,Jacksonville Jaguars,2019-12-08,4:05PM,Jacksonville,/boxscores/201912080jax.htm
+2019,14,Pittsburgh Steelers,Arizona Cardinals,2019-12-08,4:25PM,Arizona,/boxscores/201912080crd.htm
+2019,14,Kansas City Chiefs,New England Patriots,2019-12-08,4:25PM,New England,/boxscores/201912080nwe.htm
+2019,14,Tennessee Titans,Oakland Raiders,2019-12-08,4:25PM,Oakland,/boxscores/201912080rai.htm
+2019,14,Los Angeles Rams,Seattle Seahawks,2019-12-08,8:20PM,Los Angeles,/boxscores/201912080ram.htm
+2019,14,Philadelphia Eagles,New York Giants,2019-12-09,8:15PM,Philadelphia,/boxscores/201912090phi.htm
+2019,15,Baltimore Ravens,New York Jets,2019-12-12,8:20PM,Baltimore,/boxscores/201912120rav.htm
+2019,15,Seattle Seahawks,Carolina Panthers,2019-12-15,1:00PM,Carolina,/boxscores/201912150car.htm
+2019,15,Green Bay Packers,Chicago Bears,2019-12-15,1:00PM,Green Bay,/boxscores/201912150gnb.htm
+2019,15,New England Patriots,Cincinnati Bengals,2019-12-15,1:00PM,Cincinnati,/boxscores/201912150cin.htm
+2019,15,Kansas City Chiefs,Denver Broncos,2019-12-15,1:00PM,Kansas City,/boxscores/201912150kan.htm
+2019,15,Tampa Bay Buccaneers,Detroit Lions,2019-12-15,1:00PM,Detroit,/boxscores/201912150det.htm
+2019,15,Houston Texans,Tennessee Titans,2019-12-15,1:00PM,Tennessee,/boxscores/201912150oti.htm
+2019,15,New York Giants,Miami Dolphins,2019-12-15,1:00PM,New York,/boxscores/201912150nyg.htm
+2019,15,Philadelphia Eagles,Washington Redskins,2019-12-15,1:00PM,Washington,/boxscores/201912150was.htm
+2019,15,Arizona Cardinals,Cleveland Browns,2019-12-15,4:05PM,Arizona,/boxscores/201912150crd.htm
+2019,15,Jacksonville Jaguars,Oakland Raiders,2019-12-15,4:05PM,Oakland,/boxscores/201912150rai.htm
+2019,15,Minnesota Vikings,Los Angeles Chargers,2019-12-15,4:05PM,Los Angeles,/boxscores/201912150sdg.htm
+2019,15,Atlanta Falcons,San Francisco 49ers,2019-12-15,4:25PM,San Francisco,/boxscores/201912150sfo.htm
+2019,15,Dallas Cowboys,Los Angeles Rams,2019-12-15,4:25PM,Dallas,/boxscores/201912150dal.htm
+2019,15,Buffalo Bills,Pittsburgh Steelers,2019-12-15,8:20PM,Pittsburgh,/boxscores/201912150pit.htm
+2019,15,New Orleans Saints,Indianapolis Colts,2019-12-16,8:15PM,New Orleans,/boxscores/201912160nor.htm
+2019,16,Houston Texans,Tampa Bay Buccaneers,2019-12-21,1:00PM,Tampa Bay,/boxscores/201912210tam.htm
+2019,16,New England Patriots,Buffalo Bills,2019-12-21,4:30PM,New England,/boxscores/201912210nwe.htm
+2019,16,San Francisco 49ers,Los Angeles Rams,2019-12-21,8:15PM,San Francisco,/boxscores/201912210sfo.htm
+2019,16,Atlanta Falcons,Jacksonville Jaguars,2019-12-22,1:00PM,Atlanta,/boxscores/201912220atl.htm
+2019,16,Indianapolis Colts,Carolina Panthers,2019-12-22,1:00PM,Indianapolis,/boxscores/201912220clt.htm
+2019,16,Miami Dolphins,Cincinnati Bengals,2019-12-22,1:00PM,Miami,/boxscores/201912220mia.htm
+2019,16,Baltimore Ravens,Cleveland Browns,2019-12-22,1:00PM,Cleveland,/boxscores/201912220cle.htm
+2019,16,New Orleans Saints,Tennessee Titans,2019-12-22,1:00PM,Tennessee,/boxscores/201912220oti.htm
+2019,16,New York Giants,Washington Redskins,2019-12-22,1:00PM,Washington,/boxscores/201912220was.htm
+2019,16,New York Jets,Pittsburgh Steelers,2019-12-22,1:00PM,New York,/boxscores/201912220nyj.htm
+2019,16,Denver Broncos,Detroit Lions,2019-12-22,4:05PM,Denver,/boxscores/201912220den.htm
+2019,16,Oakland Raiders,Los Angeles Chargers,2019-12-22,4:05PM,Los Angeles,/boxscores/201912220sdg.htm
+2019,16,Arizona Cardinals,Seattle Seahawks,2019-12-22,4:25PM,Seattle,/boxscores/201912220sea.htm
+2019,16,Philadelphia Eagles,Dallas Cowboys,2019-12-22,4:25PM,Philadelphia,/boxscores/201912220phi.htm
+2019,16,Kansas City Chiefs,Chicago Bears,2019-12-22,8:20PM,Chicago,/boxscores/201912220chi.htm
+2019,16,Green Bay Packers,Minnesota Vikings,2019-12-23,8:15PM,Minnesota,/boxscores/201912230min.htm
+2019,17,Atlanta Falcons,Tampa Bay Buccaneers,2019-12-29,1:00PM,Tampa Bay,/boxscores/201912290tam.htm
+2019,17,New York Jets,Buffalo Bills,2019-12-29,1:00PM,Buffalo,/boxscores/201912290buf.htm
+2019,17,New Orleans Saints,Carolina Panthers,2019-12-29,1:00PM,Carolina,/boxscores/201912290car.htm
+2019,17,Chicago Bears,Minnesota Vikings,2019-12-29,1:00PM,Minnesota,/boxscores/201912290min.htm
+2019,17,Cincinnati Bengals,Cleveland Browns,2019-12-29,1:00PM,Cincinnati,/boxscores/201912290cin.htm
+2019,17,Green Bay Packers,Detroit Lions,2019-12-29,1:00PM,Detroit,/boxscores/201912290det.htm
+2019,17,Kansas City Chiefs,Los Angeles Chargers,2019-12-29,1:00PM,Kansas City,/boxscores/201912290kan.htm
+2019,17,Miami Dolphins,New England Patriots,2019-12-29,1:00PM,New England,/boxscores/201912290nwe.htm
+2019,17,Jacksonville Jaguars,Indianapolis Colts,2019-12-29,4:25PM,Jacksonville,/boxscores/201912290jax.htm
+2019,17,Los Angeles Rams,Arizona Cardinals,2019-12-29,4:25PM,Los Angeles,/boxscores/201912290ram.htm
+2019,17,Dallas Cowboys,Washington Redskins,2019-12-29,4:25PM,Dallas,/boxscores/201912290dal.htm
+2019,17,Denver Broncos,Oakland Raiders,2019-12-29,4:25PM,Denver,/boxscores/201912290den.htm
+2019,17,Tennessee Titans,Houston Texans,2019-12-29,4:25PM,Houston,/boxscores/201912290htx.htm
+2019,17,Philadelphia Eagles,New York Giants,2019-12-29,4:25PM,New York,/boxscores/201912290nyg.htm
+2019,17,Baltimore Ravens,Pittsburgh Steelers,2019-12-29,4:25PM,Baltimore,/boxscores/201912290rav.htm
+2019,17,San Francisco 49ers,Seattle Seahawks,2019-12-29,8:20PM,Seattle,/boxscores/201912290sea.htm
