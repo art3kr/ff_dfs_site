@@ -1,27 +1,58 @@
 import os
 import json
 import click
-from flask import Flask, render_template, g, request, jsonify
+from flask import Flask, render_template, g, request, jsonify, redirect, url_for, flash
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import sqlite3
+import bcrypt
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-in-prod")
 
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
 
-DATABASE = os.environ.get("DATABASE_URL", "ff_dfs.db")
+DATABASE   = os.environ.get("DATABASE_URL", "ff_dfs.db")
+SALARY_CAP = 50_000
 
 # Roster rules: slot -> (eligible positions, max count)
 ROSTER_SLOTS = {
-    "QB":   (["QB"],                    1),
-    "RB":   (["RB"],                    2),
-    "WR":   (["WR"],                    3),
-    "TE":   (["TE"],                    1),
-    "FLEX": (["RB", "WR", "TE"],        1),
-    "DST":  (["DST", "D", "DEF"],       1),
+    "QB":   (["QB"],                     1),
+    "RB":   (["RB"],                     2),
+    "WR":   (["WR"],                     3),
+    "TE":   (["TE"],                     1),
+    "FLEX": (["RB", "WR", "TE"],         1),
+    "DST":  (["DST", "D", "DEF"],        1),
 }
-SALARY_CAP = 50_000
+
+# ---------------------------------------------------------------------------
+# Flask-Login setup
+# ---------------------------------------------------------------------------
+
+login_manager = LoginManager(app)
+login_manager.login_view      = "login"          # redirect here if @login_required fails
+login_manager.login_message   = "Please log in to submit a lineup."
+login_manager.login_message_category = "info"
+
+
+class User(UserMixin):
+    """Minimal user object Flask-Login needs. Loaded from the DB each request."""
+    def __init__(self, id_, username):
+        self.id       = id_
+        self.username = username
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    db  = sqlite3.connect(DATABASE)
+    db.row_factory = sqlite3.Row
+    row = db.execute("SELECT id, username FROM users WHERE id = ?", (user_id,)).fetchone()
+    db.close()
+    if row:
+        return User(row["id"], row["username"])
+    return None
+
 
 # ---------------------------------------------------------------------------
 # Database helpers
@@ -90,6 +121,59 @@ def init_db_command():
     init_db()
 
 
+@app.cli.command("create-user")
+@click.option("--username", required=True, prompt=True)
+@click.option("--password", required=True, prompt=True, hide_input=True,
+              confirmation_prompt=True)
+def create_user_command(username, password):
+    """
+    Create a participant account. Run once per participant.
+
+    Example:
+        flask create-user --username art3kr --password secret
+        flask create-user          # will prompt interactively
+    """
+    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    db = sqlite3.connect(DATABASE)
+    try:
+        db.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed))
+        db.commit()
+        click.echo(f"User '{username}' created.")
+    except sqlite3.IntegrityError:
+        click.echo(f"ERROR: Username '{username}' already exists.", err=True)
+    finally:
+        db.close()
+
+
+@app.cli.command("list-users")
+def list_users_command():
+    """List all registered participants."""
+    db = sqlite3.connect(DATABASE)
+    rows = db.execute("SELECT id, username FROM users ORDER BY username").fetchall()
+    db.close()
+    if not rows:
+        click.echo("No users yet. Run: flask create-user")
+    else:
+        click.echo(f"{'ID':>4}  Username")
+        click.echo("-" * 24)
+        for r in rows:
+            click.echo(f"{r[0]:>4}  {r[1]}")
+
+
+@app.cli.command("delete-user")
+@click.option("--username", required=True, prompt=True)
+def delete_user_command(username):
+    """Remove a participant account."""
+    db = sqlite3.connect(DATABASE)
+    cur = db.execute("DELETE FROM users WHERE username = ?", (username,))
+    db.commit()
+    db.close()
+    if cur.rowcount:
+        click.echo(f"User '{username}' deleted.")
+    else:
+        click.echo(f"No user named '{username}' found.", err=True)
+
+
 @app.cli.command("ingest-slate")
 @click.option("--week",     required=True, type=int)
 @click.option("--year",     default=2026,  type=int, help="NFL season year (default 2026)")
@@ -140,12 +224,50 @@ def ingest_slate_command(week, year, slate_id):
 
 
 # ---------------------------------------------------------------------------
-# Routes
+# Auth routes
+# ---------------------------------------------------------------------------
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("slate"))
+
+    error = None
+    if request.method == "POST":
+        username = (request.form.get("username") or "").strip()
+        password = (request.form.get("password") or "")
+
+        db  = get_db()
+        row = db.execute(
+            "SELECT id, username, password FROM users WHERE username = ?", (username,)
+        ).fetchone()
+
+        if row and bcrypt.checkpw(password.encode(), row["password"].encode()):
+            user = User(row["id"], row["username"])
+            login_user(user)
+            # Redirect to page they were trying to reach, or home
+            next_page = request.args.get("next") or url_for("slate")
+            return redirect(next_page)
+        else:
+            error = "Invalid username or password."
+
+    return render_template("login.html", error=error)
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
+
+
+# ---------------------------------------------------------------------------
+# Main routes
 # ---------------------------------------------------------------------------
 
 @app.route("/")
 def slate():
-    """Main page: player slate table + lineup builder."""
+    """Main page: player slate table + lineup builder (public)."""
     db = get_db()
 
     row = db.execute(
@@ -175,30 +297,42 @@ def slate():
                 projected_pts DESC
         """, (current_week, current_year)).fetchall()
 
+    # If logged in, check if they already submitted this week
+    existing_lineup = None
+    if current_user.is_authenticated and current_week:
+        row2 = db.execute("""
+            SELECT lineup_json, total_salary, submitted_at
+            FROM   lineups
+            WHERE  week = ? AND year = ? AND submitter = ?
+        """, (current_week, current_year, current_user.username)).fetchone()
+        if row2:
+            existing_lineup = {
+                "players":      json.loads(row2["lineup_json"]),
+                "total_salary": row2["total_salary"],
+                "submitted_at": row2["submitted_at"],
+            }
+
     return render_template("slate.html",
                            players=players,
                            week=current_week,
                            year=current_year,
-                           salary_cap=SALARY_CAP)
+                           salary_cap=SALARY_CAP,
+                           existing_lineup=existing_lineup)
 
 
 @app.route("/submit-lineup", methods=["POST"])
+@login_required
 def submit_lineup():
     """
-    Receive a lineup submission as JSON.
-    Body: { submitter, week, year, players: [{name, position, salary, slot}, ...] }
+    Receive a lineup as JSON. Submitter comes from session, not request body.
     Returns JSON { ok: true } or { ok: false, error: "..." }
     """
-    data = request.get_json(force=True)
-
-    submitter = (data.get("submitter") or "").strip()
+    data      = request.get_json(force=True)
     week      = data.get("week")
     year      = data.get("year")
     players   = data.get("players", [])
+    submitter = current_user.username   # always from session — never trust client
 
-    # --- Basic validation ---
-    if not submitter:
-        return jsonify(ok=False, error="Name is required.")
     if not week or not year:
         return jsonify(ok=False, error="Missing week/year.")
     if len(players) != 9:
@@ -206,9 +340,9 @@ def submit_lineup():
 
     total_salary = sum(int(p.get("salary", 0)) for p in players)
     if total_salary > SALARY_CAP:
-        return jsonify(ok=False, error=f"Salary ${total_salary:,} exceeds cap ${SALARY_CAP:,}.")
+        return jsonify(ok=False, error=f"Salary ${total_salary:,} exceeds the ${SALARY_CAP:,} cap.")
 
-    # --- Slot validation ---
+    # Slot validation
     slot_counts = {}
     for p in players:
         slot = p.get("slot", "")
@@ -216,13 +350,12 @@ def submit_lineup():
         allowed_positions, _ = ROSTER_SLOTS.get(slot, ([], 0))
         pos = (p.get("position") or "").upper()
         if pos not in [x.upper() for x in allowed_positions]:
-            return jsonify(ok=False, error=f"{p['name']} ({pos}) cannot fill {slot} slot.")
+            return jsonify(ok=False, error=f"{p['name']} ({pos}) cannot fill the {slot} slot.")
 
     for slot, (_, max_count) in ROSTER_SLOTS.items():
         if slot_counts.get(slot, 0) != max_count:
             return jsonify(ok=False, error=f"Need exactly {max_count} {slot} slot(s) filled.")
 
-    # --- Persist ---
     db = get_db()
     try:
         db.execute("""
@@ -237,7 +370,7 @@ def submit_lineup():
     except Exception as e:
         return jsonify(ok=False, error=f"Database error: {e}")
 
-    return jsonify(ok=True, message=f"Lineup submitted for {submitter}, Week {week}!")
+    return jsonify(ok=True, message=f"Lineup submitted for Week {week}!")
 
 
 # ---------------------------------------------------------------------------

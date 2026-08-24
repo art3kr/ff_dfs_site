@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF DFS Challenge — Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-page">
+
+<div class="auth-card">
+    <h1 class="auth-title">FF DFS Challenge</h1>
+    <p class="auth-subtitle">Sign in to submit your lineup</p>
+
+    {% if error %}
+    <div class="auth-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('login') }}{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}">
+        <div class="field">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username"
+                   autocomplete="username" autofocus required>
+        </div>
+        <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password"
+                   autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="auth-btn">Sign In</button>
+    </form>
+</div>
+
+</body>
+</html>

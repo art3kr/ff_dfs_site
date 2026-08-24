@@ -96,3 +96,72 @@ git push
 - Admin creates users with username + hashed password
 - Login required to submit a lineup (name field replaced by logged-in user)
 - Public pages (slate, standings) remain unauthenticated
+
+---
+
+## [Step 3] — Authentication (Flask-Login)
+
+### What was built
+- **`app.py`** — added:
+  - `flask-login` + `bcrypt` integration
+  - `User` class (UserMixin) loaded from DB per request
+  - `SECRET_KEY` env var for session signing (falls back to dev value)
+  - `flask create-user --username X --password Y` — hashes password with bcrypt, inserts into DB
+  - `flask list-users` — prints all registered participants
+  - `flask delete-user --username X` — removes a user
+  - `GET/POST /login` — login form, bcrypt password check, redirects to `?next=` if set
+  - `GET /logout` — clears session, redirects to login
+  - `/submit-lineup` now requires `@login_required`; submitter always comes from `current_user.username` (never from request body)
+  - Slate route passes `existing_lineup` to template if user already submitted this week
+- **`templates/login.html`** — clean centered login form with error display
+- **`templates/slate.html`** — updated:
+  - Header shows "username | Sign out" when logged in, "Sign in to submit" when not
+  - Submit area shows login link (not a button) when unauthenticated
+  - Existing-lineup banner shows timestamp if already submitted this week
+  - Name text field removed entirely
+- **`static/style.css`** — auth card, login form, header badge, existing-banner styles appended
+- **`static/slate.js`** — updated:
+  - Reads `window.APP.isAuthenticated` and `window.APP.existingLineup`
+  - Pre-populates sidebar slots from existing lineup on page load
+  - Submit handler no longer sends submitter name (server reads from session)
+  - Unauthenticated users can still browse/build lineup visually but can't submit
+- **`requirements.txt`** — added `flask-login>=0.6`, `bcrypt>=4.0`
+
+### Key decisions made
+- Passwords stored as bcrypt hashes (never plaintext)
+- `SECRET_KEY` must be set as env var in production (Render dashboard)
+- All user management via CLI — no admin web UI needed
+- Unauthenticated users see the slate and can build a lineup but get a "Sign in to submit" prompt
+- Lineup re-submissions overwrite the previous one (same as before)
+
+### Deployment steps
+```bash
+# Install new dependencies
+pip install -r requirements.txt
+
+# Re-run init-db to ensure tables exist (safe to re-run, uses CREATE IF NOT EXISTS)
+flask init-db
+
+# Create your first user
+flask create-user --username yourname --password yourpassword
+
+# Set SECRET_KEY in prod (Render env vars dashboard)
+# SECRET_KEY=some-long-random-string
+
+git add .
+git commit -m "Step 3: Flask-Login authentication"
+git push
+```
+
+### Open questions / deferred items
+- No password-reset flow — admin just deletes and recreates the user
+- No submission deadline enforcement yet (lockout before kickoff)
+- Standings page not yet built
+- Scoring engine not yet ported
+
+### Next proposed step (Step 4)
+Season standings page at `/standings`:
+- Public page listing all participants
+- Columns: Rank, Participant, Wk1, Wk2, … WkN, Total (drop lowest)
+- Pulls from `lineups` table — shows submitted vs. not-yet-scored
+- Scoring engine port: `flask score-week --week N` CLI command that runs the PFR scrape and writes scores back to `lineups`

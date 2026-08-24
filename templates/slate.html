@@ -9,12 +9,22 @@
 <body>
 
 <header>
-    <h1>FF DFS Challenge</h1>
-    {% if week %}
-        <p class="subtitle">Week {{ week }}, {{ year }} &mdash; DraftKings Thu-Mon Slate</p>
-    {% else %}
-        <p class="subtitle">No slate loaded yet.</p>
-    {% endif %}
+    <div class="header-left">
+        <h1>FF DFS Challenge</h1>
+        {% if week %}
+            <p class="subtitle">Week {{ week }}, {{ year }} &mdash; DraftKings Thu-Mon Slate</p>
+        {% else %}
+            <p class="subtitle">No slate loaded yet.</p>
+        {% endif %}
+    </div>
+    <div class="header-right">
+        {% if current_user.is_authenticated %}
+            <span class="user-badge">{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Sign in to submit</a>
+        {% endif %}
+    </div>
 </header>
 
 <div class="page-layout">
@@ -24,7 +34,6 @@
     ================================================================ -->
     <main class="slate-panel">
 
-        <!-- Position filter buttons -->
         <div class="filter-bar">
             <span class="filter-label">Filter:</span>
             <button class="filter-btn active" data-pos="ALL">All</button>
@@ -95,78 +104,73 @@
             </div>
         </div>
 
-        <!-- One row per roster slot -->
+        <!-- Already-submitted banner -->
+        {% if existing_lineup %}
+        <div class="existing-banner" id="existing-banner">
+            <span class="existing-icon">✓</span>
+            <div>
+                <strong>Lineup submitted</strong>
+                <span class="existing-time">{{ existing_lineup.submitted_at[:16] }} UTC</span>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="roster-slots" id="roster-slots">
             <div class="slot-row" data-slot="QB">
                 <span class="slot-label qb-label">QB</span>
-                <div class="slot-player empty" id="slot-QB">
-                    <span class="slot-empty-text">Select a QB</span>
-                </div>
+                <div class="slot-player empty" id="slot-QB"><span class="slot-empty-text">Select a QB</span></div>
                 <button class="slot-clear hidden" data-slot="QB" title="Remove">✕</button>
             </div>
             <div class="slot-row" data-slot="RB1">
                 <span class="slot-label rb-label">RB</span>
-                <div class="slot-player empty" id="slot-RB1">
-                    <span class="slot-empty-text">Select a RB</span>
-                </div>
+                <div class="slot-player empty" id="slot-RB1"><span class="slot-empty-text">Select a RB</span></div>
                 <button class="slot-clear hidden" data-slot="RB1" title="Remove">✕</button>
             </div>
             <div class="slot-row" data-slot="RB2">
                 <span class="slot-label rb-label">RB</span>
-                <div class="slot-player empty" id="slot-RB2">
-                    <span class="slot-empty-text">Select a RB</span>
-                </div>
+                <div class="slot-player empty" id="slot-RB2"><span class="slot-empty-text">Select a RB</span></div>
                 <button class="slot-clear hidden" data-slot="RB2" title="Remove">✕</button>
             </div>
             <div class="slot-row" data-slot="WR1">
                 <span class="slot-label wr-label">WR</span>
-                <div class="slot-player empty" id="slot-WR1">
-                    <span class="slot-empty-text">Select a WR</span>
-                </div>
+                <div class="slot-player empty" id="slot-WR1"><span class="slot-empty-text">Select a WR</span></div>
                 <button class="slot-clear hidden" data-slot="WR1" title="Remove">✕</button>
             </div>
             <div class="slot-row" data-slot="WR2">
                 <span class="slot-label wr-label">WR</span>
-                <div class="slot-player empty" id="slot-WR2">
-                    <span class="slot-empty-text">Select a WR</span>
-                </div>
+                <div class="slot-player empty" id="slot-WR2"><span class="slot-empty-text">Select a WR</span></div>
                 <button class="slot-clear hidden" data-slot="WR2" title="Remove">✕</button>
             </div>
             <div class="slot-row" data-slot="WR3">
                 <span class="slot-label wr-label">WR</span>
-                <div class="slot-player empty" id="slot-WR3">
-                    <span class="slot-empty-text">Select a WR</span>
-                </div>
+                <div class="slot-player empty" id="slot-WR3"><span class="slot-empty-text">Select a WR</span></div>
                 <button class="slot-clear hidden" data-slot="WR3" title="Remove">✕</button>
             </div>
             <div class="slot-row" data-slot="TE">
                 <span class="slot-label te-label">TE</span>
-                <div class="slot-player empty" id="slot-TE">
-                    <span class="slot-empty-text">Select a TE</span>
-                </div>
+                <div class="slot-player empty" id="slot-TE"><span class="slot-empty-text">Select a TE</span></div>
                 <button class="slot-clear hidden" data-slot="TE" title="Remove">✕</button>
             </div>
             <div class="slot-row" data-slot="FLEX">
                 <span class="slot-label flex-label">FLEX</span>
-                <div class="slot-player empty" id="slot-FLEX">
-                    <span class="slot-empty-text">RB / WR / TE</span>
-                </div>
+                <div class="slot-player empty" id="slot-FLEX"><span class="slot-empty-text">RB / WR / TE</span></div>
                 <button class="slot-clear hidden" data-slot="FLEX" title="Remove">✕</button>
             </div>
             <div class="slot-row" data-slot="DST">
                 <span class="slot-label dst-label">DST</span>
-                <div class="slot-player empty" id="slot-DST">
-                    <span class="slot-empty-text">Select a DST</span>
-                </div>
+                <div class="slot-player empty" id="slot-DST"><span class="slot-empty-text">Select a DST</span></div>
                 <button class="slot-clear hidden" data-slot="DST" title="Remove">✕</button>
             </div>
         </div>
 
-        <!-- Submit form -->
+        <!-- Submit area: changes based on auth state -->
         <div class="submit-area">
-            <input type="text" id="submitter-name" placeholder="Your name" maxlength="50" autocomplete="off">
-            <button id="submit-btn" disabled>Submit Lineup</button>
-            <p class="submit-msg" id="submit-msg"></p>
+            {% if current_user.is_authenticated %}
+                <button id="submit-btn" disabled>Submit Lineup</button>
+                <p class="submit-msg" id="submit-msg"></p>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="login-to-submit-btn">Sign in to submit</a>
+            {% endif %}
         </div>
 
         <p class="lineup-hint">Click any player row to add them to your lineup.</p>
@@ -174,12 +178,13 @@
 
 </div><!-- .page-layout -->
 
-<!-- Pass server data to JS -->
 <script>
     window.APP = {
-        week:      {{ week | tojson }},
-        year:      {{ year | tojson }},
-        salaryCap: {{ salary_cap | tojson }}
+        week:            {{ week | tojson }},
+        year:            {{ year | tojson }},
+        salaryCap:       {{ salary_cap | tojson }},
+        isAuthenticated: {{ current_user.is_authenticated | tojson }},
+        existingLineup:  {{ (existing_lineup.players if existing_lineup else none) | tojson }}
     };
 </script>
 <script src="{{ url_for('static', filename='slate.js') }}"></script>
