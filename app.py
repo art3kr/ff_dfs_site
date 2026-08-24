@@ -10,13 +10,12 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-in-prod")
 
 # ---------------------------------------------------------------------------
-# Config
+# Config  (must be before _auto_init)
 # ---------------------------------------------------------------------------
 
 DATABASE   = os.environ.get("DATABASE_URL", "ff_dfs.db")
 SALARY_CAP = 50_000
 
-# Roster rules: slot -> (eligible positions, max count)
 ROSTER_SLOTS = {
     "QB":   (["QB"],                     1),
     "RB":   (["RB"],                     2),
@@ -25,6 +24,71 @@ ROSTER_SLOTS = {
     "FLEX": (["RB", "WR", "TE"],         1),
     "DST":  (["DST", "D", "DEF"],        1),
 }
+
+
+def _auto_init():
+    """
+    Called once at startup (not per-request).
+    1. Creates DB tables if they don't exist.
+    2. If BOOTSTRAP_USER and BOOTSTRAP_PASS env vars are set, creates that
+       user if they don't already exist — then the vars can be removed.
+    """
+    db = sqlite3.connect(DATABASE)
+    db.executescript("""
+        CREATE TABLE IF NOT EXISTS users (
+            id       INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT    NOT NULL UNIQUE,
+            password TEXT    NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS players (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            week            INTEGER NOT NULL,
+            year            INTEGER NOT NULL,
+            name            TEXT    NOT NULL,
+            position        TEXT,
+            team            TEXT,
+            opponent        TEXT,
+            salary          INTEGER,
+            projected_pts   REAL,
+            ownership_pct   REAL,
+            UNIQUE(week, year, name)
+        );
+        CREATE TABLE IF NOT EXISTS lineups (
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            week         INTEGER NOT NULL,
+            year         INTEGER NOT NULL,
+            submitter    TEXT    NOT NULL,
+            lineup_json  TEXT    NOT NULL,
+            total_salary INTEGER NOT NULL,
+            submitted_at TEXT    DEFAULT (datetime('now')),
+            UNIQUE(week, year, submitter)
+        );
+    """)
+    db.commit()
+
+    bootstrap_user = os.environ.get("BOOTSTRAP_USER", "").strip()
+    bootstrap_pass = os.environ.get("BOOTSTRAP_PASS", "").strip()
+    if bootstrap_user and bootstrap_pass:
+        existing = db.execute(
+            "SELECT id FROM users WHERE username = ?", (bootstrap_user,)
+        ).fetchone()
+        if not existing:
+            hashed = bcrypt.hashpw(bootstrap_pass.encode(), bcrypt.gensalt()).decode()
+            db.execute(
+                "INSERT INTO users (username, password) VALUES (?, ?)",
+                (bootstrap_user, hashed)
+            )
+            db.commit()
+            app.logger.info(f"Bootstrap user '{bootstrap_user}' created.")
+        else:
+            app.logger.info(f"Bootstrap user '{bootstrap_user}' already exists, skipping.")
+
+    db.close()
+
+
+# Run once at import time (covers both `flask run` and gunicorn)
+with app.app_context():
+    _auto_init()
 
 # ---------------------------------------------------------------------------
 # Flask-Login setup
@@ -72,54 +136,9 @@ def close_db(exc=None):
         db.close()
 
 
-def init_db():
-    db = sqlite3.connect(DATABASE)
-    db.executescript("""
-        CREATE TABLE IF NOT EXISTS users (
-            id       INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT    NOT NULL UNIQUE,
-            password TEXT    NOT NULL
-        );
-
-        CREATE TABLE IF NOT EXISTS players (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
-            week            INTEGER NOT NULL,
-            year            INTEGER NOT NULL,
-            name            TEXT    NOT NULL,
-            position        TEXT,
-            team            TEXT,
-            opponent        TEXT,
-            salary          INTEGER,
-            projected_pts   REAL,
-            ownership_pct   REAL,
-            UNIQUE(week, year, name)
-        );
-
-        CREATE TABLE IF NOT EXISTS lineups (
-            id           INTEGER PRIMARY KEY AUTOINCREMENT,
-            week         INTEGER NOT NULL,
-            year         INTEGER NOT NULL,
-            submitter    TEXT    NOT NULL,
-            lineup_json  TEXT    NOT NULL,
-            total_salary INTEGER NOT NULL,
-            submitted_at TEXT    DEFAULT (datetime('now')),
-            UNIQUE(week, year, submitter)
-        );
-    """)
-    db.commit()
-    db.close()
-    print("Database initialised.")
-
-
 # ---------------------------------------------------------------------------
 # CLI commands
 # ---------------------------------------------------------------------------
-
-@app.cli.command("init-db")
-def init_db_command():
-    """Create the database tables. Run once on first deploy."""
-    init_db()
-
 
 @app.cli.command("create-user")
 @click.option("--username", required=True, prompt=True)
