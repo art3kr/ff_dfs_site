@@ -1,6 +1,7 @@
 import os
+import json
 import click
-from flask import Flask, render_template, g
+from flask import Flask, render_template, g, request, jsonify
 import sqlite3
 
 app = Flask(__name__)
@@ -11,16 +12,25 @@ app = Flask(__name__)
 
 DATABASE = os.environ.get("DATABASE_URL", "ff_dfs.db")
 
+# Roster rules: slot -> (eligible positions, max count)
+ROSTER_SLOTS = {
+    "QB":   (["QB"],                    1),
+    "RB":   (["RB"],                    2),
+    "WR":   (["WR"],                    3),
+    "TE":   (["TE"],                    1),
+    "FLEX": (["RB", "WR", "TE"],        1),
+    "DST":  (["DST", "D", "DEF"],       1),
+}
+SALARY_CAP = 50_000
 
 # ---------------------------------------------------------------------------
 # Database helpers
 # ---------------------------------------------------------------------------
 
 def get_db():
-    """Open a database connection for the current request, reusing if already open."""
     if "db" not in g:
         g.db = sqlite3.connect(DATABASE)
-        g.db.row_factory = sqlite3.Row  # rows behave like dicts
+        g.db.row_factory = sqlite3.Row
     return g.db
 
 
@@ -32,7 +42,6 @@ def close_db(exc=None):
 
 
 def init_db():
-    """Create tables if they don't exist."""
     db = sqlite3.connect(DATABASE)
     db.executescript("""
         CREATE TABLE IF NOT EXISTS users (
@@ -54,6 +63,17 @@ def init_db():
             ownership_pct   REAL,
             UNIQUE(week, year, name)
         );
+
+        CREATE TABLE IF NOT EXISTS lineups (
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            week         INTEGER NOT NULL,
+            year         INTEGER NOT NULL,
+            submitter    TEXT    NOT NULL,
+            lineup_json  TEXT    NOT NULL,
+            total_salary INTEGER NOT NULL,
+            submitted_at TEXT    DEFAULT (datetime('now')),
+            UNIQUE(week, year, submitter)
+        );
     """)
     db.commit()
     db.close()
@@ -71,25 +91,17 @@ def init_db_command():
 
 
 @app.cli.command("ingest-slate")
-@click.option("--week",  required=True, type=int, help="NFL week number (1-18)")
-@click.option("--year",  default=2025,  type=int, help="NFL season year (default 2025)")
-@click.option("--slate-id", default=None, type=int,
-              help="RotoWire slate ID. If omitted, the scraper will search automatically.")
+@click.option("--week",     required=True, type=int)
+@click.option("--year",     default=2026,  type=int, help="NFL season year (default 2026)")
+@click.option("--slate-id", default=None,  type=int)
 def ingest_slate_command(week, year, slate_id):
-    """
-    Pull the current week's DraftKings salary slate from RotoWire
-    and store it in the database.
-
-    Example:
-        flask ingest-slate --week 1
-        flask ingest-slate --week 1 --slate-id 9276
-    """
+    """Pull weekly DraftKings slate from RotoWire into the DB."""
     from scraper import fetch_slate_data, find_latest_slate
 
-    click.echo(f"Ingesting slate for week {week}, year {year}...")
+    click.echo(f"Ingesting slate for week {week}, {year}...")
 
     if slate_id is None:
-        click.echo("No slate-id provided — searching for latest Thu-Mon Classic slate...")
+        click.echo("Searching for latest Thu-Mon Classic slate...")
         slate_id = find_latest_slate()
         if slate_id is None:
             click.echo("ERROR: Could not find a valid slate. Pass --slate-id manually.", err=True)
@@ -103,8 +115,7 @@ def ingest_slate_command(week, year, slate_id):
         return
 
     db = sqlite3.connect(DATABASE)
-    inserted = 0
-    skipped  = 0
+    inserted = skipped = 0
     for p in players:
         try:
             db.execute("""
@@ -134,16 +145,15 @@ def ingest_slate_command(week, year, slate_id):
 
 @app.route("/")
 def slate():
-    """Main page: show the current week's player slate."""
+    """Main page: player slate table + lineup builder."""
     db = get_db()
 
-    # Find the latest (week, year) that has data
     row = db.execute(
         "SELECT week, year FROM players ORDER BY year DESC, week DESC LIMIT 1"
     ).fetchone()
 
     if row is None:
-        players     = []
+        players      = []
         current_week = None
         current_year = None
     else:
@@ -168,7 +178,66 @@ def slate():
     return render_template("slate.html",
                            players=players,
                            week=current_week,
-                           year=current_year)
+                           year=current_year,
+                           salary_cap=SALARY_CAP)
+
+
+@app.route("/submit-lineup", methods=["POST"])
+def submit_lineup():
+    """
+    Receive a lineup submission as JSON.
+    Body: { submitter, week, year, players: [{name, position, salary, slot}, ...] }
+    Returns JSON { ok: true } or { ok: false, error: "..." }
+    """
+    data = request.get_json(force=True)
+
+    submitter = (data.get("submitter") or "").strip()
+    week      = data.get("week")
+    year      = data.get("year")
+    players   = data.get("players", [])
+
+    # --- Basic validation ---
+    if not submitter:
+        return jsonify(ok=False, error="Name is required.")
+    if not week or not year:
+        return jsonify(ok=False, error="Missing week/year.")
+    if len(players) != 9:
+        return jsonify(ok=False, error=f"Lineup must have exactly 9 players (got {len(players)}).")
+
+    total_salary = sum(int(p.get("salary", 0)) for p in players)
+    if total_salary > SALARY_CAP:
+        return jsonify(ok=False, error=f"Salary ${total_salary:,} exceeds cap ${SALARY_CAP:,}.")
+
+    # --- Slot validation ---
+    slot_counts = {}
+    for p in players:
+        slot = p.get("slot", "")
+        slot_counts[slot] = slot_counts.get(slot, 0) + 1
+        allowed_positions, _ = ROSTER_SLOTS.get(slot, ([], 0))
+        pos = (p.get("position") or "").upper()
+        if pos not in [x.upper() for x in allowed_positions]:
+            return jsonify(ok=False, error=f"{p['name']} ({pos}) cannot fill {slot} slot.")
+
+    for slot, (_, max_count) in ROSTER_SLOTS.items():
+        if slot_counts.get(slot, 0) != max_count:
+            return jsonify(ok=False, error=f"Need exactly {max_count} {slot} slot(s) filled.")
+
+    # --- Persist ---
+    db = get_db()
+    try:
+        db.execute("""
+            INSERT INTO lineups (week, year, submitter, lineup_json, total_salary)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(week, year, submitter) DO UPDATE SET
+                lineup_json  = excluded.lineup_json,
+                total_salary = excluded.total_salary,
+                submitted_at = datetime('now')
+        """, (week, year, submitter, json.dumps(players), total_salary))
+        db.commit()
+    except Exception as e:
+        return jsonify(ok=False, error=f"Database error: {e}")
+
+    return jsonify(ok=True, message=f"Lineup submitted for {submitter}, Week {week}!")
 
 
 # ---------------------------------------------------------------------------

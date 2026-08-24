@@ -1,28 +1,33 @@
 /* -----------------------------------------------------------------------
-   FF DFS Challenge — base styles
-   Goal: clean data table, easy to read, no heavy framework.
+   FF DFS Challenge — styles
    ----------------------------------------------------------------------- */
 
-*, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
     --bg:           #0f1117;
     --bg-surface:   #1a1d27;
     --bg-row-alt:   #1e2130;
+    --bg-hover:     #252a3a;
     --border:       #2e3347;
     --text:         #e2e8f0;
     --text-muted:   #8892a4;
     --accent:       #4f8ef7;
-    --pos-qb:       #e05c5c;
-    --pos-rb:       #5cb85c;
-    --pos-wr:       #5bc0de;
-    --pos-te:       #f0ad4e;
-    --pos-dst:      #9b59b6;
-    --font:         'Inter', 'Segoe UI', system-ui, sans-serif;
+    --accent-dim:   #2a4a8a;
+    --selected-bg:  #1a3a6a;
+    --selected-border: #4f8ef7;
+    --over-cap:     #e05c5c;
+    --success:      #4caf50;
+
+    --pos-qb:  #e05c5c;
+    --pos-rb:  #5cb85c;
+    --pos-wr:  #5bc0de;
+    --pos-te:  #f0ad4e;
+    --pos-dst: #9b59b6;
+    --pos-flex:#aaaaaa;
+
+    --sidebar-width: 300px;
+    --font: 'Inter', 'Segoe UI', system-ui, sans-serif;
 }
 
 body {
@@ -34,56 +39,68 @@ body {
     min-height: 100vh;
 }
 
-/* --- Header --- */
-
+/* ---- Header ---- */
 header {
-    padding: 24px 32px 16px;
+    padding: 20px 28px 14px;
     border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+}
+header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.4px; }
+header .subtitle { color: var(--text-muted); font-size: 0.85rem; }
+
+/* ---- Two-column layout ---- */
+.page-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    min-height: calc(100vh - 60px);
 }
 
-header h1 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    color: var(--text);
-}
-
-header .subtitle {
-    margin-top: 4px;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-}
-
-header code {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 1px 6px;
-    font-size: 0.85em;
-    color: var(--accent);
-}
-
-/* --- Main content --- */
-
-main {
-    padding: 24px 32px;
-}
-
-.empty-state {
-    color: var(--text-muted);
-    padding: 48px 0;
-    text-align: center;
-}
-
-/* --- Table wrapper (horizontal scroll on small screens) --- */
-
-.table-wrapper {
+/* ---- Slate panel (left) ---- */
+.slate-panel {
+    flex: 1;
+    min-width: 0;
+    padding: 20px 24px;
     overflow-x: auto;
+}
+
+/* ---- Filter bar ---- */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+.filter-label { color: var(--text-muted); font-size: 0.8rem; margin-right: 4px; }
+.filter-btn {
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.filter-btn:hover  { border-color: var(--accent); color: var(--text); }
+.filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.pos-qb-btn.active  { background: var(--pos-qb);  border-color: var(--pos-qb);  }
+.pos-rb-btn.active  { background: var(--pos-rb);  border-color: var(--pos-rb);  }
+.pos-wr-btn.active  { background: var(--pos-wr);  border-color: var(--pos-wr);  }
+.pos-te-btn.active  { background: var(--pos-te);  border-color: var(--pos-te);  }
+.pos-dst-btn.active { background: var(--pos-dst); border-color: var(--pos-dst); }
+
+/* ---- Slate table ---- */
+.table-wrapper {
     border-radius: 8px;
     border: 1px solid var(--border);
+    overflow: hidden;
 }
-
-/* --- Slate table --- */
 
 #slate-table {
     width: 100%;
@@ -94,58 +111,221 @@ main {
 #slate-table thead th {
     background: var(--bg-surface);
     color: var(--text-muted);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    padding: 10px 14px;
+    padding: 10px 12px;
     text-align: left;
     border-bottom: 1px solid var(--border);
     cursor: pointer;
     user-select: none;
 }
-
 #slate-table thead th.right,
-#slate-table tbody td.right {
-    text-align: right;
-}
-
-/* Sort indicator */
+#slate-table tbody td.right { text-align: right; }
 #slate-table thead th.sort-asc::after  { content: " ↑"; color: var(--accent); }
 #slate-table thead th.sort-desc::after { content: " ↓"; color: var(--accent); }
 
 #slate-table tbody tr {
     border-bottom: 1px solid var(--border);
+    cursor: pointer;
     transition: background 0.1s;
 }
+#slate-table tbody tr:nth-child(even) { background: var(--bg-row-alt); }
+#slate-table tbody tr:hover           { background: var(--bg-hover); }
 
-#slate-table tbody tr:nth-child(even) {
-    background: var(--bg-row-alt);
+/* Selected row */
+#slate-table tbody tr.selected {
+    background: var(--selected-bg);
+    outline: 1px solid var(--selected-border);
+    outline-offset: -1px;
+}
+#slate-table tbody tr.selected .player-name::after {
+    content: " ✓";
+    color: var(--accent);
+    font-size: 0.8em;
 }
 
-#slate-table tbody tr:hover {
-    background: #252a3a;
+/* Ineligible rows (can't be added) */
+#slate-table tbody tr.ineligible {
+    opacity: 0.35;
+    cursor: not-allowed;
 }
 
-#slate-table tbody td {
-    padding: 9px 14px;
-    color: var(--text);
-}
+#slate-table tbody td { padding: 8px 12px; }
 
-/* Position badge */
 .pos-badge {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.04em;
-    width: 46px;
+    width: 40px;
 }
-
 tr.pos-qb  .pos-badge { color: var(--pos-qb);  }
 tr.pos-rb  .pos-badge { color: var(--pos-rb);  }
 tr.pos-wr  .pos-badge { color: var(--pos-wr);  }
 tr.pos-te  .pos-badge { color: var(--pos-te);  }
 tr.pos-dst .pos-badge { color: var(--pos-dst); }
+.player-name { font-weight: 500; }
 
-.player-name {
-    font-weight: 500;
+/* Hidden rows (filtered out) */
+#slate-table tbody tr.hidden-row { display: none; }
+
+/* Empty state */
+.empty-state {
+    color: var(--text-muted);
+    padding: 48px 0;
+    text-align: center;
+}
+.empty-state code {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--accent);
+}
+
+/* ---- Lineup sidebar (right) ---- */
+.lineup-panel {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    background: var(--bg-surface);
+    border-left: 1px solid var(--border);
+    padding: 20px 16px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.lineup-header h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.salary-bar {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 0.85rem;
+}
+.salary-used      { font-weight: 700; color: var(--accent); font-size: 1rem; }
+.salary-used.over { color: var(--over-cap); }
+.salary-sep, .salary-cap { color: var(--text-muted); }
+.salary-remaining { color: var(--text-muted); font-size: 0.75rem; }
+
+/* ---- Roster slots ---- */
+.roster-slots { display: flex; flex-direction: column; gap: 6px; }
+
+.slot-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.slot-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    width: 36px;
+    flex-shrink: 0;
+    text-align: center;
+    padding: 2px 0;
+    border-radius: 4px;
+}
+.qb-label   { background: #3d1a1a; color: var(--pos-qb);  }
+.rb-label   { background: #1a3d1a; color: var(--pos-rb);  }
+.wr-label   { background: #1a303d; color: var(--pos-wr);  }
+.te-label   { background: #3d2e10; color: var(--pos-te);  }
+.flex-label { background: #2a2a2a; color: var(--pos-flex);}
+.dst-label  { background: #2a1a3d; color: var(--pos-dst); }
+
+.slot-player {
+    flex: 1;
+    min-width: 0;
+    padding: 5px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.slot-player.empty { color: var(--text-muted); font-style: italic; }
+.slot-player.filled {
+    border-color: var(--selected-border);
+    background: var(--selected-bg);
+    color: var(--text);
+    font-style: normal;
+}
+.slot-player .slot-salary {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    margin-left: 4px;
+}
+
+.slot-clear {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: color 0.1s;
+}
+.slot-clear:hover  { color: var(--over-cap); }
+.slot-clear.hidden { visibility: hidden; }
+
+/* ---- Submit area ---- */
+.submit-area { display: flex; flex-direction: column; gap: 8px; }
+
+#submitter-name {
+    width: 100%;
+    padding: 8px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.85rem;
+    font-family: var(--font);
+    outline: none;
+    transition: border-color 0.15s;
+}
+#submitter-name:focus { border-color: var(--accent); }
+
+#submit-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--accent);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+#submit-btn:disabled { background: var(--accent-dim); cursor: not-allowed; opacity: 0.6; }
+#submit-btn:not(:disabled):hover { background: #3a7ae0; }
+
+.submit-msg {
+    font-size: 0.8rem;
+    min-height: 1.2em;
+    text-align: center;
+}
+.submit-msg.success { color: var(--success); }
+.submit-msg.error   { color: var(--over-cap); }
+
+.lineup-hint {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-align: center;
+    margin-top: auto;
+    padding-top: 8px;
 }

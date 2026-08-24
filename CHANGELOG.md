@@ -45,3 +45,54 @@ Add lineup submission:
 - "Submit Lineup" button (no auth yet — just saves to a `lineups` table keyed by a name the user types)
 
 ---
+
+---
+
+## [Step 2] — Lineup builder
+
+### What was built
+- **`app.py`** — added:
+  - `lineups` table (week, year, submitter, lineup_json, total_salary, submitted_at; unique per submitter+week)
+  - `POST /submit-lineup` route — validates roster rules + $50k cap server-side, then upserts into `lineups`
+  - Default year changed from 2025 → 2026
+- **`templates/slate.html`** — full two-column layout:
+  - Left: player table with position filter buttons (All / QB / RB / WR / TE / DST)
+  - Right: sticky lineup sidebar (9 roster slots, live salary counter, name input, submit button)
+- **`static/style.css`** — all new sidebar + slot styles; selected/ineligible row states; over-cap warning color
+- **`static/slate.js`** — complete lineup builder logic:
+  - Click row → auto-fills correct slot (primary slot first, FLEX fallback)
+  - Click selected row → removes player
+  - Ineligible rows dimmed (no open slot OR adding would bust cap)
+  - Clear (✕) button per slot
+  - Submit → POST to `/submit-lineup`, shows success/error message
+  - Column sort preserved
+
+### Key decisions made
+- Players auto-route to first open eligible slot; FLEX is used as fallback for RB/WR/TE
+- Lineup re-submissions overwrite previous entry (ON CONFLICT DO UPDATE) — participants can change their lineup before the deadline
+- Server re-validates everything (don't trust client-side checks)
+- No auth yet — submitter identity is just a typed name for now
+
+### Open questions / deferred items
+- **1-player scraper bug** — RotoWire JSON structure may have changed for 2026 slates; needs investigation when slates go live
+- **Auth** — still deferred; right now anyone can submit under any name
+- **Submission deadline enforcement** — no lockout before kickoff yet
+- **Season standings page** — not yet built
+- **Scoring engine** — not yet ported into Flask
+
+### Repo cleanup needed (do this before pushing)
+```bash
+mv gitignore .gitignore
+git rm --cached ff_dfs.db
+git rm -r --cached __pycache__/
+git rm --cached .DS_Store
+git add .
+git commit -m "Step 2: lineup builder + repo cleanup"
+git push
+```
+
+### Next proposed step (Step 3)
+- Add simple session-based auth (Flask-Login or manual sessions)
+- Admin creates users with username + hashed password
+- Login required to submit a lineup (name field replaced by logged-in user)
+- Public pages (slate, standings) remain unauthenticated

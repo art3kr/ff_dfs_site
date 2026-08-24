@@ -11,55 +11,177 @@
 <header>
     <h1>FF DFS Challenge</h1>
     {% if week %}
-        <p class="subtitle">Week {{ week }}, {{ year }} — DraftKings Thu-Mon Slate</p>
+        <p class="subtitle">Week {{ week }}, {{ year }} &mdash; DraftKings Thu-Mon Slate</p>
     {% else %}
-        <p class="subtitle">No slate loaded yet. Run <code>flask ingest-slate --week N</code>.</p>
+        <p class="subtitle">No slate loaded yet.</p>
     {% endif %}
 </header>
 
-<main>
-    {% if players %}
-    <div class="table-wrapper">
-        <table id="slate-table">
-            <thead>
-                <tr>
-                    <th data-col="position">POS</th>
-                    <th data-col="name">Player</th>
-                    <th data-col="team">Team</th>
-                    <th data-col="opponent">Opp</th>
-                    <th data-col="salary" class="right">Salary</th>
-                    <th data-col="projected_pts" class="right">Proj Pts</th>
-                    <th data-col="ownership_pct" class="right">Proj Own%</th>
-                    <th data-col="value" class="right">Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in players %}
-                <tr class="pos-{{ p['position'] | lower }}">
-                    <td class="pos-badge">{{ p['position'] }}</td>
-                    <td class="player-name">{{ p['name'] }}</td>
-                    <td>{{ p['team'] }}</td>
-                    <td>{{ p['opponent'] }}</td>
-                    <td class="right">${{ "{:,}".format(p['salary']) if p['salary'] else '—' }}</td>
-                    <td class="right">{{ "%.1f"|format(p['projected_pts']) if p['projected_pts'] else '—' }}</td>
-                    <td class="right">{{ "%.1f"|format(p['ownership_pct']) if p['ownership_pct'] else '—' }}%</td>
-                    <td class="right">
-                        {% if p['salary'] and p['projected_pts'] %}
-                            {{ "%.2f"|format(p['projected_pts'] / (p['salary'] / 1000)) }}
-                        {% else %}
-                            —
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <p class="empty-state">No player data found. Run <code>flask ingest-slate --week N</code> to load the slate.</p>
-    {% endif %}
-</main>
+<div class="page-layout">
 
+    <!-- ================================================================
+         LEFT: Player slate table
+    ================================================================ -->
+    <main class="slate-panel">
+
+        <!-- Position filter buttons -->
+        <div class="filter-bar">
+            <span class="filter-label">Filter:</span>
+            <button class="filter-btn active" data-pos="ALL">All</button>
+            <button class="filter-btn pos-qb-btn"  data-pos="QB">QB</button>
+            <button class="filter-btn pos-rb-btn"  data-pos="RB">RB</button>
+            <button class="filter-btn pos-wr-btn"  data-pos="WR">WR</button>
+            <button class="filter-btn pos-te-btn"  data-pos="TE">TE</button>
+            <button class="filter-btn pos-dst-btn" data-pos="DST">DST</button>
+        </div>
+
+        {% if players %}
+        <div class="table-wrapper">
+            <table id="slate-table">
+                <thead>
+                    <tr>
+                        <th data-col="position">POS</th>
+                        <th data-col="name">Player</th>
+                        <th data-col="team">Team</th>
+                        <th data-col="opponent">Opp</th>
+                        <th data-col="salary"        class="right">Salary</th>
+                        <th data-col="projected_pts" class="right">Proj Pts</th>
+                        <th data-col="ownership_pct" class="right">Proj Own%</th>
+                        <th data-col="value"         class="right">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in players %}
+                    <tr class="player-row pos-{{ p['position'] | lower }}"
+                        data-name="{{ p['name'] }}"
+                        data-position="{{ p['position'] }}"
+                        data-salary="{{ p['salary'] }}"
+                        data-proj="{{ p['projected_pts'] }}">
+
+                        <td class="pos-badge">{{ p['position'] }}</td>
+                        <td class="player-name">{{ p['name'] }}</td>
+                        <td>{{ p['team'] }}</td>
+                        <td>{{ p['opponent'] }}</td>
+                        <td class="right">${{ "{:,}".format(p['salary']) if p['salary'] else '—' }}</td>
+                        <td class="right">{{ "%.1f"|format(p['projected_pts']) if p['projected_pts'] else '—' }}</td>
+                        <td class="right">{{ "%.1f"|format(p['ownership_pct']) if p['ownership_pct'] else '—' }}%</td>
+                        <td class="right">
+                            {% if p['salary'] and p['projected_pts'] %}
+                                {{ "%.2f"|format(p['projected_pts'] / (p['salary'] / 1000)) }}
+                            {% else %}—{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="empty-state">No player data found. Run <code>flask ingest-slate --week N</code>.</p>
+        {% endif %}
+
+    </main>
+
+    <!-- ================================================================
+         RIGHT: Lineup builder sidebar
+    ================================================================ -->
+    <aside class="lineup-panel">
+        <div class="lineup-header">
+            <h2>My Lineup</h2>
+            <div class="salary-bar">
+                <span class="salary-used" id="salary-used">$0</span>
+                <span class="salary-sep">/</span>
+                <span class="salary-cap">${{ "{:,}".format(salary_cap) }}</span>
+                <span class="salary-remaining" id="salary-remaining">({{ "{:,}".format(salary_cap) }} left)</span>
+            </div>
+        </div>
+
+        <!-- One row per roster slot -->
+        <div class="roster-slots" id="roster-slots">
+            <div class="slot-row" data-slot="QB">
+                <span class="slot-label qb-label">QB</span>
+                <div class="slot-player empty" id="slot-QB">
+                    <span class="slot-empty-text">Select a QB</span>
+                </div>
+                <button class="slot-clear hidden" data-slot="QB" title="Remove">✕</button>
+            </div>
+            <div class="slot-row" data-slot="RB1">
+                <span class="slot-label rb-label">RB</span>
+                <div class="slot-player empty" id="slot-RB1">
+                    <span class="slot-empty-text">Select a RB</span>
+                </div>
+                <button class="slot-clear hidden" data-slot="RB1" title="Remove">✕</button>
+            </div>
+            <div class="slot-row" data-slot="RB2">
+                <span class="slot-label rb-label">RB</span>
+                <div class="slot-player empty" id="slot-RB2">
+                    <span class="slot-empty-text">Select a RB</span>
+                </div>
+                <button class="slot-clear hidden" data-slot="RB2" title="Remove">✕</button>
+            </div>
+            <div class="slot-row" data-slot="WR1">
+                <span class="slot-label wr-label">WR</span>
+                <div class="slot-player empty" id="slot-WR1">
+                    <span class="slot-empty-text">Select a WR</span>
+                </div>
+                <button class="slot-clear hidden" data-slot="WR1" title="Remove">✕</button>
+            </div>
+            <div class="slot-row" data-slot="WR2">
+                <span class="slot-label wr-label">WR</span>
+                <div class="slot-player empty" id="slot-WR2">
+                    <span class="slot-empty-text">Select a WR</span>
+                </div>
+                <button class="slot-clear hidden" data-slot="WR2" title="Remove">✕</button>
+            </div>
+            <div class="slot-row" data-slot="WR3">
+                <span class="slot-label wr-label">WR</span>
+                <div class="slot-player empty" id="slot-WR3">
+                    <span class="slot-empty-text">Select a WR</span>
+                </div>
+                <button class="slot-clear hidden" data-slot="WR3" title="Remove">✕</button>
+            </div>
+            <div class="slot-row" data-slot="TE">
+                <span class="slot-label te-label">TE</span>
+                <div class="slot-player empty" id="slot-TE">
+                    <span class="slot-empty-text">Select a TE</span>
+                </div>
+                <button class="slot-clear hidden" data-slot="TE" title="Remove">✕</button>
+            </div>
+            <div class="slot-row" data-slot="FLEX">
+                <span class="slot-label flex-label">FLEX</span>
+                <div class="slot-player empty" id="slot-FLEX">
+                    <span class="slot-empty-text">RB / WR / TE</span>
+                </div>
+                <button class="slot-clear hidden" data-slot="FLEX" title="Remove">✕</button>
+            </div>
+            <div class="slot-row" data-slot="DST">
+                <span class="slot-label dst-label">DST</span>
+                <div class="slot-player empty" id="slot-DST">
+                    <span class="slot-empty-text">Select a DST</span>
+                </div>
+                <button class="slot-clear hidden" data-slot="DST" title="Remove">✕</button>
+            </div>
+        </div>
+
+        <!-- Submit form -->
+        <div class="submit-area">
+            <input type="text" id="submitter-name" placeholder="Your name" maxlength="50" autocomplete="off">
+            <button id="submit-btn" disabled>Submit Lineup</button>
+            <p class="submit-msg" id="submit-msg"></p>
+        </div>
+
+        <p class="lineup-hint">Click any player row to add them to your lineup.</p>
+    </aside>
+
+</div><!-- .page-layout -->
+
+<!-- Pass server data to JS -->
+<script>
+    window.APP = {
+        week:      {{ week | tojson }},
+        year:      {{ year | tojson }},
+        salaryCap: {{ salary_cap | tojson }}
+    };
+</script>
 <script src="{{ url_for('static', filename='slate.js') }}"></script>
 
 </body>
