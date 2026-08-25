@@ -1,0 +1,416 @@
+first_name,last_name,position,injury_status,week,game_date,slate,team,opp,spread,over_under,implied_team_score,salary,L5_dvp_rank,L5_fppg_avg,L10_fppg_avg,szn_fppg_avg,proj_points,value,ppg_actual,value_actual,player
+Jaxon,Smith-Njigba,WR,,15,2025-12-14,Thu-Mon,SEA,IND,-13.5,42.5,28.0,8600,30,23.3,24.7,24.0,24.7,2.87,,,Jaxon Smith-Njigba
+Christian,McCaffrey,RB,,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,9000,22,26.9,26.5,25.7,24.4,2.71,,,Christian McCaffrey
+Josh,Allen,QB,,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,7500,16,27.5,25.4,25.5,23.0,3.07,,,Josh Allen
+Puka,Nacua,WR,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,8700,27,20.3,21.8,22.7,22.8,2.62,,,Puka Nacua
+Lamar,Jackson,QB,,15,2025-12-14,Thu-Mon,BAL,CIN,-2.5,52.5,27.5,6400,30,12.4,18.3,18.3,22.6,3.53,,,Lamar Jackson
+Jahmyr,Gibbs,RB,,15,2025-12-14,Thu-Mon,DET,LAR,5.5,55.5,25.0,8800,4,27.9,24.8,23.6,22.5,2.56,,,Jahmyr Gibbs
+De'Von,Achane,RB,Q,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,8900,11,24.9,22.5,21.8,21.9,2.46,,,De'Von Achane
+Patrick,Mahomes,QB,,15,2025-12-14,Thu-Mon,KC,LAC,-4.5,41.5,23.0,6500,2,17.1,22.6,22.2,21.4,3.3,,,Patrick Mahomes
+Jalen,Hurts,QB,,15,2025-12-14,Thu-Mon,PHI,LV,-11.5,38.5,25.0,6800,17,16.4,19.5,20.1,21.2,3.12,,,Jalen Hurts
+Jaxson,Dart,QB,,15,2025-12-14,Thu-Mon,NYG,WAS,-2.5,47.5,25.0,5600,27,23.4,17.9,17.9,20.8,3.71,,,Jaxson Dart
+Ja'Marr,Chase,WR,,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,8100,24,15.7,19.4,19.8,20.7,2.55,,,Ja'Marr Chase
+Matthew,Stafford,QB,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,7000,26,20.2,22.5,20.9,20.5,2.93,,,Matthew Stafford
+Bijan,Robinson,RB,,15,2025-12-11,Thu-Mon,ATL,TB,4.5,43.5,19.5,8200,21,20.5,21.8,21.9,20.4,2.49,,,Bijan Robinson
+Drake,Maye,QB,,15,2025-12-14,Thu-Mon,NE,BUF,0.5,49.5,24.5,6700,5,18.1,20.3,20.6,19.9,2.97,,,Drake Maye
+Brock,Purdy,QB,,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,6200,24,17.8,18.3,17.8,19.8,3.2,,,Brock Purdy
+Dak,Prescott,QB,,15,2025-12-14,Thu-Mon,DAL,MIN,-5.5,47.5,26.5,6900,3,21.2,22.8,21.8,19.6,2.84,,,Dak Prescott
+Jayden,Daniels,QB,Q,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,6000,28,15.9,19.1,17.0,19.4,3.23,,,Jayden Daniels
+Baker,Mayfield,QB,,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,6000,19,14.8,16.0,17.0,19.2,3.2,,,Baker Mayfield
+Joe,Burrow,QB,,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,6600,20,14.9,21.1,15.1,19.1,2.89,,,Joe Burrow
+Amon-Ra,St. Brown,WR,,15,2025-12-14,Thu-Mon,DET,LAR,5.5,55.5,25.0,7900,19,14.9,17.7,18.9,19.0,2.4,,,Amon-Ra St. Brown
+Sam,Darnold,QB,,15,2025-12-14,Thu-Mon,SEA,IND,-13.5,42.5,28.0,5800,18,12.2,17.1,16.3,18.2,3.13,,,Sam Darnold
+Trey,McBride,TE,,15,2025-12-14,Thu-Mon,ARI,HOU,9.5,42.5,16.5,7400,5,22.2,20.0,18.5,17.9,2.42,,,Trey McBride
+Derrick,Henry,RB,,15,2025-12-14,Thu-Mon,BAL,CIN,-2.5,52.5,27.5,7300,32,17.2,15.5,15.6,17.6,2.42,,,Derrick Henry
+Justin,Herbert,QB,,15,2025-12-14,Thu-Mon,LAC,KC,4.5,41.5,18.5,6300,15,15.2,18.4,19.5,17.6,2.8,,,Justin Herbert
+Rashee,Rice,WR,,15,2025-12-14,Thu-Mon,KC,LAC,-4.5,41.5,23.0,7700,2,18.5,19.2,20.1,17.6,2.29,,,Rashee Rice
+Jared,Goff,QB,,15,2025-12-14,Thu-Mon,DET,LAR,5.5,55.5,25.0,6100,11,19.8,17.6,18.7,17.5,2.87,,,Jared Goff
+Javonte,Williams,RB,,15,2025-12-14,Thu-Mon,DAL,MIN,-5.5,47.5,26.5,6400,12,13.1,15.8,16.9,17.4,2.72,,,Javonte Williams
+James,Cook III,RB,,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,8000,3,18.4,18.4,19.9,17.4,2.17,,,James Cook III
+C.J.,Stroud,QB,,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,5200,12,13.5,15.2,15.2,17.2,3.31,,,C.J. Stroud
+Caleb,Williams,QB,,15,2025-12-14,Thu-Mon,CHI,CLE,-7.5,39.5,23.5,5300,4,16.9,17.4,18.9,16.9,3.19,,,Caleb Williams
+Josh,Jacobs,RB,,15,2025-12-14,Thu-Mon,GB,DEN,-2.5,42.5,22.5,6900,2,14.4,18.0,17.4,16.9,2.45,,,Josh Jacobs
+Jonathan,Taylor,RB,,15,2025-12-14,Thu-Mon,IND,SEA,13.5,42.5,14.5,8500,6,19.3,24.4,25.0,16.9,1.99,,,Jonathan Taylor
+Trevor,Lawrence,QB,,15,2025-12-14,Thu-Mon,JAX,NYJ,-13.5,41.5,27.5,5700,13,18.0,18.9,17.7,16.8,2.95,,,Trevor Lawrence
+Bo,Nix,QB,,15,2025-12-14,Thu-Mon,DEN,GB,2.5,42.5,20.0,5900,6,15.3,20.2,19.0,16.7,2.83,,,Bo Nix
+Tyler,Shough,QB,,15,2025-12-14,Thu-Mon,NO,CAR,2.5,40.5,19.0,4900,8,16.2,12.3,12.3,16.7,3.42,,,Tyler Shough
+Jordan,Love,QB,,15,2025-12-14,Thu-Mon,GB,DEN,-2.5,42.5,22.5,5400,7,15.9,18.1,17.7,16.6,3.08,,,Jordan Love
+Jacoby,Brissett,QB,,15,2025-12-14,Thu-Mon,ARI,HOU,9.5,42.5,16.5,5500,1,22.7,18.4,18.4,16.5,3.0,,,Jacoby Brissett
+Nico,Collins,WR,,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,6700,17,19.8,17.4,16.2,16.4,2.44,,,Nico Collins
+Woody,Marks,RB,,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,5600,29,10.7,11.4,9.6,16.4,2.93,,,Woody Marks
+George,Pickens,WR,,15,2025-12-14,Thu-Mon,DAL,MIN,-5.5,47.5,26.5,7300,1,22.1,22.5,20.8,16.2,2.22,,,George Pickens
+Rico,Dowdle,RB,,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,6600,19,16.5,17.5,14.8,16.2,2.45,,,Rico Dowdle
+Saquon,Barkley,RB,,15,2025-12-14,Thu-Mon,PHI,LV,-11.5,38.5,25.0,7100,24,12.7,14.9,14.9,16.1,2.27,,,Saquon Barkley
+Aaron,Rodgers,QB,,15,2025-12-15,Thu-Mon,PIT,MIA,-3.5,41.5,22.5,5100,21,11.0,13.9,14.8,16.1,3.16,,,Aaron Rodgers
+J.J.,McCarthy,QB,,15,2025-12-14,Thu-Mon,MIN,DAL,5.5,47.5,21.0,4900,32,13.5,13.8,13.8,16.0,3.27,,,J.J. McCarthy
+Travis,Etienne Jr.,RB,,15,2025-12-14,Thu-Mon,JAX,NYJ,-13.5,41.5,27.5,6500,30,16.4,14.6,15.1,16.0,2.46,,,Travis Etienne Jr.
+Davante,Adams,WR,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,7200,27,15.7,16.6,16.5,16.0,2.22,,,Davante Adams
+CeeDee,Lamb,WR,Q,15,2025-12-14,Thu-Mon,DAL,MIN,-5.5,47.5,26.5,7600,1,17.3,20.6,19.5,15.6,2.05,,,CeeDee Lamb
+Bucky,Irving,RB,,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,7200,18,18.7,18.5,18.0,15.6,2.17,,,Bucky Irving
+A.J.,Brown,WR,,15,2025-12-14,Thu-Mon,PHI,LV,-11.5,38.5,25.0,6800,28,20.1,18.3,16.1,15.4,2.26,,,A.J. Brown
+Chris,Olave,WR,,15,2025-12-14,Thu-Mon,NO,CAR,2.5,40.5,19.0,6200,11,14.0,14.9,14.5,15.3,2.47,,,Chris Olave
+Zay,Flowers,WR,,15,2025-12-14,Thu-Mon,BAL,CIN,-2.5,52.5,27.5,6300,3,12.1,12.2,13.2,15.1,2.4,,,Zay Flowers
+Bryce,Young,QB,,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,5100,9,15.0,14.1,14.9,15.1,2.97,,,Bryce Young
+Justin,Jefferson,WR,,15,2025-12-14,Thu-Mon,MIN,DAL,5.5,47.5,21.0,6300,32,6.6,12.5,12.6,15.0,2.38,,,Justin Jefferson
+Breece,Hall,RB,,15,2025-12-14,Thu-Mon,NYJ,JAX,13.5,41.5,14.0,6200,5,12.5,14.9,14.1,15.0,2.42,,,Breece Hall
+Brock,Bowers,TE,,15,2025-12-14,Thu-Mon,LV,PHI,11.5,38.5,13.5,5900,3,13.3,15.9,15.9,15.0,2.54,,,Brock Bowers
+George,Kittle,TE,,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,5400,17,15.9,13.3,13.3,14.9,2.76,,,George Kittle
+Shedeur,Sanders,QB,,15,2025-12-14,Thu-Mon,CLE,CHI,7.5,39.5,16.0,4700,25,15.4,15.4,15.4,14.8,3.15,,,Shedeur Sanders
+Chase,Brown,RB,,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,6700,20,18.5,16.4,14.7,14.8,2.21,,,Chase Brown
+TreVeyon,Henderson,RB,,15,2025-12-14,Thu-Mon,NE,BUF,0.5,49.5,24.5,6100,27,19.7,12.8,11.7,14.6,2.4,,,TreVeyon Henderson
+Wan'Dale,Robinson,WR,,15,2025-12-14,Thu-Mon,NYG,WAS,-2.5,47.5,25.0,5900,25,15.5,13.4,13.9,14.6,2.48,,,Wan'Dale Robinson
+Kenneth,Walker III,RB,,15,2025-12-14,Thu-Mon,SEA,IND,-13.5,42.5,28.0,5600,13,11.1,9.6,10.9,14.6,2.6,,,Kenneth Walker III
+Ashton,Jeanty,RB,,15,2025-12-14,Thu-Mon,LV,PHI,11.5,38.5,13.5,5800,25,13.5,16.2,14.4,14.4,2.49,,,Ashton Jeanty
+Quinshon,Judkins,RB,,15,2025-12-14,Thu-Mon,CLE,CHI,7.5,39.5,16.0,6300,15,11.7,13.1,13.2,14.2,2.25,,,Quinshon Judkins
+Tee,Higgins,WR,Q,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,6500,24,19.6,15.1,14.3,14.1,2.17,,,Tee Higgins
+Tyrod,Taylor,QB,Q,15,2025-12-14,Thu-Mon,NYJ,JAX,13.5,41.5,14.0,4800,23,11.4,12.5,10.9,13.9,2.89,,,Tyrod Taylor
+DeVonta,Smith,WR,,15,2025-12-14,Thu-Mon,PHI,LV,-11.5,38.5,25.0,5800,28,10.2,13.8,13.2,13.9,2.39,,,DeVonta Smith
+Jameson,Williams,WR,,15,2025-12-14,Thu-Mon,DET,LAR,5.5,55.5,25.0,6100,19,18.6,14.8,14.0,13.8,2.25,,,Jameson Williams
+RJ,Harvey,RB,,15,2025-12-14,Thu-Mon,DEN,GB,2.5,42.5,20.0,6000,9,14.3,13.5,11.6,13.7,2.29,,,RJ Harvey
+Emeka,Egbuka,WR,,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,6200,21,10.7,13.2,14.0,13.4,2.17,,,Emeka Egbuka
+Kyren,Williams,RB,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,6800,1,15.1,16.5,16.0,13.3,1.95,,,Kyren Williams
+Tetairoa,McMillan,WR,,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,6000,9,15.7,14.3,14.0,13.3,2.21,,,Tetairoa McMillan
+Jaylen,Waddle,WR,,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,6900,31,13.4,14.0,13.8,13.3,1.92,,,Jaylen Waddle
+Terry,McLaurin,WR,,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,5400,29,12.9,14.4,11.5,13.1,2.43,,,Terry McLaurin
+Stefon,Diggs,WR,,15,2025-12-14,Thu-Mon,NE,BUF,0.5,49.5,24.5,6000,15,12.1,13.7,12.4,13.0,2.17,,,Stefon Diggs
+Geno,Smith,QB,Q,15,2025-12-14,Thu-Mon,LV,PHI,11.5,38.5,13.5,4500,14,11.3,11.7,13.1,12.9,2.87,,,Geno Smith
+DK,Metcalf,WR,Q,15,2025-12-15,Thu-Mon,PIT,MIA,-3.5,41.5,22.5,5700,8,12.4,13.5,13.1,12.9,2.27,,,DK Metcalf
+Tua,Tagovailoa,QB,,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,5000,31,8.8,11.8,12.5,12.9,2.57,,,Tua Tagovailoa
+Jaylen,Warren,RB,,15,2025-12-15,Thu-Mon,PIT,MIA,-3.5,41.5,22.5,6000,17,12.0,13.1,13.5,12.9,2.16,,,Jaylen Warren
+Deebo,Samuel Sr.,WR,,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,5300,29,12.2,11.9,13.3,12.8,2.42,,,Deebo Samuel Sr.
+Tyrone,Tracy Jr.,RB,Q,15,2025-12-14,Thu-Mon,NYG,WAS,-2.5,47.5,25.0,5500,28,10.6,8.6,8.3,12.7,2.31,,,Tyrone Tracy Jr.
+Michael,Wilson,WR,,15,2025-12-14,Thu-Mon,ARI,HOU,9.5,42.5,16.5,6600,5,23.1,14.8,12.3,12.6,1.91,,,Michael Wilson
+Cam,Ward,QB,,15,2025-12-14,Thu-Mon,TEN,SF,12.5,44.5,16.0,4600,22,12.6,11.3,10.8,12.6,2.75,,,Cam Ward
+Kyle,Pitts Sr.,TE,Q,15,2025-12-11,Thu-Mon,ATL,TB,4.5,43.5,19.5,4000,13,8.8,10.3,10.1,12.6,3.16,,,Kyle Pitts Sr.
+Ladd,McConkey,WR,,15,2025-12-14,Thu-Mon,LAC,KC,4.5,41.5,18.5,6400,13,10.7,13.3,12.7,12.5,1.95,,,Ladd McConkey
+Omarion,Hampton,RB,,15,2025-12-14,Thu-Mon,LAC,KC,4.5,41.5,18.5,5900,7,17.3,15.8,15.8,12.4,2.1,,,Omarion Hampton
+Kirk,Cousins,QB,,15,2025-12-11,Thu-Mon,ATL,TB,4.5,43.5,19.5,4500,29,8.5,7.8,7.3,12.3,2.74,,,Kirk Cousins
+Riley,Leonard,QB,Q,15,2025-12-14,Thu-Mon,IND,SEA,13.5,42.5,14.5,4400,10,5.7,5.7,5.7,12.1,2.76,,,Riley Leonard
+Jauan,Jennings,WR,,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,5200,23,14.1,11.4,10.7,12.1,2.33,,,Jauan Jennings
+D'Andre,Swift,RB,,15,2025-12-14,Thu-Mon,CHI,CLE,-7.5,39.5,23.5,5700,10,12.3,15.6,15.0,12.0,2.1,,,D'Andre Swift
+Kenneth,Gainwell,RB,,15,2025-12-15,Thu-Mon,PIT,MIA,-3.5,41.5,22.5,5000,17,14.6,12.9,11.6,11.9,2.37,,,Kenneth Gainwell
+Chris,Godwin Jr.,WR,,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,5400,21,7.1,12.9,7.1,11.8,2.19,,,Chris Godwin Jr.
+Travis,Kelce,TE,,15,2025-12-14,Thu-Mon,KC,LAC,-4.5,41.5,23.0,4900,8,12.5,13.5,12.7,11.7,2.39,,,Travis Kelce
+Harold,Fannin Jr.,TE,,15,2025-12-14,Thu-Mon,CLE,CHI,7.5,39.5,16.0,4000,19,12.4,11.9,11.4,11.5,2.88,,,Harold Fannin Jr.
+Michael,Pittman Jr.,WR,,15,2025-12-14,Thu-Mon,IND,SEA,13.5,42.5,14.5,5100,6,12.1,13.9,14.3,11.4,2.24,,,Michael Pittman Jr.
+Aaron,Jones Sr.,RB,,15,2025-12-14,Thu-Mon,MIN,DAL,5.5,47.5,21.0,5100,23,9.8,9.3,9.3,11.3,2.21,,,Aaron Jones Sr.
+Devin,Neal,RB,,15,2025-12-14,Thu-Mon,NO,CAR,2.5,40.5,19.0,5300,26,8.9,6.2,6.2,11.3,2.13,,,Devin Neal
+Mike,Evans,WR,Q,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,5900,21,11.2,16.7,8.5,11.3,1.92,,,Mike Evans
+Courtland,Sutton,WR,,15,2025-12-14,Thu-Mon,DEN,GB,2.5,42.5,20.0,5500,12,10.9,12.2,13.0,11.0,2.01,,,Courtland Sutton
+Jakobi,Meyers,WR,,15,2025-12-14,Thu-Mon,JAX,NYJ,-13.5,41.5,27.5,5600,10,13.9,10.7,11.5,10.9,1.94,,,Jakobi Meyers
+Brian,Thomas Jr.,WR,,15,2025-12-14,Thu-Mon,JAX,NYJ,-13.5,41.5,27.5,5700,10,10.8,10.2,10.2,10.9,1.91,,,Brian Thomas Jr.
+Christian,Watson,WR,,15,2025-12-14,Thu-Mon,GB,DEN,-2.5,42.5,22.5,5500,7,16.0,11.1,14.4,10.8,1.97,,,Christian Watson
+Mark,Andrews,TE,,15,2025-12-14,Thu-Mon,BAL,CIN,-2.5,52.5,27.5,3900,32,7.8,8.3,8.7,10.6,2.71,,,Mark Andrews
+Jake,Ferguson,TE,,15,2025-12-14,Thu-Mon,DAL,MIN,-5.5,47.5,26.5,4600,14,8.1,13.7,13.4,10.6,2.3,,,Jake Ferguson
+Khalil,Shakir,WR,,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,5300,16,9.1,11.3,10.9,10.6,2.0,,,Khalil Shakir
+Ricky,Pearsall,WR,,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,5100,23,7.7,12.4,9.4,10.6,2.07,,,Ricky Pearsall
+Adonai,Mitchell,WR,,15,2025-12-14,Thu-Mon,NYJ,JAX,13.5,41.5,14.0,4400,20,8.1,5.4,5.2,10.5,2.39,,,Adonai Mitchell
+Keenan,Allen,WR,,15,2025-12-14,Thu-Mon,LAC,KC,4.5,41.5,18.5,4800,13,6.3,9.8,11.9,10.5,2.2,,,Keenan Allen
+Juwan,Johnson,TE,,15,2025-12-14,Thu-Mon,NO,CAR,2.5,40.5,19.0,3700,21,11.7,9.4,10.5,10.4,2.82,,,Juwan Johnson
+Devaughn,Vele,WR,,15,2025-12-14,Thu-Mon,NO,CAR,2.5,40.5,19.0,4200,11,8.3,6.9,6.8,10.3,2.44,,,Devaughn Vele
+Devin,Singletary,RB,,15,2025-12-14,Thu-Mon,NYG,WAS,-2.5,47.5,25.0,5000,28,11.8,7.0,5.6,10.2,2.03,,,Devin Singletary
+Tyler,Warren,TE,,15,2025-12-14,Thu-Mon,IND,SEA,13.5,42.5,14.5,4700,31,10.0,12.7,12.4,10.2,2.18,,,Tyler Warren
+Tyjae,Spears,RB,,15,2025-12-14,Thu-Mon,TEN,SF,12.5,44.5,16.0,4700,16,7.8,8.7,8.2,10.2,2.18,,,Tyjae Spears
+Quentin,Johnston,WR,,15,2025-12-14,Thu-Mon,LAC,KC,4.5,41.5,18.5,4900,13,7.7,11.2,12.5,10.1,2.05,,,Quentin Johnston
+Jordan,Addison,WR,,15,2025-12-14,Thu-Mon,MIN,DAL,5.5,47.5,21.0,4800,32,7.1,11.4,11.4,10.0,2.08,,,Jordan Addison
+Kareem,Hunt,RB,,15,2025-12-14,Thu-Mon,KC,LAC,-4.5,41.5,23.0,5400,14,13.5,11.6,10.5,10.0,1.86,,,Kareem Hunt
+Xavier,Worthy,WR,,15,2025-12-14,Thu-Mon,KC,LAC,-4.5,41.5,23.0,4500,2,8.3,9.8,8.9,10.0,2.23,,,Xavier Worthy
+Chris,Rodriguez Jr.,RB,,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,4900,31,9.0,6.3,6.3,10.0,2.04,,,Chris Rodriguez Jr.
+Hunter,Henry,TE,,15,2025-12-14,Thu-Mon,NE,BUF,0.5,49.5,24.5,4400,1,11.7,9.8,10.7,9.9,2.26,,,Hunter Henry
+Blake,Corum,RB,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,4800,1,10.5,7.1,6.9,9.8,2.04,,,Blake Corum
+Romeo,Doubs,WR,,15,2025-12-14,Thu-Mon,GB,DEN,-2.5,42.5,22.5,4700,7,5.4,10.6,10.1,9.7,2.06,,,Romeo Doubs
+Kyle,Monangai,RB,,15,2025-12-14,Thu-Mon,CHI,CLE,-7.5,39.5,23.5,5200,10,12.2,11.4,9.5,9.6,1.85,,,Kyle Monangai
+John,Metchie III,WR,,15,2025-12-14,Thu-Mon,NYJ,JAX,13.5,41.5,14.0,4300,20,9.1,6.3,6.4,9.6,2.23,,,John Metchie III
+Oronde,Gadsden II,TE,,15,2025-12-14,Thu-Mon,LAC,KC,4.5,41.5,18.5,4300,6,5.5,9.8,9.7,9.6,2.23,,,Oronde Gadsden II
+Theo,Johnson,TE,,15,2025-12-14,Thu-Mon,NYG,WAS,-2.5,47.5,25.0,3500,28,9.9,10.7,9.1,9.6,2.76,,,Theo Johnson
+Dallas,Goedert,TE,,15,2025-12-14,Thu-Mon,PHI,LV,-11.5,38.5,25.0,3800,4,7.4,11.9,11.8,9.5,2.5,,,Dallas Goedert
+DJ,Moore,WR,,15,2025-12-14,Thu-Mon,CHI,CLE,-7.5,39.5,23.5,5000,4,6.4,9.1,9.4,9.4,1.87,,,DJ Moore
+AJ,Barner,TE,,15,2025-12-14,Thu-Mon,SEA,IND,-13.5,42.5,28.0,3200,25,6.9,9.5,8.5,9.4,2.94,,,AJ Barner
+Luther,Burden III,WR,,15,2025-12-14,Thu-Mon,CHI,CLE,-7.5,39.5,23.5,4800,4,8.3,7.9,6.8,9.2,1.92,,,Luther Burden III
+Dalton,Schultz,TE,,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,4100,23,9.8,10.5,9.7,9.2,2.25,,,Dalton Schultz
+Brenton,Strange,TE,,15,2025-12-14,Thu-Mon,JAX,NYJ,-13.5,41.5,27.5,4200,18,9.4,8.4,9.2,9.2,2.19,,,Brenton Strange
+Alec,Pierce,WR,Q,15,2025-12-14,Thu-Mon,IND,SEA,13.5,42.5,14.5,4900,6,14.7,12.5,11.8,9.2,1.87,,,Alec Pierce
+Zach,Charbonnet,RB,,15,2025-12-14,Thu-Mon,SEA,IND,-13.5,42.5,28.0,5100,13,10.1,10.4,9.7,9.1,1.78,,,Zach Charbonnet
+Darnell,Mooney,WR,,15,2025-12-11,Thu-Mon,ATL,TB,4.5,43.5,19.5,4500,18,6.3,5.7,5.5,9.1,2.03,,,Darnell Mooney
+Jayden,Reed,WR,,15,2025-12-14,Thu-Mon,GB,DEN,-2.5,42.5,22.5,4500,7,7.8,8.7,11.4,9.0,2.0,,,Jayden Reed
+Seahawks,,DST,,15,2025-12-14,Thu-Mon,SEA,IND,-13.5,42.5,28.0,3700,2,15.2,11.3,11.6,8.9,2.4,,,
+Dylan,Sampson,RB,,15,2025-12-14,Thu-Mon,CLE,CHI,7.5,39.5,16.0,4300,15,6.4,4.8,5.9,8.8,2.04,,,Dylan Sampson
+Cooper,Kupp,WR,,15,2025-12-14,Thu-Mon,SEA,IND,-13.5,42.5,28.0,4100,30,7.2,7.5,7.9,8.8,2.14,,,Cooper Kupp
+Tony,Pollard,RB,,15,2025-12-14,Thu-Mon,TEN,SF,12.5,44.5,16.0,5200,16,11.8,11.0,11.0,8.8,1.7,,,Tony Pollard
+Dalton,Kincaid,TE,,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,4500,26,13.6,12.1,13.1,8.7,1.94,,,Dalton Kincaid
+Eagles,,DST,,15,2025-12-14,Thu-Mon,PHI,LV,-11.5,38.5,25.0,3800,31,8.2,7.6,7.5,8.7,2.29,,,
+Chimere,Dike,WR,,15,2025-12-14,Thu-Mon,TEN,SF,12.5,44.5,16.0,4300,22,9.3,8.6,7.2,8.7,2.03,,,Chimere Dike
+Jerry,Jeudy,WR,,15,2025-12-14,Thu-Mon,CLE,CHI,7.5,39.5,16.0,4400,26,10.2,7.5,7.6,8.6,1.95,,,Jerry Jeudy
+Jayden,Higgins,WR,,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,4200,17,11.3,8.8,7.6,8.6,2.05,,,Jayden Higgins
+Rhamondre,Stevenson,RB,,15,2025-12-14,Thu-Mon,NE,BUF,0.5,49.5,24.5,5100,27,7.5,9.1,9.1,8.6,1.69,,,Rhamondre Stevenson
+Darius,Slayton,WR,,15,2025-12-14,Thu-Mon,NYG,WAS,-2.5,47.5,25.0,4400,25,9.2,7.4,7.4,8.6,1.95,,,Darius Slayton
+Jordan,Mason,RB,,15,2025-12-14,Thu-Mon,MIN,DAL,5.5,47.5,21.0,5300,23,7.2,7.8,9.1,8.5,1.61,,,Jordan Mason
+Zonovan,Knight,RB,,15,2025-12-14,Thu-Mon,ARI,HOU,9.5,42.5,16.5,4900,8,11.2,9.6,10.5,8.5,1.73,,,Zonovan Knight
+Kayshon,Boutte,WR,,15,2025-12-14,Thu-Mon,NE,BUF,0.5,49.5,24.5,5000,15,9.4,9.7,10.6,8.5,1.7,,,Kayshon Boutte
+David,Montgomery,RB,,15,2025-12-14,Thu-Mon,DET,LAR,5.5,55.5,25.0,5000,4,9.3,11.2,11.1,8.4,1.67,,,David Montgomery
+Tre,Tucker,WR,,15,2025-12-14,Thu-Mon,LV,PHI,11.5,38.5,13.5,4200,14,7.1,7.8,10.8,8.4,2.0,,,Tre Tucker
+Josh,Downs,WR,,15,2025-12-14,Thu-Mon,IND,SEA,13.5,42.5,14.5,4100,6,6.7,8.6,8.4,8.4,2.06,,,Josh Downs
+Jaguars,,DST,,15,2025-12-14,Thu-Mon,JAX,NYJ,-13.5,41.5,27.5,3900,25,10.8,7.7,8.3,8.3,2.12,,,
+Colston,Loveland,TE,,15,2025-12-14,Thu-Mon,CHI,CLE,-7.5,39.5,23.5,3600,11,10.0,10.2,8.8,8.2,2.27,,,Colston Loveland
+Texans,,DST,,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,3600,26,10.4,10.8,9.7,8.2,2.29,,,
+Bears,,DST,,15,2025-12-14,Thu-Mon,CHI,CLE,-7.5,39.5,23.5,3500,29,5.0,6.3,6.2,8.0,2.29,,,
+Isaiah,Likely,TE,,15,2025-12-14,Thu-Mon,BAL,CIN,-2.5,52.5,27.5,3400,32,7.0,6.9,5.8,8.0,2.34,,,Isaiah Likely
+Malik,Washington,WR,,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,3900,31,7.1,7.2,7.1,7.9,2.02,,,Malik Washington
+49ers,,DST,,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,4000,30,5.0,4.2,4.7,7.9,1.97,,,
+Chuba,Hubbard,RB,,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,4600,19,7.3,9.2,10.0,7.8,1.7,,,Chuba Hubbard
+T.J.,Hockenson,TE,,15,2025-12-14,Thu-Mon,MIN,DAL,5.5,47.5,21.0,3000,20,7.3,7.8,7.8,7.7,2.57,,,T.J. Hockenson
+Isaiah,Hodgins,WR,,15,2025-12-14,Thu-Mon,NYG,WAS,-2.5,47.5,25.0,3400,25,5.5,3.7,8.1,7.7,2.27,,,Isaiah Hodgins
+Darren,Waller,TE,,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,3500,27,11.0,8.9,11.0,7.7,2.2,,,Darren Waller
+Ryan,Flournoy,WR,,15,2025-12-14,Thu-Mon,DAL,MIN,-5.5,47.5,26.5,3800,1,4.9,6.4,6.8,7.6,2.0,,,Ryan Flournoy
+Pat,Bryant,WR,,15,2025-12-14,Thu-Mon,DEN,GB,2.5,42.5,20.0,3900,12,7.4,5.9,5.9,7.6,1.95,,,Pat Bryant
+Mack,Hollins,WR,,15,2025-12-14,Thu-Mon,NE,BUF,0.5,49.5,24.5,4000,15,8.6,8.5,7.9,7.6,1.9,,,Mack Hollins
+Rashid,Shaheed,WR,,15,2025-12-14,Thu-Mon,SEA,IND,-13.5,42.5,28.0,4600,30,5.6,9.5,9.7,7.5,1.64,,,Rashid Shaheed
+Tyler,Allgeier,RB,,15,2025-12-11,Thu-Mon,ATL,TB,4.5,43.5,19.5,4500,21,11.1,8.9,8.3,7.5,1.68,,,Tyler Allgeier
+Packers,,DST,,15,2025-12-14,Thu-Mon,GB,DEN,-2.5,42.5,22.5,2800,6,7.4,5.3,5.9,7.3,2.6,,,
+Evan,Engram,TE,,15,2025-12-14,Thu-Mon,DEN,GB,2.5,42.5,20.0,3100,15,5.4,7.4,6.8,7.3,2.36,,,Evan Engram
+Mason,Taylor,TE,,15,2025-12-14,Thu-Mon,NYJ,JAX,13.5,41.5,14.0,3100,30,5.5,7.9,6.8,7.3,2.37,,,Mason Taylor
+Jalen,Coker,WR,,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,3900,9,8.4,7.1,6.9,7.3,1.88,,,Jalen Coker
+Colby,Parkinson,TE,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,3200,9,11.3,7.1,7.1,7.2,2.25,,,Colby Parkinson
+Panthers,,DST,,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,3100,28,7.2,5.1,6.0,7.2,2.33,,,
+Elic,Ayomanor,WR,,15,2025-12-14,Thu-Mon,TEN,SF,12.5,44.5,16.0,3500,22,6.0,6.4,6.9,7.2,2.05,,,Elic Ayomanor
+KaVontae,Turpin,WR,,15,2025-12-14,Thu-Mon,DAL,MIN,-5.5,47.5,26.5,3600,1,3.7,5.6,5.6,7.1,1.99,,,KaVontae Turpin
+Chiefs,,DST,,15,2025-12-14,Thu-Mon,KC,LAC,-4.5,41.5,23.0,3300,23,2.0,5.0,5.2,7.1,2.15,,,
+Steelers,,DST,,15,2025-12-15,Thu-Mon,PIT,MIA,-3.5,41.5,22.5,3100,22,9.0,8.0,7.9,7.1,2.29,,,
+Buccaneers,,DST,,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,3500,21,3.2,6.4,6.5,7.1,2.04,,,
+Olamide,Zaccheaus,WR,,15,2025-12-14,Thu-Mon,CHI,CLE,-7.5,39.5,23.5,3300,4,6.7,6.7,6.6,7.0,2.12,,,Olamide Zaccheaus
+Cowboys,,DST,,15,2025-12-14,Thu-Mon,DAL,MIN,-5.5,47.5,26.5,3400,32,5.4,5.3,4.6,7.0,2.05,,,
+Samaje,Perine,RB,,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,4200,20,6.4,4.6,4.6,6.9,1.64,,,Samaje Perine
+Troy,Franklin,WR,,15,2025-12-14,Thu-Mon,DEN,GB,2.5,42.5,20.0,5200,12,8.8,10.6,10.9,6.9,1.33,,,Troy Franklin
+Kimani,Vidal,RB,,15,2025-12-14,Thu-Mon,LAC,KC,4.5,41.5,18.5,5700,7,11.8,11.8,13.1,6.9,1.21,,,Kimani Vidal
+Rashod,Bateman,WR,,15,2025-12-14,Thu-Mon,BAL,CIN,-2.5,52.5,27.5,3400,3,4.9,5.1,4.9,6.8,1.99,,,Rashod Bateman
+Michael,Carter,RB,,15,2025-12-14,Thu-Mon,ARI,HOU,9.5,42.5,16.5,4200,8,6.7,8.2,7.3,6.8,1.61,,,Michael Carter
+Chargers,,DST,,15,2025-12-14,Thu-Mon,LAC,KC,4.5,41.5,18.5,2500,8,7.6,6.3,6.2,6.8,2.73,,,
+Tyler,Lockett,WR,,15,2025-12-14,Thu-Mon,LV,PHI,11.5,38.5,13.5,3400,14,7.0,4.8,4.5,6.7,1.98,,,Tyler Lockett
+Cedric,Tillman,WR,,15,2025-12-14,Thu-Mon,CLE,CHI,7.5,39.5,16.0,3200,26,3.2,5.4,5.5,6.6,2.06,,,Cedric Tillman
+Nick,Chubb,RB,Q,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,4600,29,4.0,5.5,6.4,6.5,1.41,,,Nick Chubb
+Xavier,Legette,WR,,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,3700,9,5.6,7.1,6.8,6.5,1.75,,,Xavier Legette
+Gunnar,Helm,TE,,15,2025-12-14,Thu-Mon,TEN,SF,12.5,44.5,16.0,2800,24,6.1,6.2,5.6,6.5,2.33,,,Gunnar Helm
+Jeremy,McNichols,RB,,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,4100,31,3.0,4.4,5.0,6.4,1.55,,,Jeremy McNichols
+John,Bates,TE,,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,2900,10,2.6,2.1,2.5,6.4,2.22,,,John Bates
+Van,Jefferson,WR,,15,2025-12-14,Thu-Mon,TEN,SF,12.5,44.5,16.0,3000,22,5.0,5.0,4.8,6.4,2.13,,,Van Jefferson
+David,Sills V,WR,,15,2025-12-11,Thu-Mon,ATL,TB,4.5,43.5,19.5,3500,18,4.2,2.7,3.3,6.4,1.83,,,David Sills V
+Rachaad,White,RB,,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,4800,18,7.2,10.2,9.4,6.4,1.33,,,Rachaad White
+Ty,Johnson,RB,,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,4500,3,7.8,5.3,4.6,6.3,1.39,,,Ty Johnson
+Broncos,,DST,,15,2025-12-14,Thu-Mon,DEN,GB,2.5,42.5,20.0,3400,4,8.4,8.3,8.2,6.2,1.82,,,
+Saints,,DST,,15,2025-12-14,Thu-Mon,NO,CAR,2.5,40.5,19.0,2500,24,6.6,6.5,5.9,6.2,2.49,,,
+Giants,,DST,,15,2025-12-14,Thu-Mon,NYG,WAS,-2.5,47.5,25.0,2700,20,2.2,2.8,2.6,6.2,2.29,,,
+Jack,Bech,WR,,15,2025-12-14,Thu-Mon,LV,PHI,11.5,38.5,13.5,3200,14,4.3,3.6,3.6,6.2,1.94,,,Jack Bech
+Darnell,Washington,TE,Q,15,2025-12-15,Thu-Mon,PIT,MIA,-3.5,41.5,22.5,2600,29,5.2,6.0,6.0,6.2,2.37,,,Darnell Washington
+Chig,Okonkwo,TE,,15,2025-12-14,Thu-Mon,TEN,SF,12.5,44.5,16.0,3300,24,5.9,6.0,6.4,6.2,1.88,,,Chig Okonkwo
+Emari,Demercado,RB,Q,15,2025-12-14,Thu-Mon,ARI,HOU,9.5,42.5,16.5,4400,8,6.7,5.3,6.2,6.1,1.38,,,Emari Demercado
+Brandin,Cooks,WR,,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,3100,16,3.1,3.8,3.8,6.1,1.97,,,Brandin Cooks
+Mike,Gesicki,TE,,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,3300,7,7.5,8.0,5.8,6.0,1.8,,,Mike Gesicki
+Bhayshul,Tuten,RB,,15,2025-12-14,Thu-Mon,JAX,NYJ,-13.5,41.5,27.5,4500,30,5.1,4.7,5.5,6.0,1.34,,,Bhayshul Tuten
+Brian,Robinson Jr.,RB,,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,4500,22,6.6,4.6,4.5,6.0,1.34,,,Brian Robinson Jr.
+Browns,,DST,,15,2025-12-14,Thu-Mon,CLE,CHI,7.5,39.5,16.0,2700,7,8.2,8.3,7.6,5.8,2.14,,,
+Rams,,DST,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,3000,3,8.2,8.8,8.6,5.8,1.94,,,
+Calvin,Austin III,WR,,15,2025-12-15,Thu-Mon,PIT,MIA,-3.5,41.5,22.5,3700,8,3.3,5.3,6.4,5.8,1.55,,,Calvin Austin III
+Ravens,,DST,,15,2025-12-14,Thu-Mon,BAL,CIN,-2.5,52.5,27.5,3200,27,6.0,4.9,4.4,5.7,1.79,,,
+Andrei,Iosivas,WR,,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,4100,24,9.4,7.4,6.9,5.7,1.39,,,Andrei Iosivas
+Bills,,DST,,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,2900,15,7.6,7.6,6.8,5.6,1.94,,,
+Dolphins,,DST,,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,2600,13,10.0,7.6,6.5,5.6,2.16,,,
+Vikings,,DST,,15,2025-12-14,Thu-Mon,MIN,DAL,5.5,47.5,21.0,2300,1,6.4,5.1,7.0,5.5,2.37,,,
+Commanders,,DST,,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,2600,19,1.2,3.1,4.1,5.5,2.1,,,
+Marvin,Harrison Jr.,WR,Q,15,2025-12-14,Thu-Mon,ARI,HOU,9.5,42.5,16.5,5600,5,12.6,12.5,12.5,5.4,0.97,,,Marvin Harrison Jr.
+Isaac,TeSlaa,WR,,15,2025-12-14,Thu-Mon,DET,LAR,5.5,55.5,25.0,3500,19,2.7,3.8,3.8,5.4,1.54,,,Isaac TeSlaa
+Gabe,Davis,WR,,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,3600,16,3.4,5.0,4.0,5.4,1.49,,,Gabe Davis
+Pat,Freiermuth,TE,,15,2025-12-15,Thu-Mon,PIT,MIA,-3.5,41.5,22.5,2900,29,6.9,8.0,7.8,5.4,1.86,,,Pat Freiermuth
+Cardinals,,DST,,15,2025-12-14,Thu-Mon,ARI,HOU,9.5,42.5,16.5,2400,14,4.2,4.7,5.5,5.3,2.19,,,
+Hollywood,Brown,WR,,15,2025-12-14,Thu-Mon,KC,LAC,-4.5,41.5,23.0,4000,2,6.8,8.5,9.3,5.3,1.31,,,Hollywood Brown
+Keon,Coleman,WR,,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,3800,16,7.2,6.9,8.9,5.3,1.39,,,Keon Coleman
+Falcons,,DST,,15,2025-12-11,Thu-Mon,ATL,TB,4.5,43.5,19.5,2500,16,6.4,5.9,6.5,5.3,2.12,,,
+Ja'Tavion,Sanders,TE,,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,2500,12,4.5,4.9,4.7,5.2,2.08,,,Ja'Tavion Sanders
+Dylan,Drummond,WR,,15,2025-12-11,Thu-Mon,ATL,TB,4.5,43.5,19.5,3000,18,2.8,2.8,3.7,5.2,1.74,,,Dylan Drummond
+Christian,Kirk,WR,,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,3200,17,5.5,6.0,6.1,5.1,1.6,,,Christian Kirk
+Isiah,Pacheco,RB,,15,2025-12-14,Thu-Mon,KC,LAC,-4.5,41.5,23.0,4700,14,6.5,6.9,6.9,5.1,1.08,,,Isiah Pacheco
+Jalen,Nailor,WR,,15,2025-12-14,Thu-Mon,MIN,DAL,5.5,47.5,21.0,3100,32,7.0,6.0,5.9,5.0,1.6,,,Jalen Nailor
+Jonnu,Smith,TE,,15,2025-12-15,Thu-Mon,PIT,MIA,-3.5,41.5,22.5,2700,29,1.8,3.8,4.8,5.0,1.83,,,Jonnu Smith
+David,Njoku,TE,Q,15,2025-12-14,Thu-Mon,CLE,CHI,7.5,39.5,16.0,3000,19,7.0,8.0,7.9,4.9,1.63,,,David Njoku
+Marvin,Mims Jr.,WR,,15,2025-12-14,Thu-Mon,DEN,GB,2.5,42.5,20.0,3600,12,5.8,7.0,6.7,4.9,1.36,,,Marvin Mims Jr.
+Anthony,Firkser,TE,,15,2025-12-14,Thu-Mon,DET,LAR,5.5,55.5,25.0,2500,16,0.3,0.3,1.4,4.9,1.97,,,Anthony Firkser
+Jacory,Croskey-Merritt,RB,,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,4400,31,3.5,7.0,7.4,4.9,1.11,,,Jacory Croskey-Merritt
+Rome,Odunze,WR,Q,15,2025-12-14,Thu-Mon,CHI,CLE,-7.5,39.5,23.5,5800,4,7.6,10.2,12.7,4.8,0.82,,,Rome Odunze
+Jets,,DST,,15,2025-12-14,Thu-Mon,NYJ,JAX,13.5,41.5,14.0,2100,17,6.2,4.0,4.0,4.8,2.27,,,
+Patriots,,DST,,15,2025-12-14,Thu-Mon,NE,BUF,0.5,49.5,24.5,2800,9,5.8,8.3,8.1,4.8,1.71,,,
+Bengals,,DST,,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,2400,18,6.6,3.8,3.8,4.7,1.96,,,
+Jaleel,McLaughlin,RB,,15,2025-12-14,Thu-Mon,DEN,GB,2.5,42.5,20.0,4000,9,3.5,5.4,4.1,4.7,1.16,,,Jaleel McLaughlin
+Taysom,Hill,TE,,15,2025-12-14,Thu-Mon,NO,CAR,2.5,40.5,19.0,2700,21,1.7,3.0,2.2,4.7,1.76,,,Taysom Hill
+Cole,Kmet,TE,,15,2025-12-14,Thu-Mon,CHI,CLE,-7.5,39.5,23.5,2600,11,6.2,5.2,5.1,4.6,1.79,,,Cole Kmet
+Mason,Tipton,WR,,15,2025-12-14,Thu-Mon,NO,CAR,2.5,40.5,19.0,3000,11,2.2,2.8,2.8,4.6,1.52,,,Mason Tipton
+DeAndre,Hopkins,WR,,15,2025-12-14,Thu-Mon,BAL,CIN,-2.5,52.5,27.5,3000,3,2.7,2.7,4.2,4.5,1.49,,,DeAndre Hopkins
+Emanuel,Wilson,RB,,15,2025-12-14,Thu-Mon,GB,DEN,-2.5,42.5,22.5,4400,2,9.4,7.7,6.7,4.5,1.03,,,Emanuel Wilson
+Elijah,Higgins,TE,,15,2025-12-14,Thu-Mon,ARI,HOU,9.5,42.5,16.5,2500,5,3.3,3.5,3.3,4.5,1.81,,,Elijah Higgins
+Alvin,Kamara,RB,Q,15,2025-12-14,Thu-Mon,NO,CAR,2.5,40.5,19.0,5500,26,6.4,8.9,9.3,4.5,0.82,,,Alvin Kamara
+Colts,,DST,,15,2025-12-14,Thu-Mon,IND,SEA,13.5,42.5,14.5,2200,11,4.8,6.4,7.2,4.5,2.02,,,
+Noah,Fant,TE,,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,2800,7,4.8,6.5,7.0,4.4,1.55,,,Noah Fant
+Tyrell,Shavers,WR,,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,3000,16,6.5,5.1,4.6,4.4,1.46,,,Tyrell Shavers
+DeMario,Douglas,WR,,15,2025-12-14,Thu-Mon,NE,BUF,0.5,49.5,24.5,3500,15,9.4,8.0,7.5,4.3,1.23,,,DeMario Douglas
+Treylon,Burks,WR,,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,3000,29,4.1,2.6,4.7,4.3,1.42,,,Treylon Burks
+Raiders,,DST,,15,2025-12-14,Thu-Mon,LV,PHI,11.5,38.5,13.5,2000,10,4.8,4.1,4.2,4.3,2.15,,,
+Titans,,DST,,15,2025-12-14,Thu-Mon,TEN,SF,12.5,44.5,16.0,2300,12,8.2,6.0,5.4,4.2,1.84,,,
+Keaton,Mitchell,RB,Q,15,2025-12-14,Thu-Mon,BAL,CIN,-2.5,52.5,27.5,4300,32,6.4,4.2,5.2,4.1,0.95,,,Keaton Mitchell
+Tim,Patrick,WR,,15,2025-12-14,Thu-Mon,JAX,NYJ,-13.5,41.5,27.5,3700,10,7.0,4.8,4.8,4.1,1.11,,,Tim Patrick
+Parker,Washington,WR,Q,15,2025-12-14,Thu-Mon,JAX,NYJ,-13.5,41.5,27.5,4700,10,12.1,9.9,10.1,4.1,0.88,,,Parker Washington
+Payne,Durham,TE,,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,2500,2,2.3,3.1,0.7,4.0,1.61,,,Payne Durham
+Sean,Tucker,RB,,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,4300,18,11.5,8.1,8.1,4.0,0.92,,,Sean Tucker
+Isaiah,Bond,WR,,15,2025-12-14,Thu-Mon,CLE,CHI,7.5,39.5,16.0,3000,26,2.5,3.5,3.3,3.9,1.31,,,Isaiah Bond
+Rasheen,Ali,RB,,15,2025-12-14,Thu-Mon,BAL,CIN,-2.5,52.5,27.5,4000,32,1.6,1.1,2.0,3.9,0.98,,,Rasheen Ali
+Lions,,DST,,15,2025-12-14,Thu-Mon,DET,LAR,5.5,55.5,25.0,2600,5,2.6,6.4,6.0,3.9,1.51,,,
+Dawson,Knox,TE,,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,3000,26,7.6,5.7,5.4,3.9,1.3,,,Dawson Knox
+Andre,Baccellia,WR,,15,2025-12-14,Thu-Mon,ARI,HOU,9.5,42.5,16.5,3000,5,0.6,0.8,1.4,3.7,1.23,,,Andre Baccellia
+Ben,Sinnott,TE,,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,2700,10,3.5,1.7,3.5,3.6,1.33,,,Ben Sinnott
+Dontayvion,Wicks,WR,Q,15,2025-12-14,Thu-Mon,GB,DEN,-2.5,42.5,22.5,3700,7,8.9,6.9,6.9,3.5,0.93,,,Dontayvion Wicks
+Kyle,Juszczyk,RB,Q,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,4000,22,3.1,3.8,3.7,3.5,0.87,,,Kyle Juszczyk
+Luke,Musgrave,TE,,15,2025-12-14,Thu-Mon,GB,DEN,-2.5,42.5,22.5,2500,22,3.1,3.2,3.0,3.4,1.34,,,Luke Musgrave
+Jaylin,Noel,WR,,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,3000,17,3.0,4.8,4.3,3.4,1.15,,,Jaylin Noel
+Xavier,Smith,WR,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,3000,27,4.0,2.9,4.0,3.4,1.14,,,Xavier Smith
+Daniel,Bellinger,TE,,15,2025-12-14,Thu-Mon,NYG,WAS,-2.5,47.5,25.0,2500,28,4.5,4.1,4.2,3.4,1.37,,,Daniel Bellinger
+Ollie,Gordon II,RB,,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,4400,11,4.2,3.9,4.0,3.4,0.78,,,Ollie Gordon II
+Xavier,Hutchinson,WR,,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,3000,17,4.0,6.5,6.3,3.3,1.11,,,Xavier Hutchinson
+Isaiah,Davis,RB,,15,2025-12-14,Thu-Mon,NYJ,JAX,13.5,41.5,14.0,4000,5,1.2,4.1,3.7,3.3,0.84,,,Isaiah Davis
+Josh,Whyle,TE,,15,2025-12-14,Thu-Mon,GB,DEN,-2.5,42.5,22.5,2500,22,4.3,4.2,2.9,3.2,1.29,,,Josh Whyle
+Tyler,Badie,RB,,15,2025-12-14,Thu-Mon,DEN,GB,2.5,42.5,20.0,4000,9,2.3,2.5,2.6,3.2,0.81,,,Tyler Badie
+JuJu,Smith-Schuster,WR,,15,2025-12-14,Thu-Mon,KC,LAC,-4.5,41.5,23.0,3000,2,1.9,5.1,5.3,3.2,1.08,,,JuJu Smith-Schuster
+Tre',Harris,WR,,15,2025-12-14,Thu-Mon,LAC,KC,4.5,41.5,18.5,3100,13,3.5,3.7,3.7,3.2,1.03,,,Tre' Harris
+Davis,Allen,TE,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,2500,9,5.4,3.7,4.4,3.2,1.27,,,Davis Allen
+Evan,Hull,RB,,15,2025-12-14,Thu-Mon,NO,CAR,2.5,40.5,19.0,4000,26,1.3,1.3,1.8,3.2,0.79,,,Evan Hull
+Nick,Westbrook-Ikhine,WR,,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,3000,31,2.7,3.6,2.5,3.2,1.07,,,Nick Westbrook-Ikhine
+Jaylen,Wright,RB,,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,4900,11,5.4,3.0,5.4,3.2,0.66,,,Jaylen Wright
+Elijah,Arroyo,TE,Q,15,2025-12-14,Thu-Mon,SEA,IND,-13.5,42.5,28.0,2500,25,0.6,3.1,2.9,3.2,1.28,,,Elijah Arroyo
+Joshua,Palmer,WR,Q,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,3500,16,5.2,6.2,5.7,3.1,0.89,,,Joshua Palmer
+Noah,Brown,WR,,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,3200,29,5.7,6.6,3.2,3.0,0.93,,,Noah Brown
+Isaiah,Williams,WR,,15,2025-12-14,Thu-Mon,NYJ,JAX,13.5,41.5,14.0,3000,20,5.6,2.7,4.5,2.9,0.95,,,Isaiah Williams
+Tommy,Tremble,TE,,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,2500,12,2.0,4.3,4.1,2.9,1.15,,,Tommy Tremble
+Marquez,Valdes-Scantling,WR,,15,2025-12-15,Thu-Mon,PIT,MIA,-3.5,41.5,22.5,3100,8,1.6,4.4,1.6,2.9,0.93,,,Marquez Valdes-Scantling
+Demarcus,Robinson,WR,,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,3000,23,2.2,3.2,3.2,2.9,0.98,,,Demarcus Robinson
+Devin,Culp,TE,,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,2500,2,2.8,2.8,,2.9,1.16,,,Devin Culp
+Noah,Gray,TE,,15,2025-12-14,Thu-Mon,KC,LAC,-4.5,41.5,23.0,2500,8,3.0,3.0,2.9,2.8,1.11,,,Noah Gray
+Terrance,Ferguson,TE,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,2500,9,2.3,3.1,3.1,2.8,1.1,,,Terrance Ferguson
+Jahan,Dotson,WR,,15,2025-12-14,Thu-Mon,PHI,LV,-11.5,38.5,25.0,3000,28,2.0,3.0,3.5,2.8,0.93,,,Jahan Dotson
+Tez,Johnson,WR,,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,3400,21,9.0,8.5,7.7,2.8,0.81,,,Tez Johnson
+Malik,Davis,RB,,15,2025-12-14,Thu-Mon,DAL,MIN,-5.5,47.5,26.5,4000,12,3.1,1.6,3.1,2.7,0.67,,,Malik Davis
+Raheem,Mostert,RB,,15,2025-12-14,Thu-Mon,LV,PHI,11.5,38.5,13.5,4300,25,2.5,2.6,2.6,2.7,0.62,,,Raheem Mostert
+LeQuint,Allen Jr.,RB,,15,2025-12-14,Thu-Mon,JAX,NYJ,-13.5,41.5,27.5,4000,30,2.1,1.9,1.9,2.6,0.66,,,LeQuint Allen Jr.
+Adam,Thielen,WR,,15,2025-12-15,Thu-Mon,PIT,MIA,-3.5,41.5,22.5,3200,8,1.3,1.8,1.8,2.6,0.81,,,Adam Thielen
+Devontez,Walker,WR,,15,2025-12-14,Thu-Mon,BAL,CIN,-2.5,52.5,27.5,3000,3,5.0,3.4,6.3,2.5,0.84,,,Devontez Walker
+Tyquan,Thornton,WR,,15,2025-12-14,Thu-Mon,KC,LAC,-4.5,41.5,23.0,3000,2,3.2,7.4,7.4,2.5,0.83,,,Tyquan Thornton
+Michael,Mayer,TE,Q,15,2025-12-14,Thu-Mon,LV,PHI,11.5,38.5,13.5,2900,3,3.9,5.2,5.1,2.5,0.86,,,Michael Mayer
+Austin,Hooper,TE,,15,2025-12-14,Thu-Mon,NE,BUF,0.5,49.5,24.5,2500,1,5.0,4.3,4.3,2.4,0.95,,,Austin Hooper
+Jordan,Whittington,WR,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,3000,27,2.2,3.3,3.0,2.3,0.76,,,Jordan Whittington
+Adam,Trautman,TE,,15,2025-12-14,Thu-Mon,DEN,GB,2.5,42.5,20.0,2500,15,3.8,3.9,4.2,2.2,0.88,,,Adam Trautman
+Chris,Brooks,RB,,15,2025-12-14,Thu-Mon,GB,DEN,-2.5,42.5,22.5,4000,2,2.7,2.2,2.2,2.2,0.54,,,Chris Brooks
+John,FitzPatrick,TE,,15,2025-12-14,Thu-Mon,GB,DEN,-2.5,42.5,22.5,2500,22,1.7,2.0,2.6,2.2,0.88,,,John FitzPatrick
+Matthew,Golden,WR,,15,2025-12-14,Thu-Mon,GB,DEN,-2.5,42.5,22.5,3600,7,3.5,5.7,5.7,2.2,0.62,,,Matthew Golden
+Dare,Ogunbowale,RB,,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,4000,29,2.5,2.5,2.7,2.2,0.54,,,Dare Ogunbowale
+Brashard,Smith,RB,,15,2025-12-14,Thu-Mon,KC,LAC,-4.5,41.5,23.0,4000,14,2.3,4.4,4.1,2.2,0.55,,,Brashard Smith
+Jaylin,Lane,WR,,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,3000,29,2.7,4.1,3.7,2.2,0.73,,,Jaylin Lane
+Greg,Dulcich,TE,,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,2500,27,5.7,2.8,5.7,2.2,0.88,,,Greg Dulcich
+Josh,Oliver,TE,,15,2025-12-14,Thu-Mon,MIN,DAL,5.5,47.5,21.0,2800,20,6.4,4.7,5.2,2.1,0.74,,,Josh Oliver
+Jalen,Brooks,WR,,15,2025-12-14,Thu-Mon,ARI,HOU,9.5,42.5,16.5,3300,5,3.4,3.1,5.2,2.1,0.63,,,Jalen Brooks
+Allen,Lazard,WR,,15,2025-12-14,Thu-Mon,NYJ,JAX,13.5,41.5,14.0,3000,20,1.8,3.9,2.7,2.1,0.7,,,Allen Lazard
+Foster,Moreau,TE,,15,2025-12-14,Thu-Mon,NO,CAR,2.5,40.5,19.0,2500,21,1.9,5.1,1.9,2.1,0.85,,,Foster Moreau
+Colson,Yankoff,TE,,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,2500,10,0.8,0.4,1.3,2.1,0.85,,,Colson Yankoff
+Tank,Bigsby,RB,,15,2025-12-14,Thu-Mon,PHI,LV,-11.5,38.5,25.0,4600,24,3.7,4.8,3.1,2.1,0.45,,,Tank Bigsby
+Jimmy,Horn Jr.,WR,,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,3000,9,2.8,3.2,3.2,1.9,0.63,,,Jimmy Horn Jr.
+Kaleb,Johnson,RB,,15,2025-12-15,Thu-Mon,PIT,MIA,-3.5,41.5,22.5,4000,17,1.0,0.9,0.9,1.9,0.47,,,Kaleb Johnson
+Charlie,Kolar,TE,,15,2025-12-14,Thu-Mon,BAL,CIN,-2.5,52.5,27.5,2500,32,3.8,3.3,3.7,1.8,0.74,,,Charlie Kolar
+Tanner,Hudson,TE,,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,2500,7,4.8,4.4,5.2,1.8,0.73,,,Tanner Hudson
+Zavier,Scott,RB,,15,2025-12-14,Thu-Mon,MIN,DAL,5.5,47.5,21.0,4000,23,2.6,5.0,5.0,1.8,0.44,,,Zavier Scott
+Kendrick,Bourne,WR,,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,3800,23,3.8,8.5,8.5,1.8,0.48,,,Kendrick Bourne
+Cade,Stover,TE,,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,2500,23,3.4,3.6,3.4,1.7,0.68,,,Cade Stover
+Kalif,Raymond,WR,Q,15,2025-12-14,Thu-Mon,DET,LAR,5.5,55.5,25.0,3400,19,5.9,4.7,4.7,1.7,0.5,,,Kalif Raymond
+Ian,Thomas,TE,Q,15,2025-12-14,Thu-Mon,LV,PHI,11.5,38.5,13.5,2500,3,3.6,2.6,3.5,1.7,0.68,,,Ian Thomas
+Deven,Thompkins,WR,,15,2025-12-11,Thu-Mon,ATL,TB,4.5,43.5,19.5,3000,18,1.8,1.3,3.1,1.7,0.58,,,Deven Thompkins
+Jeremy,Ruckert,TE,,15,2025-12-14,Thu-Mon,NYJ,JAX,13.5,41.5,14.0,2500,30,3.6,3.9,3.9,1.6,0.65,,,Jeremy Ruckert
+Will,Dissly,TE,,15,2025-12-14,Thu-Mon,LAC,KC,4.5,41.5,18.5,2500,6,1.9,3.6,1.9,1.6,0.65,,,Will Dissly
+Mitchell,Evans,TE,,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,2500,12,2.8,4.0,4.0,1.6,0.62,,,Mitchell Evans
+James,Proche II,WR,,15,2025-12-14,Thu-Mon,TEN,SF,12.5,44.5,16.0,3000,22,1.9,1.4,3.2,1.6,0.53,,,James Proche II
+Hunter,Long,TE,,15,2025-12-14,Thu-Mon,JAX,NYJ,-13.5,41.5,27.5,2500,18,4.3,3.5,4.6,1.5,0.59,,,Hunter Long
+Konata,Mumpfield,WR,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,3000,27,3.0,3.0,3.0,1.5,0.51,,,Konata Mumpfield
+Will,Shipley,RB,,15,2025-12-14,Thu-Mon,PHI,LV,-11.5,38.5,25.0,4100,24,2.1,2.8,1.8,1.5,0.37,,,Will Shipley
+Julian,Hill,TE,,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,2500,27,3.2,2.0,2.9,1.5,0.6,,,Julian Hill
+Drew,Sample,TE,,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,2500,7,3.1,2.6,2.4,1.4,0.55,,,Drew Sample
+Kyle,Williams,WR,,15,2025-12-14,Thu-Mon,NE,BUF,0.5,49.5,24.5,3000,15,5.5,3.1,3.1,1.4,0.48,,,Kyle Williams
+Sterling,Shepard,WR,,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,3300,21,4.7,5.7,6.4,1.4,0.44,,,Sterling Shepard
+Luke,Schoonmaker,TE,,15,2025-12-14,Thu-Mon,DAL,MIN,-5.5,47.5,26.5,2500,14,2.0,1.5,1.5,1.3,0.5,,,Luke Schoonmaker
+Ray,Davis,RB,,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,4000,3,3.7,2.3,2.5,1.3,0.34,,,Ray Davis
+Cody,White,WR,,15,2025-12-14,Thu-Mon,SEA,IND,-13.5,42.5,28.0,3000,30,3.6,3.4,6.0,1.2,0.39,,,Cody White
+Luke,Farrell,TE,,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,2500,17,3.0,3.2,3.4,1.2,0.48,,,Luke Farrell
+Jalen,McMillan,WR,Q,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,4000,21,16.7,12.7,,1.2,0.31,,,Jalen McMillan
+Malachi,Corley,WR,Q,15,2025-12-14,Thu-Mon,CLE,CHI,7.5,39.5,16.0,3000,26,1.7,1.7,2.0,1.1,0.38,,,Malachi Corley
+Mitch,Tinsley,WR,,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,3100,24,4.1,3.6,4.8,1.1,0.35,,,Mitch Tinsley
+Hunter,Luepke,RB,,15,2025-12-14,Thu-Mon,DAL,MIN,-5.5,47.5,26.5,4000,12,3.8,2.4,3.1,1.1,0.26,,,Hunter Luepke
+Jonathan,Mingo,WR,,15,2025-12-14,Thu-Mon,DAL,MIN,-5.5,47.5,26.5,3000,1,1.3,1.0,,1.1,0.36,,,Jonathan Mingo
+Tom,Kennedy,WR,,15,2025-12-14,Thu-Mon,DET,LAR,5.5,55.5,25.0,3000,19,1.5,2.1,7.6,1.1,0.38,,,Tom Kennedy
+Jackson,Hawes,TE,,15,2025-12-14,Thu-Mon,BUF,NE,-0.5,49.5,25.0,2500,26,5.3,4.5,4.5,1.1,0.46,,,Jackson Hawes
+Alec,Ingold,RB,,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,4000,11,1.7,1.4,1.6,1.1,0.27,,,Alec Ingold
+Charlie,Woerner,TE,,15,2025-12-11,Thu-Mon,ATL,TB,4.5,43.5,19.5,2500,13,1.7,1.6,2.1,1.1,0.44,,,Charlie Woerner
+Dyami,Brown,WR,,15,2025-12-14,Thu-Mon,JAX,NYJ,-13.5,41.5,27.5,3000,10,3.4,5.6,5.5,1.0,0.33,,,Dyami Brown
+Lil'Jordan,Humphrey,WR,,15,2025-12-14,Thu-Mon,DEN,GB,2.5,42.5,20.0,3000,12,3.0,2.0,3.8,0.9,0.31,,,Lil'Jordan Humphrey
+Gunner,Olszewski,WR,Q,15,2025-12-14,Thu-Mon,NYG,WAS,-2.5,47.5,25.0,3000,25,1.7,0.8,2.8,0.9,0.3,,,Gunner Olszewski
+Grant,Calcaterra,TE,,15,2025-12-14,Thu-Mon,PHI,LV,-11.5,38.5,25.0,2500,4,2.0,1.4,2.0,0.9,0.35,,,Grant Calcaterra
+Cedrick,Wilson Jr.,WR,,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,3000,31,3.1,2.8,1.8,0.9,0.29,,,Cedrick Wilson Jr.
+Dee,Eskridge,WR,,15,2025-12-15,Thu-Mon,MIA,PIT,3.5,41.5,19.0,3000,31,1.8,1.3,1.8,0.9,0.31,,,Dee Eskridge
+Ameer,Abdullah,RB,,15,2025-12-14,Thu-Mon,IND,SEA,13.5,42.5,14.5,4000,6,1.6,6.1,2.6,0.9,0.24,,,Ameer Abdullah
+Tai,Felton,WR,,15,2025-12-14,Thu-Mon,MIN,DAL,5.5,47.5,21.0,3000,32,2.0,2.0,2.0,0.8,0.27,,,Tai Felton
+Brycen,Tremayne,WR,,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,3000,9,3.5,3.3,4.2,0.8,0.26,,,Brycen Tremayne
+Mo,Alie-Cox,TE,,15,2025-12-14,Thu-Mon,IND,SEA,13.5,42.5,14.5,2500,31,0.7,1.1,1.4,0.8,0.32,,,Mo Alie-Cox
+Durham,Smythe,TE,,15,2025-12-14,Thu-Mon,CHI,CLE,-7.5,39.5,23.5,2500,11,0.9,1.1,1.5,0.7,0.27,,,Durham Smythe
+Dante,Pettis,WR,,15,2025-12-14,Thu-Mon,NO,CAR,2.5,40.5,19.0,3000,11,5.4,3.8,2.4,0.7,0.23,,,Dante Pettis
+Trevor,Etienne,RB,,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,4000,19,1.8,1.4,1.4,0.7,0.17,,,Trevor Etienne
+Julius,Chestnut,RB,,15,2025-12-14,Thu-Mon,TEN,SF,12.5,44.5,16.0,4000,16,0.7,0.7,0.7,0.7,0.18,,,Julius Chestnut
+Kameron,Johnson,WR,,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,3000,21,3.7,2.1,4.4,0.7,0.22,,,Kameron Johnson
+Blake,Whiteheart,TE,,15,2025-12-14,Thu-Mon,CLE,CHI,7.5,39.5,16.0,2500,19,0.7,0.5,0.6,0.6,0.24,,,Blake Whiteheart
+Brevyn,Spann-Ford,TE,,15,2025-12-14,Thu-Mon,DAL,MIN,-5.5,47.5,26.5,2500,14,2.6,1.4,2.2,0.6,0.22,,,Brevyn Spann-Ford
+Adam,Prentice,RB,,15,2025-12-14,Thu-Mon,DEN,GB,2.5,42.5,20.0,4000,9,2.5,1.6,1.6,0.6,0.15,,,Adam Prentice
+Terrell,Jennings,RB,Q,15,2025-12-14,Thu-Mon,NE,BUF,0.5,49.5,24.5,4000,27,3.0,2.3,3.0,0.6,0.16,,,Terrell Jennings
+Ben,Skowronek,WR,,15,2025-12-15,Thu-Mon,PIT,MIA,-3.5,41.5,22.5,3000,8,1.5,2.4,2.8,0.6,0.19,,,Ben Skowronek
+Skyy,Moore,WR,,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,3000,23,1.7,1.1,1.5,0.6,0.19,,,Skyy Moore
+Raheim,Sanders,RB,,15,2025-12-14,Thu-Mon,CLE,CHI,7.5,39.5,16.0,4000,15,6.3,6.3,6.3,0.5,0.12,,,Raheim Sanders
+Josiah,Deguara,TE,,15,2025-12-14,Thu-Mon,ARI,HOU,9.5,42.5,16.5,2500,5,0.6,0.3,0.8,0.5,0.21,,,Josiah Deguara
+Quintin,Morris,TE,,15,2025-12-14,Thu-Mon,JAX,NYJ,-13.5,41.5,27.5,2500,18,0.9,1.2,2.3,0.5,0.21,,,Quintin Morris
+Derius,Davis,WR,Q,15,2025-12-14,Thu-Mon,LAC,KC,4.5,41.5,18.5,3000,13,0.4,2.7,0.2,0.5,0.17,,,Derius Davis
+Dylan,Laube,RB,,15,2025-12-14,Thu-Mon,LV,PHI,11.5,38.5,13.5,4000,25,1.1,0.5,1.8,0.5,0.12,,,Dylan Laube
+Robbie,Ouzts,RB,,15,2025-12-14,Thu-Mon,SEA,IND,-13.5,42.5,28.0,4000,13,,,,0.5,0.13,,,Robbie Ouzts
+Devin,Duvernay,WR,,15,2025-12-14,Thu-Mon,CHI,CLE,-7.5,39.5,23.5,3000,4,1.5,2.2,2.3,0.4,0.13,,,Devin Duvernay
+Charlie,Jones,WR,,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,3000,24,0.0,1.0,0.0,0.4,0.12,,,Charlie Jones
+Tahj,Brooks,RB,,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,4000,20,0.7,0.7,0.7,0.4,0.09,,,Tahj Brooks
+Eric,Gray,RB,,15,2025-12-14,Thu-Mon,NYG,WAS,-2.5,47.5,25.0,4000,28,0.6,0.7,,0.4,0.11,,,Eric Gray
+Kylen,Granson,TE,,15,2025-12-14,Thu-Mon,PHI,LV,-11.5,38.5,25.0,2500,4,2.4,2.1,1.3,0.4,0.18,,,Kylen Granson
+Darius,Cooper,WR,,15,2025-12-14,Thu-Mon,PHI,LV,-11.5,38.5,25.0,3000,28,2.8,2.8,2.8,0.4,0.14,,,Darius Cooper
+Tyler,Goodson,RB,,15,2025-12-14,Thu-Mon,IND,SEA,13.5,42.5,14.5,4000,6,0.8,0.8,0.8,0.4,0.11,,,Tyler Goodson
+Drew,Ogletree,TE,,15,2025-12-14,Thu-Mon,IND,SEA,13.5,42.5,14.5,2500,31,2.7,1.9,3.5,0.4,0.17,,,Drew Ogletree
+Kalel,Mullings,RB,,15,2025-12-14,Thu-Mon,TEN,SF,12.5,44.5,16.0,4000,16,,,,0.4,0.09,,,Kalel Mullings
+Andrew,Beck,RB,,15,2025-12-14,Thu-Mon,NYJ,JAX,13.5,41.5,14.0,4000,5,3.1,1.5,3.1,0.3,0.06,,,Andrew Beck
+Sione,Vaki,RB,,15,2025-12-14,Thu-Mon,DET,LAR,5.5,55.5,25.0,4000,4,0.9,0.5,0.4,0.3,0.09,,,Sione Vaki
+Jake,Tonges,TE,,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,2500,17,11.0,7.3,10.4,0.3,0.14,,,Jake Tonges
+Patrick,Ricard,RB,,15,2025-12-14,Thu-Mon,BAL,CIN,-2.5,52.5,27.5,4000,32,0.5,0.3,0.2,0.2,0.04,,,Patrick Ricard
+C.J.,Ham,RB,,15,2025-12-14,Thu-Mon,MIN,DAL,5.5,47.5,21.0,4000,23,1.7,0.9,1.5,0.2,0.04,,,C.J. Ham
+Nick,Vannett,TE,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,2500,9,3.1,3.0,,0.2,0.09,,,Nick Vannett
+Ronnie,Rivers,RB,,15,2025-12-14,Thu-Mon,LAR,DET,-5.5,55.5,30.5,4000,1,3.4,1.7,4.1,0.2,0.04,,,Ronnie Rivers
+Jack,Westover,RB,,15,2025-12-14,Thu-Mon,NE,BUF,0.5,49.5,24.5,4000,27,0.0,0.0,0.0,0.2,0.04,,,Jack Westover
+Jack,Stoll,TE,,15,2025-12-14,Thu-Mon,NO,CAR,2.5,40.5,19.0,2500,21,0.7,1.4,2.3,0.2,0.09,,,Jack Stoll
+Isaac,Guerendo,RB,,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,4000,22,12.3,8.2,,0.2,0.05,,,Isaac Guerendo
+Pharaoh,Brown,TE,,15,2025-12-14,Thu-Mon,ARI,HOU,9.5,42.5,16.5,2500,5,0.9,0.9,,0.1,0.05,,,Pharaoh Brown
+Scott,Matlock,RB,,15,2025-12-14,Thu-Mon,LAC,KC,4.5,41.5,18.5,4000,7,1.7,1.7,4.2,0.1,0.03,,,Scott Matlock
+Deshaun,Watson,QB,O,15,2025-12-14,Thu-Mon,CLE,CHI,7.5,39.5,16.0,4000,25,10.5,11.6,,0.0,0.0,,,Deshaun Watson
+Erick,All Jr.,TE,O,15,2025-12-14,Thu-Mon,CIN,BAL,2.5,52.5,25.0,2500,7,3.1,4.0,,0.0,0.0,,,Erick All Jr.
+Gavin,Bartholomew,TE,O,15,2025-12-14,Thu-Mon,MIN,DAL,5.5,47.5,21.0,2500,20,,,,0.0,0.0,,,Gavin Bartholomew
+Joe,Mixon,RB,O,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,4800,29,11.3,15.7,,0.0,0.0,,,Joe Mixon
+Tank,Dell,WR,O,15,2025-12-14,Thu-Mon,HOU,ARI,-9.5,42.5,26.0,3000,17,10.2,11.3,,0.0,0.0,,,Tank Dell
+Irvin,Charles,WR,O,15,2025-12-14,Thu-Mon,NYJ,JAX,13.5,41.5,14.0,3000,20,0.0,0.0,,0.0,0.0,,,Irvin Charles
+Jonathon,Brooks,RB,O,15,2025-12-14,Thu-Mon,CAR,NO,-2.5,40.5,21.5,4000,19,2.5,2.5,,0.0,0.0,,,Jonathon Brooks
+Zach,Ertz,TE,O,15,2025-12-14,Thu-Mon,WAS,NYG,2.5,47.5,22.5,2500,10,10.4,9.3,10.0,0.0,0.0,,,Zach Ertz
+Brandon,Aiyuk,WR,O,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,4600,23,10.5,9.5,,0.0,0.0,,,Brandon Aiyuk
+Joel,Wilson,TE,O,15,2025-12-14,Thu-Mon,TEN,SF,12.5,44.5,16.0,2500,24,,,,0.0,0.0,,,Joel Wilson
+Kurtis,Rourke,QB,O,15,2025-12-14,Thu-Mon,SF,TEN,-12.5,44.5,28.5,4000,24,,,,0.0,0.0,,,Kurtis Rourke
+Cade,Otton,TE,O,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,3400,2,7.2,8.4,7.4,0.0,0.0,,,Cade Otton
+Connor,Bazelak,QB,O,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,4000,19,,,,0.0,0.0,,,Connor Bazelak
+Josh,Williams,RB,O,15,2025-12-11,Thu-Mon,TB,ATL,-4.5,43.5,24.0,4000,18,1.1,1.1,1.1,0.0,0.0,,,Josh Williams
+Casey,Washington,WR,O,15,2025-12-11,Thu-Mon,ATL,TB,4.5,43.5,19.5,3000,18,3.1,1.5,3.1,0.0,0.0,,,Casey Washington
+Nathan,Carter,RB,O,15,2025-12-11,Thu-Mon,ATL,TB,4.5,43.5,19.5,4000,21,2.5,2.5,2.5,0.0,0.0,,,Nathan Carter

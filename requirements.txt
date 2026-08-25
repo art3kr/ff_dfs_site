@@ -1,9 +1,24 @@
+# Web framework
 flask>=3.0
 flask-login>=0.6
+
+# Auth
 bcrypt>=4.0
+
+# HTTP / scraping
 requests>=2.31
 beautifulsoup4>=4.12
 urllib3>=2.0
+
+# Data
+pandas>=2.0
+python-dotenv>=1.0
+
+# CLI
 click>=8.1
+
+# Production server
 gunicorn>=21.2
+
+# Database (prod)
 psycopg2-binary>=2.9

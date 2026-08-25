@@ -72,6 +72,9 @@ def fetch_week(year: int, week: int) -> list[dict]:
         parts = line.split(';')
         if len(parts) < 10:
             continue
+        # Skip the header row ("Week;Year;GID;Name;...")
+        if not parts[0].lstrip('-').isdigit():
+            continue
         try:
             rows.append({
                 'week':          int(parts[0]),
@@ -125,6 +128,14 @@ def normalize_name(name: str) -> str:
 # Main
 # ---------------------------------------------------------------------------
 
+def _save(df: pd.DataFrame):
+    """Write the dataframe to the output file (overwrites each time)."""
+    df = df.drop_duplicates(subset=['year', 'week', 'rg_id'])
+    df = df.sort_values(['year', 'week', 'position', 'dk_salary'],
+                        ascending=[True, True, True, False])
+    df.to_csv(OUTPUT_FILE, index=False, compression='gzip')
+
+
 def main():
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
 
@@ -133,13 +144,16 @@ def main():
     if os.path.exists(OUTPUT_FILE):
         print(f"Found existing file: {OUTPUT_FILE}")
         existing_df = pd.read_csv(OUTPUT_FILE)
-        for _, row in existing_df[['year','week']].drop_duplicates().iterrows():
+        for _, row in existing_df[['year', 'week']].drop_duplicates().iterrows():
             already_done.add((int(row['year']), int(row['week'])))
         print(f"  Already scraped: {len(already_done)} (year, week) pairs")
     else:
         existing_df = pd.DataFrame(columns=SCSV_COLUMNS + ['name_normalized'])
 
-    all_rows = []
+    # Keep all rows (existing + new) in memory; write to disk after every week
+    # so Ctrl-C at any point leaves a valid, readable file.
+    all_rows = existing_df.to_dict('records') if not existing_df.empty else []
+
     total_weeks = sum(WEEKS_BY_YEAR.values())
     done_count  = 0
 
@@ -163,24 +177,13 @@ def main():
             else:
                 print(" (empty — possible playoff week)")
 
+            # Write after every week — safe to Ctrl-C at any point
+            _save(pd.DataFrame(all_rows))
             time.sleep(SLEEP_SEC)
 
-    if not all_rows:
-        print("No new data scraped.")
-        return
-
-    new_df = pd.DataFrame(all_rows)
-    final_df = pd.concat([existing_df, new_df], ignore_index=True)
-
-    # Deduplicate on (year, week, rg_id) — safety net
-    final_df = final_df.drop_duplicates(subset=['year','week','rg_id'])
-    final_df = final_df.sort_values(['year','week','position','dk_salary'],
-                                     ascending=[True, True, True, False])
-
-    final_df.to_csv(OUTPUT_FILE, index=False, compression='gzip')
-    print(f"\nSaved {len(final_df):,} rows → {OUTPUT_FILE}")
+    final_df = pd.read_csv(OUTPUT_FILE)
+    print(f"\nDone. {len(final_df):,} rows → {OUTPUT_FILE}")
     print(f"Years: {sorted(final_df['year'].unique())}")
-    print(f"Sample:\n{final_df.head(3).to_string()}")
 
 
 if __name__ == '__main__':

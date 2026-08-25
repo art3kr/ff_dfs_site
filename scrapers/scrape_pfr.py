@@ -16,6 +16,10 @@ Player stats columns:
   rec_tgt, rec, rec_yds, rec_td,
   snap_pct
 
+dk_pts is computed by this script using the standard DraftKings PPR
+formula (see calculate_dk_points()), since the career gamelog page this
+scraper uses doesn't include a pre-computed DK points column.
+
 Game info columns (from boxscore):
   boxscore_url, year, week, team_home, team_away,
   roof, surface, weather, attendance, vegas_line, over_under
@@ -24,27 +28,57 @@ Run:
     python scrapers/scrape_pfr.py --years 2014-2025
     python scrapers/scrape_pfr.py --years 2024-2025   # incremental update
 
-IMPORTANT: PFR rate-limits aggressively. The scraper uses:
-  - 4-second sleep between player pages (same as your original)
-  - 2-second sleep between boxscore pages
-  - Randomized User-Agent rotation
-  - Checkpoint saves every 20 players (resume-safe)
+IMPORTANT: PFR is behind Cloudflare, which blocks plain scraper requests
+with a JS challenge. This scraper reuses a `cf_clearance` cookie captured
+from a real logged-in browser session (see make_session() below for how
+to get one) — this lets us use fast, simple `requests` calls instead of
+a full browser, while still passing Cloudflare's check.
 
-Expect ~8-10 hours for a full 2014-2025 run (~600 players × 12 years).
-Run it overnight. You can Ctrl-C at any time and re-run — it will resume.
+Required setup — add these to your .env file:
+    PFR_CF_CLEARANCE=<value from your browser's cf_clearance cookie>
+    PFR_CF_BM=<value from your browser's __cf_bm cookie>
+    PFR_USER_AGENT=<run navigator.userAgent in your browser console>
+
+These expire periodically (often within hours). When you start getting
+403s again, grab fresh values from your browser and update .env.
+
+SPEED: player stats are scraped via each player's career gamelog page
+(/players/X/XXXX00/gamelog/ — no year in the URL), which returns their
+ENTIRE career in one request. A player active across all 12 requested
+years is hit once instead of 12 times. This cuts total requests (and
+therefore both runtime and exposure to getting blocked) by roughly 3x
+compared to fetching one page per player per year.
+
+RELIABILITY: if 5 requests in a row fail, the scraper assumes your
+PFR_CF_CLEARANCE cookie has expired and stops itself immediately with
+instructions, rather than grinding through hundreds of players uselessly
+while blocked. Refresh the cookie and re-run the same command — it
+resumes exactly where it stopped.
+
+Rate limiting:
+  - 6-second sleep between player pages
+  - 3-second sleep between boxscore pages
+  - Retries with backoff on 403/429 responses
+  - Saves to disk after every player and every game — Ctrl-C at any
+    point leaves a valid, fully up-to-date file, and re-running the
+    same command picks up exactly where you left off.
+
+Expect roughly 3-4 hours for a full 2014-2025 run (down from ~10+ hours
+with the old per-year approach), assuming your cookie stays valid.
+
 """
 
 import os
 import re
 import sys
 import time
-import glob
-import pickle
 import random
 import argparse
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup, Comment
+from dotenv import load_dotenv
+load_dotenv()
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -52,21 +86,79 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Config
 # ---------------------------------------------------------------------------
 
-DATA_DIR         = os.path.join(os.path.dirname(__file__), '..', 'data')
-CHECKPOINT_DIR   = os.path.join(DATA_DIR, '_pfr_checkpoints')
+DATA_DIR         = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data'))
 PLAYERS_OUT      = os.path.join(DATA_DIR, 'pfr_player_stats_2014_2025.csv.gz')
 GAMES_OUT        = os.path.join(DATA_DIR, 'pfr_game_info_2014_2025.csv.gz')
 
 PFR_BASE         = "https://www.pro-football-reference.com"
-SLEEP_PLAYER     = 4.0      # seconds between player pages
-SLEEP_BOXSCORE   = 2.0      # seconds between boxscore pages
-CHECKPOINT_EVERY = 20       # save checkpoint every N players
+SLEEP_PLAYER     = 6.0      # seconds between player pages (increased to avoid 429s)
+SLEEP_BOXSCORE   = 3.0      # seconds between boxscore pages
+SLEEP_ON_429     = 90.0     # seconds to wait after a 429 rate-limit response
+SLEEP_ON_403     = 30.0     # seconds to wait after a 403 before retrying
+MAX_RETRIES      = 3        # number of retries per page before giving up
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:139.0) Gecko/20100101 Firefox/139.0",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15",
 ]
+
+# ---------------------------------------------------------------------------
+# Cloudflare cookie auth
+#
+# PFR is behind Cloudflare. A real browser that solves Cloudflare's JS
+# challenge gets issued a `cf_clearance` cookie — reusing that cookie in
+# a plain requests session lets us skip the challenge entirely, without
+# needing a full browser (Playwright) at all.
+#
+# How to get fresh values when this expires:
+#   1. Open pro-football-reference.com in Chrome, load any page normally
+#   2. DevTools (F12) -> Application -> Cookies -> www.pro-football-reference.com
+#   3. Copy the values of cf_clearance and __cf_bm
+#   4. DevTools -> Console -> run: navigator.userAgent  -> copy that too
+#   5. Put all three in your .env file (see below) and re-run
+#
+# cf_clearance is typically valid for a limited window (often hours, not
+# days) and is usually tied to the User-Agent + IP that solved the
+# challenge, so PFR_USER_AGENT must match the browser you copied it from.
+# ---------------------------------------------------------------------------
+
+PFR_CF_CLEARANCE = os.environ.get("PFR_CF_CLEARANCE", "")
+PFR_CF_BM        = os.environ.get("PFR_CF_BM", "")
+PFR_USER_AGENT   = os.environ.get(
+    "PFR_USER_AGENT",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+)
+
+
+def make_session() -> requests.Session:
+    """
+    Create a requests.Session pre-loaded with the Cloudflare clearance
+    cookie captured from a real browser, so requests pass through without
+    triggering the JS challenge.
+    """
+    session = requests.Session()
+
+    if not PFR_CF_CLEARANCE:
+        print("WARNING: PFR_CF_CLEARANCE not set in .env — requests will "
+              "likely be blocked by Cloudflare. See scrape_pfr.py header "
+              "comment for how to get a fresh cookie.")
+
+    if PFR_CF_CLEARANCE:
+        session.cookies.set(
+            'cf_clearance', PFR_CF_CLEARANCE,
+            domain='.pro-football-reference.com', path='/'
+        )
+    if PFR_CF_BM:
+        session.cookies.set(
+            '__cf_bm', PFR_CF_BM,
+            domain='.pro-football-reference.com', path='/'
+        )
+
+    session.headers.update({'User-Agent': PFR_USER_AGENT})
+    return session
+
 
 PLAYER_COLUMNS = [
     'pfr_id', 'name', 'name_normalized', 'year', 'week',
@@ -87,14 +179,61 @@ GAME_COLUMNS = [
 # ---------------------------------------------------------------------------
 
 def get_headers() -> dict:
+    """
+    Minimal headers matching the original working scraper.
+    IMPORTANT: PFR's bot detection appears to flag "too complete" header
+    sets (Sec-Fetch-*, DNT, etc.) as suspicious more than it flags bare
+    requests. The original Weekly_Scores_Scrape.py used NO custom headers
+    at all for table pages and only a User-Agent for per-player pages —
+    and that worked reliably. So we replicate that minimal footprint here.
+    """
     return {
         'User-Agent': random.choice(USER_AGENTS),
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
     }
+
+
+def pfr_get(session: requests.Session, url: str, use_headers: bool = True) -> requests.Response | None:
+    """
+    GET a PFR page with retry logic for 403/429 responses.
+    - 429 (rate limited): wait SLEEP_ON_429 seconds then retry
+    - 403 (blocked):      wait SLEEP_ON_403 seconds then retry
+      (if this keeps happening, PFR_CF_CLEARANCE has likely expired —
+      get a fresh one from your browser, see the make_session() docstring)
+    - Other errors:       return None after MAX_RETRIES attempts
+
+    The session already carries the cf_clearance cookie and a matching
+    User-Agent (set in make_session()), so use_headers here only controls
+    whether we ALSO send the extra rotating User-Agent from USER_AGENTS —
+    which we don't want to do now, since it would mismatch the UA that
+    the cf_clearance cookie was issued for. Kept as a no-op parameter for
+    backward compatibility with existing call sites.
+    """
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            r = session.get(url, verify=False, timeout=30)
+        except requests.RequestException as e:
+            print(f"  Request error (attempt {attempt}/{MAX_RETRIES}): {e}")
+            time.sleep(SLEEP_ON_403)
+            continue
+
+        if r.status_code == 200:
+            return r
+
+        if r.status_code == 429:
+            print(f"  Rate limited (429). Waiting {SLEEP_ON_429}s before retry {attempt+1}/{MAX_RETRIES}...")
+            time.sleep(SLEEP_ON_429)
+            continue
+
+        if r.status_code == 403:
+            print(f"  Blocked (403). Waiting {SLEEP_ON_403}s before retry {attempt+1}/{MAX_RETRIES}...")
+            time.sleep(SLEEP_ON_403)
+            continue
+
+        print(f"  HTTP {r.status_code} for {url}")
+        return None
+
+    print(f"  Gave up after {MAX_RETRIES} attempts: {url}")
+    return None
 
 
 def normalize_name(name: str) -> str:
@@ -122,15 +261,33 @@ def _int(s) -> int:
         return 0
 
 
-def save_checkpoint(data: list, path: str):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, 'wb') as f:
-        pickle.dump(data, f)
-
-
-def load_checkpoint(path: str) -> list:
-    with open(path, 'rb') as f:
-        return pickle.load(f)
+def calculate_dk_points(pass_yds=0, pass_td=0, pass_int=0,
+                        rush_yds=0, rush_td=0,
+                        rec=0, rec_yds=0, rec_td=0,
+                        fumbles_lost=0) -> float:
+    """
+    Standard DraftKings NFL PPR scoring formula. Used to compute fantasy
+    points ourselves from raw box-score stats, since the career gamelog
+    page (unlike the per-year fantasy page) doesn't include a pre-computed
+    DK points column.
+    """
+    pts = 0.0
+    pts += pass_yds * 0.04          # 1 pt per 25 pass yds
+    pts += pass_td * 4
+    pts += pass_int * -1
+    pts += rush_yds * 0.1           # 1 pt per 10 rush yds
+    pts += rush_td * 6
+    pts += rec * 1                  # PPR: 1 pt per reception
+    pts += rec_yds * 0.1            # 1 pt per 10 rec yds
+    pts += rec_td * 6
+    pts += fumbles_lost * -1
+    if pass_yds >= 300:
+        pts += 3
+    if rush_yds >= 100:
+        pts += 3
+    if rec_yds >= 100:
+        pts += 3
+    return round(pts, 2)
 
 
 # ---------------------------------------------------------------------------
@@ -142,12 +299,16 @@ def get_players_for_year(year: int, session: requests.Session) -> pd.DataFrame:
     Scrape PFR's annual fantasy table to get all players + their page URLs.
     Returns df with columns: name, pfr_id, player_url, team, position, dk_pts_season
     """
+    # NOTE: table-listing pages use a bare request (no custom headers),
+    # matching the original working scraper. No homepage warm-up either —
+    # both were found to make PFR's bot detection MORE likely to block us,
+    # not less. Less looks more human here, apparently.
     url = f"{PFR_BASE}/years/{year}/fantasy.htm"
     print(f"  Fetching player list: {url}")
 
-    r = session.get(url, headers=get_headers(), verify=False, timeout=30)
-    if r.status_code != 200:
-        print(f"  ERROR {r.status_code} fetching {url}")
+    r = pfr_get(session, url, use_headers=False)
+    if r is None:
+        print(f"  ERROR: could not fetch {url} after retries")
         return pd.DataFrame()
 
     soup = BeautifulSoup(r.content, 'html.parser')
@@ -196,24 +357,35 @@ def get_players_for_year(year: int, session: requests.Session) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Step 2: Scrape weekly stats for one player in one year
+# Step 2: Scrape a player's ENTIRE career game log in one request
+#
+# PFR's career gamelog page (/players/X/XXXX00/gamelog/ — no year in the
+# URL) returns every regular-season game the player has ever played, all
+# in one page. This replaces hitting /fantasy/{year}/ once per player per
+# year — for a player active 2014-2025, that's 12 requests collapsed
+# into 1. Across a full run this cuts total requests (and therefore both
+# runtime and exposure to getting blocked) by roughly 3x.
+#
+# Trade-off: this page doesn't have a pre-computed DK points column like
+# the per-year fantasy page did, so we compute it ourselves from raw
+# stats via calculate_dk_points().
 # ---------------------------------------------------------------------------
 
-def get_player_weekly_stats(pfr_id: str, name: str, player_url: str,
-                             year: int, session: requests.Session) -> list[dict]:
+def get_player_career_gamelog(pfr_id: str, name: str, player_url: str,
+                              position: str, years_needed: set,
+                              session: requests.Session) -> list[dict]:
     """
-    Hit the player's individual fantasy page for `year`.
-    Returns list of dicts, one per week played.
+    Hit the player's career gamelog page ONCE and return rows only for
+    the years in `years_needed`. Returns list of dicts, one per game.
     """
-    # e.g. /players/M/McCAC00/fantasy/2024/
-    url = PFR_BASE + re.sub(r'\.htm$', '', player_url) + f'/fantasy/{year}/'
-    r   = session.get(url, headers=get_headers(), verify=False, timeout=30)
+    url = PFR_BASE + re.sub(r'\.htm$', '', player_url) + '/gamelog/'
+    r   = pfr_get(session, url, use_headers=True)
 
-    if r.status_code != 200:
-        return []
+    if r is None:
+        return None   # None = request failed (distinct from [] = no games)
 
     soup  = BeautifulSoup(r.content, 'html.parser')
-    table = soup.find('table', id='player_fantasy')
+    table = soup.find('table', id='stats')
     if not table:
         return []
 
@@ -223,53 +395,45 @@ def get_player_weekly_stats(pfr_id: str, name: str, player_url: str,
 
     rows = []
     for row in tbody.find_all('tr'):
-        # Skip sub-header rows
         if row.get('class') and 'thead' in row.get('class'):
             continue
 
         def get(stat):
-            cell = row.find('td', attrs={'data-stat': stat})
+            cell = row.find('td', attrs={'data-stat': stat}) or \
+                   row.find('th', attrs={'data-stat': stat})
             return cell.get_text(strip=True) if cell else ''
 
         try:
+            year = _int(get('year_id'))
+            if year not in years_needed:
+                continue   # skip games outside the range we asked for
+
             week_num = _int(get('week_num'))
             if week_num == 0:
                 continue
 
-            # Team / opponent / home-away
-            team_cell = row.find('td', attrs={'data-stat': 'team'})
-            team      = team_cell.get_text(strip=True) if team_cell else ''
+            team      = get('team')
+            opp_raw   = get('opp') or get('game_location')
+            game_loc  = get('game_location')   # '@' if away, '' if home
+            home_away = 'a' if game_loc == '@' else 'h'
+            opponent  = get('opp')
 
-            opp_cell  = row.find('td', attrs={'data-stat': 'opp'})
-            opp_raw   = opp_cell.get_text(strip=True) if opp_cell else ''
-            # PFR formats opponent as '@OPP' for away games
-            home_away = 'a' if opp_raw.startswith('@') else 'h'
-            opponent  = opp_raw.lstrip('@').strip()
-
-            position  = get('fantasy_pos') or get('pos')
-            dk_pts    = _float(get('draftkings_points'))
-
-            # Passing
-            pass_cmp  = _int(get('pass_cmp'))
-            pass_att  = _int(get('pass_att'))
             pass_yds  = _int(get('pass_yds'))
             pass_td   = _int(get('pass_td'))
             pass_int  = _int(get('pass_int'))
-
-            # Rushing
-            rush_att  = _int(get('rush_att'))
             rush_yds  = _int(get('rush_yds'))
             rush_td   = _int(get('rush_td'))
-
-            # Receiving
-            rec_tgt   = _int(get('targets'))
             rec       = _int(get('rec'))
             rec_yds   = _int(get('rec_yds'))
             rec_td    = _int(get('rec_td'))
+            fumbles_lost = _int(get('fumbles_lost'))
 
-            # Snap % (may not exist in older years — graceful fallback)
-            snap_raw  = get('off_pct')
-            snap_pct  = _float(snap_raw) if snap_raw else None
+            dk_pts = calculate_dk_points(
+                pass_yds=pass_yds, pass_td=pass_td, pass_int=pass_int,
+                rush_yds=rush_yds, rush_td=rush_td,
+                rec=rec, rec_yds=rec_yds, rec_td=rec_td,
+                fumbles_lost=fumbles_lost,
+            )
 
             rows.append({
                 'pfr_id':          pfr_id,
@@ -282,22 +446,22 @@ def get_player_weekly_stats(pfr_id: str, name: str, player_url: str,
                 'home_away':       home_away,
                 'position':        position.upper(),
                 'dk_pts':          dk_pts,
-                'pass_cmp':        pass_cmp,
-                'pass_att':        pass_att,
+                'pass_cmp':        _int(get('pass_cmp')),
+                'pass_att':        _int(get('pass_att')),
                 'pass_yds':        pass_yds,
                 'pass_td':         pass_td,
                 'pass_int':        pass_int,
-                'rush_att':        rush_att,
+                'rush_att':        _int(get('rush_att')),
                 'rush_yds':        rush_yds,
                 'rush_td':         rush_td,
-                'rec_tgt':         rec_tgt,
+                'rec_tgt':         _int(get('targets')),
                 'rec':             rec,
                 'rec_yds':         rec_yds,
                 'rec_td':          rec_td,
-                'snap_pct':        snap_pct,
+                'snap_pct':        _float(get('off_pct')) if get('off_pct') else None,
             })
 
-        except Exception as e:
+        except Exception:
             continue
 
     return rows
@@ -314,7 +478,7 @@ def get_game_info(boxscore_url: str, year: int, week: int,
     Hit one PFR boxscore page and extract game_info table.
     """
     url = PFR_BASE + boxscore_url
-    r   = session.get(url, headers=get_headers(), verify=False, timeout=30)
+    r   = pfr_get(session, url, use_headers=False)
 
     result = {
         'boxscore_url': boxscore_url,
@@ -322,9 +486,11 @@ def get_game_info(boxscore_url: str, year: int, week: int,
         'team_home': team_home, 'team_away': team_away,
         'roof': '', 'surface': '', 'weather': '',
         'attendance': '', 'vegas_line': '', 'over_under': '',
+        '_request_failed': False,
     }
 
-    if r.status_code != 200:
+    if r is None:
+        result['_request_failed'] = True
         return result
 
     soup  = BeautifulSoup(r.content, 'html.parser')
@@ -400,12 +566,9 @@ def _scrape_schedule_from_pfr(year: int) -> pd.DataFrame:
     """Fallback: scrape schedule from PFR if no local file available."""
     url = f"{PFR_BASE}/years/{year}/games.htm"
     print(f"  Fetching schedule from PFR: {url}")
-    try:
-        r = requests.get(url, headers=get_headers(), verify=False, timeout=30)
-        if r.status_code != 200:
-            return pd.DataFrame()
-    except Exception as e:
-        print(f"  Schedule fetch error: {e}")
+    with make_session() as sched_session:
+        r = pfr_get(sched_session, url, use_headers=False)
+    if r is None:
         return pd.DataFrame()
 
     soup  = BeautifulSoup(r.content, 'html.parser')
@@ -458,7 +621,6 @@ def _scrape_schedule_from_pfr(year: int) -> pd.DataFrame:
 
 def scrape_player_stats(years: list[int]):
     """Scrape player weekly stats for all given years."""
-    os.makedirs(CHECKPOINT_DIR, exist_ok=True)
     os.makedirs(DATA_DIR, exist_ok=True)
 
     # Load existing output
@@ -473,13 +635,20 @@ def scrape_player_stats(years: list[int]):
 
     all_new_rows = []
 
-    with requests.Session() as session:
+    with make_session() as session:
+        # -------------------------------------------------------------
+        # Pass 1: build a unique player list across ALL requested years.
+        # This still requires one request per year (cheap — 12 total),
+        # but means each player is scraped once no matter how many of
+        # our requested years they played in.
+        # -------------------------------------------------------------
+        unique_players = {}   # pfr_id -> {name, player_url, position, years: set}
+
         for year in years:
             print(f"\n{'='*50}")
-            print(f"YEAR {year}")
+            print(f"YEAR {year} — building player list")
             print(f"{'='*50}")
 
-            # Get player list for this year
             players_df = get_players_for_year(year, session)
             time.sleep(SLEEP_PLAYER)
 
@@ -487,36 +656,80 @@ def scrape_player_stats(years: list[int]):
                 print(f"  No players found for {year}, skipping")
                 continue
 
-            for i, row in players_df.iterrows():
-                pfr_id     = row['pfr_id']
-                name       = row['name']
-                player_url = row['player_url']
+            for _, row in players_df.iterrows():
+                pfr_id = row['pfr_id']
+                if pfr_id not in unique_players:
+                    unique_players[pfr_id] = {
+                        'name': row['name'], 'player_url': row['player_url'],
+                        'position': row['position'], 'years': set(),
+                    }
+                unique_players[pfr_id]['years'].add(year)
 
-                if (pfr_id, year) in done_pairs:
-                    print(f"  Skip {name} {year} (already done)")
-                    continue
+        print(f"\n{len(unique_players)} unique players across {len(years)} year(s) "
+              f"(vs {sum(len(p['years']) for p in unique_players.values())} "
+              f"player-year combinations the old per-year approach would have hit)")
 
-                print(f"  [{i+1}/{len(players_df)}] {name} ({pfr_id}) {year}", end='', flush=True)
+        # -------------------------------------------------------------
+        # Pass 2: scrape each unique player's full career gamelog ONCE,
+        # filtered down to only the years we actually need.
+        # -------------------------------------------------------------
+        consecutive_failures = 0
+        FAILURE_CIRCUIT_BREAKER = 5   # stop entirely after this many in a row
 
-                weekly_rows = get_player_weekly_stats(pfr_id, name, player_url, year, session)
-                print(f" → {len(weekly_rows)} weeks")
+        player_ids = list(unique_players.keys())
+        for i, pfr_id in enumerate(player_ids):
+            info = unique_players[pfr_id]
 
-                all_new_rows.extend(weekly_rows)
-                done_pairs.add((pfr_id, year))
+            if all((pfr_id, y) in done_pairs for y in info['years']):
+                print(f"  Skip {info['name']} (all years already done)")
+                continue
 
-                # Checkpoint
-                if (i + 1) % CHECKPOINT_EVERY == 0:
-                    _flush_player_rows(existing, all_new_rows)
-                    print(f"  [checkpoint saved at player {i+1}]")
+            still_needed = {y for y in info['years'] if (pfr_id, y) not in done_pairs}
+
+            print(f"  [{i+1}/{len(player_ids)}] {info['name']} ({pfr_id}) "
+                  f"years={sorted(still_needed)}", end='', flush=True)
+
+            game_rows = get_player_career_gamelog(
+                pfr_id, info['name'], info['player_url'], info['position'],
+                still_needed, session
+            )
+
+            if game_rows is None:
+                # Request failed after all retries — likely cookie expired
+                consecutive_failures += 1
+                print(f" → FAILED ({consecutive_failures}/{FAILURE_CIRCUIT_BREAKER} consecutive)")
+
+                if consecutive_failures >= FAILURE_CIRCUIT_BREAKER:
+                    print(f"\n{'!'*60}")
+                    print(f"STOPPING: {FAILURE_CIRCUIT_BREAKER} consecutive requests failed.")
+                    print(f"Your PFR_CF_CLEARANCE cookie has almost certainly expired.")
+                    print(f"Refresh it from your browser (see the top of this file for")
+                    print(f"instructions), update .env, then re-run this exact command —")
+                    print(f"it will resume from {info['name']} onward, nothing is lost.")
+                    print(f"{'!'*60}\n")
+                    _flush_player_rows(existing, all_new_rows, final=True)
+                    sys.exit(1)
 
                 time.sleep(SLEEP_PLAYER)
+                continue
 
-    # Final save
+            consecutive_failures = 0   # reset on any success, even 0-row success
+
+            all_new_rows.extend(game_rows)
+            for y in still_needed:
+                done_pairs.add((pfr_id, y))
+
+            _flush_player_rows(existing, all_new_rows)
+            print(f" → {len(game_rows)} games [saved to {os.path.basename(PLAYERS_OUT)}]")
+
+            time.sleep(SLEEP_PLAYER)
+
+    # Final save (redundant with the per-player save above, kept as a safety net)
     _flush_player_rows(existing, all_new_rows, final=True)
 
 
 def _flush_player_rows(existing: pd.DataFrame, new_rows: list, final: bool = False):
-    """Merge new rows with existing and save."""
+    """Merge new rows with existing and save to disk."""
     if not new_rows:
         return
     new_df   = pd.DataFrame(new_rows, columns=PLAYER_COLUMNS)
@@ -524,8 +737,8 @@ def _flush_player_rows(existing: pd.DataFrame, new_rows: list, final: bool = Fal
     final_df = final_df.drop_duplicates(subset=['pfr_id','year','week'])
     final_df = final_df.sort_values(['year','week','position'])
     final_df.to_csv(PLAYERS_OUT, index=False, compression='gzip')
-    label = "FINAL" if final else "checkpoint"
-    print(f"  [{label}] Saved {len(final_df):,} rows → {PLAYERS_OUT}")
+    if final:
+        print(f"  [FINAL] Saved {len(final_df):,} rows → {PLAYERS_OUT}")
 
 
 def scrape_game_info(years: list[int]):
@@ -542,7 +755,19 @@ def scrape_game_info(years: list[int]):
 
     all_new = []
 
-    with requests.Session() as session:
+    def _flush_games():
+        if not all_new:
+            return
+        new_df   = pd.DataFrame(all_new, columns=GAME_COLUMNS)
+        final_df = pd.concat([existing, new_df], ignore_index=True)
+        final_df = final_df.drop_duplicates(subset=['boxscore_url'])
+        final_df = final_df.sort_values(['year','week'])
+        final_df.to_csv(GAMES_OUT, index=False, compression='gzip')
+
+    with make_session() as session:
+        consecutive_failures = 0
+        FAILURE_CIRCUIT_BREAKER = 5
+
         for year in years:
             print(f"\nGame info: {year}")
             schedule = load_schedule(year)  # uses local CSV, no web request
@@ -559,17 +784,37 @@ def scrape_game_info(years: list[int]):
                 print(f"  W{game['week']:02d} {game['team_away']} @ {game['team_home']}", end='', flush=True)
                 info = get_game_info(url, year, game['week'],
                                      game['team_home'], game['team_away'], session)
-                print(f" ✓")
+
+                if info.get('_request_failed'):
+                    consecutive_failures += 1
+                    print(f" → FAILED ({consecutive_failures}/{FAILURE_CIRCUIT_BREAKER} consecutive)")
+
+                    if consecutive_failures >= FAILURE_CIRCUIT_BREAKER:
+                        print(f"\n{'!'*60}")
+                        print(f"STOPPING: {FAILURE_CIRCUIT_BREAKER} consecutive requests failed.")
+                        print(f"Your PFR_CF_CLEARANCE cookie has almost certainly expired.")
+                        print(f"Refresh it, update .env, then re-run this exact command —")
+                        print(f"it will resume from here, nothing is lost.")
+                        print(f"{'!'*60}\n")
+                        _flush_games()
+                        sys.exit(1)
+
+                    time.sleep(SLEEP_BOXSCORE)
+                    continue
+
+                consecutive_failures = 0
+                info.pop('_request_failed', None)
                 all_new.append(info)
                 done_urls.add(url)
+
+                # Save after every game — Ctrl-C at any point is safe
+                _flush_games()
+                print(f" ✓ [saved to {os.path.basename(GAMES_OUT)}]")
+
                 time.sleep(SLEEP_BOXSCORE)
 
     if all_new:
-        new_df   = pd.DataFrame(all_new, columns=GAME_COLUMNS)
-        final_df = pd.concat([existing, new_df], ignore_index=True)
-        final_df = final_df.drop_duplicates(subset=['boxscore_url'])
-        final_df = final_df.sort_values(['year','week'])
-        final_df.to_csv(GAMES_OUT, index=False, compression='gzip')
+        final_df = pd.read_csv(GAMES_OUT)
         print(f"\nSaved {len(final_df):,} game rows → {GAMES_OUT}")
     else:
         print("\nNo new game data scraped.")
@@ -602,8 +847,11 @@ if __name__ == '__main__':
 
     years = parse_years(args.years)
     print(f"Years to scrape: {years}")
+    print(f"Output folder:   {DATA_DIR}")
     print(f"Player stats output: {PLAYERS_OUT}")
     print(f"Game info output:    {GAMES_OUT}")
+    if not os.path.isdir(DATA_DIR):
+        print(f"  (folder doesn't exist yet — it will be created automatically)")
     print()
 
     if not args.skip_players:

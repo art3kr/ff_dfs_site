@@ -9,6 +9,9 @@ It can also be run directly for testing:
     python scraper.py --week 1 --slate-id 9276
 """
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
 import requests
 import urllib3
 from bs4 import BeautifulSoup
@@ -25,25 +28,41 @@ ROTOWIRE_DATA_URL = (
     "?siteID=2&slateID={slate_id}&projSource=RotoWire&oshipSource=RotoWire"
 )
 
-# RotoWire fields we care about → our DB column names
-# Inspect a real API response to confirm field names each season;
-# these matched the Week 13 CSV in the repo.
-FIELD_MAP = {
-    "player":     "name",
-    "position":   "position",
-    "team":       "team",
-    "opp":        "opponent",
-    "salary":     "salary",
-    "proj":       "projected_pts",
-    "ownership":  "ownership_pct",
-}
+# ---------------------------------------------------------------------------
+# Auth — RotoWire requires a logged-in session to return the full player list.
+# Set RW_PHPSESSID and RW_TSD as environment variables (or in your .env file).
+# Get them from: Chrome DevTools → Application → Cookies → www.rotowire.com
+# ---------------------------------------------------------------------------
+
+RW_PHPSESSID = os.environ.get("RW_PHPSESSID", "")
+RW_TSD       = os.environ.get("RW_TSD", "")
+
+def _rw_headers() -> dict:
+    h = {
+        'User-Agent':       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
+        'Accept':           'application/json, text/javascript, */*; q=0.01',
+        'Accept-Language':  'en-US,en;q=0.9',
+        'Accept-Encoding':  'gzip, deflate, br',
+        'Referer':          'https://www.rotowire.com/daily/nfl/value-report.php',
+        'X-Requested-With': 'XMLHttpRequest',
+        'DNT':              '1',
+        'Connection':       'keep-alive',
+    }
+    parts = []
+    if RW_PHPSESSID:
+        parts.append(f"PHPSESSID={RW_PHPSESSID}")
+    if RW_TSD:
+        parts.append(f"rw_tsd={RW_TSD}")
+    if parts:
+        h['Cookie'] = "; ".join(parts)
+    return h
 
 
 def is_thu_mon_classic_slate(slate_id: int) -> bool:
     """Return True if the given RotoWire slate ID is a Thu-Mon Classic DraftKings contest."""
     url = ROTOWIRE_SLATE_CHECK_URL.format(slate_id=slate_id)
     try:
-        r = requests.get(url, verify=False, timeout=10)
+        r = requests.get(url, headers=_rw_headers(), verify=False, timeout=10)
     except requests.RequestException as e:
         print(f"  Request error checking slate {slate_id}: {e}")
         return False
@@ -84,7 +103,7 @@ def fetch_slate_data(slate_id: int, week: int, year: int) -> list[dict]:
     """
     url = ROTOWIRE_DATA_URL.format(slate_id=slate_id)
     try:
-        r = requests.get(url, verify=False, timeout=15)
+        r = requests.get(url, headers=_rw_headers(), verify=False, timeout=15)
     except requests.RequestException as e:
         print(f"Request error fetching slate data: {e}")
         return []

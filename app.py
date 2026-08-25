@@ -1,4 +1,6 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
 import json
 import click
 from flask import Flask, render_template, g, request, jsonify, redirect, url_for, flash
