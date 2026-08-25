@@ -16,10 +16,6 @@ Player stats columns:
   rec_tgt, rec, rec_yds, rec_td,
   snap_pct
 
-dk_pts is computed by this script using the standard DraftKings PPR
-formula (see calculate_dk_points()), since the career gamelog page this
-scraper uses doesn't include a pre-computed DK points column.
-
 Game info columns (from boxscore):
   boxscore_url, year, week, team_home, team_away,
   roof, surface, weather, attendance, vegas_line, over_under
@@ -42,12 +38,14 @@ Required setup — add these to your .env file:
 These expire periodically (often within hours). When you start getting
 403s again, grab fresh values from your browser and update .env.
 
-SPEED: player stats are scraped via each player's career gamelog page
-(/players/X/XXXX00/gamelog/ — no year in the URL), which returns their
-ENTIRE career in one request. A player active across all 12 requested
-years is hit once instead of 12 times. This cuts total requests (and
-therefore both runtime and exposure to getting blocked) by roughly 3x
-compared to fetching one page per player per year.
+SPEED: player stats are fetched per-player-per-year from each player's
+/fantasy/{year}/ page — the same approach as your original working
+scraper (a "combined career page in one request" approach was tried and
+reverted after it returned 0 rows; that page's structure wasn't what we
+assumed). The one real speed lever here is that players with 0 season
+DK points on the year-list page (inactive squad players, long snappers,
+etc.) are skipped entirely before we ever fetch their per-week detail
+page — a free filter that costs no extra requests.
 
 RELIABILITY: if 5 requests in a row fail, the scraper assumes your
 PFR_CF_CLEARANCE cookie has expired and stops itself immediately with
@@ -56,15 +54,17 @@ while blocked. Refresh the cookie and re-run the same command — it
 resumes exactly where it stopped.
 
 Rate limiting:
-  - 6-second sleep between player pages
+  - 4-second sleep between player pages
   - 3-second sleep between boxscore pages
   - Retries with backoff on 403/429 responses
   - Saves to disk after every player and every game — Ctrl-C at any
     point leaves a valid, fully up-to-date file, and re-running the
     same command picks up exactly where you left off.
 
-Expect roughly 3-4 hours for a full 2014-2025 run (down from ~10+ hours
-with the old per-year approach), assuming your cookie stays valid.
+Expect roughly 6-9 hours for a full 2014-2025 run, depending on how many
+players get filtered out by the zero-DK-points skip. Run it overnight —
+if the cookie expires partway through, refresh it and re-run; nothing
+already scraped is lost.
 
 """
 
@@ -91,7 +91,7 @@ PLAYERS_OUT      = os.path.join(DATA_DIR, 'pfr_player_stats_2014_2025.csv.gz')
 GAMES_OUT        = os.path.join(DATA_DIR, 'pfr_game_info_2014_2025.csv.gz')
 
 PFR_BASE         = "https://www.pro-football-reference.com"
-SLEEP_PLAYER     = 6.0      # seconds between player pages (increased to avoid 429s)
+SLEEP_PLAYER     = 4.0      # seconds between player pages (matches your original proven cadence — the earlier 403 blocking turned out to be Cloudflare cookie expiry, not rate limiting, so 429 backoff below is sufficient safety net)
 SLEEP_BOXSCORE   = 3.0      # seconds between boxscore pages
 SLEEP_ON_429     = 90.0     # seconds to wait after a 429 rate-limit response
 SLEEP_ON_403     = 30.0     # seconds to wait after a 403 before retrying
@@ -261,6 +261,26 @@ def _int(s) -> int:
         return 0
 
 
+def find_table(soup: BeautifulSoup, table_id: str):
+    """
+    Find a table by id, checking both the live HTML and inside HTML
+    comments. PFR frequently wraps supplementary tables (anything beyond
+    the single "main" table on a page) inside <!-- --> comments — this
+    is presumably to make the raw page lighter and slightly harder to
+    scrape naively. Our boxscore game_info parsing already had to work
+    around this; the per-year player fantasy table does too.
+    """
+    table = soup.find('table', id=table_id)
+    if table:
+        return table
+
+    # Not in live HTML — search inside HTML comments
+    comment_soup = BeautifulSoup(
+        "\n".join(soup.find_all(string=Comment)), 'html.parser'
+    )
+    return comment_soup.find('table', id=table_id)
+
+
 def calculate_dk_points(pass_yds=0, pass_td=0, pass_int=0,
                         rush_yds=0, rush_td=0,
                         rec=0, rec_yds=0, rec_td=0,
@@ -357,36 +377,63 @@ def get_players_for_year(year: int, session: requests.Session) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Step 2: Scrape a player's ENTIRE career game log in one request
+# Step 2: Scrape weekly stats for one player in one year
 #
-# PFR's career gamelog page (/players/X/XXXX00/gamelog/ — no year in the
-# URL) returns every regular-season game the player has ever played, all
-# in one page. This replaces hitting /fantasy/{year}/ once per player per
-# year — for a player active 2014-2025, that's 12 requests collapsed
-# into 1. Across a full run this cuts total requests (and therefore both
-# runtime and exposure to getting blocked) by roughly 3x.
-#
-# Trade-off: this page doesn't have a pre-computed DK points column like
-# the per-year fantasy page did, so we compute it ourselves from raw
-# stats via calculate_dk_points().
+# NOTE: an earlier version of this function tried to fetch a player's
+# entire career in one request via /gamelog/ (no year in the URL), to
+# cut total requests. That page's row data didn't reliably expose a
+# 'year_id' column the way assumed, and returned 0 rows for every
+# player when tested. Reverted to the proven per-year approach, which
+# was verified working with real data in earlier testing.
 # ---------------------------------------------------------------------------
 
-def get_player_career_gamelog(pfr_id: str, name: str, player_url: str,
-                              position: str, years_needed: set,
-                              session: requests.Session) -> list[dict]:
+def get_player_weekly_stats(pfr_id: str, name: str, player_url: str, position: str,
+                            year: int, date_to_week: dict,
+                            session: requests.Session) -> list[dict] | None:
     """
-    Hit the player's career gamelog page ONCE and return rows only for
-    the years in `years_needed`. Returns list of dicts, one per game.
+    Hit the player's individual fantasy page for `year`.
+    Returns list of dicts (one per week played), [] if no table/data found,
+    or None if the request itself failed after retries (used by the
+    circuit breaker to detect an expired cf_clearance cookie).
+
+    `position` is passed in from the player-list page rather than parsed
+    per-row, because this table has no 'fantasy_pos'/'pos' field — real
+    field confirmed via debug output is 'starter_pos', which reflects
+    starter status, not position, so it's not usable for this purpose.
+
+    `date_to_week` maps 'YYYY-MM-DD' -> NFL week number (see
+    load_date_to_week()). This table's own 'game_num' field counts games
+    played, not actual week — it silently diverges from the real week
+    after a bye. We derive the true week from the game's calendar date
+    against our trusted local schedule instead.
+
+    Real field names on this table (confirmed via live debug output,
+    Aug 2026): game_num, game_date, team, game_location, opp, game_result,
+    starter_pos, rush_att, rush_yds, rush_td, targets, rec, rec_yds, rec_td,
+    offense, off_pct, defense, def_pct, special_teams, st_pct,
+    fantasy_points, draftkings_points, fanduel_points. Passing columns
+    (pass_cmp/att/yds/td/int) weren't present on the RB pages sampled —
+    handled gracefully below (missing cell -> 0), but not yet verified on
+    a QB page.
     """
-    url = PFR_BASE + re.sub(r'\.htm$', '', player_url) + '/gamelog/'
+    # e.g. /players/M/McCAC00/fantasy/2024/
+    url = PFR_BASE + re.sub(r'\.htm$', '', player_url) + f'/fantasy/{year}/'
     r   = pfr_get(session, url, use_headers=True)
 
     if r is None:
-        return None   # None = request failed (distinct from [] = no games)
+        return None
 
     soup  = BeautifulSoup(r.content, 'html.parser')
-    table = soup.find('table', id='stats')
+    table = find_table(soup, 'player_fantasy')
     if not table:
+        live_ids = [t.get('id') for t in soup.find_all('table') if t.get('id')]
+        comment_soup = BeautifulSoup(
+            "\n".join(soup.find_all(string=Comment)), 'html.parser'
+        )
+        commented_ids = [t.get('id') for t in comment_soup.find_all('table') if t.get('id')]
+        print(f"\n    [DEBUG] 'player_fantasy' table not found for {url}")
+        print(f"    [DEBUG] Live table ids: {live_ids}")
+        print(f"    [DEBUG] Commented table ids: {commented_ids}")
         return []
 
     tbody = table.find('tbody')
@@ -395,45 +442,44 @@ def get_player_career_gamelog(pfr_id: str, name: str, player_url: str,
 
     rows = []
     for row in tbody.find_all('tr'):
+        # Skip sub-header rows
         if row.get('class') and 'thead' in row.get('class'):
             continue
 
         def get(stat):
-            cell = row.find('td', attrs={'data-stat': stat}) or \
-                   row.find('th', attrs={'data-stat': stat})
+            cell = row.find('td', attrs={'data-stat': stat})
             return cell.get_text(strip=True) if cell else ''
 
         try:
-            year = _int(get('year_id'))
-            if year not in years_needed:
-                continue   # skip games outside the range we asked for
-
-            week_num = _int(get('week_num'))
+            game_date = get('game_date')[:10]   # 'YYYY-MM-DD'
+            week_num  = date_to_week.get(game_date, 0)
             if week_num == 0:
-                continue
+                continue   # date not in our regular-season schedule (preseason/playoffs)
 
             team      = get('team')
-            opp_raw   = get('opp') or get('game_location')
-            game_loc  = get('game_location')   # '@' if away, '' if home
-            home_away = 'a' if game_loc == '@' else 'h'
             opponent  = get('opp')
+            game_loc  = get('game_location')     # '@' = away, '' = home
+            home_away = 'a' if game_loc.strip() == '@' else 'h'
 
+            dk_pts    = _float(get('draftkings_points'))
+
+            pass_cmp  = _int(get('pass_cmp'))
+            pass_att  = _int(get('pass_att'))
             pass_yds  = _int(get('pass_yds'))
             pass_td   = _int(get('pass_td'))
             pass_int  = _int(get('pass_int'))
+
+            rush_att  = _int(get('rush_att'))
             rush_yds  = _int(get('rush_yds'))
             rush_td   = _int(get('rush_td'))
+
+            rec_tgt   = _int(get('targets'))
             rec       = _int(get('rec'))
             rec_yds   = _int(get('rec_yds'))
             rec_td    = _int(get('rec_td'))
-            fumbles_lost = _int(get('fumbles_lost'))
 
-            dk_pts = calculate_dk_points(
-                pass_yds=pass_yds, pass_td=pass_td, pass_int=pass_int,
-                rush_yds=rush_yds, rush_td=rush_td,
-                rec=rec, rec_yds=rec_yds, rec_td=rec_td,
-                fumbles_lost=fumbles_lost,
-            )
+            snap_raw  = get('off_pct')
+            snap_pct  = _float(snap_raw) if snap_raw else None
 
             rows.append({
                 'pfr_id':          pfr_id,
@@ -446,19 +492,19 @@ def get_player_career_gamelog(pfr_id: str, name: str, player_url: str,
                 'home_away':       home_away,
                 'position':        position.upper(),
                 'dk_pts':          dk_pts,
-                'pass_cmp':        _int(get('pass_cmp')),
-                'pass_att':        _int(get('pass_att')),
+                'pass_cmp':        pass_cmp,
+                'pass_att':        pass_att,
                 'pass_yds':        pass_yds,
                 'pass_td':         pass_td,
                 'pass_int':        pass_int,
-                'rush_att':        _int(get('rush_att')),
+                'rush_att':        rush_att,
                 'rush_yds':        rush_yds,
                 'rush_td':         rush_td,
-                'rec_tgt':         _int(get('targets')),
+                'rec_tgt':         rec_tgt,
                 'rec':             rec,
                 'rec_yds':         rec_yds,
                 'rec_td':          rec_td,
-                'snap_pct':        _float(get('off_pct')) if get('off_pct') else None,
+                'snap_pct':        snap_pct,
             })
 
         except Exception:
@@ -528,6 +574,37 @@ def get_game_info(boxscore_url: str, year: int, week: int,
 # ---------------------------------------------------------------------------
 
 SCHEDULES_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'schedules')
+
+
+def load_date_to_week(year: int) -> dict:
+    """
+    Build a {date_string: week_number} lookup from the local schedule CSV.
+
+    PFR's per-player fantasy page has a 'game_num' field (the player's Nth
+    game played that season) but NO actual NFL week number field. game_num
+    silently diverges from the real week after a player's bye — e.g. their
+    5th game played might be Week 6 if they had a Week 3 bye. Rather than
+    trust PFR's internal numbering, we derive the real week from the game's
+    calendar date against our own trusted schedule files (the same ones
+    used for game info scraping).
+    """
+    path = os.path.join(SCHEDULES_DIR, f'{year}_schedule_df.csv')
+    if not os.path.exists(path):
+        print(f"  WARNING: no schedule file for {year} — cannot map game "
+              f"dates to weeks, all games for this year will be skipped")
+        return {}
+
+    df = pd.read_csv(path)
+    df = df[df['team_2'] != 'BYE']
+    df = df[df['week'].apply(lambda w: str(w).isdigit() or isinstance(w, int))]
+    df['week'] = df['week'].astype(int)
+    df = df[df['week'] <= 18]
+
+    mapping = {}
+    for _, r in df.iterrows():
+        date_str = str(r['date'])[:10]   # normalise to 'YYYY-MM-DD'
+        mapping[date_str] = int(r['week'])
+    return mapping
 
 
 def load_schedule(year: int) -> pd.DataFrame:
@@ -634,19 +711,13 @@ def scrape_player_stats(years: list[int]):
         done_pairs = set()
 
     all_new_rows = []
+    consecutive_failures = 0
+    FAILURE_CIRCUIT_BREAKER = 5   # stop entirely after this many failures in a row
 
     with make_session() as session:
-        # -------------------------------------------------------------
-        # Pass 1: build a unique player list across ALL requested years.
-        # This still requires one request per year (cheap — 12 total),
-        # but means each player is scraped once no matter how many of
-        # our requested years they played in.
-        # -------------------------------------------------------------
-        unique_players = {}   # pfr_id -> {name, player_url, position, years: set}
-
         for year in years:
             print(f"\n{'='*50}")
-            print(f"YEAR {year} — building player list")
+            print(f"YEAR {year}")
             print(f"{'='*50}")
 
             players_df = get_players_for_year(year, session)
@@ -656,73 +727,69 @@ def scrape_player_stats(years: list[int]):
                 print(f"  No players found for {year}, skipping")
                 continue
 
-            for _, row in players_df.iterrows():
-                pfr_id = row['pfr_id']
-                if pfr_id not in unique_players:
-                    unique_players[pfr_id] = {
-                        'name': row['name'], 'player_url': row['player_url'],
-                        'position': row['position'], 'years': set(),
-                    }
-                unique_players[pfr_id]['years'].add(year)
+            # Build the date -> real NFL week lookup once per year (see
+            # load_date_to_week() docstring for why we need this instead
+            # of trusting PFR's own 'game_num' field).
+            date_to_week = load_date_to_week(year)
 
-        print(f"\n{len(unique_players)} unique players across {len(years)} year(s) "
-              f"(vs {sum(len(p['years']) for p in unique_players.values())} "
-              f"player-year combinations the old per-year approach would have hit)")
+            # Free speed win: the year-list page already gives us each
+            # player's season DK point total (dk_pts_season) at no extra
+            # request cost. Players with 0 points (inactive squad players,
+            # long snappers, etc.) are never going to matter for a DFS
+            # site, so skip fetching their per-week detail page entirely.
+            before = len(players_df)
+            players_df = players_df[players_df['dk_pts_season'] > 0].reset_index(drop=True)
+            skipped = before - len(players_df)
+            if skipped:
+                print(f"  Skipping {skipped} players with 0 season DK points "
+                      f"(inactive/irrelevant) — {len(players_df)} remain")
 
-        # -------------------------------------------------------------
-        # Pass 2: scrape each unique player's full career gamelog ONCE,
-        # filtered down to only the years we actually need.
-        # -------------------------------------------------------------
-        consecutive_failures = 0
-        FAILURE_CIRCUIT_BREAKER = 5   # stop entirely after this many in a row
+            for i, row in players_df.iterrows():
+                pfr_id     = row['pfr_id']
+                name       = row['name']
+                player_url = row['player_url']
+                position   = row['position']
 
-        player_ids = list(unique_players.keys())
-        for i, pfr_id in enumerate(player_ids):
-            info = unique_players[pfr_id]
+                if (pfr_id, year) in done_pairs:
+                    print(f"  Skip {name} {year} (already done)")
+                    continue
 
-            if all((pfr_id, y) in done_pairs for y in info['years']):
-                print(f"  Skip {info['name']} (all years already done)")
-                continue
+                print(f"  [{i+1}/{len(players_df)}] {name} ({pfr_id}) {year}", end='', flush=True)
 
-            still_needed = {y for y in info['years'] if (pfr_id, y) not in done_pairs}
+                weekly_rows = get_player_weekly_stats(
+                    pfr_id, name, player_url, position, year, date_to_week, session
+                )
 
-            print(f"  [{i+1}/{len(player_ids)}] {info['name']} ({pfr_id}) "
-                  f"years={sorted(still_needed)}", end='', flush=True)
+                if weekly_rows is None:
+                    # Request failed after all retries — likely cookie expired
+                    consecutive_failures += 1
+                    print(f" → FAILED ({consecutive_failures}/{FAILURE_CIRCUIT_BREAKER} consecutive)")
 
-            game_rows = get_player_career_gamelog(
-                pfr_id, info['name'], info['player_url'], info['position'],
-                still_needed, session
-            )
+                    if consecutive_failures >= FAILURE_CIRCUIT_BREAKER:
+                        print(f"\n{'!'*60}")
+                        print(f"STOPPING: {FAILURE_CIRCUIT_BREAKER} consecutive requests failed.")
+                        print(f"Your PFR_CF_CLEARANCE cookie has almost certainly expired.")
+                        print(f"Refresh it from your browser (see the top of this file for")
+                        print(f"instructions), update .env, then re-run this exact command —")
+                        print(f"it will resume from {name} onward, nothing is lost.")
+                        print(f"{'!'*60}\n")
+                        _flush_player_rows(existing, all_new_rows, final=True)
+                        sys.exit(1)
 
-            if game_rows is None:
-                # Request failed after all retries — likely cookie expired
-                consecutive_failures += 1
-                print(f" → FAILED ({consecutive_failures}/{FAILURE_CIRCUIT_BREAKER} consecutive)")
+                    time.sleep(SLEEP_PLAYER)
+                    continue
 
-                if consecutive_failures >= FAILURE_CIRCUIT_BREAKER:
-                    print(f"\n{'!'*60}")
-                    print(f"STOPPING: {FAILURE_CIRCUIT_BREAKER} consecutive requests failed.")
-                    print(f"Your PFR_CF_CLEARANCE cookie has almost certainly expired.")
-                    print(f"Refresh it from your browser (see the top of this file for")
-                    print(f"instructions), update .env, then re-run this exact command —")
-                    print(f"it will resume from {info['name']} onward, nothing is lost.")
-                    print(f"{'!'*60}\n")
-                    _flush_player_rows(existing, all_new_rows, final=True)
-                    sys.exit(1)
+                consecutive_failures = 0   # reset on any success, even 0-row success
+
+                all_new_rows.extend(weekly_rows)
+                done_pairs.add((pfr_id, year))
+
+                # Save after EVERY player — Ctrl-C at any point leaves a
+                # valid, fully up-to-date file.
+                _flush_player_rows(existing, all_new_rows)
+                print(f" → {len(weekly_rows)} weeks [saved to {os.path.basename(PLAYERS_OUT)}]")
 
                 time.sleep(SLEEP_PLAYER)
-                continue
-
-            consecutive_failures = 0   # reset on any success, even 0-row success
-
-            all_new_rows.extend(game_rows)
-            for y in still_needed:
-                done_pairs.add((pfr_id, y))
-
-            _flush_player_rows(existing, all_new_rows)
-            print(f" → {len(game_rows)} games [saved to {os.path.basename(PLAYERS_OUT)}]")
-
-            time.sleep(SLEEP_PLAYER)
 
     # Final save (redundant with the per-player save above, kept as a safety net)
     _flush_player_rows(existing, all_new_rows, final=True)

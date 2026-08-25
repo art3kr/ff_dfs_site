@@ -121,6 +121,66 @@ def _auto_init():
                 UNIQUE(week, year, submitter)
             )
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS hist_dfs_salaries (
+                id              SERIAL PRIMARY KEY,
+                week            INTEGER NOT NULL,
+                year            INTEGER NOT NULL,
+                name            TEXT    NOT NULL,
+                name_normalized TEXT    NOT NULL,
+                position        TEXT,
+                team            TEXT,
+                opponent        TEXT,
+                home_away       TEXT,
+                dk_salary       INTEGER,
+                dk_pts_scored   REAL,
+                projected_pts   REAL,
+                ownership_pct   REAL,
+                source          TEXT,
+                UNIQUE(week, year, name_normalized, source)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_hist_salaries_lookup
+                ON hist_dfs_salaries (year, week, name_normalized)
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS hist_player_stats (
+                id              SERIAL PRIMARY KEY,
+                pfr_id          TEXT    NOT NULL,
+                name            TEXT    NOT NULL,
+                name_normalized TEXT    NOT NULL,
+                year            INTEGER NOT NULL,
+                week            INTEGER NOT NULL,
+                team            TEXT,
+                opponent        TEXT,
+                home_away       TEXT,
+                position        TEXT,
+                dk_pts          REAL,
+                pass_cmp        INTEGER,
+                pass_att        INTEGER,
+                pass_yds        INTEGER,
+                pass_td         INTEGER,
+                pass_int        INTEGER,
+                rush_att        INTEGER,
+                rush_yds        INTEGER,
+                rush_td         INTEGER,
+                rec_tgt         INTEGER,
+                rec             INTEGER,
+                rec_yds         INTEGER,
+                rec_td          INTEGER,
+                snap_pct        REAL,
+                UNIQUE(pfr_id, year, week)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_hist_stats_lookup
+                ON hist_player_stats (year, week, name_normalized)
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_hist_stats_player
+                ON hist_player_stats (pfr_id)
+        """)
     else:
         # SQLite: executescript for multi-statement init
         conn.executescript("""
@@ -152,6 +212,56 @@ def _auto_init():
                 submitted_at TEXT    DEFAULT (datetime('now')),
                 UNIQUE(week, year, submitter)
             );
+            CREATE TABLE IF NOT EXISTS hist_dfs_salaries (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                week            INTEGER NOT NULL,
+                year            INTEGER NOT NULL,
+                name            TEXT    NOT NULL,
+                name_normalized TEXT    NOT NULL,
+                position        TEXT,
+                team            TEXT,
+                opponent        TEXT,
+                home_away       TEXT,
+                dk_salary       INTEGER,
+                dk_pts_scored   REAL,
+                projected_pts   REAL,
+                ownership_pct   REAL,
+                source          TEXT,
+                UNIQUE(week, year, name_normalized, source)
+            );
+            CREATE INDEX IF NOT EXISTS idx_hist_salaries_lookup
+                ON hist_dfs_salaries (year, week, name_normalized);
+            CREATE TABLE IF NOT EXISTS hist_player_stats (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                pfr_id          TEXT    NOT NULL,
+                name            TEXT    NOT NULL,
+                name_normalized TEXT    NOT NULL,
+                year            INTEGER NOT NULL,
+                week            INTEGER NOT NULL,
+                team            TEXT,
+                opponent        TEXT,
+                home_away       TEXT,
+                position        TEXT,
+                dk_pts          REAL,
+                pass_cmp        INTEGER,
+                pass_att        INTEGER,
+                pass_yds        INTEGER,
+                pass_td         INTEGER,
+                pass_int        INTEGER,
+                rush_att        INTEGER,
+                rush_yds        INTEGER,
+                rush_td         INTEGER,
+                rec_tgt         INTEGER,
+                rec             INTEGER,
+                rec_yds         INTEGER,
+                rec_td          INTEGER,
+                snap_pct        REAL,
+                UNIQUE(pfr_id, year, week)
+            );
+            CREATE INDEX IF NOT EXISTS idx_hist_stats_lookup
+                ON hist_player_stats (year, week, name_normalized);
+            CREATE INDEX IF NOT EXISTS idx_hist_stats_player
+                ON hist_player_stats (pfr_id);
         """)
 
     conn.commit()
@@ -377,6 +487,251 @@ def ingest_slate_command(week, year, slate_id):
     cur.close()
     conn.close()
     click.echo(f"Done. {inserted} players upserted, {skipped} skipped.")
+
+
+@app.cli.command("load-history")
+@click.option("--data-dir", default="data",
+              help="Folder containing the .csv.gz files produced by the scrapers.")
+@click.option("--salaries-only", is_flag=True, help="Only load salary files, skip player stats.")
+@click.option("--stats-only",    is_flag=True, help="Only load player stats, skip salary files.")
+@click.option("--batch-size", default=1000, type=int, help="Rows per bulk-insert batch.")
+def load_history_command(data_dir, salaries_only, stats_only, batch_size):
+    """
+    Load the historical .csv.gz files produced by the scrapers into
+    hist_dfs_salaries and hist_player_stats.
+
+    Reads (whichever of these exist):
+        data/rotoguru_dk_2014_2021.csv.gz     -> hist_dfs_salaries
+        data/rotowire_dk_2022_2025.csv.gz     -> hist_dfs_salaries
+        data/dk_salaries_2022_2025.csv.gz     -> hist_dfs_salaries
+        data/pfr_player_stats_2014_2025.csv.gz -> hist_player_stats
+
+    Safe to re-run: uses ON CONFLICT upsert on each table's unique key,
+    so re-running after a fresh scrape just refreshes existing rows and
+    adds new ones — nothing is duplicated.
+
+    To load into a remote Render Postgres DB instead of local SQLite,
+    set DATABASE_URL to Render's "External Database URL" before running:
+        DATABASE_URL=postgres://...  flask load-history        (Mac/Linux)
+        $env:DATABASE_URL="postgres://..."; flask load-history  (PowerShell)
+    """
+    import pandas as pd
+
+    SALARY_FILES = [
+        "rotoguru_dk_2014_2021.csv.gz",
+        "rotowire_dk_2022_2025.csv.gz",
+        "dk_salaries_2022_2025.csv.gz",
+    ]
+    STATS_FILE = "pfr_player_stats_2014_2025.csv.gz"
+
+    conn = _connect()
+    cur  = _cursor(conn)
+
+    def upsert_salaries(df: pd.DataFrame, source_label: str):
+        ph = _ph(13)
+        if _is_postgres():
+            sql = f"""
+                INSERT INTO hist_dfs_salaries
+                    (week, year, name, name_normalized, position, team, opponent,
+                     home_away, dk_salary, dk_pts_scored, projected_pts, ownership_pct, source)
+                VALUES ({ph})
+                ON CONFLICT (week, year, name_normalized, source) DO UPDATE SET
+                    position      = EXCLUDED.position,
+                    team          = EXCLUDED.team,
+                    opponent      = EXCLUDED.opponent,
+                    home_away     = EXCLUDED.home_away,
+                    dk_salary     = EXCLUDED.dk_salary,
+                    dk_pts_scored = EXCLUDED.dk_pts_scored,
+                    projected_pts = EXCLUDED.projected_pts,
+                    ownership_pct = EXCLUDED.ownership_pct
+            """
+        else:
+            sql = f"""
+                INSERT INTO hist_dfs_salaries
+                    (week, year, name, name_normalized, position, team, opponent,
+                     home_away, dk_salary, dk_pts_scored, projected_pts, ownership_pct, source)
+                VALUES ({ph})
+                ON CONFLICT(week, year, name_normalized, source) DO UPDATE SET
+                    position      = excluded.position,
+                    team          = excluded.team,
+                    opponent      = excluded.opponent,
+                    home_away     = excluded.home_away,
+                    dk_salary     = excluded.dk_salary,
+                    dk_pts_scored = excluded.dk_pts_scored,
+                    projected_pts = excluded.projected_pts,
+                    ownership_pct = excluded.ownership_pct
+            """
+
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            batch.append((
+                int(r.get('week')), int(r.get('year')),
+                str(r.get('name', '')), str(r.get('name_normalized', '')),
+                _none_if_nan(r.get('position')), _none_if_nan(r.get('team')),
+                _none_if_nan(r.get('opponent')), _none_if_nan(r.get('home_away')),
+                _int_or_none(r.get('dk_salary')), _float_or_none(r.get('dk_pts_scored')),
+                _float_or_none(r.get('projected_pts')), _float_or_none(r.get('ownership_pct')),
+                source_label,
+            ))
+            if len(batch) >= batch_size:
+                cur.executemany(sql, batch)
+                conn.commit()
+                inserted += len(batch)
+                click.echo(f"    ...{inserted:,} rows loaded")
+                batch = []
+        if batch:
+            cur.executemany(sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
+    def upsert_stats(df: pd.DataFrame):
+        if _is_postgres():
+            sql = f"""
+                INSERT INTO hist_player_stats
+                    (pfr_id, name, name_normalized, year, week, team, opponent, home_away,
+                     position, dk_pts, pass_cmp, pass_att, pass_yds, pass_td, pass_int,
+                     rush_att, rush_yds, rush_td, rec_tgt, rec, rec_yds, rec_td, snap_pct)
+                VALUES ({_ph(23)})
+                ON CONFLICT (pfr_id, year, week) DO UPDATE SET
+                    name        = EXCLUDED.name,
+                    team        = EXCLUDED.team,
+                    opponent    = EXCLUDED.opponent,
+                    home_away   = EXCLUDED.home_away,
+                    position    = EXCLUDED.position,
+                    dk_pts      = EXCLUDED.dk_pts,
+                    pass_cmp    = EXCLUDED.pass_cmp,
+                    pass_att    = EXCLUDED.pass_att,
+                    pass_yds    = EXCLUDED.pass_yds,
+                    pass_td     = EXCLUDED.pass_td,
+                    pass_int    = EXCLUDED.pass_int,
+                    rush_att    = EXCLUDED.rush_att,
+                    rush_yds    = EXCLUDED.rush_yds,
+                    rush_td     = EXCLUDED.rush_td,
+                    rec_tgt     = EXCLUDED.rec_tgt,
+                    rec         = EXCLUDED.rec,
+                    rec_yds     = EXCLUDED.rec_yds,
+                    rec_td      = EXCLUDED.rec_td,
+                    snap_pct    = EXCLUDED.snap_pct
+            """
+        else:
+            sql = f"""
+                INSERT INTO hist_player_stats
+                    (pfr_id, name, name_normalized, year, week, team, opponent, home_away,
+                     position, dk_pts, pass_cmp, pass_att, pass_yds, pass_td, pass_int,
+                     rush_att, rush_yds, rush_td, rec_tgt, rec, rec_yds, rec_td, snap_pct)
+                VALUES ({_ph(23)})
+                ON CONFLICT(pfr_id, year, week) DO UPDATE SET
+                    name        = excluded.name,
+                    team        = excluded.team,
+                    opponent    = excluded.opponent,
+                    home_away   = excluded.home_away,
+                    position    = excluded.position,
+                    dk_pts      = excluded.dk_pts,
+                    pass_cmp    = excluded.pass_cmp,
+                    pass_att    = excluded.pass_att,
+                    pass_yds    = excluded.pass_yds,
+                    pass_td     = excluded.pass_td,
+                    pass_int    = excluded.pass_int,
+                    rush_att    = excluded.rush_att,
+                    rush_yds    = excluded.rush_yds,
+                    rush_td     = excluded.rush_td,
+                    rec_tgt     = excluded.rec_tgt,
+                    rec         = excluded.rec,
+                    rec_yds     = excluded.rec_yds,
+                    rec_td      = excluded.rec_td,
+                    snap_pct    = excluded.snap_pct
+            """
+
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            batch.append((
+                str(r.get('pfr_id', '')), str(r.get('name', '')), str(r.get('name_normalized', '')),
+                int(r.get('year')), int(r.get('week')),
+                _none_if_nan(r.get('team')), _none_if_nan(r.get('opponent')),
+                _none_if_nan(r.get('home_away')), _none_if_nan(r.get('position')),
+                _float_or_none(r.get('dk_pts')),
+                _int_or_none(r.get('pass_cmp')), _int_or_none(r.get('pass_att')),
+                _int_or_none(r.get('pass_yds')), _int_or_none(r.get('pass_td')),
+                _int_or_none(r.get('pass_int')),
+                _int_or_none(r.get('rush_att')), _int_or_none(r.get('rush_yds')),
+                _int_or_none(r.get('rush_td')),
+                _int_or_none(r.get('rec_tgt')), _int_or_none(r.get('rec')),
+                _int_or_none(r.get('rec_yds')), _int_or_none(r.get('rec_td')),
+                _float_or_none(r.get('snap_pct')),
+            ))
+            if len(batch) >= batch_size:
+                cur.executemany(sql, batch)
+                conn.commit()
+                inserted += len(batch)
+                click.echo(f"    ...{inserted:,} rows loaded")
+                batch = []
+        if batch:
+            cur.executemany(sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
+    # --- Load salary files ---
+    if not stats_only:
+        for filename in SALARY_FILES:
+            path = os.path.join(data_dir, filename)
+            if not os.path.exists(path):
+                click.echo(f"Skip (not found): {path}")
+                continue
+            click.echo(f"Loading {path} ...")
+            df = pd.read_csv(path)
+            source_label = filename.replace('.csv.gz', '')
+            count = upsert_salaries(df, source_label)
+            click.echo(f"  Done: {count:,} rows from {filename}")
+
+    # --- Load player stats file ---
+    if not salaries_only:
+        path = os.path.join(data_dir, STATS_FILE)
+        if not os.path.exists(path):
+            click.echo(f"Skip (not found): {path}")
+        else:
+            click.echo(f"Loading {path} ...")
+            df = pd.read_csv(path)
+            count = upsert_stats(df)
+            click.echo(f"  Done: {count:,} rows from {STATS_FILE}")
+
+    cur.close()
+    conn.close()
+    click.echo("load-history complete.")
+
+
+def _none_if_nan(v):
+    if v is None:
+        return None
+    try:
+        import math
+        if isinstance(v, float) and math.isnan(v):
+            return None
+    except Exception:
+        pass
+    s = str(v).strip()
+    return s if s and s.lower() != 'nan' else None
+
+
+def _int_or_none(v):
+    try:
+        if v is None or (isinstance(v, float) and v != v):  # NaN check
+            return None
+        return int(float(v))
+    except (ValueError, TypeError):
+        return None
+
+
+def _float_or_none(v):
+    try:
+        if v is None or (isinstance(v, float) and v != v):  # NaN check
+            return None
+        return float(v)
+    except (ValueError, TypeError):
+        return None
 
 
 # ---------------------------------------------------------------------------
