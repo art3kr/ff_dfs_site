@@ -156,6 +156,7 @@ def _auto_init():
                 opponent        TEXT,
                 home_away       TEXT,
                 position        TEXT,
+                game_date       TEXT,
                 dk_pts          REAL,
                 pass_cmp        INTEGER,
                 pass_att        INTEGER,
@@ -169,6 +170,7 @@ def _auto_init():
                 rec             INTEGER,
                 rec_yds         INTEGER,
                 rec_td          INTEGER,
+                fumbles_lost    INTEGER,
                 snap_pct        REAL,
                 UNIQUE(pfr_id, year, week)
             )
@@ -242,6 +244,7 @@ def _auto_init():
                 opponent        TEXT,
                 home_away       TEXT,
                 position        TEXT,
+                game_date       TEXT,
                 dk_pts          REAL,
                 pass_cmp        INTEGER,
                 pass_att        INTEGER,
@@ -255,6 +258,7 @@ def _auto_init():
                 rec             INTEGER,
                 rec_yds         INTEGER,
                 rec_td          INTEGER,
+                fumbles_lost    INTEGER,
                 snap_pct        REAL,
                 UNIQUE(pfr_id, year, week)
             );
@@ -590,58 +594,62 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
         if _is_postgres():
             sql = f"""
                 INSERT INTO hist_player_stats
-                    (pfr_id, name, name_normalized, year, week, team, opponent, home_away,
+                    (pfr_id, name, name_normalized, year, week, game_date, team, opponent, home_away,
                      position, dk_pts, pass_cmp, pass_att, pass_yds, pass_td, pass_int,
-                     rush_att, rush_yds, rush_td, rec_tgt, rec, rec_yds, rec_td, snap_pct)
-                VALUES ({_ph(23)})
+                     rush_att, rush_yds, rush_td, rec_tgt, rec, rec_yds, rec_td, fumbles_lost, snap_pct)
+                VALUES ({_ph(25)})
                 ON CONFLICT (pfr_id, year, week) DO UPDATE SET
-                    name        = EXCLUDED.name,
-                    team        = EXCLUDED.team,
-                    opponent    = EXCLUDED.opponent,
-                    home_away   = EXCLUDED.home_away,
-                    position    = EXCLUDED.position,
-                    dk_pts      = EXCLUDED.dk_pts,
-                    pass_cmp    = EXCLUDED.pass_cmp,
-                    pass_att    = EXCLUDED.pass_att,
-                    pass_yds    = EXCLUDED.pass_yds,
-                    pass_td     = EXCLUDED.pass_td,
-                    pass_int    = EXCLUDED.pass_int,
-                    rush_att    = EXCLUDED.rush_att,
-                    rush_yds    = EXCLUDED.rush_yds,
-                    rush_td     = EXCLUDED.rush_td,
-                    rec_tgt     = EXCLUDED.rec_tgt,
-                    rec         = EXCLUDED.rec,
-                    rec_yds     = EXCLUDED.rec_yds,
-                    rec_td      = EXCLUDED.rec_td,
-                    snap_pct    = EXCLUDED.snap_pct
+                    name         = EXCLUDED.name,
+                    game_date    = EXCLUDED.game_date,
+                    team         = EXCLUDED.team,
+                    opponent     = EXCLUDED.opponent,
+                    home_away    = EXCLUDED.home_away,
+                    position     = EXCLUDED.position,
+                    dk_pts       = EXCLUDED.dk_pts,
+                    pass_cmp     = EXCLUDED.pass_cmp,
+                    pass_att     = EXCLUDED.pass_att,
+                    pass_yds     = EXCLUDED.pass_yds,
+                    pass_td      = EXCLUDED.pass_td,
+                    pass_int     = EXCLUDED.pass_int,
+                    rush_att     = EXCLUDED.rush_att,
+                    rush_yds     = EXCLUDED.rush_yds,
+                    rush_td      = EXCLUDED.rush_td,
+                    rec_tgt      = EXCLUDED.rec_tgt,
+                    rec          = EXCLUDED.rec,
+                    rec_yds      = EXCLUDED.rec_yds,
+                    rec_td       = EXCLUDED.rec_td,
+                    fumbles_lost = EXCLUDED.fumbles_lost,
+                    snap_pct     = EXCLUDED.snap_pct
             """
         else:
             sql = f"""
                 INSERT INTO hist_player_stats
-                    (pfr_id, name, name_normalized, year, week, team, opponent, home_away,
+                    (pfr_id, name, name_normalized, year, week, game_date, team, opponent, home_away,
                      position, dk_pts, pass_cmp, pass_att, pass_yds, pass_td, pass_int,
-                     rush_att, rush_yds, rush_td, rec_tgt, rec, rec_yds, rec_td, snap_pct)
-                VALUES ({_ph(23)})
+                     rush_att, rush_yds, rush_td, rec_tgt, rec, rec_yds, rec_td, fumbles_lost, snap_pct)
+                VALUES ({_ph(25)})
                 ON CONFLICT(pfr_id, year, week) DO UPDATE SET
-                    name        = excluded.name,
-                    team        = excluded.team,
-                    opponent    = excluded.opponent,
-                    home_away   = excluded.home_away,
-                    position    = excluded.position,
-                    dk_pts      = excluded.dk_pts,
-                    pass_cmp    = excluded.pass_cmp,
-                    pass_att    = excluded.pass_att,
-                    pass_yds    = excluded.pass_yds,
-                    pass_td     = excluded.pass_td,
-                    pass_int    = excluded.pass_int,
-                    rush_att    = excluded.rush_att,
-                    rush_yds    = excluded.rush_yds,
-                    rush_td     = excluded.rush_td,
-                    rec_tgt     = excluded.rec_tgt,
-                    rec         = excluded.rec,
-                    rec_yds     = excluded.rec_yds,
-                    rec_td      = excluded.rec_td,
-                    snap_pct    = excluded.snap_pct
+                    name         = excluded.name,
+                    game_date    = excluded.game_date,
+                    team         = excluded.team,
+                    opponent     = excluded.opponent,
+                    home_away    = excluded.home_away,
+                    position     = excluded.position,
+                    dk_pts       = excluded.dk_pts,
+                    pass_cmp     = excluded.pass_cmp,
+                    pass_att     = excluded.pass_att,
+                    pass_yds     = excluded.pass_yds,
+                    pass_td      = excluded.pass_td,
+                    pass_int     = excluded.pass_int,
+                    rush_att     = excluded.rush_att,
+                    rush_yds     = excluded.rush_yds,
+                    rush_td      = excluded.rush_td,
+                    rec_tgt      = excluded.rec_tgt,
+                    rec          = excluded.rec,
+                    rec_yds      = excluded.rec_yds,
+                    rec_td       = excluded.rec_td,
+                    fumbles_lost = excluded.fumbles_lost,
+                    snap_pct     = excluded.snap_pct
             """
 
         inserted = 0
@@ -649,7 +657,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
         for _, r in df.iterrows():
             batch.append((
                 str(r.get('pfr_id', '')), str(r.get('name', '')), str(r.get('name_normalized', '')),
-                int(r.get('year')), int(r.get('week')),
+                int(r.get('year')), int(r.get('week')), _none_if_nan(r.get('game_date')),
                 _none_if_nan(r.get('team')), _none_if_nan(r.get('opponent')),
                 _none_if_nan(r.get('home_away')), _none_if_nan(r.get('position')),
                 _float_or_none(r.get('dk_pts')),
@@ -660,6 +668,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
                 _int_or_none(r.get('rush_td')),
                 _int_or_none(r.get('rec_tgt')), _int_or_none(r.get('rec')),
                 _int_or_none(r.get('rec_yds')), _int_or_none(r.get('rec_td')),
+                _int_or_none(r.get('fumbles_lost')),
                 _float_or_none(r.get('snap_pct')),
             ))
             if len(batch) >= batch_size:
