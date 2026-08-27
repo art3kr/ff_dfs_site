@@ -616,3 +616,34 @@ header {
     color: var(--accent);
     border-bottom-color: var(--accent);
 }
+
+/* -----------------------------------------------------------------------
+   Standings page
+   ----------------------------------------------------------------------- */
+
+.dropped-week {
+    text-decoration: line-through;
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.pending-week {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.78rem;
+}
+
+.total-col {
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.standings-note {
+    margin-top: 10px;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+#standings-table tbody tr:nth-child(1) .total-col { color: #ffd700; }
+#standings-table tbody tr:nth-child(2) .total-col { color: #c0c0c0; }
+#standings-table tbody tr:nth-child(3) .total-col { color: #cd7f32; }

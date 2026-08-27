@@ -63,6 +63,17 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-in-prod")
 
 SALARY_CAP = 50_000
 
+
+def normalize_name(name: str) -> str:
+    """
+    Matches the exact normalization used by the scrapers (scrape_pfr.py,
+    scrape_rotoguru.py, etc.) so names in a submitted lineup_json can be
+    joined against hist_player_stats the same way History/Player pages
+    already do.
+    """
+    import re
+    return re.sub(r"[^a-z0-9 ]", "", name.lower().strip())
+
 ROSTER_SLOTS = {
     "QB":   (["QB"],                     1),
     "RB":   (["RB"],                     2),
@@ -1076,6 +1087,112 @@ def player_career(pfr_id):
     return render_template("player.html",
                            found=True, pfr_id=pfr_id, name=info["name"],
                            games=games, career_totals=totals)
+
+
+@app.route("/standings")
+def standings():
+    """
+    Season-long leaderboard: cumulative points across all submitted
+    lineups for a season, with each participant's single lowest-scoring
+    week dropped (per the original challenge rules).
+
+    Scoring: each lineup's 9 players are matched against
+    hist_player_stats by (year, week, name_normalized) — the same join
+    History/Player pages use. A week only counts toward standings once
+    ALL 9 of a lineup's players have a matched stats row; otherwise
+    that week is marked "pending" and excluded from the totals rather
+    than showing a misleadingly low partial score (e.g. games not yet
+    played, or this week's data not yet scraped).
+    """
+    ph = _ph()
+
+    available_years = db_fetchall(
+        "SELECT DISTINCT year FROM lineups ORDER BY year DESC"
+    )
+    years = [r["year"] for r in available_years]
+
+    if not years:
+        return render_template("standings.html", year=None, years=[],
+                               standings=[], weeks=[])
+
+    req_year = request.args.get("year", type=int)
+    sel_year = req_year if req_year in years else years[0]
+
+    lineup_rows = db_fetchall(f"""
+        SELECT submitter, week, lineup_json
+        FROM lineups
+        WHERE year = {ph}
+        ORDER BY submitter, week
+    """, (sel_year,))
+
+    # Collect every distinct name_normalized we need to score, in one
+    # batch, rather than one query per player per lineup.
+    all_names = set()
+    parsed_lineups = []   # (submitter, week, [player dicts])
+    for row in lineup_rows:
+        players = json.loads(row["lineup_json"])
+        parsed_lineups.append((row["submitter"], row["week"], players))
+        for p in players:
+            all_names.add(normalize_name(p["name"]))
+
+    # Pull actual scores for every (week, name_normalized) this season
+    # in one query, then look them up in memory below.
+    scores_by_week_name = {}   # (week, name_normalized) -> actual dk_pts
+    if all_names:
+        stats_rows = db_fetchall(f"""
+            SELECT week, name_normalized, COALESCE(dk_pts_pfr_reported, dk_pts) AS actual_pts
+            FROM hist_player_stats
+            WHERE year = {ph}
+        """, (sel_year,))
+        for r in stats_rows:
+            scores_by_week_name[(r["week"], r["name_normalized"])] = r["actual_pts"]
+
+    # Score every lineup; a week only counts if all 9 players matched
+    by_submitter = {}   # submitter -> {week: score}
+    weeks_seen = set()
+    for submitter, week, players in parsed_lineups:
+        weeks_seen.add(week)
+        total = 0.0
+        matched = 0
+        for p in players:
+            key = (week, normalize_name(p["name"]))
+            pts = scores_by_week_name.get(key)
+            if pts is not None:
+                total += pts
+                matched += 1
+
+        by_submitter.setdefault(submitter, {})
+        if matched == 9:
+            by_submitter[submitter][week] = round(total, 2)
+        else:
+            by_submitter[submitter][week] = None   # pending / incomplete
+
+    weeks = sorted(weeks_seen)
+
+    # Build the leaderboard: drop each participant's single lowest
+    # *fully-scored* week, sum the rest, rank descending.
+    leaderboard = []
+    for submitter, week_scores in by_submitter.items():
+        scored_weeks = {w: s for w, s in week_scores.items() if s is not None}
+        if scored_weeks:
+            dropped_week = min(scored_weeks, key=lambda w: scored_weeks[w])
+        else:
+            dropped_week = None
+        total = sum(s for w, s in scored_weeks.items() if w != dropped_week)
+
+        leaderboard.append({
+            "submitter":     submitter,
+            "week_scores":   week_scores,      # includes None for pending weeks
+            "dropped_week":  dropped_week,
+            "total":         round(total, 2),
+            "weeks_scored":  len(scored_weeks),
+        })
+
+    leaderboard.sort(key=lambda r: r["total"], reverse=True)
+
+    return render_template("standings.html",
+                           year=sel_year, years=years,
+                           standings=leaderboard, weeks=weeks)
 
 
 @app.route("/submit-lineup", methods=["POST"])

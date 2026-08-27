@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF DFS Challenge — Standings{% if year %} — {{ year }}{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>FF DFS Challenge</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('slate') }}" class="nav-link">Slate</a>
+            <a href="{{ url_for('history') }}" class="nav-link">History</a>
+            <a href="{{ url_for('standings') }}" class="nav-link active">Standings</a>
+        </nav>
+        {% if year %}
+            <p class="subtitle">{{ year }} Season &mdash; Lowest week dropped</p>
+        {% else %}
+            <p class="subtitle">No lineups submitted yet.</p>
+        {% endif %}
+    </div>
+    <div class="header-right">
+        {% if current_user.is_authenticated %}
+            <span class="user-badge">{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Sign in</a>
+        {% endif %}
+    </div>
+</header>
+
+<main class="history-main">
+
+{% if not years %}
+    <p class="empty-state">No lineups have been submitted yet — standings will appear once the season gets underway.</p>
+{% else %}
+
+    {% if years|length > 1 %}
+    <form class="history-selector" method="GET" action="{{ url_for('standings') }}">
+        <label>
+            Season
+            <select name="year" onchange="this.form.submit()">
+                {% for y in years %}
+                <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </label>
+    </form>
+    {% endif %}
+
+    {% if standings %}
+    <div class="table-wrapper">
+        <table id="standings-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Participant</th>
+                    {% for w in weeks %}
+                    <th class="right">Wk{{ w }}</th>
+                    {% endfor %}
+                    <th class="right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in standings %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td class="player-name">{{ row['submitter'] }}</td>
+                    {% for w in weeks %}
+                        {% set score = row['week_scores'].get(w) %}
+                        {% set is_dropped = (w == row['dropped_week']) %}
+                        <td class="right {% if is_dropped %}dropped-week{% endif %}">
+                            {% if score is none %}
+                                <span class="pending-week" title="Not yet fully scored">pending</span>
+                            {% else %}
+                                {{ "%.1f"|format(score) }}
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                    <td class="right total-col">{{ "%.1f"|format(row['total']) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p class="standings-note">
+        Struck-through score = each participant's dropped (lowest) week.
+        "pending" = that week's lineup isn't fully scored yet (game results not yet available/scraped).
+    </p>
+    {% else %}
+    <p class="empty-state">No lineups found for {{ year }}.</p>
+    {% endif %}
+
+{% endif %}
+
+</main>
+
+</body>
+</html>
