@@ -90,7 +90,13 @@
                 {% set actual = p['dk_pts_pfr_reported'] if p['dk_pts_pfr_reported'] is not none else p['dk_pts_computed'] %}
                 <tr class="pos-{{ p['position'] | lower }}">
                     <td class="pos-badge">{{ p['position'] }}</td>
-                    <td class="player-name">{{ p['name'] }}</td>
+                    <td class="player-name">
+                        {% if p['pfr_id'] %}
+                            <a href="{{ url_for('player_career', pfr_id=p['pfr_id']) }}" class="player-link">{{ p['name'] }}</a>
+                        {% else %}
+                            {{ p['name'] }}
+                        {% endif %}
+                    </td>
                     <td>{{ p['team'] }}</td>
                     <td>{{ p['opponent'] }}</td>
                     <td class="right">${{ "{:,}".format(p['dk_salary']) if p['dk_salary'] else '—' }}</td>

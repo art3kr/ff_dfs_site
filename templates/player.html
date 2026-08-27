@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF DFS Challenge — {{ name if found else 'Player Not Found' }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>FF DFS Challenge</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('slate') }}" class="nav-link">Slate</a>
+            <a href="{{ url_for('history') }}" class="nav-link">History</a>
+        </nav>
+        {% if found %}
+            <p class="subtitle">{{ name }} &mdash; Career History</p>
+        {% else %}
+            <p class="subtitle">No data found for player id "{{ pfr_id }}"</p>
+        {% endif %}
+    </div>
+    <div class="header-right">
+        {% if current_user.is_authenticated %}
+            <span class="user-badge">{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Sign in</a>
+        {% endif %}
+    </div>
+</header>
+
+<main class="history-main">
+
+{% if not found %}
+    <p class="empty-state">
+        No career data found for this player. <a href="{{ url_for('history') }}">Back to History</a>
+    </p>
+{% else %}
+
+    {% if career_totals and career_totals['games_played'] %}
+    <div class="career-summary">
+        <div class="summary-stat">
+            <span class="summary-value">{{ career_totals['games_played'] }}</span>
+            <span class="summary-label">Games</span>
+        </div>
+        <div class="summary-stat">
+            <span class="summary-value">{{ "%.1f"|format(career_totals['total_dk_pts']) if career_totals['total_dk_pts'] else '—' }}</span>
+            <span class="summary-label">Total DK Pts</span>
+        </div>
+        <div class="summary-stat">
+            <span class="summary-value">{{ "%.1f"|format(career_totals['avg_dk_pts']) if career_totals['avg_dk_pts'] else '—' }}</span>
+            <span class="summary-label">Avg DK Pts</span>
+        </div>
+        {% if career_totals['total_pass_yds'] %}
+        <div class="summary-stat">
+            <span class="summary-value">{{ "{:,}".format(career_totals['total_pass_yds']|int) }}</span>
+            <span class="summary-label">Pass Yds</span>
+        </div>
+        <div class="summary-stat">
+            <span class="summary-value">{{ career_totals['total_pass_td']|int }}</span>
+            <span class="summary-label">Pass TD</span>
+        </div>
+        {% endif %}
+        {% if career_totals['total_rush_yds'] %}
+        <div class="summary-stat">
+            <span class="summary-value">{{ "{:,}".format(career_totals['total_rush_yds']|int) }}</span>
+            <span class="summary-label">Rush Yds</span>
+        </div>
+        <div class="summary-stat">
+            <span class="summary-value">{{ career_totals['total_rush_td']|int }}</span>
+            <span class="summary-label">Rush TD</span>
+        </div>
+        {% endif %}
+        {% if career_totals['total_rec'] %}
+        <div class="summary-stat">
+            <span class="summary-value">{{ career_totals['total_rec']|int }}</span>
+            <span class="summary-label">Receptions</span>
+        </div>
+        <div class="summary-stat">
+            <span class="summary-value">{{ "{:,}".format(career_totals['total_rec_yds']|int) }}</span>
+            <span class="summary-label">Rec Yds</span>
+        </div>
+        <div class="summary-stat">
+            <span class="summary-value">{{ career_totals['total_rec_td']|int }}</span>
+            <span class="summary-label">Rec TD</span>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if games %}
+    <div class="table-wrapper">
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th data-col="year">Year</th>
+                    <th data-col="week">Wk</th>
+                    <th data-col="team">Team</th>
+                    <th data-col="opponent">Opp</th>
+                    <th data-col="salary"   class="right">Salary</th>
+                    <th data-col="dk_pts"   class="right">DK Pts</th>
+                    <th data-col="pass_yds" class="right">Pass Yds</th>
+                    <th data-col="pass_td"  class="right">Pass TD</th>
+                    <th data-col="rush_yds" class="right">Rush Yds</th>
+                    <th data-col="rush_td"  class="right">Rush TD</th>
+                    <th data-col="rec"      class="right">Rec</th>
+                    <th data-col="rec_yds"  class="right">Rec Yds</th>
+                    <th data-col="rec_td"   class="right">Rec TD</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for g in games %}
+                {% set actual = g['dk_pts_pfr_reported'] if g['dk_pts_pfr_reported'] is not none else g['dk_pts_computed'] %}
+                <tr>
+                    <td>{{ g['year'] }}</td>
+                    <td>{{ g['week'] }}</td>
+                    <td>{{ g['team'] }}</td>
+                    <td>{{ g['opponent'] }}</td>
+                    <td class="right">{{ "${:,}".format(g['dk_salary']) if g['dk_salary'] else '—' }}</td>
+                    <td class="right">{{ "%.1f"|format(actual) if actual is not none else '—' }}</td>
+                    <td class="right">{{ g['pass_yds'] if g['pass_yds'] else '—' }}</td>
+                    <td class="right">{{ g['pass_td']  if g['pass_td']  else '—' }}</td>
+                    <td class="right">{{ g['rush_yds'] if g['rush_yds'] else '—' }}</td>
+                    <td class="right">{{ g['rush_td']  if g['rush_td']  else '—' }}</td>
+                    <td class="right">{{ g['rec']      if g['rec']      else '—' }}</td>
+                    <td class="right">{{ g['rec_yds']  if g['rec_yds']  else '—' }}</td>
+                    <td class="right">{{ g['rec_td']   if g['rec_td']   else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No game data found for this player.</p>
+    {% endif %}
+
+{% endif %}
+
+</main>
+
+<script src="{{ url_for('static', filename='history.js') }}"></script>
+
+</body>
+</html>

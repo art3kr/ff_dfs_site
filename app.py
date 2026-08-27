@@ -984,6 +984,7 @@ def history():
             s.dk_salary       AS dk_salary,
             s.projected_pts   AS projected_pts,
             s.ownership_pct   AS ownership_pct,
+            hp.pfr_id              AS pfr_id,
             hp.dk_pts             AS dk_pts_computed,
             hp.dk_pts_pfr_reported AS dk_pts_pfr_reported,
             hp.pass_yds AS pass_yds, hp.pass_td AS pass_td, hp.pass_int AS pass_int,
@@ -1011,6 +1012,70 @@ def history():
                            year=sel_year, week=sel_week,
                            available_years=available_years,
                            available_weeks_by_year=available_weeks_by_year)
+
+
+@app.route("/players/<pfr_id>")
+def player_career(pfr_id):
+    """
+    Full career page for one player: every year/week of real stats we
+    have, with salary + value context left-joined in from
+    hist_dfs_salaries wherever a match exists (same name_normalized
+    join used on /history — salary coverage may be incomplete for
+    some years, stats will still show either way).
+    """
+    ph = _ph()
+
+    # Basic player identity (name, positions played — some players
+    # switch position over a career, e.g. a WR moving to a return role)
+    info = db_fetchone(f"""
+        SELECT name, pfr_id
+        FROM hist_player_stats
+        WHERE pfr_id = {ph}
+        ORDER BY year DESC, week DESC
+        LIMIT 1
+    """, (pfr_id,))
+
+    if info is None:
+        return render_template("player.html", found=False, pfr_id=pfr_id,
+                               name=None, games=[], career_totals=None)
+
+    games = db_fetchall(f"""
+        SELECT
+            hp.year AS year, hp.week AS week, hp.game_date AS game_date,
+            hp.team AS team, hp.opponent AS opponent, hp.home_away AS home_away,
+            hp.position AS position,
+            hp.dk_pts AS dk_pts_computed, hp.dk_pts_pfr_reported AS dk_pts_pfr_reported,
+            hp.pass_cmp AS pass_cmp, hp.pass_att AS pass_att, hp.pass_yds AS pass_yds,
+            hp.pass_td AS pass_td, hp.pass_int AS pass_int,
+            hp.rush_att AS rush_att, hp.rush_yds AS rush_yds, hp.rush_td AS rush_td,
+            hp.rec_tgt AS rec_tgt, hp.rec AS rec, hp.rec_yds AS rec_yds, hp.rec_td AS rec_td,
+            s.dk_salary AS dk_salary
+        FROM hist_player_stats hp
+        LEFT JOIN hist_dfs_salaries s
+            ON  s.year = hp.year AND s.week = hp.week
+            AND s.name_normalized = hp.name_normalized
+        WHERE hp.pfr_id = {ph}
+        ORDER BY hp.year DESC, hp.week DESC
+    """, (pfr_id,))
+
+    # Career-level summary stats (best-effort — uses PFR-reported dk_pts
+    # where available, falls back to computed)
+    totals = db_fetchone(f"""
+        SELECT
+            COUNT(*) AS games_played,
+            SUM(COALESCE(dk_pts_pfr_reported, dk_pts)) AS total_dk_pts,
+            AVG(COALESCE(dk_pts_pfr_reported, dk_pts)) AS avg_dk_pts,
+            SUM(pass_yds) AS total_pass_yds, SUM(pass_td) AS total_pass_td,
+            SUM(rush_yds) AS total_rush_yds, SUM(rush_td) AS total_rush_td,
+            SUM(rec)      AS total_rec,      SUM(rec_yds) AS total_rec_yds,
+            SUM(rec_td)   AS total_rec_td
+        FROM hist_player_stats
+        WHERE pfr_id = {ph}
+    """, (pfr_id,))
+
+    return render_template("player.html",
+                           found=True, pfr_id=pfr_id, name=info["name"],
+                           games=games, career_totals=totals)
 
 
 @app.route("/submit-lineup", methods=["POST"])

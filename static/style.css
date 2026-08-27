@@ -567,3 +567,52 @@ header {
 #history-table tbody tr:hover {
     background: var(--bg-hover);
 }
+
+/* -----------------------------------------------------------------------
+   Player career page — summary stat boxes
+   ----------------------------------------------------------------------- */
+
+.career-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.summary-stat {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 18px;
+    min-width: 90px;
+    text-align: center;
+}
+
+.summary-value {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.summary-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 2px;
+}
+
+/* Player name links inside the history table */
+.player-link {
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--text-muted);
+}
+
+.player-link:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
