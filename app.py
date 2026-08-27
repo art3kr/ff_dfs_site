@@ -76,6 +76,54 @@ ROSTER_SLOTS = {
 # Auto-init: create tables + optional bootstrap user on startup
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Schema migration for hist_player_stats
+#
+# CREATE TABLE IF NOT EXISTS only handles brand-new databases — it does
+# NOTHING to a table that already exists with an older schema, even if
+# we've since added new columns to the CREATE TABLE statement above. This
+# bit us: a table created early in development (before game_date,
+# fumbles_rec_td, kick_ret*/punt_ret*, and dk_pts_pfr_reported existed)
+# stayed stuck on that old shape on Render's Postgres, causing every
+# insert to fail with "column does not exist" once load-history tried to
+# write those newer fields.
+#
+# These functions add any missing columns to an already-existing table,
+# so schema changes made here going forward apply automatically on next
+# startup — no more manually dropping tables when we add a column.
+# ---------------------------------------------------------------------------
+
+# Columns added to hist_player_stats after its original creation.
+# (column_name, SQL type) — keep this in sync whenever a new column is
+# added to the CREATE TABLE statements above.
+HIST_PLAYER_STATS_MIGRATIONS = [
+    ("game_date",           "TEXT"),
+    ("dk_pts_pfr_reported", "REAL"),
+    ("fumbles_rec_td",      "INTEGER"),
+    ("kick_ret",            "INTEGER"),
+    ("kick_ret_yds",        "INTEGER"),
+    ("kick_ret_td",         "INTEGER"),
+    ("punt_ret",            "INTEGER"),
+    ("punt_ret_yds",        "INTEGER"),
+    ("punt_ret_td",         "INTEGER"),
+]
+
+
+def _migrate_hist_player_stats_pg(cur):
+    """Add any missing hist_player_stats columns on Postgres."""
+    for col, coltype in HIST_PLAYER_STATS_MIGRATIONS:
+        cur.execute(f"ALTER TABLE hist_player_stats ADD COLUMN IF NOT EXISTS {col} {coltype}")
+
+
+def _migrate_hist_player_stats_sqlite(conn):
+    """Add any missing hist_player_stats columns on SQLite (no IF NOT
+    EXISTS support for ADD COLUMN, so check existing columns first)."""
+    existing = {row[1] for row in conn.execute("PRAGMA table_info(hist_player_stats)")}
+    for col, coltype in HIST_PLAYER_STATS_MIGRATIONS:
+        if col not in existing:
+            conn.execute(f"ALTER TABLE hist_player_stats ADD COLUMN {col} {coltype}")
+
+
 def _auto_init():
     """
     Creates tables if they don't exist and optionally creates a first user
@@ -191,6 +239,7 @@ def _auto_init():
             CREATE INDEX IF NOT EXISTS idx_hist_stats_player
                 ON hist_player_stats (pfr_id)
         """)
+        _migrate_hist_player_stats_pg(cur)
     else:
         # SQLite: executescript for multi-statement init
         conn.executescript("""
@@ -283,6 +332,7 @@ def _auto_init():
             CREATE INDEX IF NOT EXISTS idx_hist_stats_player
                 ON hist_player_stats (pfr_id);
         """)
+        _migrate_hist_player_stats_sqlite(conn)
 
     conn.commit()
 
