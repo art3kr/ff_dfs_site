@@ -181,7 +181,9 @@ PLAYER_COLUMNS = [
     'team', 'opponent', 'home_away', 'position', 'dk_pts',
     'pass_cmp', 'pass_att', 'pass_yds', 'pass_td', 'pass_int',
     'rush_att', 'rush_yds', 'rush_td',
-    'rec_tgt', 'rec', 'rec_yds', 'rec_td', 'fumbles_lost',
+    'rec_tgt', 'rec', 'rec_yds', 'rec_td', 'fumbles_lost', 'fumbles_rec_td',
+    'kick_ret', 'kick_ret_yds', 'kick_ret_td',
+    'punt_ret', 'punt_ret_yds', 'punt_ret_td',
     'snap_pct',
 ]
 
@@ -302,12 +304,39 @@ def find_table(soup: BeautifulSoup, table_id: str):
 def calculate_dk_points(pass_yds=0, pass_td=0, pass_int=0,
                         rush_yds=0, rush_td=0,
                         rec=0, rec_yds=0, rec_td=0,
-                        fumbles_lost=0) -> float:
+                        fumbles_lost=0,
+                        kick_ret_td=0, punt_ret_td=0,
+                        fumbles_rec_td=0) -> float:
     """
     Standard DraftKings NFL PPR scoring formula. Used to compute fantasy
     points ourselves from raw box-score stats, since the career gamelog
     page (unlike the per-year fantasy page) doesn't include a pre-computed
     DK points column.
+
+    kick_ret_td / punt_ret_td: return touchdowns, worth 6 pts each, same
+    as any other TD — confirmed necessary by comparing against PFR's own
+    historical dk_pts (compare_dk_points.py): a cluster of -6.0
+    discrepancies belonged to known return specialists (Rashid Shaheed,
+    Marvin Mims, Kalif Raymond, Xavier Gipson, Tyler Lockett, etc.) — the
+    return TD data was present in the 'stats' table all along
+    (kick_ret_td/punt_ret_td fields) but wasn't being extracted or scored.
+
+    fumbles_rec_td: offensive fumble recovery touchdown (also 6 pts) —
+    same discovery process, confirmed as the source of a second, smaller
+    cluster of -6.0 discrepancies (Trey McBride, Travis Kelce, Keenan
+    Allen games) not explained by return TDs.
+
+    No yardage bonus applies to return yards under standard DK rules —
+    the 100+ yard bonus is rushing/receiving only.
+
+    KNOWN REMAINING GAP: 2-point conversions (worth 2 pts each) are NOT
+    captured here. A second discrepancy pattern in compare_dk_points.py —
+    almost entirely QB rows, off by amounts landing very close to
+    multiples of 2 (e.g. -2.04, -4.02, -4.04) — strongly suggests missed
+    2-point conversions. That data isn't available on the player gamelog
+    page this scraper uses; it typically lives in a game's scoring/
+    play-by-play log instead, a genuinely different data source. This
+    formula does not attempt to account for it.
     """
     pts = 0.0
     pts += pass_yds * 0.04          # 1 pt per 25 pass yds
@@ -319,6 +348,9 @@ def calculate_dk_points(pass_yds=0, pass_td=0, pass_int=0,
     pts += rec_yds * 0.1            # 1 pt per 10 rec yds
     pts += rec_td * 6
     pts += fumbles_lost * -1
+    pts += kick_ret_td * 6
+    pts += punt_ret_td * 6
+    pts += fumbles_rec_td * 6
     if pass_yds >= 300:
         pts += 3
     if rush_yds >= 100:
@@ -507,6 +539,14 @@ def get_player_career_stats(pfr_id: str, name: str, player_url: str, position: s
             rec_td    = _int(get('rec_td'))
 
             fumbles_lost = _int(get('fumbles_lost'))
+            fumbles_rec_td = _int(get('fumbles_rec_td'))
+
+            kick_ret     = _int(get('kick_ret'))
+            kick_ret_yds = _int(get('kick_ret_yds'))
+            kick_ret_td  = _int(get('kick_ret_td'))
+            punt_ret     = _int(get('punt_ret'))
+            punt_ret_yds = _int(get('punt_ret_yds'))
+            punt_ret_td  = _int(get('punt_ret_td'))
 
             snap_raw  = get('snap_counts_off_pct')
             snap_pct  = _float(snap_raw) if snap_raw else None
@@ -516,6 +556,8 @@ def get_player_career_stats(pfr_id: str, name: str, player_url: str, position: s
                 rush_yds=rush_yds, rush_td=rush_td,
                 rec=rec, rec_yds=rec_yds, rec_td=rec_td,
                 fumbles_lost=fumbles_lost,
+                kick_ret_td=kick_ret_td, punt_ret_td=punt_ret_td,
+                fumbles_rec_td=fumbles_rec_td,
             )
 
             rows.append({
@@ -543,6 +585,13 @@ def get_player_career_stats(pfr_id: str, name: str, player_url: str, position: s
                 'rec_yds':         rec_yds,
                 'rec_td':          rec_td,
                 'fumbles_lost':    fumbles_lost,
+                'fumbles_rec_td':  fumbles_rec_td,
+                'kick_ret':        kick_ret,
+                'kick_ret_yds':    kick_ret_yds,
+                'kick_ret_td':     kick_ret_td,
+                'punt_ret':        punt_ret,
+                'punt_ret_yds':    punt_ret_yds,
+                'punt_ret_td':     punt_ret_td,
                 'snap_pct':        snap_pct,
             })
 
@@ -706,9 +755,26 @@ def load_date_to_week(year: int) -> dict:
     df = df[df['week'] <= 18]
 
     mapping = {}
+    skipped_unparseable = 0
     for _, r in df.iterrows():
-        date_str = str(r['date'])[:10]   # normalise to 'YYYY-MM-DD'
+        # Parse properly instead of naive string slicing — different
+        # years' schedule CSVs use different raw date formats (most are
+        # ISO 'YYYY-MM-DD', but at least one year's file uses 'M/D/YY',
+        # e.g. '9/4/25'). Naive [:10] slicing silently produced the wrong
+        # key for any non-ISO format, causing every lookup for that year
+        # to fail with zero errors or warnings. Explicit parsing handles
+        # whatever format is actually in the file.
+        parsed = pd.to_datetime(r['date'], errors='coerce')
+        if pd.isna(parsed):
+            skipped_unparseable += 1
+            continue
+        date_str = parsed.strftime('%Y-%m-%d')
         mapping[date_str] = int(r['week'])
+
+    if skipped_unparseable:
+        print(f"  WARNING: {skipped_unparseable} rows in {year} schedule had "
+              f"unparseable dates and were skipped")
+
     return mapping
 
 
@@ -910,15 +976,25 @@ def scrape_player_stats(years: list[int]):
             consecutive_failures = 0   # reset on any success, even 0-row success
 
             all_new_rows.extend(game_rows)
-            # Mark EVERY year actually found in this player's career page
+            # Mark every year actually found in this player's career page
             # as done — not just the years this run originally asked for.
             # Since the page already contains their whole career, a later
             # run requesting a totally different --years range will
             # correctly skip re-fetching this player.
+            #
+            # IMPORTANT: we deliberately do NOT also mark every year in
+            # info['years'] as done regardless of whether it produced
+            # rows. Doing that (an earlier version of this function did)
+            # silently hides real gaps — if a year's games failed to
+            # parse for any reason (a week-mapping miss, a page quirk,
+            # an interrupted run), that year gets permanently marked
+            # "complete" with zero actual data, and every future re-run
+            # skips it forever. The small cost of occasionally re-checking
+            # a player who legitimately had 0 games in a requested year
+            # (e.g. injured reserve all season) is far cheaper than
+            # silently losing a real season of data.
             years_found = {row['year'] for row in game_rows}
             for y in years_found:
-                done_pairs.add((pfr_id, y))
-            for y in info['years']:   # also cover requested years with 0 games (e.g. injured all season)
                 done_pairs.add((pfr_id, y))
 
             # Save after EVERY player — Ctrl-C at any point leaves a

@@ -158,6 +158,7 @@ def _auto_init():
                 position        TEXT,
                 game_date       TEXT,
                 dk_pts          REAL,
+                dk_pts_pfr_reported REAL,
                 pass_cmp        INTEGER,
                 pass_att        INTEGER,
                 pass_yds        INTEGER,
@@ -171,6 +172,13 @@ def _auto_init():
                 rec_yds         INTEGER,
                 rec_td          INTEGER,
                 fumbles_lost    INTEGER,
+                fumbles_rec_td  INTEGER,
+                kick_ret        INTEGER,
+                kick_ret_yds    INTEGER,
+                kick_ret_td     INTEGER,
+                punt_ret        INTEGER,
+                punt_ret_yds    INTEGER,
+                punt_ret_td     INTEGER,
                 snap_pct        REAL,
                 UNIQUE(pfr_id, year, week)
             )
@@ -246,6 +254,7 @@ def _auto_init():
                 position        TEXT,
                 game_date       TEXT,
                 dk_pts          REAL,
+                dk_pts_pfr_reported REAL,
                 pass_cmp        INTEGER,
                 pass_att        INTEGER,
                 pass_yds        INTEGER,
@@ -259,6 +268,13 @@ def _auto_init():
                 rec_yds         INTEGER,
                 rec_td          INTEGER,
                 fumbles_lost    INTEGER,
+                fumbles_rec_td  INTEGER,
+                kick_ret        INTEGER,
+                kick_ret_yds    INTEGER,
+                kick_ret_td     INTEGER,
+                punt_ret        INTEGER,
+                punt_ret_yds    INTEGER,
+                punt_ret_td     INTEGER,
                 snap_pct        REAL,
                 UNIQUE(pfr_id, year, week)
             );
@@ -595,9 +611,10 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             sql = f"""
                 INSERT INTO hist_player_stats
                     (pfr_id, name, name_normalized, year, week, game_date, team, opponent, home_away,
-                     position, dk_pts, pass_cmp, pass_att, pass_yds, pass_td, pass_int,
-                     rush_att, rush_yds, rush_td, rec_tgt, rec, rec_yds, rec_td, fumbles_lost, snap_pct)
-                VALUES ({_ph(25)})
+                     position, dk_pts, dk_pts_pfr_reported, pass_cmp, pass_att, pass_yds, pass_td, pass_int,
+                     rush_att, rush_yds, rush_td, rec_tgt, rec, rec_yds, rec_td, fumbles_lost, fumbles_rec_td,
+                     kick_ret, kick_ret_yds, kick_ret_td, punt_ret, punt_ret_yds, punt_ret_td, snap_pct)
+                VALUES ({_ph(33)})
                 ON CONFLICT (pfr_id, year, week) DO UPDATE SET
                     name         = EXCLUDED.name,
                     game_date    = EXCLUDED.game_date,
@@ -606,6 +623,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
                     home_away    = EXCLUDED.home_away,
                     position     = EXCLUDED.position,
                     dk_pts       = EXCLUDED.dk_pts,
+                    dk_pts_pfr_reported = EXCLUDED.dk_pts_pfr_reported,
                     pass_cmp     = EXCLUDED.pass_cmp,
                     pass_att     = EXCLUDED.pass_att,
                     pass_yds     = EXCLUDED.pass_yds,
@@ -619,15 +637,23 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
                     rec_yds      = EXCLUDED.rec_yds,
                     rec_td       = EXCLUDED.rec_td,
                     fumbles_lost = EXCLUDED.fumbles_lost,
+                    fumbles_rec_td = EXCLUDED.fumbles_rec_td,
+                    kick_ret     = EXCLUDED.kick_ret,
+                    kick_ret_yds = EXCLUDED.kick_ret_yds,
+                    kick_ret_td  = EXCLUDED.kick_ret_td,
+                    punt_ret     = EXCLUDED.punt_ret,
+                    punt_ret_yds = EXCLUDED.punt_ret_yds,
+                    punt_ret_td  = EXCLUDED.punt_ret_td,
                     snap_pct     = EXCLUDED.snap_pct
             """
         else:
             sql = f"""
                 INSERT INTO hist_player_stats
                     (pfr_id, name, name_normalized, year, week, game_date, team, opponent, home_away,
-                     position, dk_pts, pass_cmp, pass_att, pass_yds, pass_td, pass_int,
-                     rush_att, rush_yds, rush_td, rec_tgt, rec, rec_yds, rec_td, fumbles_lost, snap_pct)
-                VALUES ({_ph(25)})
+                     position, dk_pts, dk_pts_pfr_reported, pass_cmp, pass_att, pass_yds, pass_td, pass_int,
+                     rush_att, rush_yds, rush_td, rec_tgt, rec, rec_yds, rec_td, fumbles_lost, fumbles_rec_td,
+                     kick_ret, kick_ret_yds, kick_ret_td, punt_ret, punt_ret_yds, punt_ret_td, snap_pct)
+                VALUES ({_ph(33)})
                 ON CONFLICT(pfr_id, year, week) DO UPDATE SET
                     name         = excluded.name,
                     game_date    = excluded.game_date,
@@ -636,6 +662,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
                     home_away    = excluded.home_away,
                     position     = excluded.position,
                     dk_pts       = excluded.dk_pts,
+                    dk_pts_pfr_reported = excluded.dk_pts_pfr_reported,
                     pass_cmp     = excluded.pass_cmp,
                     pass_att     = excluded.pass_att,
                     pass_yds     = excluded.pass_yds,
@@ -649,6 +676,13 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
                     rec_yds      = excluded.rec_yds,
                     rec_td       = excluded.rec_td,
                     fumbles_lost = excluded.fumbles_lost,
+                    fumbles_rec_td = excluded.fumbles_rec_td,
+                    kick_ret     = excluded.kick_ret,
+                    kick_ret_yds = excluded.kick_ret_yds,
+                    kick_ret_td  = excluded.kick_ret_td,
+                    punt_ret     = excluded.punt_ret,
+                    punt_ret_yds = excluded.punt_ret_yds,
+                    punt_ret_td  = excluded.punt_ret_td,
                     snap_pct     = excluded.snap_pct
             """
 
@@ -661,6 +695,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
                 _none_if_nan(r.get('team')), _none_if_nan(r.get('opponent')),
                 _none_if_nan(r.get('home_away')), _none_if_nan(r.get('position')),
                 _float_or_none(r.get('dk_pts')),
+                _float_or_none(r.get('dk_pts_pfr_reported')),
                 _int_or_none(r.get('pass_cmp')), _int_or_none(r.get('pass_att')),
                 _int_or_none(r.get('pass_yds')), _int_or_none(r.get('pass_td')),
                 _int_or_none(r.get('pass_int')),
@@ -669,6 +704,11 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
                 _int_or_none(r.get('rec_tgt')), _int_or_none(r.get('rec')),
                 _int_or_none(r.get('rec_yds')), _int_or_none(r.get('rec_td')),
                 _int_or_none(r.get('fumbles_lost')),
+                _int_or_none(r.get('fumbles_rec_td')),
+                _int_or_none(r.get('kick_ret')), _int_or_none(r.get('kick_ret_yds')),
+                _int_or_none(r.get('kick_ret_td')),
+                _int_or_none(r.get('punt_ret')), _int_or_none(r.get('punt_ret_yds')),
+                _int_or_none(r.get('punt_ret_td')),
                 _float_or_none(r.get('snap_pct')),
             ))
             if len(batch) >= batch_size:
@@ -846,6 +886,81 @@ def slate():
                            year=current_year,
                            salary_cap=SALARY_CAP,
                            existing_lineup=existing_lineup)
+
+
+@app.route("/history")
+def history():
+    """
+    Weekly historical browser: DFS salary + real box-score stats for any
+    past year/week, joined on (year, week, name_normalized).
+
+    hist_dfs_salaries is the "master" list of who was in a given week's
+    slate (from RotoGuru/RotoWire/DFF); hist_player_stats supplies the
+    real results, left-joined in since not every salaried player
+    necessarily has a matched stats row (name mismatches, etc.).
+    """
+    year_week_rows = db_fetchall(
+        "SELECT DISTINCT year, week FROM hist_dfs_salaries ORDER BY year DESC, week DESC"
+    )
+    available = [(r["year"], r["week"]) for r in year_week_rows]
+
+    if not available:
+        return render_template("history.html",
+                               players=[], year=None, week=None,
+                               available_years=[], available_weeks_by_year={})
+
+    req_year = request.args.get("year", type=int)
+    req_week = request.args.get("week", type=int)
+
+    if req_year is None or req_week is None or (req_year, req_week) not in available:
+        sel_year, sel_week = available[0]   # most recent by default
+    else:
+        sel_year, sel_week = req_year, req_week
+
+    available_years = sorted({y for y, w in available}, reverse=True)
+    available_weeks_by_year = {}
+    for y, w in available:
+        available_weeks_by_year.setdefault(y, []).append(w)
+    for y in available_weeks_by_year:
+        available_weeks_by_year[y].sort()
+
+    ph = _ph()
+    players = db_fetchall(f"""
+        SELECT
+            s.name            AS name,
+            s.position        AS position,
+            s.team            AS team,
+            s.opponent        AS opponent,
+            s.dk_salary       AS dk_salary,
+            s.projected_pts   AS projected_pts,
+            s.ownership_pct   AS ownership_pct,
+            hp.dk_pts             AS dk_pts_computed,
+            hp.dk_pts_pfr_reported AS dk_pts_pfr_reported,
+            hp.pass_yds AS pass_yds, hp.pass_td AS pass_td, hp.pass_int AS pass_int,
+            hp.rush_att AS rush_att, hp.rush_yds AS rush_yds, hp.rush_td AS rush_td,
+            hp.rec      AS rec,      hp.rec_yds  AS rec_yds,  hp.rec_td  AS rec_td
+        FROM hist_dfs_salaries s
+        LEFT JOIN hist_player_stats hp
+            ON  hp.year = s.year AND hp.week = s.week
+            AND hp.name_normalized = s.name_normalized
+        WHERE s.year = {ph} AND s.week = {ph}
+        ORDER BY
+            CASE s.position
+                WHEN 'QB'  THEN 1
+                WHEN 'RB'  THEN 2
+                WHEN 'WR'  THEN 3
+                WHEN 'TE'  THEN 4
+                WHEN 'DST' THEN 5
+                ELSE 6
+            END,
+            s.dk_salary DESC
+    """, (sel_year, sel_week))
+
+    return render_template("history.html",
+                           players=players,
+                           year=sel_year, week=sel_week,
+                           available_years=available_years,
+                           available_weeks_by_year=available_weeks_by_year)
 
 
 @app.route("/submit-lineup", methods=["POST"])

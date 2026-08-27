@@ -11,6 +11,10 @@
 <header>
     <div class="header-left">
         <h1>FF DFS Challenge</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('slate') }}" class="nav-link active">Slate</a>
+            <a href="{{ url_for('history') }}" class="nav-link">History</a>
+        </nav>
         {% if week %}
             <p class="subtitle">Week {{ week }}, {{ year }} &mdash; DraftKings Thu-Mon Slate</p>
         {% else %}

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF DFS Challenge — History{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>FF DFS Challenge</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('slate') }}" class="nav-link">Slate</a>
+            <a href="{{ url_for('history') }}" class="nav-link active">History</a>
+        </nav>
+        {% if year %}
+            <p class="subtitle">Week {{ week }}, {{ year }} &mdash; Salary + Results</p>
+        {% else %}
+            <p class="subtitle">No historical data loaded yet.</p>
+        {% endif %}
+    </div>
+    <div class="header-right">
+        {% if current_user.is_authenticated %}
+            <span class="user-badge">{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Sign in</a>
+        {% endif %}
+    </div>
+</header>
+
+<main class="history-main">
+
+    {% if available_years %}
+    <form class="history-selector" id="history-selector" method="GET" action="{{ url_for('history') }}">
+        <label>
+            Year
+            <select name="year" id="year-select">
+                {% for y in available_years %}
+                <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            Week
+            <select name="week" id="week-select">
+                {% for w in available_weeks_by_year[year] %}
+                <option value="{{ w }}" {% if w == week %}selected{% endif %}>Week {{ w }}</option>
+                {% endfor %}
+            </select>
+        </label>
+    </form>
+
+    <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-btn active" data-pos="ALL">All</button>
+        <button class="filter-btn pos-qb-btn"  data-pos="QB">QB</button>
+        <button class="filter-btn pos-rb-btn"  data-pos="RB">RB</button>
+        <button class="filter-btn pos-wr-btn"  data-pos="WR">WR</button>
+        <button class="filter-btn pos-te-btn"  data-pos="TE">TE</button>
+        <button class="filter-btn pos-dst-btn" data-pos="DST">DST</button>
+    </div>
+
+    {% if players %}
+    <div class="table-wrapper">
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th data-col="position">POS</th>
+                    <th data-col="name">Player</th>
+                    <th data-col="team">Team</th>
+                    <th data-col="opponent">Opp</th>
+                    <th data-col="salary"        class="right">Salary</th>
+                    <th data-col="proj"          class="right">Proj Pts</th>
+                    <th data-col="actual"        class="right">Actual Pts</th>
+                    <th data-col="value"         class="right">Value</th>
+                    <th data-col="pass_yds"      class="right">Pass Yds</th>
+                    <th data-col="pass_td"       class="right">Pass TD</th>
+                    <th data-col="rush_yds"      class="right">Rush Yds</th>
+                    <th data-col="rush_td"       class="right">Rush TD</th>
+                    <th data-col="rec"           class="right">Rec</th>
+                    <th data-col="rec_yds"       class="right">Rec Yds</th>
+                    <th data-col="rec_td"        class="right">Rec TD</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in players %}
+                {% set actual = p['dk_pts_pfr_reported'] if p['dk_pts_pfr_reported'] is not none else p['dk_pts_computed'] %}
+                <tr class="pos-{{ p['position'] | lower }}">
+                    <td class="pos-badge">{{ p['position'] }}</td>
+                    <td class="player-name">{{ p['name'] }}</td>
+                    <td>{{ p['team'] }}</td>
+                    <td>{{ p['opponent'] }}</td>
+                    <td class="right">${{ "{:,}".format(p['dk_salary']) if p['dk_salary'] else '—' }}</td>
+                    <td class="right">{{ "%.1f"|format(p['projected_pts']) if p['projected_pts'] else '—' }}</td>
+                    <td class="right">{{ "%.1f"|format(actual) if actual is not none else '—' }}</td>
+                    <td class="right">
+                        {% if p['dk_salary'] and actual is not none %}
+                            {{ "%.2f"|format(actual / (p['dk_salary'] / 1000)) }}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="right">{{ p['pass_yds'] if p['pass_yds'] is not none else '—' }}</td>
+                    <td class="right">{{ p['pass_td']  if p['pass_td']  is not none else '—' }}</td>
+                    <td class="right">{{ p['rush_yds'] if p['rush_yds'] is not none else '—' }}</td>
+                    <td class="right">{{ p['rush_td']  if p['rush_td']  is not none else '—' }}</td>
+                    <td class="right">{{ p['rec']      if p['rec']      is not none else '—' }}</td>
+                    <td class="right">{{ p['rec_yds']  if p['rec_yds']  is not none else '—' }}</td>
+                    <td class="right">{{ p['rec_td']   if p['rec_td']   is not none else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No players found for Week {{ week }}, {{ year }}.</p>
+    {% endif %}
+
+    {% else %}
+    <p class="empty-state">
+        No historical data loaded yet. Run <code>flask load-history</code> after scraping.
+    </p>
+    {% endif %}
+
+</main>
+
+<script>
+    window.HISTORY_WEEKS_BY_YEAR = {{ available_weeks_by_year | tojson }};
+</script>
+<script src="{{ url_for('static', filename='history.js') }}"></script>
+
+</body>
+</html>
