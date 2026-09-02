@@ -41,6 +41,13 @@
     const tbody = table.querySelector("tbody");
     const rows  = Array.from(tbody.querySelectorAll("tr.player-row"));
 
+    // Quick lookup for "is this player's game already locked?" — used
+    // by the slot clear button, which doesn't have direct row access.
+    const lockedByName = {};
+    rows.forEach(function (row) {
+        lockedByName[row.dataset.name] = row.dataset.locked === "true";
+    });
+
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
@@ -86,13 +93,17 @@
         const p        = lineup[slotKey];
 
         if (p) {
+            const isLockedIn = !!lockedByName[p.name];
             el.classList.remove("empty");
             el.classList.add("filled");
+            if (isLockedIn) el.classList.add("locked-in");
             el.innerHTML = "<span class='slot-name'>" + p.name + "</span>"
-                         + "<span class='slot-salary'>$" + p.salary.toLocaleString() + "</span>";
-            if (clearBtn) clearBtn.classList.remove("hidden");
+                         + "<span class='slot-salary'>$" + p.salary.toLocaleString() + "</span>"
+                         + (isLockedIn ? "<span class='slot-lock-icon' title='Game already started'>🔒</span>" : "");
+            if (clearBtn) clearBtn.classList.toggle("hidden", isLockedIn);
         } else {
             el.classList.remove("filled");
+            el.classList.remove("locked-in");
             el.classList.add("empty");
             const eligible = SLOTS[slotKey].eligible.join(" / ");
             el.innerHTML = "<span class='slot-empty-text'>" + eligible + "</span>";
@@ -103,15 +114,16 @@
     function refreshRowStates() {
         const used = totalSalary();
         rows.forEach(function (row) {
-            const name    = row.dataset.name;
-            const pos     = row.dataset.position.toUpperCase();
-            const salary  = parseInt(row.dataset.salary, 10) || 0;
-            const inTeam  = playerInLineup(name);
-            const hasSlot = findOpenSlot(pos) !== null;
-            const fits    = (used + salary) <= CAP;
+            const name     = row.dataset.name;
+            const pos      = row.dataset.position.toUpperCase();
+            const salary   = parseInt(row.dataset.salary, 10) || 0;
+            const isLocked = row.dataset.locked === "true";
+            const inTeam   = playerInLineup(name);
+            const hasSlot  = findOpenSlot(pos) !== null;
+            const fits     = (used + salary) <= CAP;
 
             row.classList.toggle("selected",   inTeam);
-            row.classList.toggle("ineligible", !inTeam && (!hasSlot || !fits));
+            row.classList.toggle("ineligible", !inTeam && (isLocked || !hasSlot || !fits));
         });
     }
 
@@ -186,13 +198,19 @@
     // ------------------------------------------------------------------
     rows.forEach(function (row) {
         row.addEventListener("click", function () {
-            const name   = row.dataset.name;
-            const pos    = row.dataset.position.toUpperCase();
-            const salary = parseInt(row.dataset.salary, 10) || 0;
-            const proj   = parseFloat(row.dataset.proj)     || 0;
+            const name    = row.dataset.name;
+            const pos     = row.dataset.position.toUpperCase();
+            const salary  = parseInt(row.dataset.salary, 10) || 0;
+            const proj    = parseFloat(row.dataset.proj)     || 0;
+            const isLocked = row.dataset.locked === "true";
 
-            // Remove if already in lineup
+            // Remove if already in lineup — but NOT if this player's game
+            // has already kicked off. A player who was already locked
+            // into a slot (from an earlier submission, before their game
+            // started) stays there; the rest of the lineup can still be
+            // edited freely for games that haven't started yet.
             if (playerInLineup(name)) {
+                if (isLocked) return;   // can't remove a locked-in pick
                 for (const key of Object.keys(lineup)) {
                     if (lineup[key] && lineup[key].name === name) {
                         lineup[key] = null;
@@ -204,6 +222,9 @@
                 updateSubmitButton();
                 return;
             }
+
+            // Can't newly select a player whose game has already started
+            if (isLocked) return;
 
             // If not logged in, clicking does nothing (submit btn is replaced by login link)
             // We still allow building a lineup visually — they just can't submit
@@ -226,6 +247,8 @@
         btn.addEventListener("click", function (e) {
             e.stopPropagation();
             const key = btn.dataset.slot;
+            const current = lineup[key];
+            if (current && lockedByName[current.name]) return;   // can't clear a locked-in pick
             lineup[key] = null;
             renderSlot(key);
             updateSalaryDisplay();

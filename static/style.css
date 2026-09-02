@@ -647,3 +647,41 @@ header {
 #standings-table tbody tr:nth-child(1) .total-col { color: #ffd700; }
 #standings-table tbody tr:nth-child(2) .total-col { color: #c0c0c0; }
 #standings-table tbody tr:nth-child(3) .total-col { color: #cd7f32; }
+
+/* -----------------------------------------------------------------------
+   Per-game lineup lock (once a team's kickoff has passed)
+   ----------------------------------------------------------------------- */
+
+#slate-table tbody tr.locked-row {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+#slate-table tbody tr.locked-row.selected {
+    /* A locked player already in the user's lineup stays fully visible
+       and clearly marked, rather than dimmed like an unavailable row */
+    opacity: 1;
+}
+
+.locked-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    background: #4a1a1a;
+    border: 1px solid var(--over-cap);
+    border-radius: 4px;
+    color: var(--over-cap);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    vertical-align: middle;
+}
+
+.slot-player.locked-in {
+    border-color: var(--over-cap);
+}
+
+.slot-lock-icon {
+    margin-left: 4px;
+    font-size: 0.75rem;
+}

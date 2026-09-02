@@ -1,4 +1,5 @@
 import os
+import sys
 from dotenv import load_dotenv
 load_dotenv()
 import json
@@ -73,6 +74,15 @@ def normalize_name(name: str) -> str:
     """
     import re
     return re.sub(r"[^a-z0-9 ]", "", name.lower().strip())
+
+
+# DST names in submitted lineups can be in wildly different formats
+# depending on which salary source was used at ingest time ("HOU DST",
+# "Seahawks", "SEA", "Kansas City Chiefs", ...) — normalize_team()
+# resolves any of these to the canonical PFR abbreviation used in
+# hist_dst_stats.team.
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'scrapers'))
+from team_mapping import normalize_team
 
 ROSTER_SLOTS = {
     "QB":   (["QB"],                     1),
@@ -251,6 +261,44 @@ def _auto_init():
                 ON hist_player_stats (pfr_id)
         """)
         _migrate_hist_player_stats_pg(cur)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS hist_dst_stats (
+                id                SERIAL PRIMARY KEY,
+                year              INTEGER NOT NULL,
+                week              INTEGER NOT NULL,
+                team              TEXT    NOT NULL,
+                opponent          TEXT,
+                points_allowed    INTEGER,
+                dk_pts            REAL,
+                sack              INTEGER,
+                interception      INTEGER,
+                fumble_rec        INTEGER,
+                forced_fumble     INTEGER,
+                def_td            INTEGER,
+                safety            INTEGER,
+                special_teams_td  INTEGER,
+                UNIQUE(year, week, team)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_hist_dst_lookup
+                ON hist_dst_stats (year, week, team)
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS game_schedule (
+                id                SERIAL PRIMARY KEY,
+                year              INTEGER NOT NULL,
+                week              INTEGER NOT NULL,
+                team              TEXT    NOT NULL,
+                opponent          TEXT,
+                kickoff           TIMESTAMP NOT NULL,
+                UNIQUE(year, week, team)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_game_schedule_lookup
+                ON game_schedule (year, week, team)
+        """)
     else:
         # SQLite: executescript for multi-statement init
         conn.executescript("""
@@ -342,6 +390,36 @@ def _auto_init():
                 ON hist_player_stats (year, week, name_normalized);
             CREATE INDEX IF NOT EXISTS idx_hist_stats_player
                 ON hist_player_stats (pfr_id);
+            CREATE TABLE IF NOT EXISTS hist_dst_stats (
+                id                INTEGER PRIMARY KEY AUTOINCREMENT,
+                year              INTEGER NOT NULL,
+                week              INTEGER NOT NULL,
+                team              TEXT    NOT NULL,
+                opponent          TEXT,
+                points_allowed    INTEGER,
+                dk_pts            REAL,
+                sack              INTEGER,
+                interception      INTEGER,
+                fumble_rec        INTEGER,
+                forced_fumble     INTEGER,
+                def_td            INTEGER,
+                safety            INTEGER,
+                special_teams_td  INTEGER,
+                UNIQUE(year, week, team)
+            );
+            CREATE INDEX IF NOT EXISTS idx_hist_dst_lookup
+                ON hist_dst_stats (year, week, team);
+            CREATE TABLE IF NOT EXISTS game_schedule (
+                id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                year     INTEGER NOT NULL,
+                week     INTEGER NOT NULL,
+                team     TEXT    NOT NULL,
+                opponent TEXT,
+                kickoff  TEXT    NOT NULL,
+                UNIQUE(year, week, team)
+            );
+            CREATE INDEX IF NOT EXISTS idx_game_schedule_lookup
+                ON game_schedule (year, week, team);
         """)
         _migrate_hist_player_stats_sqlite(conn)
 
@@ -570,6 +648,245 @@ def ingest_slate_command(week, year, slate_id):
     click.echo(f"Done. {inserted} players upserted, {skipped} skipped.")
 
 
+@app.cli.command("load-weekly-salary")
+@click.argument("csv_path", type=click.Path(exists=True))
+@click.option("--year", default=None, type=int,
+              help="Season year. Auto-detected from the filename when possible "
+                   "(DFF: date in filename; RotoWire: parent folder named by year). "
+                   "Required as a fallback if it can't be detected.")
+def load_weekly_salary_command(csv_path, year):
+    """
+    Load one week's salary file directly into the live `players` table —
+    the same table the Slate page (/) reads from — bypassing RotoWire's
+    live scraper entirely.
+
+    Use this once the real season starts and RotoWire's free-tier 1-player
+    cap makes `flask ingest-slate` unusable: download the week's salary
+    export from DraftKings or Daily Fantasy Fuel (DFF), then run this
+    command directly against that file.
+
+    Reuses the exact same format-detection and parsing logic already
+    proven in scrapers/combine_dk_salaries.py (which builds the
+    historical hist_dfs_salaries data) — both DFF and RotoWire export
+    formats are auto-detected and handled. Week comes from the file's
+    own `week` column, same as year detection.
+
+    Examples:
+        flask load-weekly-salary "C:\\Downloads\\DFF_NFL_cheatsheet_2026-09-10.csv"
+        flask load-weekly-salary "C:\\Downloads\\Week1_salaries_rotowire.csv" --year 2026
+    """
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'scrapers'))
+    from combine_dk_salaries import detect_format, year_from_path, parse_dff, parse_rotowire
+    import pandas as pd
+
+    try:
+        df = pd.read_csv(csv_path, encoding='utf-8', on_bad_lines='skip')
+    except UnicodeDecodeError:
+        df = pd.read_csv(csv_path, encoding='latin-1', on_bad_lines='skip')
+
+    if df.empty:
+        click.echo("ERROR: file is empty.", err=True)
+        return
+
+    fmt = detect_format(df)
+    if fmt == 'unknown':
+        click.echo(f"ERROR: unrecognised file format. Columns found: {list(df.columns)[:8]}...", err=True)
+        click.echo("Expected either a DFF cheatsheet export or a RotoWire export.", err=True)
+        return
+
+    detected_year = year_from_path(csv_path, year)
+    if detected_year is None:
+        click.echo("ERROR: couldn't determine the season year from the filename "
+                   "or folder. Pass it explicitly with --year.", err=True)
+        return
+
+    click.echo(f"Format detected: {fmt}")
+    click.echo(f"Year: {detected_year}")
+
+    parsed = parse_dff(df, detected_year) if fmt == 'dff' else parse_rotowire(df, detected_year)
+
+    if parsed.empty:
+        click.echo("ERROR: no valid player rows parsed from this file.", err=True)
+        return
+
+    week = int(parsed['week'].iloc[0])
+    click.echo(f"Week: {week}")
+    click.echo(f"Players parsed: {len(parsed)}")
+
+    conn = _connect()
+    cur  = _cursor(conn)
+    inserted = skipped = 0
+
+    for _, p in parsed.iterrows():
+        try:
+            # parse_dff/parse_rotowire's dk_salary maps to our `salary`
+            # column; projected_pts maps directly; ownership_pct too.
+            row_data = (
+                week, detected_year, p['name'], p['position'], p['team'], p['opponent'],
+                int(p['dk_salary']) if pd.notna(p['dk_salary']) else 0,
+                float(p['projected_pts']) if pd.notna(p['projected_pts']) else None,
+                float(p['ownership_pct']) if pd.notna(p['ownership_pct']) else None,
+            )
+            if _is_postgres():
+                cur.execute("""
+                    INSERT INTO players
+                        (week, year, name, position, team, opponent, salary, projected_pts, ownership_pct)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (week, year, name) DO UPDATE SET
+                        position      = EXCLUDED.position,
+                        team          = EXCLUDED.team,
+                        opponent      = EXCLUDED.opponent,
+                        salary        = EXCLUDED.salary,
+                        projected_pts = EXCLUDED.projected_pts,
+                        ownership_pct = EXCLUDED.ownership_pct
+                """, row_data)
+            else:
+                cur.execute("""
+                    INSERT INTO players
+                        (week, year, name, position, team, opponent, salary, projected_pts, ownership_pct)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(week, year, name) DO UPDATE SET
+                        position      = excluded.position,
+                        team          = excluded.team,
+                        opponent      = excluded.opponent,
+                        salary        = excluded.salary,
+                        projected_pts = excluded.projected_pts,
+                        ownership_pct = excluded.ownership_pct
+                """, row_data)
+            inserted += 1
+        except Exception as e:
+            click.echo(f"  Skipped {p.get('name', '?')}: {e}")
+            skipped += 1
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    click.echo(f"Done. {inserted} players upserted, {skipped} skipped.")
+    click.echo(f"Slate page will now show Week {week}, {detected_year}.")
+
+
+@app.cli.command("load-schedule")
+@click.option("--year", required=True, type=int)
+def load_schedule_command(year):
+    """
+    Load kickoff times for one season into game_schedule — required for
+    the per-game lineup lock: once a specific game's kickoff time has
+    passed, players in that game can no longer be newly selected, and
+    if already in a submitted lineup, can't be swapped out.
+
+    Reads data/schedules/{year}_schedule_df.csv (same format as the
+    historical schedule files: year, week, team_1, team_2, date, time,
+    location, boxscore_url). team_2 is the home team, team_1 is away
+    (matching the convention already established in scrape_pfr.py's
+    load_schedule()). Both teams get a row with the same kickoff
+    datetime, keyed by their own team so a simple (year, week, team)
+    lookup works for any player regardless of which side of the
+    matchup they're on.
+
+    Team names are resolved to canonical abbreviations via
+    team_mapping.normalize_team() — reusing the same normalizer DST
+    matching already depends on, so this stays consistent with the
+    rest of the system.
+    """
+    import pandas as pd
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'scrapers'))
+    from team_mapping import normalize_team
+
+    EASTERN = ZoneInfo("America/New_York")
+
+    path = os.path.join('data', 'schedules', f'{year}_schedule_df.csv')
+    if not os.path.exists(path):
+        click.echo(f"ERROR: schedule file not found: {path}", err=True)
+        click.echo(f"Place a {year}_schedule_df.csv in data/schedules/ "
+                   f"(same format as historical years) before running this.", err=True)
+        return
+
+    df = pd.read_csv(path)
+    df = df[df['team_2'] != 'BYE']
+    df = df[df['week'].apply(lambda w: str(w).isdigit() or isinstance(w, int))]
+    df['week'] = df['week'].astype(int)
+    df = df[df['week'] <= 18]
+
+    conn = _connect()
+    cur  = _cursor(conn)
+    inserted = skipped = 0
+
+    for _, row in df.iterrows():
+        try:
+            date_str = str(row['date']).strip()
+            time_str = str(row.get('time', '') or '').strip()
+            if not date_str or date_str.lower() == 'nan':
+                skipped += 1
+                continue
+
+            # Combine date + time into one datetime. Handle a missing/
+            # unparseable time gracefully by defaulting to midnight —
+            # better to have an approximate kickoff than none at all,
+            # though this will be slightly wrong for that one game.
+            dt = pd.to_datetime(date_str, errors='coerce')
+            if pd.isna(dt):
+                skipped += 1
+                continue
+
+            if time_str and time_str.lower() != 'nan':
+                time_parsed = pd.to_datetime(time_str, errors='coerce')
+                if pd.notna(time_parsed):
+                    dt = dt.replace(hour=time_parsed.hour, minute=time_parsed.minute)
+
+            # NFL kickoff times in the schedule CSV are US Eastern
+            # (e.g. "8:20PM" means 8:20PM ET, not UTC). Localize
+            # properly — using zoneinfo rather than a fixed UTC offset
+            # so Daylight Saving transitions (EDT in Sept, EST in Dec)
+            # are handled correctly — then convert to UTC for storage,
+            # so the slate route's datetime.utcnow() comparison is
+            # always correct regardless of what timezone is "now".
+            dt_eastern = dt.to_pydatetime().replace(tzinfo=EASTERN)
+            dt_utc     = dt_eastern.astimezone(ZoneInfo("UTC"))
+            kickoff    = dt_utc.strftime('%Y-%m-%d %H:%M:%S')
+
+            # team_2 = home, team_1 = away (matches scrape_pfr.py's load_schedule())
+            home_team = normalize_team(str(row['team_2']))
+            away_team = normalize_team(str(row['team_1']))
+
+            if not home_team or not away_team:
+                click.echo(f"  WARNING: couldn't normalize team(s) in row: "
+                          f"{row['team_1']} @ {row['team_2']}")
+                skipped += 1
+                continue
+
+            for team, opponent in [(home_team, away_team), (away_team, home_team)]:
+                ph = _ph(5)
+                if _is_postgres():
+                    cur.execute(f"""
+                        INSERT INTO game_schedule (year, week, team, opponent, kickoff)
+                        VALUES ({ph})
+                        ON CONFLICT (year, week, team) DO UPDATE SET
+                            opponent = EXCLUDED.opponent,
+                            kickoff  = EXCLUDED.kickoff
+                    """, (year, int(row['week']), team, opponent, kickoff))
+                else:
+                    cur.execute(f"""
+                        INSERT INTO game_schedule (year, week, team, opponent, kickoff)
+                        VALUES ({ph})
+                        ON CONFLICT(year, week, team) DO UPDATE SET
+                            opponent = excluded.opponent,
+                            kickoff  = excluded.kickoff
+                    """, (year, int(row['week']), team, opponent, kickoff))
+                inserted += 1
+
+        except Exception as e:
+            click.echo(f"  Skipped row ({row.get('team_1','?')} @ {row.get('team_2','?')}): {e}")
+            skipped += 1
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    click.echo(f"Done. {inserted} team-week kickoff rows loaded, {skipped} skipped.")
+
+
 @app.cli.command("load-history")
 @click.option("--data-dir", default="data",
               help="Folder containing the .csv.gz files produced by the scrapers.")
@@ -604,6 +921,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
         "dk_salaries_2022_2025.csv.gz",
     ]
     STATS_FILE = "pfr_player_stats_2014_2025.csv.gz"
+    DST_FILE   = "hist_dst_stats.csv.gz"
 
     conn = _connect()
     cur  = _cursor(conn)
@@ -784,6 +1102,71 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             inserted += len(batch)
         return inserted
 
+    def upsert_dst_stats(df: pd.DataFrame):
+        if _is_postgres():
+            sql = f"""
+                INSERT INTO hist_dst_stats
+                    (year, week, team, opponent, points_allowed, dk_pts,
+                     sack, interception, fumble_rec, forced_fumble,
+                     def_td, safety, special_teams_td)
+                VALUES ({_ph(13)})
+                ON CONFLICT (year, week, team) DO UPDATE SET
+                    opponent         = EXCLUDED.opponent,
+                    points_allowed   = EXCLUDED.points_allowed,
+                    dk_pts           = EXCLUDED.dk_pts,
+                    sack             = EXCLUDED.sack,
+                    interception     = EXCLUDED.interception,
+                    fumble_rec       = EXCLUDED.fumble_rec,
+                    forced_fumble    = EXCLUDED.forced_fumble,
+                    def_td           = EXCLUDED.def_td,
+                    safety           = EXCLUDED.safety,
+                    special_teams_td = EXCLUDED.special_teams_td
+            """
+        else:
+            sql = f"""
+                INSERT INTO hist_dst_stats
+                    (year, week, team, opponent, points_allowed, dk_pts,
+                     sack, interception, fumble_rec, forced_fumble,
+                     def_td, safety, special_teams_td)
+                VALUES ({_ph(13)})
+                ON CONFLICT(year, week, team) DO UPDATE SET
+                    opponent         = excluded.opponent,
+                    points_allowed   = excluded.points_allowed,
+                    dk_pts           = excluded.dk_pts,
+                    sack             = excluded.sack,
+                    interception     = excluded.interception,
+                    fumble_rec       = excluded.fumble_rec,
+                    forced_fumble    = excluded.forced_fumble,
+                    def_td           = excluded.def_td,
+                    safety           = excluded.safety,
+                    special_teams_td = excluded.special_teams_td
+            """
+
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            batch.append((
+                int(r.get('year')), int(r.get('week')), str(r.get('team', '')),
+                _none_if_nan(r.get('opponent')),
+                _int_or_none(r.get('points_allowed')),
+                _float_or_none(r.get('dk_pts')),
+                _int_or_none(r.get('sack')), _int_or_none(r.get('interception')),
+                _int_or_none(r.get('fumble_rec')), _int_or_none(r.get('forced_fumble')),
+                _int_or_none(r.get('def_td')), _int_or_none(r.get('safety')),
+                _int_or_none(r.get('special_teams_td')),
+            ))
+            if len(batch) >= batch_size:
+                cur.executemany(sql, batch)
+                conn.commit()
+                inserted += len(batch)
+                click.echo(f"    ...{inserted:,} rows loaded")
+                batch = []
+        if batch:
+            cur.executemany(sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
     # --- Load salary files ---
     if not stats_only:
         for filename in SALARY_FILES:
@@ -807,6 +1190,17 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             df = pd.read_csv(path)
             count = upsert_stats(df)
             click.echo(f"  Done: {count:,} rows from {STATS_FILE}")
+
+    # --- Load DST (team defense) stats file ---
+    if not salaries_only:
+        path = os.path.join(data_dir, DST_FILE)
+        if not os.path.exists(path):
+            click.echo(f"Skip (not found): {path}")
+        else:
+            click.echo(f"Loading {path} ...")
+            df = pd.read_csv(path)
+            count = upsert_dst_stats(df)
+            click.echo(f"  Done: {count:,} rows from {DST_FILE}")
 
     cur.close()
     conn.close()
@@ -941,12 +1335,38 @@ def slate():
                 "submitted_at": str(row2["submitted_at"]),
             }
 
+    # Per-game lock: once a team's kickoff has passed, their players
+    # can no longer be newly selected. Build a set of locked team
+    # abbreviations for the current week so the template/JS can mark
+    # individual rows rather than locking the whole slate at once.
+    locked_teams = set()
+    if current_week:
+        from datetime import datetime, timezone
+        schedule_rows = db_fetchall(
+            f"SELECT team, kickoff FROM game_schedule WHERE year = {_ph()} AND week = {_ph()}",
+            (current_year, current_week)
+        )
+        now = datetime.now(timezone.utc)
+        for r in schedule_rows:
+            kickoff = r["kickoff"]
+            if isinstance(kickoff, str):
+                try:
+                    # Stored as UTC (naive string, 'YYYY-MM-DD HH:MM:SS')
+                    kickoff = datetime.fromisoformat(kickoff).replace(tzinfo=timezone.utc)
+                except ValueError:
+                    continue
+            elif kickoff is not None and kickoff.tzinfo is None:
+                kickoff = kickoff.replace(tzinfo=timezone.utc)
+            if kickoff and now >= kickoff:
+                locked_teams.add(r["team"])
+
     return render_template("slate.html",
                            players=players,
                            week=current_week,
                            year=current_year,
                            salary_cap=SALARY_CAP,
-                           existing_lineup=existing_lineup)
+                           existing_lineup=existing_lineup,
+                           locked_teams=sorted(locked_teams))
 
 
 @app.route("/history")
@@ -1096,13 +1516,16 @@ def standings():
     lineups for a season, with each participant's single lowest-scoring
     week dropped (per the original challenge rules).
 
-    Scoring: each lineup's 9 players are matched against
-    hist_player_stats by (year, week, name_normalized) — the same join
-    History/Player pages use. A week only counts toward standings once
-    ALL 9 of a lineup's players have a matched stats row; otherwise
-    that week is marked "pending" and excluded from the totals rather
-    than showing a misleadingly low partial score (e.g. games not yet
-    played, or this week's data not yet scraped).
+    Scoring: each lineup's 9 players are matched against real results —
+    offensive players against hist_player_stats by (year, week,
+    name_normalized), and the DST pick against hist_dst_stats by
+    (year, week, team), since DST names come in inconsistent formats
+    across salary sources ("HOU DST", "Seahawks", "SEA", ...) and are
+    resolved via team_mapping.normalize_team() rather than plain name
+    matching. A week only counts toward standings once ALL 9 of a
+    lineup's players (8 offense + 1 DST) have a matched result;
+    otherwise that week is marked "pending" and excluded from the
+    totals rather than showing a misleadingly low partial score.
     """
     ph = _ph()
 
@@ -1125,15 +1548,25 @@ def standings():
         ORDER BY submitter, week
     """, (sel_year,))
 
-    # Collect every distinct name_normalized we need to score, in one
-    # batch, rather than one query per player per lineup.
+    # Collect every distinct name we need to score, split by whether it's
+    # a DST pick (matched by team abbreviation) or an offensive player
+    # (matched by normalized name) — DST names come in wildly different
+    # formats depending on which salary source was used ("HOU DST",
+    # "Seahawks", "SEA", ...), so they need team_mapping's normalizer
+    # rather than the plain name join offense players use.
     all_names = set()
+    all_teams = set()
     parsed_lineups = []   # (submitter, week, [player dicts])
     for row in lineup_rows:
         players = json.loads(row["lineup_json"])
         parsed_lineups.append((row["submitter"], row["week"], players))
         for p in players:
-            all_names.add(normalize_name(p["name"]))
+            if (p.get("slot") or "").upper() == "DST":
+                team = normalize_team(p["name"])
+                if team:
+                    all_teams.add(team)
+            else:
+                all_names.add(normalize_name(p["name"]))
 
     # Pull actual scores for every (week, name_normalized) this season
     # in one query, then look them up in memory below.
@@ -1147,6 +1580,17 @@ def standings():
         for r in stats_rows:
             scores_by_week_name[(r["week"], r["name_normalized"])] = r["actual_pts"]
 
+    # Same for DST picks, keyed by (week, team) instead of name
+    scores_by_week_team = {}   # (week, team) -> dk_pts
+    if all_teams:
+        dst_rows = db_fetchall(f"""
+            SELECT week, team, dk_pts
+            FROM hist_dst_stats
+            WHERE year = {ph}
+        """, (sel_year,))
+        for r in dst_rows:
+            scores_by_week_team[(r["week"], r["team"])] = r["dk_pts"]
+
     # Score every lineup; a week only counts if all 9 players matched
     by_submitter = {}   # submitter -> {week: score}
     weeks_seen = set()
@@ -1155,8 +1599,13 @@ def standings():
         total = 0.0
         matched = 0
         for p in players:
-            key = (week, normalize_name(p["name"]))
-            pts = scores_by_week_name.get(key)
+            if (p.get("slot") or "").upper() == "DST":
+                team = normalize_team(p["name"])
+                pts  = scores_by_week_team.get((week, team)) if team else None
+            else:
+                key = (week, normalize_name(p["name"]))
+                pts = scores_by_week_name.get(key)
+
             if pts is not None:
                 total += pts
                 matched += 1
@@ -1225,6 +1674,66 @@ def submit_lineup():
     for slot, (_, max_count) in ROSTER_SLOTS.items():
         if slot_counts.get(slot, 0) != max_count:
             return jsonify(ok=False, error=f"Need exactly {max_count} {slot} slot(s) filled.")
+
+    # --- Per-game lock enforcement (the real security boundary — the
+    # client-side lock in slate.js is just a UX convenience; someone
+    # could bypass it entirely by calling this endpoint directly, so
+    # every check here is re-verified from scratch server-side). ---
+    from datetime import datetime, timezone
+
+    schedule_rows = db_fetchall(
+        f"SELECT team, kickoff FROM game_schedule WHERE year = {_ph()} AND week = {_ph()}",
+        (year, week)
+    )
+    now = datetime.now(timezone.utc)
+    locked_teams = set()
+    for r in schedule_rows:
+        kickoff = r["kickoff"]
+        if isinstance(kickoff, str):
+            try:
+                kickoff = datetime.fromisoformat(kickoff).replace(tzinfo=timezone.utc)
+            except ValueError:
+                continue
+        elif kickoff is not None and kickoff.tzinfo is None:
+            kickoff = kickoff.replace(tzinfo=timezone.utc)
+        if kickoff and now >= kickoff:
+            locked_teams.add(r["team"])
+
+    # A player already in the submitter's PREVIOUS lineup for this
+    # week is allowed to stay even if their game has since started —
+    # only a NEW selection of an already-locked player is rejected.
+    previous_names = set()
+    if locked_teams:   # skip the lookup entirely if nothing's locked yet
+        prev_row = db_fetchone(
+            f"SELECT lineup_json FROM lineups WHERE week = {_ph()} AND year = {_ph()} AND submitter = {_ph()}",
+            (week, year, submitter)
+        )
+        if prev_row:
+            previous_names = {p["name"] for p in json.loads(prev_row["lineup_json"])}
+
+    if locked_teams:
+        # Look up each offensive player's team from the live slate table
+        team_rows = db_fetchall(
+            f"SELECT name, team FROM players WHERE week = {_ph()} AND year = {_ph()}",
+            (week, year)
+        )
+        team_by_name = {r["name"]: r["team"] for r in team_rows}
+
+        for p in players:
+            name = p["name"]
+            if name in previous_names:
+                continue   # already locked in from a prior submission — allowed
+
+            if (p.get("slot") or "").upper() == "DST":
+                team = normalize_team(name)
+            else:
+                team = team_by_name.get(name)
+
+            if team and team in locked_teams:
+                return jsonify(ok=False, error=(
+                    f"{name}'s game has already started — you can't select "
+                    f"a new player from a game that's already kicked off."
+                ))
 
     try:
         if _is_postgres():

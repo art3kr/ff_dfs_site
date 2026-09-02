@@ -66,14 +66,20 @@
                 </thead>
                 <tbody>
                     {% for p in players %}
-                    <tr class="player-row pos-{{ p['position'] | lower }}"
+                    {% set is_locked = p['team'] in locked_teams %}
+                    <tr class="player-row pos-{{ p['position'] | lower }}{% if is_locked %} locked-row{% endif %}"
                         data-name="{{ p['name'] }}"
                         data-position="{{ p['position'] }}"
                         data-salary="{{ p['salary'] }}"
-                        data-proj="{{ p['projected_pts'] }}">
+                        data-proj="{{ p['projected_pts'] }}"
+                        data-team="{{ p['team'] }}"
+                        data-locked="{{ 'true' if is_locked else 'false' }}">
 
                         <td class="pos-badge">{{ p['position'] }}</td>
-                        <td class="player-name">{{ p['name'] }}</td>
+                        <td class="player-name">
+                            {{ p['name'] }}
+                            {% if is_locked %}<span class="locked-badge">LOCKED</span>{% endif %}
+                        </td>
                         <td>{{ p['team'] }}</td>
                         <td>{{ p['opponent'] }}</td>
                         <td class="right">${{ "{:,}".format(p['salary']) if p['salary'] else '—' }}</td>
@@ -189,7 +195,8 @@
         year:            {{ year | tojson }},
         salaryCap:       {{ salary_cap | tojson }},
         isAuthenticated: {{ current_user.is_authenticated | tojson }},
-        existingLineup:  {{ (existing_lineup.players if existing_lineup else none) | tojson }}
+        existingLineup:  {{ (existing_lineup.players if existing_lineup else none) | tojson }},
+        lockedTeams:     {{ locked_teams | tojson }}
     };
 </script>
 <script src="{{ url_for('static', filename='slate.js') }}"></script>

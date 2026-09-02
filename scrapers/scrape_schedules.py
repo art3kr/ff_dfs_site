@@ -98,6 +98,8 @@ def scrape_schedule(year: int) -> pd.DataFrame:
         locations = []
         boxscore_urls = []
 
+        missing_time_count = 0
+
         '''iterate through html table of games'''
         for index, row in enumerate(table.find('tbody').find_all('tr')):
             
@@ -127,7 +129,26 @@ def scrape_schedule(year: int) -> pd.DataFrame:
                     date = row.find('td', attrs={'data-stat': 'game_date'}).get_text()
                 except:
                     date = ''
-                time = row.find('td', attrs={'data-stat': 'gametime'}).get_text()
+
+                # FIX: gametime wasn't wrapped in its own try/except, so a
+                # missing time (very common for games PFR hasn't scheduled
+                # an exact kickoff for yet, which is exactly the situation
+                # before a season starts) silently dropped the ENTIRE row
+                # via the outer bare except below — losing the matchup,
+                # date, and boxscore_url too, not just the time. Now a
+                # missing time just leaves 'time' blank and the row is
+                # still kept, so Week 1 (usually scheduled early) doesn't
+                # have to wait on Week 18 (often finalized much later,
+                # especially with flex scheduling) before any of it is
+                # usable.
+                try:
+                    time = row.find('td', attrs={'data-stat': 'gametime'}).get_text()
+                    if not time.strip():
+                        missing_time_count += 1
+                except:
+                    time = ''
+                    missing_time_count += 1
+
                 location = row.find('td', attrs={'data-stat': 'game_location'}).get_text()  
 
                 '''location is not just @, but the city'''
@@ -148,6 +169,12 @@ def scrape_schedule(year: int) -> pd.DataFrame:
 
             except:
                 pass
+
+        if missing_time_count:
+            print(f"  NOTE: {missing_time_count} game(s) have no kickoff time yet "
+                  f"(PFR hasn't scheduled/announced it) — those rows were still "
+                  f"kept with time='', but flask load-schedule will skip them "
+                  f"until you re-run this scraper closer to those weeks.")
 
         '''create dataframe from lists'''
         schedule_df = pd.DataFrame(
