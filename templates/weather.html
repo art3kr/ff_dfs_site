@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF DFS Challenge — Weather{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>FF DFS Challenge</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('slate') }}" class="nav-link">Slate</a>
+            <a href="{{ url_for('history') }}" class="nav-link">History</a>
+            <a href="{{ url_for('standings') }}" class="nav-link">Standings</a>
+            <a href="{{ url_for('weather') }}" class="nav-link active">Weather</a>
+            <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
+        </nav>
+        {% if year %}
+            <p class="subtitle">Week {{ week }}, {{ year }} &mdash; Game Conditions</p>
+        {% else %}
+            <p class="subtitle">No weather data loaded yet.</p>
+        {% endif %}
+    </div>
+    <div class="header-right">
+        {% if current_user.is_authenticated %}
+            <span class="user-badge">{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Sign in</a>
+        {% endif %}
+    </div>
+</header>
+
+<main class="history-main">
+
+    {% if available_years %}
+    <div class="page-controls">
+        <form class="history-selector" id="history-selector" method="GET" action="{{ url_for('weather') }}">
+            <label>
+                Year
+                <select name="year" id="year-select">
+                    {% for y in available_years %}
+                    <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                Week
+                <select name="week" id="week-select">
+                    {% for w in available_weeks_by_year[year] %}
+                    <option value="{{ w }}" {% if w == week %}selected{% endif %}>Week {{ w }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </form>
+        <a href="{{ url_for('download_csv', data_type='weather', year=year, week=week) }}" class="download-btn">⬇ Download CSV</a>
+    </div>
+
+    {% if games %}
+    <div class="table-wrapper">
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th data-col="matchup">Matchup</th>
+                    <th data-col="date">Date/Time</th>
+                    <th data-col="status">Status</th>
+                    <th data-col="score" class="right">Score</th>
+                    <th data-col="temp"  class="right">Temp</th>
+                    <th data-col="condition">Condition</th>
+                    <th data-col="wind"  class="right">Wind</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for g in games %}
+                <tr>
+                    <td class="player-name">{{ g['away_team'] | upper }} @ {{ g['home_team'] | upper }}</td>
+                    <td>{{ g['game_date'] or '—' }}</td>
+                    <td>{{ g['status'] or '—' }}</td>
+                    <td class="right">
+                        {% if g['away_score'] is not none and g['home_score'] is not none %}
+                            {{ g['away_score'] }} - {{ g['home_score'] }}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="right">{{ g['temp_f'] ~ '°F' if g['temp_f'] is not none else '—' }}</td>
+                    <td>{{ g['condition'] or '—' }}</td>
+                    <td class="right">
+                        {% if g['wind_mph'] is not none %}
+                            {{ g['wind_mph'] }} mph {{ g['wind_direction'] or '' }}
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No games found for Week {{ week }}, {{ year }}.</p>
+    {% endif %}
+
+    {% else %}
+    <p class="empty-state">
+        No weather data loaded yet. Run <code>scrapers/scrape_weekly_weather.py</code> then <code>flask load-history</code>.
+    </p>
+    {% endif %}
+
+</main>
+
+<script>
+    window.HISTORY_WEEKS_BY_YEAR = {{ available_weeks_by_year | tojson }};
+</script>
+<script src="{{ url_for('static', filename='history.js') }}"></script>
+
+</body>
+</html>

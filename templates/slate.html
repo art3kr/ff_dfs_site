@@ -15,6 +15,8 @@
             <a href="{{ url_for('slate') }}" class="nav-link active">Slate</a>
             <a href="{{ url_for('history') }}" class="nav-link">History</a>
             <a href="{{ url_for('standings') }}" class="nav-link">Standings</a>
+            <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
+            <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
         </nav>
         {% if week %}
             <p class="subtitle">Week {{ week }}, {{ year }} &mdash; DraftKings Thu-Mon Slate</p>
@@ -39,14 +41,19 @@
     ================================================================ -->
     <main class="slate-panel">
 
-        <div class="filter-bar">
-            <span class="filter-label">Filter:</span>
-            <button class="filter-btn active" data-pos="ALL">All</button>
-            <button class="filter-btn pos-qb-btn"  data-pos="QB">QB</button>
-            <button class="filter-btn pos-rb-btn"  data-pos="RB">RB</button>
-            <button class="filter-btn pos-wr-btn"  data-pos="WR">WR</button>
-            <button class="filter-btn pos-te-btn"  data-pos="TE">TE</button>
-            <button class="filter-btn pos-dst-btn" data-pos="DST">DST</button>
+        <div class="page-controls">
+            <div class="filter-bar">
+                <span class="filter-label">Filter:</span>
+                <button class="filter-btn active" data-pos="ALL">All</button>
+                <button class="filter-btn pos-qb-btn"  data-pos="QB">QB</button>
+                <button class="filter-btn pos-rb-btn"  data-pos="RB">RB</button>
+                <button class="filter-btn pos-wr-btn"  data-pos="WR">WR</button>
+                <button class="filter-btn pos-te-btn"  data-pos="TE">TE</button>
+                <button class="filter-btn pos-dst-btn" data-pos="DST">DST</button>
+            </div>
+            {% if week %}
+            <a href="{{ url_for('download_csv', data_type='slate', year=year, week=week) }}" class="download-btn">⬇ Download CSV</a>
+            {% endif %}
         </div>
 
         {% if players %}
@@ -58,6 +65,7 @@
                         <th data-col="name">Player</th>
                         <th data-col="team">Team</th>
                         <th data-col="opponent">Opp</th>
+                        <th data-col="kickoff">Kickoff</th>
                         <th data-col="salary"        class="right">Salary</th>
                         <th data-col="projected_pts" class="right">Proj Pts</th>
                         <th data-col="ownership_pct" class="right">Proj Own%</th>
@@ -82,6 +90,7 @@
                         </td>
                         <td>{{ p['team'] }}</td>
                         <td>{{ p['opponent'] }}</td>
+                        <td class="kickoff-cell">{{ kickoff_by_team.get(p['team'], '—') }}</td>
                         <td class="right">${{ "{:,}".format(p['salary']) if p['salary'] else '—' }}</td>
                         <td class="right">{{ "%.1f"|format(p['projected_pts']) if p['projected_pts'] else '—' }}</td>
                         <td class="right">{{ "%.1f"|format(p['ownership_pct']) if p['ownership_pct'] else '—' }}%</td>
@@ -196,7 +205,8 @@
         salaryCap:       {{ salary_cap | tojson }},
         isAuthenticated: {{ current_user.is_authenticated | tojson }},
         existingLineup:  {{ (existing_lineup.players if existing_lineup else none) | tojson }},
-        lockedTeams:     {{ locked_teams | tojson }}
+        lockedTeams:     {{ locked_teams | tojson }},
+        kickoffByTeam:   {{ kickoff_by_team | tojson }}
     };
 </script>
 <script src="{{ url_for('static', filename='slate.js') }}"></script>

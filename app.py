@@ -299,6 +299,57 @@ def _auto_init():
             CREATE INDEX IF NOT EXISTS idx_game_schedule_lookup
                 ON game_schedule (year, week, team)
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS hist_weather (
+                id             SERIAL PRIMARY KEY,
+                year           INTEGER NOT NULL,
+                week           INTEGER NOT NULL,
+                game_date      TEXT,
+                status         TEXT,
+                away_team      TEXT    NOT NULL,
+                home_team      TEXT    NOT NULL,
+                away_score     INTEGER,
+                home_score     INTEGER,
+                temp_f         INTEGER,
+                condition      TEXT,
+                wind_mph       INTEGER,
+                wind_direction TEXT,
+                UNIQUE(year, week, away_team, home_team)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_hist_weather_lookup
+                ON hist_weather (year, week)
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS hist_game_info (
+                id           SERIAL PRIMARY KEY,
+                boxscore_url TEXT    NOT NULL,
+                year         INTEGER NOT NULL,
+                week         INTEGER NOT NULL,
+                team_home    TEXT,
+                team_away    TEXT,
+                date         TEXT,
+                time         TEXT,
+                location     TEXT,
+                won_toss     TEXT,
+                won_ot_toss  TEXT,
+                roof         TEXT,
+                surface      TEXT,
+                duration     TEXT,
+                attendance   TEXT,
+                vegas_line   TEXT,
+                over_under   TEXT,
+                temp         TEXT,
+                humidity     TEXT,
+                wind         TEXT,
+                UNIQUE(boxscore_url)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_hist_game_info_lookup
+                ON hist_game_info (year, week)
+        """)
     else:
         # SQLite: executescript for multi-statement init
         conn.executescript("""
@@ -420,6 +471,49 @@ def _auto_init():
             );
             CREATE INDEX IF NOT EXISTS idx_game_schedule_lookup
                 ON game_schedule (year, week, team);
+            CREATE TABLE IF NOT EXISTS hist_weather (
+                id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                year           INTEGER NOT NULL,
+                week           INTEGER NOT NULL,
+                game_date      TEXT,
+                status         TEXT,
+                away_team      TEXT    NOT NULL,
+                home_team      TEXT    NOT NULL,
+                away_score     INTEGER,
+                home_score     INTEGER,
+                temp_f         INTEGER,
+                condition      TEXT,
+                wind_mph       INTEGER,
+                wind_direction TEXT,
+                UNIQUE(year, week, away_team, home_team)
+            );
+            CREATE INDEX IF NOT EXISTS idx_hist_weather_lookup
+                ON hist_weather (year, week);
+            CREATE TABLE IF NOT EXISTS hist_game_info (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                boxscore_url TEXT    NOT NULL,
+                year         INTEGER NOT NULL,
+                week         INTEGER NOT NULL,
+                team_home    TEXT,
+                team_away    TEXT,
+                date         TEXT,
+                time         TEXT,
+                location     TEXT,
+                won_toss     TEXT,
+                won_ot_toss  TEXT,
+                roof         TEXT,
+                surface      TEXT,
+                duration     TEXT,
+                attendance   TEXT,
+                vegas_line   TEXT,
+                over_under   TEXT,
+                temp         TEXT,
+                humidity     TEXT,
+                wind         TEXT,
+                UNIQUE(boxscore_url)
+            );
+            CREATE INDEX IF NOT EXISTS idx_hist_game_info_lookup
+                ON hist_game_info (year, week);
         """)
         _migrate_hist_player_stats_sqlite(conn)
 
@@ -922,6 +1016,8 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
     ]
     STATS_FILE = "pfr_player_stats_2014_2025.csv.gz"
     DST_FILE   = "hist_dst_stats.csv.gz"
+    WEATHER_FILE   = "weekly_weather.csv.gz"
+    GAME_INFO_FILE = "pfr_game_info_2014_2025.csv.gz"
 
     conn = _connect()
     cur  = _cursor(conn)
@@ -1167,6 +1263,144 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             inserted += len(batch)
         return inserted
 
+    def upsert_weather(df: pd.DataFrame):
+        if _is_postgres():
+            sql = f"""
+                INSERT INTO hist_weather
+                    (year, week, game_date, status, away_team, home_team,
+                     away_score, home_score, temp_f, condition, wind_mph, wind_direction)
+                VALUES ({_ph(12)})
+                ON CONFLICT (year, week, away_team, home_team) DO UPDATE SET
+                    game_date      = EXCLUDED.game_date,
+                    status         = EXCLUDED.status,
+                    away_score     = EXCLUDED.away_score,
+                    home_score     = EXCLUDED.home_score,
+                    temp_f         = EXCLUDED.temp_f,
+                    condition      = EXCLUDED.condition,
+                    wind_mph       = EXCLUDED.wind_mph,
+                    wind_direction = EXCLUDED.wind_direction
+            """
+        else:
+            sql = f"""
+                INSERT INTO hist_weather
+                    (year, week, game_date, status, away_team, home_team,
+                     away_score, home_score, temp_f, condition, wind_mph, wind_direction)
+                VALUES ({_ph(12)})
+                ON CONFLICT(year, week, away_team, home_team) DO UPDATE SET
+                    game_date      = excluded.game_date,
+                    status         = excluded.status,
+                    away_score     = excluded.away_score,
+                    home_score     = excluded.home_score,
+                    temp_f         = excluded.temp_f,
+                    condition      = excluded.condition,
+                    wind_mph       = excluded.wind_mph,
+                    wind_direction = excluded.wind_direction
+            """
+
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            batch.append((
+                int(r.get('year')), int(r.get('week')),
+                _none_if_nan(r.get('game_date')), _none_if_nan(r.get('status')),
+                str(r.get('away_team', '')), str(r.get('home_team', '')),
+                _int_or_none(r.get('away_score')), _int_or_none(r.get('home_score')),
+                _int_or_none(r.get('temp_f')), _none_if_nan(r.get('condition')),
+                _int_or_none(r.get('wind_mph')), _none_if_nan(r.get('wind_direction')),
+            ))
+            if len(batch) >= batch_size:
+                cur.executemany(sql, batch)
+                conn.commit()
+                inserted += len(batch)
+                click.echo(f"    ...{inserted:,} rows loaded")
+                batch = []
+        if batch:
+            cur.executemany(sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
+    def upsert_game_info(df: pd.DataFrame):
+        if _is_postgres():
+            sql = f"""
+                INSERT INTO hist_game_info
+                    (boxscore_url, year, week, team_home, team_away, date, time, location,
+                     won_toss, won_ot_toss, roof, surface, duration, attendance,
+                     vegas_line, over_under, temp, humidity, wind)
+                VALUES ({_ph(19)})
+                ON CONFLICT (boxscore_url) DO UPDATE SET
+                    year         = EXCLUDED.year,
+                    week         = EXCLUDED.week,
+                    team_home    = EXCLUDED.team_home,
+                    team_away    = EXCLUDED.team_away,
+                    date         = EXCLUDED.date,
+                    time         = EXCLUDED.time,
+                    location     = EXCLUDED.location,
+                    won_toss     = EXCLUDED.won_toss,
+                    won_ot_toss  = EXCLUDED.won_ot_toss,
+                    roof         = EXCLUDED.roof,
+                    surface      = EXCLUDED.surface,
+                    duration     = EXCLUDED.duration,
+                    attendance   = EXCLUDED.attendance,
+                    vegas_line   = EXCLUDED.vegas_line,
+                    over_under   = EXCLUDED.over_under,
+                    temp         = EXCLUDED.temp,
+                    humidity     = EXCLUDED.humidity,
+                    wind         = EXCLUDED.wind
+            """
+        else:
+            sql = f"""
+                INSERT INTO hist_game_info
+                    (boxscore_url, year, week, team_home, team_away, date, time, location,
+                     won_toss, won_ot_toss, roof, surface, duration, attendance,
+                     vegas_line, over_under, temp, humidity, wind)
+                VALUES ({_ph(19)})
+                ON CONFLICT(boxscore_url) DO UPDATE SET
+                    year         = excluded.year,
+                    week         = excluded.week,
+                    team_home    = excluded.team_home,
+                    team_away    = excluded.team_away,
+                    date         = excluded.date,
+                    time         = excluded.time,
+                    location     = excluded.location,
+                    won_toss     = excluded.won_toss,
+                    won_ot_toss  = excluded.won_ot_toss,
+                    roof         = excluded.roof,
+                    surface      = excluded.surface,
+                    duration     = excluded.duration,
+                    attendance   = excluded.attendance,
+                    vegas_line   = excluded.vegas_line,
+                    over_under   = excluded.over_under,
+                    temp         = excluded.temp,
+                    humidity     = excluded.humidity,
+                    wind         = excluded.wind
+            """
+
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            batch.append((
+                str(r.get('boxscore_url', '')), int(r.get('year')), int(r.get('week')),
+                _none_if_nan(r.get('team_home')), _none_if_nan(r.get('team_away')),
+                _none_if_nan(r.get('date')), _none_if_nan(r.get('time')), _none_if_nan(r.get('location')),
+                _none_if_nan(r.get('won_toss')), _none_if_nan(r.get('won_ot_toss')),
+                _none_if_nan(r.get('roof')), _none_if_nan(r.get('surface')),
+                _none_if_nan(r.get('duration')), _none_if_nan(r.get('attendance')),
+                _none_if_nan(r.get('vegas_line')), _none_if_nan(r.get('over_under')),
+                _none_if_nan(r.get('temp')), _none_if_nan(r.get('humidity')), _none_if_nan(r.get('wind')),
+            ))
+            if len(batch) >= batch_size:
+                cur.executemany(sql, batch)
+                conn.commit()
+                inserted += len(batch)
+                click.echo(f"    ...{inserted:,} rows loaded")
+                batch = []
+        if batch:
+            cur.executemany(sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
     # --- Load salary files ---
     if not stats_only:
         for filename in SALARY_FILES:
@@ -1190,6 +1424,28 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             df = pd.read_csv(path)
             count = upsert_stats(df)
             click.echo(f"  Done: {count:,} rows from {STATS_FILE}")
+
+    # --- Load weather file ---
+    if not salaries_only:
+        path = os.path.join(data_dir, WEATHER_FILE)
+        if not os.path.exists(path):
+            click.echo(f"Skip (not found): {path}")
+        else:
+            click.echo(f"Loading {path} ...")
+            df = pd.read_csv(path)
+            count = upsert_weather(df)
+            click.echo(f"  Done: {count:,} rows from {WEATHER_FILE}")
+
+    # --- Load game info file ---
+    if not salaries_only:
+        path = os.path.join(data_dir, GAME_INFO_FILE)
+        if not os.path.exists(path):
+            click.echo(f"Skip (not found): {path}")
+        else:
+            click.echo(f"Loading {path} ...")
+            df = pd.read_csv(path)
+            count = upsert_game_info(df)
+            click.echo(f"  Done: {count:,} rows from {GAME_INFO_FILE}")
 
     # --- Load DST (team defense) stats file ---
     if not salaries_only:
@@ -1340,8 +1596,12 @@ def slate():
     # abbreviations for the current week so the template/JS can mark
     # individual rows rather than locking the whole slate at once.
     locked_teams = set()
+    kickoff_by_team = {}   # team -> friendly display string, e.g. "Thu 8:20 PM ET"
     if current_week:
         from datetime import datetime, timezone
+        from zoneinfo import ZoneInfo
+        EASTERN = ZoneInfo("America/New_York")
+
         schedule_rows = db_fetchall(
             f"SELECT team, kickoff FROM game_schedule WHERE year = {_ph()} AND week = {_ph()}",
             (current_year, current_week)
@@ -1357,8 +1617,17 @@ def slate():
                     continue
             elif kickoff is not None and kickoff.tzinfo is None:
                 kickoff = kickoff.replace(tzinfo=timezone.utc)
-            if kickoff and now >= kickoff:
+
+            if not kickoff:
+                continue
+
+            if now >= kickoff:
                 locked_teams.add(r["team"])
+
+            # Friendly display string for every team, locked or not, so
+            # players can plan around upcoming locks proactively.
+            kickoff_eastern = kickoff.astimezone(EASTERN)
+            kickoff_by_team[r["team"]] = kickoff_eastern.strftime("%a %I:%M %p ET").lstrip("0").replace(" 0", " ")
 
     return render_template("slate.html",
                            players=players,
@@ -1366,7 +1635,8 @@ def slate():
                            year=current_year,
                            salary_cap=SALARY_CAP,
                            existing_lineup=existing_lineup,
-                           locked_teams=sorted(locked_teams))
+                           locked_teams=sorted(locked_teams),
+                           kickoff_by_team=kickoff_by_team)
 
 
 @app.route("/history")
@@ -1507,6 +1777,189 @@ def player_career(pfr_id):
     return render_template("player.html",
                            found=True, pfr_id=pfr_id, name=info["name"],
                            games=games, career_totals=totals)
+
+
+@app.route("/weather")
+def weather():
+    """
+    Weekly weather browser — past and upcoming game conditions, same
+    year/week selector pattern as /history.
+    """
+    year_week_rows = db_fetchall(
+        "SELECT DISTINCT year, week FROM hist_weather ORDER BY year DESC, week DESC"
+    )
+    available = [(r["year"], r["week"]) for r in year_week_rows]
+
+    if not available:
+        return render_template("weather.html", games=[], year=None, week=None,
+                               available_years=[], available_weeks_by_year={})
+
+    req_year = request.args.get("year", type=int)
+    req_week = request.args.get("week", type=int)
+
+    if req_year is None or req_week is None or (req_year, req_week) not in available:
+        sel_year, sel_week = available[0]
+    else:
+        sel_year, sel_week = req_year, req_week
+
+    available_years = sorted({y for y, w in available}, reverse=True)
+    available_weeks_by_year = {}
+    for y, w in available:
+        available_weeks_by_year.setdefault(y, []).append(w)
+    for y in available_weeks_by_year:
+        available_weeks_by_year[y].sort()
+
+    ph = _ph()
+    games = db_fetchall(f"""
+        SELECT game_date, status, away_team, home_team, away_score, home_score,
+               temp_f, condition, wind_mph, wind_direction
+        FROM hist_weather
+        WHERE year = {ph} AND week = {ph}
+        ORDER BY away_team
+    """, (sel_year, sel_week))
+
+    return render_template("weather.html",
+                           games=games, year=sel_year, week=sel_week,
+                           available_years=available_years,
+                           available_weeks_by_year=available_weeks_by_year)
+
+
+@app.route("/gameinfo")
+def gameinfo():
+    """
+    Weekly game info browser — roof, surface, weather, vegas lines,
+    attendance, etc., same year/week selector pattern as /history.
+    """
+    year_week_rows = db_fetchall(
+        "SELECT DISTINCT year, week FROM hist_game_info ORDER BY year DESC, week DESC"
+    )
+    available = [(r["year"], r["week"]) for r in year_week_rows]
+
+    if not available:
+        return render_template("gameinfo.html", games=[], year=None, week=None,
+                               available_years=[], available_weeks_by_year={})
+
+    req_year = request.args.get("year", type=int)
+    req_week = request.args.get("week", type=int)
+
+    if req_year is None or req_week is None or (req_year, req_week) not in available:
+        sel_year, sel_week = available[0]
+    else:
+        sel_year, sel_week = req_year, req_week
+
+    available_years = sorted({y for y, w in available}, reverse=True)
+    available_weeks_by_year = {}
+    for y, w in available:
+        available_weeks_by_year.setdefault(y, []).append(w)
+    for y in available_weeks_by_year:
+        available_weeks_by_year[y].sort()
+
+    ph = _ph()
+    games = db_fetchall(f"""
+        SELECT team_home, team_away, date, time, location, won_toss, won_ot_toss,
+               roof, surface, duration, attendance, vegas_line, over_under,
+               temp, humidity, wind
+        FROM hist_game_info
+        WHERE year = {ph} AND week = {ph}
+        ORDER BY team_home
+    """, (sel_year, sel_week))
+
+    return render_template("gameinfo.html",
+                           games=games, year=sel_year, week=sel_week,
+                           available_years=available_years,
+                           available_weeks_by_year=available_weeks_by_year)
+
+
+@app.route("/download/<data_type>")
+def download_csv(data_type):
+    """
+    CSV export for the History, Slate, Weather, and Game Info tabs.
+    Respects the same ?year=&week= filters the page itself is showing,
+    so "download" always matches exactly what's currently on screen.
+    """
+    import csv
+    import io
+
+    year = request.args.get("year", type=int)
+    week = request.args.get("week", type=int)
+    ph = _ph(2)
+
+    if data_type == "slate":
+        rows = db_fetchall("""
+            SELECT week, year, name, position, team, opponent, salary, projected_pts, ownership_pct
+            FROM players WHERE week = %s AND year = %s
+        """ if _is_postgres() else """
+            SELECT week, year, name, position, team, opponent, salary, projected_pts, ownership_pct
+            FROM players WHERE week = ? AND year = ?
+        """, (week, year))
+        filename = f"slate_week{week}_{year}.csv"
+
+    elif data_type == "history":
+        rows = db_fetchall(f"""
+            SELECT s.year, s.week, s.name, s.position, s.team, s.opponent,
+                   s.dk_salary, s.projected_pts, s.ownership_pct,
+                   hp.dk_pts AS dk_pts_computed, hp.dk_pts_pfr_reported,
+                   hp.pass_yds, hp.pass_td, hp.pass_int,
+                   hp.rush_att, hp.rush_yds, hp.rush_td,
+                   hp.rec, hp.rec_yds, hp.rec_td
+            FROM hist_dfs_salaries s
+            LEFT JOIN hist_player_stats hp
+                ON hp.year = s.year AND hp.week = s.week AND hp.name_normalized = s.name_normalized
+            WHERE s.year = {_ph()} AND s.week = {_ph()}
+        """, (year, week))
+        filename = f"history_week{week}_{year}.csv"
+
+    elif data_type == "weather":
+        rows = db_fetchall(f"""
+            SELECT year, week, game_date, status, away_team, home_team,
+                   away_score, home_score, temp_f, condition, wind_mph, wind_direction
+            FROM hist_weather WHERE year = {_ph()} AND week = {_ph()}
+        """, (year, week))
+        filename = f"weather_week{week}_{year}.csv"
+
+    elif data_type == "gameinfo":
+        rows = db_fetchall(f"""
+            SELECT year, week, team_home, team_away, date, time, location,
+                   won_toss, won_ot_toss, roof, surface, duration, attendance,
+                   vegas_line, over_under, temp, humidity, wind
+            FROM hist_game_info WHERE year = {_ph()} AND week = {_ph()}
+        """, (year, week))
+        filename = f"gameinfo_week{week}_{year}.csv"
+
+    elif data_type == "player":
+        pfr_id = request.args.get("pfr_id", "")
+        if not pfr_id:
+            return jsonify(error="Missing pfr_id"), 400
+        rows = db_fetchall(f"""
+            SELECT hp.year, hp.week, hp.team, hp.opponent,
+                   hp.dk_pts, hp.dk_pts_pfr_reported,
+                   hp.pass_cmp, hp.pass_att, hp.pass_yds, hp.pass_td, hp.pass_int,
+                   hp.rush_att, hp.rush_yds, hp.rush_td,
+                   hp.rec_tgt, hp.rec, hp.rec_yds, hp.rec_td,
+                   s.dk_salary
+            FROM hist_player_stats hp
+            LEFT JOIN hist_dfs_salaries s
+                ON s.year = hp.year AND s.week = hp.week AND s.name_normalized = hp.name_normalized
+            WHERE hp.pfr_id = {_ph()}
+            ORDER BY hp.year DESC, hp.week DESC
+        """, (pfr_id,))
+        filename = f"player_{pfr_id}.csv"
+
+    else:
+        return jsonify(error="Unknown data type"), 404
+
+    output = io.StringIO()
+    if rows:
+        writer = csv.DictWriter(output, fieldnames=list(rows[0].keys()))
+        writer.writeheader()
+        for r in rows:
+            writer.writerow(dict(r))
+
+    return app.response_class(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 
 @app.route("/standings")

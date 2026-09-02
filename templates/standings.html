@@ -15,6 +15,8 @@
             <a href="{{ url_for('slate') }}" class="nav-link">Slate</a>
             <a href="{{ url_for('history') }}" class="nav-link">History</a>
             <a href="{{ url_for('standings') }}" class="nav-link active">Standings</a>
+            <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
+            <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
         </nav>
         {% if year %}
             <p class="subtitle">{{ year }} Season &mdash; Lowest week dropped</p>

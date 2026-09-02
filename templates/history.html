@@ -15,6 +15,8 @@
             <a href="{{ url_for('slate') }}" class="nav-link">Slate</a>
             <a href="{{ url_for('history') }}" class="nav-link active">History</a>
             <a href="{{ url_for('standings') }}" class="nav-link">Standings</a>
+            <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
+            <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
         </nav>
         {% if year %}
             <p class="subtitle">Week {{ week }}, {{ year }} &mdash; Salary + Results</p>
@@ -35,24 +37,27 @@
 <main class="history-main">
 
     {% if available_years %}
-    <form class="history-selector" id="history-selector" method="GET" action="{{ url_for('history') }}">
-        <label>
-            Year
-            <select name="year" id="year-select">
-                {% for y in available_years %}
-                <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
-                {% endfor %}
-            </select>
-        </label>
-        <label>
-            Week
-            <select name="week" id="week-select">
-                {% for w in available_weeks_by_year[year] %}
-                <option value="{{ w }}" {% if w == week %}selected{% endif %}>Week {{ w }}</option>
-                {% endfor %}
-            </select>
-        </label>
-    </form>
+    <div class="page-controls">
+        <form class="history-selector" id="history-selector" method="GET" action="{{ url_for('history') }}">
+            <label>
+                Year
+                <select name="year" id="year-select">
+                    {% for y in available_years %}
+                    <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                Week
+                <select name="week" id="week-select">
+                    {% for w in available_weeks_by_year[year] %}
+                    <option value="{{ w }}" {% if w == week %}selected{% endif %}>Week {{ w }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </form>
+        <a href="{{ url_for('download_csv', data_type='history', year=year, week=week) }}" class="download-btn">⬇ Download CSV</a>
+    </div>
 
     <div class="filter-bar">
         <span class="filter-label">Filter:</span>
