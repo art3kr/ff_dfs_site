@@ -724,3 +724,13 @@ header {
     border-color: var(--accent);
     color: #fff;
 }
+
+.download-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.download-btn-all {
+    background: transparent;
+    border-style: dashed;
+}

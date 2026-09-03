@@ -56,7 +56,10 @@
                 </select>
             </label>
         </form>
-        <a href="{{ url_for('download_csv', data_type='weather', year=year, week=week) }}" class="download-btn">⬇ Download CSV</a>
+        <div class="download-actions">
+            <a href="{{ url_for('download_csv', data_type='weather', year=year, week=week) }}" class="download-btn">⬇ Download This Week</a>
+            <a href="{{ url_for('download_csv', data_type='weather') }}" class="download-btn download-btn-all">⬇ Download All Data</a>
+        </div>
     </div>
 
     {% if games %}

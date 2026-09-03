@@ -156,6 +156,19 @@ def _auto_init():
 
     if _is_postgres():
         # Postgres: SERIAL for autoincrement, NOW() for timestamp
+        #
+        # This whole branch runs on EVERY startup of app.py — including
+        # every gunicorn worker on Render, and any CLI command (like
+        # `flask load-history`) run alongside the live app. If two of
+        # these happen to start at the same moment, they can both try
+        # to ALTER/CREATE the same tables simultaneously and deadlock
+        # (confirmed: this actually happened — "DeadlockDetected...
+        # AccessExclusiveLock on relation... blocked by process...").
+        # An advisory lock makes the second process simply WAIT for the
+        # first to finish instead of colliding — after which its own
+        # CREATE TABLE IF NOT EXISTS / ADD COLUMN IF NOT EXISTS calls
+        # are safe no-ops, since the first process already did the work.
+        cur.execute("SELECT pg_advisory_lock(918273645)")
         cur.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id       SERIAL PRIMARY KEY,
@@ -350,6 +363,7 @@ def _auto_init():
             CREATE INDEX IF NOT EXISTS idx_hist_game_info_lookup
                 ON hist_game_info (year, week)
         """)
+        cur.execute("SELECT pg_advisory_unlock(918273645)")
     else:
         # SQLite: executescript for multi-statement init
         conn.executescript("""
@@ -1874,8 +1888,13 @@ def gameinfo():
 def download_csv(data_type):
     """
     CSV export for the History, Slate, Weather, and Game Info tabs.
-    Respects the same ?year=&week= filters the page itself is showing,
-    so "download" always matches exactly what's currently on screen.
+
+    If ?year=&week= are both given, respects that filter — matching
+    exactly what the page itself is showing for that week.
+
+    If neither is given (history/weather/gameinfo only), returns the
+    FULL dataset across every year/week — for downloading everything at
+    once instead of one week at a time.
     """
     import csv
     import io
@@ -1895,36 +1914,69 @@ def download_csv(data_type):
         filename = f"slate_week{week}_{year}.csv"
 
     elif data_type == "history":
-        rows = db_fetchall(f"""
-            SELECT s.year, s.week, s.name, s.position, s.team, s.opponent,
-                   s.dk_salary, s.projected_pts, s.ownership_pct,
-                   hp.dk_pts AS dk_pts_computed, hp.dk_pts_pfr_reported,
-                   hp.pass_yds, hp.pass_td, hp.pass_int,
-                   hp.rush_att, hp.rush_yds, hp.rush_td,
-                   hp.rec, hp.rec_yds, hp.rec_td
-            FROM hist_dfs_salaries s
-            LEFT JOIN hist_player_stats hp
-                ON hp.year = s.year AND hp.week = s.week AND hp.name_normalized = s.name_normalized
-            WHERE s.year = {_ph()} AND s.week = {_ph()}
-        """, (year, week))
-        filename = f"history_week{week}_{year}.csv"
+        if year is not None and week is not None:
+            rows = db_fetchall(f"""
+                SELECT s.year, s.week, s.name, s.position, s.team, s.opponent,
+                       s.dk_salary, s.projected_pts, s.ownership_pct,
+                       hp.dk_pts AS dk_pts_computed, hp.dk_pts_pfr_reported,
+                       hp.pass_yds, hp.pass_td, hp.pass_int,
+                       hp.rush_att, hp.rush_yds, hp.rush_td,
+                       hp.rec, hp.rec_yds, hp.rec_td
+                FROM hist_dfs_salaries s
+                LEFT JOIN hist_player_stats hp
+                    ON hp.year = s.year AND hp.week = s.week AND hp.name_normalized = s.name_normalized
+                WHERE s.year = {_ph()} AND s.week = {_ph()}
+            """, (year, week))
+            filename = f"history_week{week}_{year}.csv"
+        else:
+            # No filter given — full dataset across every year/week we have.
+            rows = db_fetchall("""
+                SELECT s.year, s.week, s.name, s.position, s.team, s.opponent,
+                       s.dk_salary, s.projected_pts, s.ownership_pct,
+                       hp.dk_pts AS dk_pts_computed, hp.dk_pts_pfr_reported,
+                       hp.pass_yds, hp.pass_td, hp.pass_int,
+                       hp.rush_att, hp.rush_yds, hp.rush_td,
+                       hp.rec, hp.rec_yds, hp.rec_td
+                FROM hist_dfs_salaries s
+                LEFT JOIN hist_player_stats hp
+                    ON hp.year = s.year AND hp.week = s.week AND hp.name_normalized = s.name_normalized
+                ORDER BY s.year, s.week
+            """)
+            filename = "history_all.csv"
 
     elif data_type == "weather":
-        rows = db_fetchall(f"""
-            SELECT year, week, game_date, status, away_team, home_team,
-                   away_score, home_score, temp_f, condition, wind_mph, wind_direction
-            FROM hist_weather WHERE year = {_ph()} AND week = {_ph()}
-        """, (year, week))
-        filename = f"weather_week{week}_{year}.csv"
+        if year is not None and week is not None:
+            rows = db_fetchall(f"""
+                SELECT year, week, game_date, status, away_team, home_team,
+                       away_score, home_score, temp_f, condition, wind_mph, wind_direction
+                FROM hist_weather WHERE year = {_ph()} AND week = {_ph()}
+            """, (year, week))
+            filename = f"weather_week{week}_{year}.csv"
+        else:
+            rows = db_fetchall("""
+                SELECT year, week, game_date, status, away_team, home_team,
+                       away_score, home_score, temp_f, condition, wind_mph, wind_direction
+                FROM hist_weather ORDER BY year, week
+            """)
+            filename = "weather_all.csv"
 
     elif data_type == "gameinfo":
-        rows = db_fetchall(f"""
-            SELECT year, week, team_home, team_away, date, time, location,
-                   won_toss, won_ot_toss, roof, surface, duration, attendance,
-                   vegas_line, over_under, temp, humidity, wind
-            FROM hist_game_info WHERE year = {_ph()} AND week = {_ph()}
-        """, (year, week))
-        filename = f"gameinfo_week{week}_{year}.csv"
+        if year is not None and week is not None:
+            rows = db_fetchall(f"""
+                SELECT year, week, team_home, team_away, date, time, location,
+                       won_toss, won_ot_toss, roof, surface, duration, attendance,
+                       vegas_line, over_under, temp, humidity, wind
+                FROM hist_game_info WHERE year = {_ph()} AND week = {_ph()}
+            """, (year, week))
+            filename = f"gameinfo_week{week}_{year}.csv"
+        else:
+            rows = db_fetchall("""
+                SELECT year, week, team_home, team_away, date, time, location,
+                       won_toss, won_ot_toss, roof, surface, duration, attendance,
+                       vegas_line, over_under, temp, humidity, wind
+                FROM hist_game_info ORDER BY year, week
+            """)
+            filename = "gameinfo_all.csv"
 
     elif data_type == "player":
         pfr_id = request.args.get("pfr_id", "")
