@@ -129,20 +129,32 @@ HIST_PLAYER_STATS_MIGRATIONS = [
     ("punt_ret_td",         "INTEGER"),
 ]
 
+GAME_SCHEDULE_MIGRATIONS = [
+    ("home_away", "TEXT"),
+]
+
+
+def _migrate_table_pg(cur, table_name, migrations):
+    """Add any missing columns to `table_name` on Postgres."""
+    for col, coltype in migrations:
+        cur.execute(f"ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS {col} {coltype}")
+
+
+def _migrate_table_sqlite(conn, table_name, migrations):
+    """Add any missing columns to `table_name` on SQLite (no IF NOT
+    EXISTS support for ADD COLUMN, so check existing columns first)."""
+    existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table_name})")}
+    for col, coltype in migrations:
+        if col not in existing:
+            conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {col} {coltype}")
+
 
 def _migrate_hist_player_stats_pg(cur):
-    """Add any missing hist_player_stats columns on Postgres."""
-    for col, coltype in HIST_PLAYER_STATS_MIGRATIONS:
-        cur.execute(f"ALTER TABLE hist_player_stats ADD COLUMN IF NOT EXISTS {col} {coltype}")
+    _migrate_table_pg(cur, "hist_player_stats", HIST_PLAYER_STATS_MIGRATIONS)
 
 
 def _migrate_hist_player_stats_sqlite(conn):
-    """Add any missing hist_player_stats columns on SQLite (no IF NOT
-    EXISTS support for ADD COLUMN, so check existing columns first)."""
-    existing = {row[1] for row in conn.execute("PRAGMA table_info(hist_player_stats)")}
-    for col, coltype in HIST_PLAYER_STATS_MIGRATIONS:
-        if col not in existing:
-            conn.execute(f"ALTER TABLE hist_player_stats ADD COLUMN {col} {coltype}")
+    _migrate_table_sqlite(conn, "hist_player_stats", HIST_PLAYER_STATS_MIGRATIONS)
 
 
 def _auto_init():
@@ -304,6 +316,7 @@ def _auto_init():
                 week              INTEGER NOT NULL,
                 team              TEXT    NOT NULL,
                 opponent          TEXT,
+                home_away         TEXT,
                 kickoff           TIMESTAMP NOT NULL,
                 UNIQUE(year, week, team)
             )
@@ -312,6 +325,7 @@ def _auto_init():
             CREATE INDEX IF NOT EXISTS idx_game_schedule_lookup
                 ON game_schedule (year, week, team)
         """)
+        _migrate_table_pg(cur, "game_schedule", GAME_SCHEDULE_MIGRATIONS)
         cur.execute("""
             CREATE TABLE IF NOT EXISTS hist_weather (
                 id             SERIAL PRIMARY KEY,
@@ -475,12 +489,13 @@ def _auto_init():
             CREATE INDEX IF NOT EXISTS idx_hist_dst_lookup
                 ON hist_dst_stats (year, week, team);
             CREATE TABLE IF NOT EXISTS game_schedule (
-                id       INTEGER PRIMARY KEY AUTOINCREMENT,
-                year     INTEGER NOT NULL,
-                week     INTEGER NOT NULL,
-                team     TEXT    NOT NULL,
-                opponent TEXT,
-                kickoff  TEXT    NOT NULL,
+                id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                year      INTEGER NOT NULL,
+                week      INTEGER NOT NULL,
+                team      TEXT    NOT NULL,
+                opponent  TEXT,
+                home_away TEXT,
+                kickoff   TEXT    NOT NULL,
                 UNIQUE(year, week, team)
             );
             CREATE INDEX IF NOT EXISTS idx_game_schedule_lookup
@@ -530,6 +545,7 @@ def _auto_init():
                 ON hist_game_info (year, week);
         """)
         _migrate_hist_player_stats_sqlite(conn)
+        _migrate_table_sqlite(conn, "game_schedule", GAME_SCHEDULE_MIGRATIONS)
 
     conn.commit()
 
@@ -965,24 +981,26 @@ def load_schedule_command(year):
                 skipped += 1
                 continue
 
-            for team, opponent in [(home_team, away_team), (away_team, home_team)]:
-                ph = _ph(5)
+            for team, opponent, home_away in [(home_team, away_team, 'h'), (away_team, home_team, 'a')]:
+                ph = _ph(6)
                 if _is_postgres():
                     cur.execute(f"""
-                        INSERT INTO game_schedule (year, week, team, opponent, kickoff)
+                        INSERT INTO game_schedule (year, week, team, opponent, home_away, kickoff)
                         VALUES ({ph})
                         ON CONFLICT (year, week, team) DO UPDATE SET
-                            opponent = EXCLUDED.opponent,
-                            kickoff  = EXCLUDED.kickoff
-                    """, (year, int(row['week']), team, opponent, kickoff))
+                            opponent  = EXCLUDED.opponent,
+                            home_away = EXCLUDED.home_away,
+                            kickoff   = EXCLUDED.kickoff
+                    """, (year, int(row['week']), team, opponent, home_away, kickoff))
                 else:
                     cur.execute(f"""
-                        INSERT INTO game_schedule (year, week, team, opponent, kickoff)
+                        INSERT INTO game_schedule (year, week, team, opponent, home_away, kickoff)
                         VALUES ({ph})
                         ON CONFLICT(year, week, team) DO UPDATE SET
-                            opponent = excluded.opponent,
-                            kickoff  = excluded.kickoff
-                    """, (year, int(row['week']), team, opponent, kickoff))
+                            opponent  = excluded.opponent,
+                            home_away = excluded.home_away,
+                            kickoff   = excluded.kickoff
+                    """, (year, int(row['week']), team, opponent, home_away, kickoff))
                 inserted += 1
 
         except Exception as e:
@@ -1793,6 +1811,67 @@ def player_career(pfr_id):
                            games=games, career_totals=totals)
 
 
+@app.route("/schedule")
+def schedule():
+    """
+    Full-season schedule — every week, every game, for a given year.
+    One row per game (home_away='h' side only), so this shows a real
+    "Away @ Home" list rather than the two-rows-per-game structure
+    game_schedule stores internally (one row per team, so per-player
+    kickoff lookups are a simple (year, week, team) query elsewhere).
+    """
+    available_years_rows = db_fetchall(
+        "SELECT DISTINCT year FROM game_schedule ORDER BY year DESC"
+    )
+    available_years = [r["year"] for r in available_years_rows]
+
+    if not available_years:
+        return render_template("schedule.html", games_by_week={}, weeks=[],
+                               year=None, available_years=[])
+
+    req_year = request.args.get("year", type=int)
+    sel_year = req_year if req_year in available_years else available_years[0]
+
+    ph = _ph()
+    rows = db_fetchall(f"""
+        SELECT week, team AS home_team, opponent AS away_team, kickoff
+        FROM game_schedule
+        WHERE year = {ph} AND home_away = 'h'
+        ORDER BY week, kickoff
+    """, (sel_year,))
+
+    from datetime import datetime, timezone
+    from zoneinfo import ZoneInfo
+    EASTERN = ZoneInfo("America/New_York")
+
+    games_by_week = {}
+    for r in rows:
+        kickoff = r["kickoff"]
+        display = "TBD"
+        if kickoff:
+            if isinstance(kickoff, str):
+                try:
+                    kickoff = datetime.fromisoformat(kickoff).replace(tzinfo=timezone.utc)
+                except ValueError:
+                    kickoff = None
+            elif kickoff.tzinfo is None:
+                kickoff = kickoff.replace(tzinfo=timezone.utc)
+            if kickoff:
+                display = kickoff.astimezone(EASTERN).strftime("%a %m/%d %I:%M %p ET").lstrip("0").replace(" 0", " ")
+
+        games_by_week.setdefault(r["week"], []).append({
+            "away_team": r["away_team"],
+            "home_team": r["home_team"],
+            "kickoff_display": display,
+        })
+
+    weeks = sorted(games_by_week.keys())
+
+    return render_template("schedule.html",
+                           games_by_week=games_by_week, weeks=weeks,
+                           year=sel_year, available_years=available_years)
+
+
 @app.route("/weather")
 def weather():
     """
@@ -1996,6 +2075,15 @@ def download_csv(data_type):
             ORDER BY hp.year DESC, hp.week DESC
         """, (pfr_id,))
         filename = f"player_{pfr_id}.csv"
+
+    elif data_type == "schedule":
+        rows = db_fetchall(f"""
+            SELECT week, team AS home_team, opponent AS away_team, kickoff
+            FROM game_schedule
+            WHERE year = {_ph()} AND home_away = 'h'
+            ORDER BY week, kickoff
+        """, (year,))
+        filename = f"schedule_{year}.csv"
 
     else:
         return jsonify(error="Unknown data type"), 404

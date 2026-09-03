@@ -1,4 +1,5 @@
 import random
+import re
 
 from bs4 import BeautifulSoup, Comment
 import pandas as pd
@@ -125,10 +126,40 @@ def scrape_schedule(year: int) -> pd.DataFrame:
                 except:
                     boxscore_url = ''
                 
-                try:
-                    date = row.find('td', attrs={'data-stat': 'game_date'}).get_text()
-                except:
-                    date = ''
+                # Date extraction — PFR changed their schedule page
+                # template starting with the 2026 season. The OLD
+                # template (2014-2025, confirmed via the uploaded 2025
+                # HTML) has an explicit 'game_date' column. The NEW
+                # template (confirmed via the uploaded 2026 HTML) has
+                # NO 'game_date' column at all — instead, for games not
+                # yet played, the date shows up as the boxscore_word
+                # cell's link TEXT (e.g. "September 9", no year). But
+                # that same cell's text flips to the generic word
+                # "boxscore" once the game has actually been played
+                # (confirmed: this is also true on the OLD 2025
+                # template for already-played games) — so relying on
+                # link text isn't reliable across a whole season as
+                # games transition from scheduled to played.
+                #
+                # The robust fix: boxscore_url itself always encodes
+                # the date as YYYYMMDD (e.g. /boxscores/202609090sea.htm
+                # -> 2026-09-09), regardless of whether the game has
+                # been played yet or what page template PFR is using.
+                # Confirmed this pattern holds identically on both the
+                # 2025 and 2026 uploaded pages. Try this first; only
+                # fall back to the old 'game_date' column (still needed
+                # for years where boxscore_url might be empty, e.g. a
+                # postponed/cancelled game) if the URL doesn't parse.
+                date = ''
+                if boxscore_url:
+                    m = re.search(r'/boxscores/(\d{4})(\d{2})(\d{2})', boxscore_url)
+                    if m:
+                        date = f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
+                if not date:
+                    try:
+                        date = row.find('td', attrs={'data-stat': 'game_date'}).get_text()
+                    except:
+                        date = ''
 
                 # FIX: gametime wasn't wrapped in its own try/except, so a
                 # missing time (very common for games PFR hasn't scheduled

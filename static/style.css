@@ -734,3 +734,50 @@ header {
     background: transparent;
     border-style: dashed;
 }
+
+/* -----------------------------------------------------------------------
+   Schedule page
+   ----------------------------------------------------------------------- */
+
+.week-jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 24px;
+}
+
+.week-jump-link {
+    padding: 4px 10px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.week-jump-link:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.schedule-week {
+    margin-bottom: 28px;
+    scroll-margin-top: 20px;
+}
+
+.schedule-week-title {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+}
+
+.schedule-at {
+    color: var(--text-muted);
+    text-align: center;
+    width: 20px;
+}

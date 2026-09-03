@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF DFS Challenge — Schedule{% if year %} — {{ year }}{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>FF DFS Challenge</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('slate') }}" class="nav-link">Slate</a>
+            <a href="{{ url_for('history') }}" class="nav-link">History</a>
+            <a href="{{ url_for('standings') }}" class="nav-link">Standings</a>
+            <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
+            <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
+            <a href="{{ url_for('schedule') }}" class="nav-link active">Schedule</a>
+        </nav>
+        {% if year %}
+            <p class="subtitle">{{ year }} Season &mdash; Full Schedule</p>
+        {% else %}
+            <p class="subtitle">No schedule loaded yet.</p>
+        {% endif %}
+    </div>
+    <div class="header-right">
+        {% if current_user.is_authenticated %}
+            <span class="user-badge">{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Sign in</a>
+        {% endif %}
+    </div>
+</header>
+
+<main class="history-main">
+
+{% if not available_years %}
+    <p class="empty-state">
+        No schedule loaded yet. Run <code>scrapers/scrape_schedules.py --years {year}</code>
+        then <code>flask load-schedule --year {year}</code>.
+    </p>
+{% else %}
+
+    <div class="page-controls">
+        {% if available_years|length > 1 %}
+        <form class="history-selector" method="GET" action="{{ url_for('schedule') }}">
+            <label>
+                Season
+                <select name="year" onchange="this.form.submit()">
+                    {% for y in available_years %}
+                    <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </form>
+        {% else %}
+        <span></span>
+        {% endif %}
+        <a href="{{ url_for('download_csv', data_type='schedule', year=year) }}" class="download-btn">⬇ Download Full Schedule</a>
+    </div>
+
+    <div class="week-jump">
+        {% for w in weeks %}
+        <a href="#week-{{ w }}" class="week-jump-link">Wk{{ w }}</a>
+        {% endfor %}
+    </div>
+
+    {% for w in weeks %}
+    <section class="schedule-week" id="week-{{ w }}">
+        <h3 class="schedule-week-title">Week {{ w }}</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Away</th>
+                        <th></th>
+                        <th>Home</th>
+                        <th>Kickoff</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for g in games_by_week[w] %}
+                    <tr>
+                        <td class="player-name">{{ g['away_team'] | upper }}</td>
+                        <td class="schedule-at">@</td>
+                        <td class="player-name">{{ g['home_team'] | upper }}</td>
+                        <td>{{ g['kickoff_display'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endfor %}
+
+{% endif %}
+
+</main>
+
+</body>
+</html>
