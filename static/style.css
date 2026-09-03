@@ -781,3 +781,33 @@ header {
     text-align: center;
     width: 20px;
 }
+
+/* -----------------------------------------------------------------------
+   Weather page — Final vs Forecast distinction
+   ----------------------------------------------------------------------- */
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.status-final {
+    background: rgba(79, 142, 247, 0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+}
+
+.status-forecast {
+    background: transparent;
+    border: 1px dashed var(--text-muted);
+    color: var(--text-muted);
+}
+
+.forecast-value {
+    font-style: italic;
+    color: var(--text-muted);
+}

@@ -79,18 +79,30 @@
             </thead>
             <tbody>
                 {% for g in games %}
+                {% set is_final = g['status'] == 'Final' %}
+                {% set has_weather = g['temp_f'] is not none or g['condition'] %}
                 <tr>
                     <td class="player-name">{{ g['away_team'] | upper }} @ {{ g['home_team'] | upper }}</td>
                     <td>{{ g['game_date'] or '—' }}</td>
-                    <td>{{ g['status'] or '—' }}</td>
+                    <td>
+                        {% if is_final %}
+                            <span class="status-badge status-final">Final</span>
+                        {% else %}
+                            <span class="status-badge status-forecast">Forecast</span>
+                        {% endif %}
+                    </td>
                     <td class="right">
                         {% if g['away_score'] is not none and g['home_score'] is not none %}
                             {{ g['away_score'] }} - {{ g['home_score'] }}
                         {% else %}—{% endif %}
                     </td>
-                    <td class="right">{{ g['temp_f'] ~ '°F' if g['temp_f'] is not none else '—' }}</td>
-                    <td>{{ g['condition'] or '—' }}</td>
-                    <td class="right">
+                    <td class="right {% if not is_final and has_weather %}forecast-value{% endif %}">
+                        {{ g['temp_f'] ~ '°F' if g['temp_f'] is not none else '—' }}
+                    </td>
+                    <td class="{% if not is_final and has_weather %}forecast-value{% endif %}">
+                        {{ g['condition'] or '—' }}
+                    </td>
+                    <td class="right {% if not is_final and has_weather %}forecast-value{% endif %}">
                         {% if g['wind_mph'] is not none %}
                             {{ g['wind_mph'] }} mph {{ g['wind_direction'] or '' }}
                         {% else %}—{% endif %}
@@ -100,6 +112,12 @@
             </tbody>
         </table>
     </div>
+    <p class="standings-note">
+        <span class="status-badge status-forecast">Forecast</span> = predicted conditions for a game that hasn't
+        been played yet — subject to change as kickoff approaches, and blank until nflweather.com has a forecast
+        available (usually not more than about a week out).
+        <span class="status-badge status-final">Final</span> = actual recorded conditions from the completed game.
+    </p>
     {% else %}
     <p class="empty-state">No games found for Week {{ week }}, {{ year }}.</p>
     {% endif %}
