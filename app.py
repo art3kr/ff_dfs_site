@@ -3004,7 +3004,8 @@ def standings():
 
     if not years:
         return render_template("standings.html", year=None, years=[],
-                               standings=[], weeks=[])
+                               standings=[], weeks=[],
+                               standings_no_drop=[], weekly_top_scorers=[])
 
     req_year = request.args.get("year", type=int)
     sel_year = req_year if req_year in years else years[0]
@@ -3107,9 +3108,48 @@ def standings():
 
     leaderboard.sort(key=lambda r: r["total"], reverse=True)
 
+    # Season standings WITHOUT dropping the lowest week — same
+    # scored-weeks data as above, just summed differently. Kept as a
+    # separate ranking rather than folded into the existing
+    # leaderboard, since the two can disagree on ordering (a
+    # consistently-good-but-never-great player might rank higher with
+    # no drop than someone who has one huge week and one terrible one).
+    leaderboard_no_drop = []
+    for submitter, week_scores in by_submitter.items():
+        scored_weeks = {w: s for w, s in week_scores.items() if s is not None}
+        total_no_drop = sum(scored_weeks.values())
+        leaderboard_no_drop.append({
+            "submitter":    submitter,
+            "week_scores":  week_scores,
+            "total":        round(total_no_drop, 2),
+            "weeks_scored": len(scored_weeks),
+        })
+    leaderboard_no_drop.sort(key=lambda r: r["total"], reverse=True)
+
+    # Weekly high scorer — for each week, whoever had the highest
+    # FULLY-SCORED total that week (pending/incomplete weeks excluded,
+    # same rule as everywhere else on this page). Shows every
+    # participant tied for the top score that week, rather than
+    # arbitrarily picking one.
+    weekly_top_scorers = []
+    for w in weeks:
+        scores_this_week = {
+            submitter: week_scores[w]
+            for submitter, week_scores in by_submitter.items()
+            if week_scores.get(w) is not None
+        }
+        if not scores_this_week:
+            weekly_top_scorers.append({"week": w, "top_score": None, "winners": []})
+            continue
+        top_score = max(scores_this_week.values())
+        winners = sorted([s for s, pts in scores_this_week.items() if pts == top_score])
+        weekly_top_scorers.append({"week": w, "top_score": top_score, "winners": winners})
+
     return render_template("standings.html",
                            year=sel_year, years=years,
-                           standings=leaderboard, weeks=weeks)
+                           standings=leaderboard, weeks=weeks,
+                           standings_no_drop=leaderboard_no_drop,
+                           weekly_top_scorers=weekly_top_scorers)
 
 
 @app.route("/submit-lineup", methods=["POST"])

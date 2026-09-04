@@ -990,3 +990,32 @@ header {
     font-weight: 700;
     font-size: 0.75rem;
 }
+
+/* -----------------------------------------------------------------------
+   Standings — new sections (season no-drop, weekly high scorer)
+   ----------------------------------------------------------------------- */
+
+.standings-section-title {
+    margin: 28px 0 10px 0;
+    font-size: 1rem;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+}
+
+.standings-section-title:first-of-type {
+    margin-top: 0;
+}
+
+.tie-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    background: rgba(79, 142, 247, 0.15);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--accent);
+    vertical-align: middle;
+}
