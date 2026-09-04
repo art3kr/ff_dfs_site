@@ -1019,3 +1019,99 @@ header {
     color: var(--accent);
     vertical-align: middle;
 }
+
+/* -----------------------------------------------------------------------
+   Props page
+   ----------------------------------------------------------------------- */
+
+.props-picker-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+#props-count { font-weight: 700; font-size: 0.85rem; }
+
+#props-submit-btn {
+    padding: 6px 16px;
+    background: var(--accent);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+#props-submit-btn:disabled {
+    background: var(--bg-row-alt);
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+.props-submit-success { color: #4caf50; font-size: 0.82rem; }
+.props-submit-error   { color: #f44336; font-size: 0.82rem; }
+
+.props-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.prop-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.prop-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 10px;
+}
+
+.prop-line {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.prop-pick-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.prop-pick-btn {
+    flex: 1;
+    padding: 6px 0;
+    background: var(--bg-row-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+.prop-pick-btn.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.prop-result {
+    margin-top: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
+}
+.prop-result-over    { background: rgba(76, 175, 80, 0.15);  color: #4caf50; }
+.prop-result-under   { background: rgba(244, 67, 54, 0.15);  color: #f44336; }
+.prop-result-push    { background: rgba(158, 158, 158, 0.15); color: var(--text-muted); }
+.prop-result-pending { background: var(--bg-row-alt); color: var(--text-muted); }

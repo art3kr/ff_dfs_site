@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF DFS Challenge — Props{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>FF DFS Challenge</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('slate') }}" class="nav-link challenge-tab">Slate</a>
+            <a href="{{ url_for('standings') }}" class="nav-link challenge-tab">Standings</a>
+            <a href="{{ url_for('props') }}" class="nav-link challenge-tab active">Props</a>
+            <a href="{{ url_for('history') }}" class="nav-link">History</a>
+            <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
+            <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
+            <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>
+            <a href="{{ url_for('fantasy_points_against') }}" class="nav-link">Fantasy Pts Against</a>
+            <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
+            <a href="{{ url_for('best_matchups') }}" class="nav-link">Best Matchups</a>
+            <a href="{{ url_for('depth_charts') }}" class="nav-link">Depth Charts</a>
+        </nav>
+        {% if week %}
+            <p class="subtitle">Week {{ week }}, {{ year }} &mdash; Pick over/under on exactly 5 props</p>
+        {% else %}
+            <p class="subtitle">No props loaded yet.</p>
+        {% endif %}
+    </div>
+    <div class="header-right">
+        {% if current_user.is_authenticated %}
+            <span class="user-badge">{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Sign in to pick</a>
+        {% endif %}
+    </div>
+</header>
+
+<main class="history-main">
+
+{% if not available_years %}
+    <p class="empty-state">No props loaded yet for any week.</p>
+{% else %}
+
+    <div class="page-controls">
+        <form class="history-selector" id="history-selector" method="GET" action="{{ url_for('props') }}">
+            <label>
+                Year
+                <select name="year" id="year-select">
+                    {% for y in available_years %}
+                    <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                Week
+                <select name="week" id="week-select">
+                    {% for w in available_weeks_by_year[year] %}
+                    <option value="{{ w }}" {% if w == week %}selected{% endif %}>Week {{ w }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </form>
+    </div>
+
+    {% if prop_rows %}
+    {% if current_user.is_authenticated %}
+    <div class="props-picker-bar">
+        <span id="props-count">0 / 5 selected</span>
+        <button id="props-submit-btn" disabled>Submit Picks</button>
+        <span id="props-submit-msg"></span>
+    </div>
+    {% endif %}
+
+    <div class="props-grid" id="props-grid">
+        {% for p in prop_rows %}
+        {% set score = scores.get(p['id']) %}
+        {% set existing_pick = existing_picks.get(p['id']) %}
+        <div class="prop-card" data-prop-id="{{ p['id'] }}">
+            <div class="prop-card-header">
+                <span class="player-name">{{ p['player_name'] }}</span>
+                <span class="prop-line">{{ p['stat_field'] | replace('_', ' ') | title }}: {{ p['line'] }}</span>
+            </div>
+            {% if current_user.is_authenticated %}
+            <div class="prop-pick-buttons">
+                <button class="prop-pick-btn {% if existing_pick == 'over' %}selected{% endif %}" data-pick="over">Over</button>
+                <button class="prop-pick-btn {% if existing_pick == 'under' %}selected{% endif %}" data-pick="under">Under</button>
+            </div>
+            {% endif %}
+            {% if score and score['result'] %}
+            <div class="prop-result prop-result-{{ score['result'] }}">
+                Result: {{ score['result'] | upper }} (actual: {{ score['actual'] }})
+            </div>
+            {% elif score %}
+            <div class="prop-result prop-result-pending">Pending</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">No props found for Week {{ week }}, {{ year }}.</p>
+    {% endif %}
+
+{% endif %}
+
+</main>
+
+<script>
+    window.PROPS_APP = {
+        year: {{ year | tojson }},
+        week: {{ week | tojson }},
+        isAuthenticated: {{ current_user.is_authenticated | tojson }},
+        existingPicks: {{ existing_picks | tojson }}
+    };
+    window.HISTORY_WEEKS_BY_YEAR = {{ available_weeks_by_year | tojson }};
+</script>
+<script src="{{ url_for('static', filename='history.js') }}"></script>
+<script src="{{ url_for('static', filename='props.js') }}"></script>
+
+</body>
+</html>

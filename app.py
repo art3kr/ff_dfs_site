@@ -2758,6 +2758,165 @@ def depth_charts():
                            available_teams=available_teams)
 
 
+def _score_props_for_week(year: int, week: int) -> dict:
+    """
+    Compares each prop's line against the real result, once that
+    week's stats are loaded (via flask load-history) — no manual
+    result entry needed, since every prop maps to a real
+    hist_player_stats column (enforced at add-props time).
+
+    Returns {prop_bet_id: {'actual': float_or_None, 'result':
+    'over'/'under'/'push'/None}}. actual/result are None when that
+    week's real stats for that player haven't loaded yet (pending).
+    """
+    ph = _ph()
+    props = db_fetchall(f"""
+        SELECT id, player_name_normalized, stat_field, line
+        FROM prop_bets
+        WHERE year = {ph} AND week = {ph}
+    """, (year, week))
+
+    if not props:
+        return {}
+
+    result = {}
+    by_field = {}
+    for p in props:
+        by_field.setdefault(p["stat_field"], []).append(p)
+
+    for stat_field, field_props in by_field.items():
+        if stat_field not in VALID_PROP_STAT_FIELDS:
+            # Defense in depth — add-props already validates this at
+            # write time, but don't trust it blindly at read time too.
+            for p in field_props:
+                result[p["id"]] = {"actual": None, "result": None}
+            continue
+
+        names = {p["player_name_normalized"] for p in field_props}
+        placeholders = ", ".join([ph] * len(names))
+        stat_rows = db_fetchall(f"""
+            SELECT name_normalized, {stat_field} AS actual_value
+            FROM hist_player_stats
+            WHERE year = {ph} AND week = {ph} AND name_normalized IN ({placeholders})
+        """, (year, week) + tuple(names))
+        actual_by_name = {r["name_normalized"]: r["actual_value"] for r in stat_rows}
+
+        for p in field_props:
+            actual = actual_by_name.get(p["player_name_normalized"])
+            if actual is None:
+                result[p["id"]] = {"actual": None, "result": None}
+            elif actual > p["line"]:
+                result[p["id"]] = {"actual": actual, "result": "over"}
+            elif actual < p["line"]:
+                result[p["id"]] = {"actual": actual, "result": "under"}
+            else:
+                result[p["id"]] = {"actual": actual, "result": "push"}   # rare with .5 lines
+
+    return result
+
+
+@app.route("/props")
+def props():
+    """
+    NOTE — no lock mechanism yet: picks can be changed anytime,
+    including after games have started. Lineups have per-game locking
+    (see game_schedule); props don't yet. Worth adding the same
+    protection here if this becomes a real fairness concern in
+    practice.
+    """
+    year_week_rows = db_fetchall(
+        "SELECT DISTINCT year, week FROM prop_bets ORDER BY year DESC, week DESC"
+    )
+    available = [(r["year"], r["week"]) for r in year_week_rows]
+
+    if not available:
+        return render_template("props.html", prop_rows=[], year=None, week=None,
+                               available_years=[], available_weeks_by_year={},
+                               existing_picks={}, scores={})
+
+    req_year = request.args.get("year", type=int)
+    req_week = request.args.get("week", type=int)
+    if req_year is None or req_week is None or (req_year, req_week) not in available:
+        sel_year, sel_week = available[0]
+    else:
+        sel_year, sel_week = req_year, req_week
+
+    available_years = sorted({y for y, w in available}, reverse=True)
+    available_weeks_by_year = {}
+    for y, w in available:
+        available_weeks_by_year.setdefault(y, []).append(w)
+    for y in available_weeks_by_year:
+        available_weeks_by_year[y].sort()
+
+    ph = _ph()
+    prop_rows = db_fetchall(f"""
+        SELECT id, player_name, stat_field, line
+        FROM prop_bets
+        WHERE year = {ph} AND week = {ph}
+        ORDER BY player_name
+    """, (sel_year, sel_week))
+
+    scores = _score_props_for_week(sel_year, sel_week)
+
+    existing_picks = {}
+    if current_user.is_authenticated:
+        pick_rows = db_fetchall(f"""
+            SELECT prop_bet_id, pick FROM prop_picks
+            WHERE year = {ph} AND week = {ph} AND submitter = {ph}
+        """, (sel_year, sel_week, current_user.username))
+        existing_picks = {r["prop_bet_id"]: r["pick"] for r in pick_rows}
+
+    return render_template("props.html",
+                           prop_rows=prop_rows, year=sel_year, week=sel_week,
+                           available_years=available_years,
+                           available_weeks_by_year=available_weeks_by_year,
+                           existing_picks=existing_picks, scores=scores)
+
+
+@app.route("/submit-props", methods=["POST"])
+@login_required
+def submit_props():
+    data = request.get_json(force=True)
+    year = data.get("year")
+    week = data.get("week")
+    picks = data.get("picks")
+
+    if not isinstance(picks, list) or len(picks) != 5:
+        return jsonify(error="You must pick exactly 5 props."), 400
+
+    prop_bet_ids = [p.get("prop_bet_id") for p in picks]
+    if len(set(prop_bet_ids)) != 5:
+        return jsonify(error="Duplicate prop selected."), 400
+
+    for p in picks:
+        if p.get("pick") not in ("over", "under"):
+            return jsonify(error="Each pick must be 'over' or 'under'."), 400
+
+    ph = _ph()
+    placeholders = ", ".join([ph] * len(prop_bet_ids))
+    valid_rows = db_fetchall(f"""
+        SELECT id FROM prop_bets
+        WHERE year = {ph} AND week = {ph} AND id IN ({placeholders})
+    """, (year, week) + tuple(prop_bet_ids))
+    valid_ids = {r["id"] for r in valid_rows}
+    if len(valid_ids) != 5:
+        return jsonify(error="One or more selected props are invalid for this week."), 400
+
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(f"DELETE FROM prop_picks WHERE year = {ph} AND week = {ph} AND submitter = {ph}",
+                (year, week, current_user.username))
+    for p in picks:
+        cur.execute(f"""
+            INSERT INTO prop_picks (year, week, submitter, prop_bet_id, pick)
+            VALUES ({_ph(5)})
+        """, (year, week, current_user.username, p["prop_bet_id"], p["pick"]))
+    conn.commit()
+    cur.close()
+
+    return jsonify(success=True)
+
+
 @app.route("/schedule")
 def schedule():
     """
