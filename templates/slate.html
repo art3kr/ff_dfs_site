@@ -42,6 +42,22 @@
     ================================================================ -->
     <main class="slate-panel">
 
+        {% if week and total_teams_scheduled %}
+        <div class="lock-status-banner">
+            <span class="lock-status-count">{{ locked_teams|length }}/{{ total_teams_scheduled }} teams locked</span>
+            <span class="lock-status-detail">
+                {% if locked_teams|length == 0 %}
+                    — no games have started yet
+                {% elif locked_teams|length == total_teams_scheduled %}
+                    — all of this week's games have started
+                {% else %}
+                    — {{ total_teams_scheduled - locked_teams|length }} teams still to play
+                {% endif %}
+            </span>
+            <a href="{{ url_for('schedule', year=year) }}#week-{{ week }}" class="lock-status-link">View Week {{ week }} schedule →</a>
+        </div>
+        {% endif %}
+
         <div class="page-controls">
             <div class="filter-bar">
                 <span class="filter-label">Filter:</span>

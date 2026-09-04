@@ -71,28 +71,34 @@
     {% for w in weeks %}
     <section class="schedule-week" id="week-{{ w }}">
         <h3 class="schedule-week-title">Week {{ w }}</h3>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Away</th>
-                        <th></th>
-                        <th>Home</th>
-                        <th>Kickoff</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for g in games_by_week[w] %}
-                    <tr>
-                        <td class="player-name">{{ g['away_team'] | upper }}</td>
-                        <td class="schedule-at">@</td>
-                        <td class="player-name">{{ g['home_team'] | upper }}</td>
-                        <td>{{ g['kickoff_display'] }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+        {% for day_name, games in games_by_week[w].items() %}
+        <div class="schedule-day">
+            <h4 class="schedule-day-title">{{ day_name }}</h4>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Away</th>
+                            <th></th>
+                            <th>Home</th>
+                            <th>Kickoff</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for g in games %}
+                        <tr>
+                            <td class="player-name">{{ g['away_team'] | upper }}</td>
+                            <td class="schedule-at">@</td>
+                            <td class="player-name">{{ g['home_team'] | upper }}</td>
+                            <td>{{ g['kickoff_display'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
+        {% endfor %}
     </section>
     {% endfor %}
 

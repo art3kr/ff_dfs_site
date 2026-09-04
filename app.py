@@ -1629,6 +1629,7 @@ def slate():
     # individual rows rather than locking the whole slate at once.
     locked_teams = set()
     kickoff_by_team = {}   # team -> friendly display string, e.g. "Thu 8:20 PM ET"
+    total_teams_scheduled = 0
     if current_week:
         from datetime import datetime, timezone
         from zoneinfo import ZoneInfo
@@ -1638,6 +1639,7 @@ def slate():
             f"SELECT team, kickoff FROM game_schedule WHERE year = {_ph()} AND week = {_ph()}",
             (current_year, current_week)
         )
+        total_teams_scheduled = len(schedule_rows)
         now = datetime.now(timezone.utc)
         for r in schedule_rows:
             kickoff = r["kickoff"]
@@ -1668,6 +1670,7 @@ def slate():
                            salary_cap=SALARY_CAP,
                            existing_lineup=existing_lineup,
                            locked_teams=sorted(locked_teams),
+                           total_teams_scheduled=total_teams_scheduled,
                            kickoff_by_team=kickoff_by_team)
 
 
@@ -1844,10 +1847,19 @@ def schedule():
     from zoneinfo import ZoneInfo
     EASTERN = ZoneInfo("America/New_York")
 
+    # games_by_week[week] is an ordered dict of {day_name: [games]}.
+    # Since rows are already sorted chronologically by kickoff (the SQL
+    # query above orders by week, kickoff), inserting into a plain dict
+    # here naturally produces day-groups in correct chronological order
+    # (Thu, then Sun, then Mon, etc.) without needing to hardcode a
+    # day-of-week ordering — this also correctly handles the occasional
+    # Wed/Fri/Sat game, which just slots into wherever it falls
+    # chronologically relative to the rest of that week's games.
     games_by_week = {}
     for r in rows:
         kickoff = r["kickoff"]
         display = "TBD"
+        day_name = "Date TBD"
         if kickoff:
             if isinstance(kickoff, str):
                 try:
@@ -1857,9 +1869,12 @@ def schedule():
             elif kickoff.tzinfo is None:
                 kickoff = kickoff.replace(tzinfo=timezone.utc)
             if kickoff:
-                display = kickoff.astimezone(EASTERN).strftime("%a %m/%d %I:%M %p ET").lstrip("0").replace(" 0", " ")
+                kickoff_eastern = kickoff.astimezone(EASTERN)
+                display = kickoff_eastern.strftime("%a %m/%d %I:%M %p ET").lstrip("0").replace(" 0", " ")
+                day_name = kickoff_eastern.strftime("%A")   # "Thursday", "Sunday", etc.
 
-        games_by_week.setdefault(r["week"], []).append({
+        week_dict = games_by_week.setdefault(r["week"], {})
+        week_dict.setdefault(day_name, []).append({
             "away_team": r["away_team"],
             "home_team": r["home_team"],
             "kickoff_display": display,
