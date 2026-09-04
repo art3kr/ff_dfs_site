@@ -1,5 +1,6 @@
 import os
 import sys
+import random
 from dotenv import load_dotenv
 load_dotenv()
 import json
@@ -866,6 +867,118 @@ def create_user_command(username, password):
     finally:
         cur.close()
         conn.close()
+
+
+# Short, memorable words for generated passwords — avoids ambiguous
+# characters (0/O, 1/l/I) and anything awkward to text/read aloud,
+# since these need to be easy for casual league participants to type
+# on a phone, not maximally secure.
+_PASSWORD_WORDS = [
+    'otter', 'maple', 'comet', 'raven', 'pixel', 'amber', 'coral', 'delta',
+    'ember', 'frost', 'grove', 'haven', 'ivory', 'jade', 'karst', 'lunar',
+    'marsh', 'nomad', 'onyx', 'plaza', 'quartz', 'ridge', 'storm', 'tundra',
+    'urban', 'vapor', 'willow', 'xenon', 'yonder', 'zephyr', 'basil', 'cider',
+    'ditto', 'ecru', 'flint', 'ginger', 'hazel', 'inlet', 'juno', 'kiwi',
+]
+
+
+def _generate_password(used: set) -> str:
+    """A short word + 3 digits (2-9 only, no 0/1 to avoid confusion
+    with O/l). Regenerates on collision so every password in a batch
+    is guaranteed unique."""
+    while True:
+        word = random.choice(_PASSWORD_WORDS)
+        digits = ''.join(random.choices('23456789', k=3))
+        candidate = f"{word}{digits}"
+        if candidate not in used:
+            used.add(candidate)
+            return candidate
+
+
+@app.cli.command("create-users-batch")
+@click.argument("usernames_file", type=click.Path(exists=True))
+@click.option("--output", default=None,
+              help="Save the generated username/password pairs to this CSV "
+                   "(default: prints to screen only — copy it down, since "
+                   "passwords aren't recoverable once bcrypt-hashed in the DB).")
+def create_users_batch_command(usernames_file, output):
+    """
+    Create multiple accounts at once, one per line in USERNAMES_FILE
+    (plain text, one username per line — blank lines and lines
+    starting with # are skipped). Each gets a unique, memorable
+    auto-generated password (e.g. "otter482") printed at the end for
+    you to distribute — there's no "forgot password" flow yet, so
+    make sure you actually save this output before closing the
+    terminal.
+
+    Example usernames.txt:
+        # comments and blank lines are fine
+        alice
+        bob
+        charlie
+
+    Usage:
+        flask create-users-batch usernames.txt
+        flask create-users-batch usernames.txt --output credentials.csv
+    """
+    with open(usernames_file) as f:
+        usernames = [line.strip() for line in f if line.strip() and not line.strip().startswith('#')]
+
+    if not usernames:
+        click.echo("ERROR: no usernames found in the file.", err=True)
+        return
+
+    if len(usernames) != len(set(usernames)):
+        dupes = [u for u in usernames if usernames.count(u) > 1]
+        click.echo(f"ERROR: duplicate usernames in the file: {sorted(set(dupes))}", err=True)
+        return
+
+    conn = _connect()
+    cur = _cursor(conn)
+
+    used_passwords = set()
+    results = []   # (username, password, status)
+
+    for username in usernames:
+        password = _generate_password(used_passwords)
+        hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+        try:
+            cur.execute(
+                f"INSERT INTO users (username, password) VALUES ({_ph(2)})",
+                (username, hashed)
+            )
+            conn.commit()
+            results.append((username, password, "created"))
+        except Exception as e:
+            conn.rollback()
+            results.append((username, None, f"SKIPPED - {e}"))
+
+    cur.close()
+    conn.close()
+
+    click.echo(f"\n{'Username':<20} {'Password':<15} Status")
+    click.echo("-" * 50)
+    for username, password, status in results:
+        pw_display = password if password else "-"
+        click.echo(f"{username:<20} {pw_display:<15} {status}")
+
+    created_count = sum(1 for _, _, s in results if s == "created")
+    click.echo(f"\n{created_count}/{len(usernames)} accounts created.")
+
+    if output:
+        import csv as csv_module
+        with open(output, 'w', newline='') as f:
+            writer = csv_module.writer(f)
+            writer.writerow(['username', 'password', 'status'])
+            for row in results:
+                writer.writerow(row)
+        click.echo(f"Saved -> {output}")
+        click.echo("(This file has plaintext passwords — distribute it securely "
+                   "and delete it once everyone has their login.)")
+    else:
+        click.echo("\nNo --output given — this is the ONLY copy of these passwords. "
+                   "Copy them down now; they can't be recovered from the database "
+                   "once hashed.")
 
 
 @app.cli.command("list-users")
