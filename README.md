@@ -93,96 +93,51 @@ Edge cases (Jr./Sr., name changes, DST teams) are handled at query time.
 ## 4\. Weekly Workflow
 
 Beginning of week (before games start):
-
-\# 1. Update the schedule — picks up newly-finalized kickoff times
-
-\#    (early in the season many are still TBD; flex scheduling updates
-
-\#    happen throughout the season too)
-
 ```bash
-
+\# 1. Update the schedule — picks up newly-finalized kickoff times
+\#    (early in the season many are still TBD; flex scheduling updates
+\#    happen throughout the season too)
 python scrapers/scrape\_schedules.py --years 2026
-
 flask load-schedule --year 2026
 
-
-
 \# 2. Scrape this week's DraftKings salaries
-
 python scrapers/scrape\_fp\_dk\_salaries.py --week N --year 2026
-
 flask load-weekly-salary data/fp\_dk\_salaries\_weekN\_2026.csv.gz --year 2026
 
-
-
 \# 3. Scrape this week's weather forecasts (re-run again closer to
-
 \#    kickoff too — forecasts only populate \~1 week out)
-
 python scrapers/scrape\_weekly\_weather.py --year 2026 --weeks N
 
-
-
 \# 4. Scrape season-long Vegas props (or weekly, once FirstDown Studio
-
 \#    turns that on)
-
 python scrapers/scrape\_firstdown\_studio.py --position all
 
-
-
 \# 5. Persist everything into the database
-
 flask load-history---
-
 ```
-
-
 
 End of week (after all games have played):
 
 ```bash
-
 \# 1. Player stats — the real results
-
 python scrapers/scrape\_pfr.py --years 2026
 
-
-
 \# 2. Team points scored/allowed (needed for DST scoring)
-
 python scrapers/scrape\_team\_points.py --years 2026
 
-
-
 \# 3. DST fantasy stat categories (sacks, INTs, etc.)
-
 python scrapers/scrape\_dst\_fantasy\_stats.py --year 2026 --weeks N
 
-
-
 \# 4. Combine into final DK-accurate DST scores
-
 python scrapers/combine\_dst\_scoring.py --year 2026
 
-
-
 \# 5. Game info — roof, surface, actual weather, vegas lines, attendance
-
 python scrapers/scrape\_pfr.py --years 2026 --skip-players   # game info portion
 
-
-
 \# 6. Weather — re-scrape to get "Final" status + actual conditions
-
 python scrapers/scrape\_weekly\_weather.py --year 2026 --weeks N
 
-
-
 \# 7. Persist everything — Standings auto-recomputes once this is loaded
-
 flask load-history
-
 ```
 
