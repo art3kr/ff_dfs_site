@@ -978,6 +978,29 @@ VALID_PROP_STAT_FIELDS = {
     'fumbles_lost', 'kick_ret_yds', 'kick_ret_td', 'punt_ret_yds', 'punt_ret_td',
 }
 
+# Composite props (e.g. "passing + rushing yards") sum two existing
+# columns rather than reading one directly — we already have both
+# underlying stats in hist_player_stats, so these are genuinely
+# addressable, unlike props needing data we don't track at all (kicker
+# stats, single-play "longest X" records, which would need a real new
+# scraper). COALESCE guards against one side legitimately being NULL
+# (e.g. a pure runner with no pass attempts that week) — without it,
+# SQL's NULL-propagation would make the whole sum NULL and the prop
+# would incorrectly show as pending forever.
+COMPOSITE_PROP_STAT_FIELDS = {
+    'pass_rush_yds': '(COALESCE(pass_yds, 0) + COALESCE(rush_yds, 0))',
+    'rush_rec_yds':  '(COALESCE(rush_yds, 0) + COALESCE(rec_yds, 0))',
+    # "Touchdowns" (anytime scorer) on scoresandodds is a moneyline
+    # yes/no proposition, but it's mathematically equivalent to "over
+    # 0.5 combined touchdowns" — auto-scorable the same way as the
+    # yards composites above, just summing three columns instead of
+    # two, with an implicit 0.5 line (the site shows odds, not an
+    # explicit line, since it's framed as yes/no rather than over/under).
+    'any_td': '(COALESCE(pass_td, 0) + COALESCE(rush_td, 0) + COALESCE(rec_td, 0))',
+}
+
+VALID_PROP_STAT_FIELDS = VALID_PROP_STAT_FIELDS | set(COMPOSITE_PROP_STAT_FIELDS.keys())
+
 
 @app.cli.command("add-props")
 @click.argument("csv_path", type=click.Path(exists=True))
@@ -2803,8 +2826,11 @@ def _score_props_for_week(year: int, week: int) -> dict:
 
         names = {p["player_name_normalized"] for p in field_props}
         placeholders = ", ".join([ph] * len(names))
+        # Composite fields (e.g. pass_rush_yds) need a SUM expression,
+        # not a bare column name — everything else is a direct column.
+        sql_expr = COMPOSITE_PROP_STAT_FIELDS.get(stat_field, stat_field)
         stat_rows = db_fetchall(f"""
-            SELECT name_normalized, {stat_field} AS actual_value
+            SELECT name_normalized, {sql_expr} AS actual_value
             FROM hist_player_stats
             WHERE year = {ph} AND week = {ph} AND name_normalized IN ({placeholders})
         """, (year, week) + tuple(names))

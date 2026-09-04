@@ -9,20 +9,20 @@ only categories that do that cleanly get converted here; anything
 that doesn't (a composite stat, a longest-play prop, a yes/no
 proposition) is reported and skipped rather than silently dropped.
 
-Categories that DO convert (map 1:1 to a real stat_field):
+Categories that DO convert (map to a real stat_field — either
+directly or as a composite of two existing columns):
     passing-yards, rushing-yards, receiving-yards, receptions,
     passing-tds, completions, interceptions, pass-attempts,
-    rush-attempts
+    rush-attempts, passing-and-rushing-yards, rushing-and-receiving-yards
 
-Categories that DON'T (and why):
+Categories that DON'T (and why — these need data we don't track at
+all, not just a different SQL expression):
     touchdowns                      — combines rush_td + rec_td, no
                                        single matching column
-    passing-and-rushing-yards       — composite (pass_yds + rush_yds)
-    rushing-and-receiving-yards     — composite (rush_yds + rec_yds)
     first-touchdown-scorer          — yes/no proposition, not a line
     last-touchdown-scorer           — yes/no proposition, not a line
     longest-reception                — we don't track single-play
-    longest-rush                     — longest-X stats at all
+    longest-rush                     — "longest X" stats at all
     longest-completion
     kicking-points                   — we don't track kicker stats
 
@@ -55,14 +55,23 @@ CATEGORY_TO_STAT_FIELD = {
     'interceptions':   'pass_int',
     'pass-attempts':   'pass_att',
     'rush-attempts':   'rush_att',
+    # Composite props — sum two (or three) existing columns rather
+    # than reading one directly (see COMPOSITE_PROP_STAT_FIELDS in
+    # app.py). We already track the underlying stats, so these are
+    # genuinely supported now, unlike the still-unsupported ones below.
+    'passing-and-rushing-yards':   'pass_rush_yds',
+    'rushing-and-receiving-yards': 'rush_rec_yds',
+    # Anytime-scorer "touchdowns" is a moneyline yes/no prop, not an
+    # over/under line — mathematically equivalent to "over 0.5 combined
+    # touchdowns" though, so it maps to any_td (pass_td + rush_td +
+    # rec_td) with an IMPLICIT 0.5 line, since the site shows odds
+    # rather than an explicit line for this one.
+    'touchdowns': 'any_td',
 }
 
 UNSUPPORTED_CATEGORIES = {
-    'touchdowns':                   "combines rush_td + rec_td, no single matching column",
-    'passing-and-rushing-yards':    "composite stat (pass_yds + rush_yds)",
-    'rushing-and-receiving-yards':  "composite stat (rush_yds + rec_yds)",
-    'first-touchdown-scorer':       "yes/no proposition, not a line",
-    'last-touchdown-scorer':        "yes/no proposition, not a line",
+    'first-touchdown-scorer':       "yes/no proposition needing play-sequence data we don't have",
+    'last-touchdown-scorer':        "yes/no proposition needing play-sequence data we don't have",
     'longest-reception':            "we don't track single-play 'longest X' stats",
     'longest-rush':                 "we don't track single-play 'longest X' stats",
     'longest-completion':           "we don't track single-play 'longest X' stats",
@@ -108,12 +117,18 @@ def main(input_path: str, output_path: str):
     # the vast majority of real cases — a prop's line is one number,
     # just quoted with different odds on each side); fall back to
     # under_line for the rare row missing an over side.
+    # 'touchdowns' is moneyline-shaped (no over_line/under_line at all —
+    # see scrape_scoresandodds_props.py), so it needs the implicit 0.5
+    # line filled in explicitly rather than falling back to a column
+    # that's genuinely empty for these rows.
     convertible['line'] = convertible['over_line'].fillna(convertible['under_line'])
+    convertible.loc[convertible['category'] == 'touchdowns', 'line'] = 0.5
 
     out = convertible[[
         'player_name', 'stat_field', 'line',
         'category', 'team', 'opponent', 'home_away',
         'over_odds', 'over_book', 'under_odds', 'under_book',
+        'moneyline_odds', 'moneyline_book',
         'site_projection', 'projection_diff',
     ]].rename(columns={'category': 'category_original'})
 

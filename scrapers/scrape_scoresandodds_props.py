@@ -102,7 +102,8 @@ CATEGORIES = {
 OUT_COLUMNS = ['category', 'player_name', 'team', 'opponent', 'home_away',
                'over_line', 'over_odds', 'over_book',
                'under_line', 'under_odds', 'under_book',
-               'site_projection', 'projection_diff']
+               'moneyline_odds', 'moneyline_book',
+               'site_projection', 'projection_diff', 'event_id']
 
 
 def _parse_matchup(text: str):
@@ -131,7 +132,15 @@ def scrape_category(category_key: str, include_projection: bool = True) -> pd.Da
         print(f"    HTTP {r.status_code}")
         return pd.DataFrame()
 
-    soup = BeautifulSoup(r.content, 'html.parser')
+    # from_encoding='utf-8' is deliberate, not the default — confirmed
+    # via direct testing that BeautifulSoup's encoding AUTO-detection
+    # can misinterpret short numeric/symbol content (like a moneyline
+    # odds price, e.g. "+450") into garbage characters when there
+    # isn't enough surrounding text to guess correctly. The page is
+    # UTF-8 (standard for modern sites); specifying it explicitly
+    # removes that guesswork entirely rather than hoping auto-detect
+    # gets it right for every row.
+    soup = BeautifulSoup(r.content, 'html.parser', from_encoding='utf-8')
     rows = soup.find_all('li', attrs={'data-name': True})
     print(f"    {len(rows)} player rows found")
 
@@ -157,6 +166,7 @@ def scrape_category(category_key: str, include_projection: bool = True) -> pd.Da
 
         over_line = over_odds = over_book = None
         under_line = under_odds = under_book = None
+        moneyline_odds = moneyline_book = None
 
         for container in li.find_all('div', class_='best-odds-container'):
             ml_span = container.find('span', class_='data-moneyline')
@@ -165,24 +175,47 @@ def scrape_category(category_key: str, include_projection: bool = True) -> pd.Da
             if not ml_span:
                 continue
             line_text = ml_span.get_text(strip=True)
-            if not line_text or line_text[0] not in ('o', 'u'):
+            if not line_text:
                 continue
-            try:
-                line_val = float(line_text[1:])
-            except ValueError:
-                continue
-            odds_val = odds_tag.get_text(strip=True) if odds_tag else None
             book = book_img.get('alt') if book_img else None
 
-            if line_text[0] == 'o':
-                over_line, over_odds, over_book = line_val, odds_val, book
+            if line_text[0] in ('o', 'u'):
+                # Standard over/under line (e.g. "o265.5"), paired with
+                # a separate <small class="data-odds"> for the price.
+                try:
+                    line_val = float(line_text[1:])
+                except ValueError:
+                    continue
+                odds_val = odds_tag.get_text(strip=True) if odds_tag else None
+                if line_text[0] == 'o':
+                    over_line, over_odds, over_book = line_val, odds_val, book
+                else:
+                    under_line, under_odds, under_book = line_val, odds_val, book
             else:
-                under_line, under_odds, under_book = line_val, odds_val, book
+                # Moneyline proposition (e.g. "+450") — confirmed real
+                # via diagnostic for first/last-touchdown-scorer and
+                # anytime "touchdowns": a single price with no separate
+                # odds tag (the moneyline text IS the price), and only
+                # one best-odds-container instead of two. Also shows up
+                # as a handful of individual rows within otherwise
+                # normal over/under categories (e.g. a low-usage player
+                # the book only offers a simple yes/no price for,
+                # rather than a full line) — this is genuinely a
+                # per-row shape, not a per-category one.
+                moneyline_odds, moneyline_book = line_text, book
 
         site_projection = li.get('data-proj') if include_projection else None
         projection_diff = li.get('data-diff') if include_projection else None
 
-        if not player_name or (over_line is None and under_line is None):
+        # event_id lives on the detail-drawer element, confirmed real
+        # via diagnostic — needed to build market-comparison URLs
+        # (see scrape_scoresandodds_market_comparison.py)
+        drawer = li.find('div', attrs={'data-role': 'chassis'})
+        event_id = drawer.get('data-event') if drawer else None
+
+        has_line = over_line is not None or under_line is not None
+        has_moneyline = moneyline_odds is not None
+        if not player_name or not (has_line or has_moneyline):
             structure_mismatches += 1
             continue
 
@@ -192,15 +225,16 @@ def scrape_category(category_key: str, include_projection: bool = True) -> pd.Da
             'home_away': home_away,
             'over_line': over_line, 'over_odds': over_odds, 'over_book': over_book,
             'under_line': under_line, 'under_odds': under_odds, 'under_book': under_book,
+            'moneyline_odds': moneyline_odds, 'moneyline_book': moneyline_book,
             'site_projection': site_projection, 'projection_diff': projection_diff,
+            'event_id': event_id,
         })
 
     if structure_mismatches:
-        print(f"    WARNING: {structure_mismatches}/{len(rows)} rows had no parseable "
-              f"over/under line — this category likely has a different structure "
-              f"(e.g. a yes/no proposition rather than a line) and needs its own "
-              f"parsing logic, not this generic one. Share the diagnostic output for "
-              f"this category and this can be fixed properly rather than guessed at.")
+        print(f"    WARNING: {structure_mismatches}/{len(rows)} rows had neither a "
+              f"parseable line nor a moneyline price — genuinely unknown structure, "
+              f"not just the moneyline-vs-line distinction already handled. Share the "
+              f"diagnostic output for this category and this can be fixed properly.")
 
     print(f"    {len(records)} rows successfully parsed")
     return pd.DataFrame(records, columns=OUT_COLUMNS)
