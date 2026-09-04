@@ -1,0 +1,266 @@
+{# templates/_info_modal.html
+   Shared across every page via {% include %} — one place to edit
+   the explanations rather than duplicating this content in 12
+   separate template files. #}
+
+<button id="info-btn" class="info-btn" title="What do these tabs mean?">ⓘ Info</button>
+
+<div id="info-modal-overlay" class="info-modal-overlay hidden">
+    <div class="info-modal">
+        <div class="info-modal-header">
+            <h2>What each tab shows</h2>
+            <button id="info-modal-close" class="info-modal-close">&times;</button>
+        </div>
+        <div class="info-modal-body">
+
+            <p class="info-intro">
+                New here, or new to betting/DFS terms in general? This page explains what
+                each tab is for and a few terms you'll see repeated across the site.
+            </p>
+
+            <h3 class="info-section-title">The Challenges (what you actually do)</h3>
+
+            <details open>
+                <summary>Slate — build your weekly DFS lineup</summary>
+                <p>Pick 9 players (QB, 2 RB, 3 WR, TE, FLEX, DST) within a fixed salary cap,
+                like a real DraftKings contest. Click a player to add them; the salary bar
+                shows how much cap space you have left. Once a player's game starts, you can't
+                swap in a <em>new</em> player from that game — but if they were already in
+                your lineup, they stay put. Every other game on the slate stays editable
+                until <em>its</em> kickoff.</p>
+            </details>
+
+            <details>
+                <summary>Standings — how everyone's doing</summary>
+                <p>Three separate rankings: season-long DFS points with your single worst
+                week dropped, season-long DFS points with nothing dropped, and the weekly
+                high scorer for each week. Below that, the separate Prop Bet Challenge
+                standings — ranked by total correct picks, not accuracy percentage.</p>
+            </details>
+
+            <details>
+                <summary>Props — pick 5 over/under bets each week</summary>
+                <p>Each week you'll see a slate of player prop bets (e.g. "Bijan Robinson
+                over/under 5.5 catches"). Pick exactly 5 and choose Over or Under on each.
+                Once the games are played, we automatically check your picks against the
+                real result. See "Over/Under" and "Line" in the glossary below if that's new
+                to you.</p>
+            </details>
+
+            <h3 class="info-section-title">Reference & Research (data to help you decide)</h3>
+
+            <details>
+                <summary>History — past weeks' salaries and results</summary>
+                <p>Browse any past week's slate alongside what actually happened — salary,
+                projected points, and actual DK points scored. Switch the week dropdown to
+                "Season" to see full-season totals per player instead of one week at a time.</p>
+            </details>
+
+            <details>
+                <summary>Weather — game conditions</summary>
+                <p>Temperature, wind, and conditions for each game. A "Forecast" badge means
+                the game hasn't been played yet and conditions could still change; "Final"
+                means the game's over and this is what actually happened.</p>
+            </details>
+
+            <details>
+                <summary>Game Info — the broader game context</summary>
+                <p>Roof type, playing surface, attendance, and the Vegas point spread/total
+                for each game — useful context beyond just weather (e.g. an indoor dome game
+                won't be affected by wind at all).</p>
+            </details>
+
+            <details>
+                <summary>Schedule — the full season, organized by day</summary>
+                <p>Every week's games grouped by which day they're played (Thursday, Sunday,
+                Monday, and the occasional other day) rather than one long flat list.</p>
+            </details>
+
+            <details>
+                <summary>Fantasy Pts Against — which defenses are weak matchups</summary>
+                <p>Shows how many fantasy points each team has given up to a given position
+                (QB/RB/WR/TE) this season. A high number means that defense has been generous
+                to that position — a potentially good matchup for a player facing them.</p>
+            </details>
+
+            <details>
+                <summary>Team Points — scoring by team</summary>
+                <p>Points scored and allowed by each team, week by week, or switch to "Season"
+                for their average per game across the whole year.</p>
+            </details>
+
+            <details>
+                <summary>Best Matchups — this week's most exploitable matchups</summary>
+                <p>Cross-references this week's slate against each player's specific opponent's
+                recent history of points allowed to that position, plus the player's own
+                recent scoring — both averaged over their last 10 games (crossing into last
+                season if needed early in a new one). Sorted so the best combination of
+                "weak opponent + productive player" shows up first. Only shows players
+                actually on their team's depth chart this week.</p>
+            </details>
+
+            <details>
+                <summary>Depth Charts — who's actually playing, and in what order</summary>
+                <p>Each team's 1st/2nd/3rd string at QB, RB, WR, and TE. Useful for spotting
+                backups who might see extra usage, or confirming a player is even in the
+                mix at all.</p>
+            </details>
+
+            <h3 class="info-section-title">Terms you'll see around the site</h3>
+
+            <details>
+                <summary>Over/Under (and "the line")</summary>
+                <p>A prop bet's "line" is a number set for a specific stat (like passing
+                yards). Betting the <strong>Over</strong> means you think the real result
+                will be higher than that number; <strong>Under</strong> means you think
+                it'll be lower. E.g. "Over 5.5 catches" wins if the player catches 6 or more.</p>
+            </details>
+
+            <details>
+                <summary>Odds (+150, -120, etc.)</summary>
+                <p>American odds format. A <strong>negative</strong> number (like -120) means
+                you'd need to bet $120 to win $100 — that side is considered more likely. A
+                <strong>positive</strong> number (like +150) means a $100 bet would win $150 —
+                that side is considered less likely, but pays out more if it hits.</p>
+            </details>
+
+            <details>
+                <summary>Salary cap, Proj Pts, and Value</summary>
+                <p>In DFS, every player has a "salary" and you're building a 9-player lineup
+                under a fixed total budget (the salary cap) — same idea as a real DraftKings
+                contest. "Proj Pts" is a projection of how many points they'll likely score;
+                "Value" is projected points per $1,000 of salary, a quick way to spot
+                good bang-for-your-buck picks.</p>
+            </details>
+
+            <details>
+                <summary>DK Points</summary>
+                <p>DraftKings' specific fantasy scoring formula — not the same as standard
+                fantasy football scoring. It includes bonuses for milestones (like 100+
+                rushing yards) that other formats don't always have.</p>
+            </details>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .info-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 900;
+        padding: 8px 16px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .info-btn:hover { filter: brightness(1.1); }
+
+    .info-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .info-modal-overlay.hidden { display: none; }
+
+    .info-modal {
+        background: var(--bg-surface, #1e1e1e);
+        border-radius: 12px;
+        max-width: 640px;
+        width: 100%;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    .info-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border, #333);
+    }
+    .info-modal-header h2 { margin: 0; font-size: 1.1rem; }
+
+    .info-modal-close {
+        background: none;
+        border: none;
+        color: var(--text-muted, #999);
+        font-size: 1.5rem;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0 4px;
+    }
+    .info-modal-close:hover { color: var(--text, #fff); }
+
+    .info-modal-body {
+        padding: 16px 20px;
+        overflow-y: auto;
+    }
+
+    .info-intro {
+        margin: 0 0 16px 0;
+        color: var(--text-muted, #999);
+        font-size: 0.85rem;
+    }
+
+    .info-section-title {
+        margin: 20px 0 8px 0;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--accent);
+    }
+    .info-section-title:first-of-type { margin-top: 0; }
+
+    .info-modal-body details {
+        margin-bottom: 8px;
+        border: 1px solid var(--border, #333);
+        border-radius: 6px;
+        padding: 8px 12px;
+    }
+    .info-modal-body summary {
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.88rem;
+    }
+    .info-modal-body p {
+        margin: 8px 0 2px 0;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: var(--text-muted, #ccc);
+    }
+</style>
+
+<script>
+    (function () {
+        var btn = document.getElementById('info-btn');
+        var overlay = document.getElementById('info-modal-overlay');
+        var closeBtn = document.getElementById('info-modal-close');
+        if (!btn || !overlay || !closeBtn) return;
+
+        function open() { overlay.classList.remove('hidden'); }
+        function close() { overlay.classList.add('hidden'); }
+
+        btn.addEventListener('click', open);
+        closeBtn.addEventListener('click', close);
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) close();   // click on the dark backdrop closes it
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') close();
+        });
+    })();
+</script>
