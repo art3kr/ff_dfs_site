@@ -791,17 +791,19 @@ def load_weekly_salary_command(csv_path, year):
 
     Reuses the exact same format-detection and parsing logic already
     proven in scrapers/combine_dk_salaries.py (which builds the
-    historical hist_dfs_salaries data) — both DFF and RotoWire export
-    formats are auto-detected and handled. Week comes from the file's
-    own `week` column, same as year detection.
+    historical hist_dfs_salaries data) — DFF exports, RotoWire exports,
+    and pre-processed files (e.g. scrapers/scrape_fp_dk_salaries.py's
+    output, identified by having name_normalized/dk_salary columns
+    already present) are all auto-detected and handled. Week comes from
+    the file's own `week` column, same as year detection.
 
     Examples:
         flask load-weekly-salary "C:\\Downloads\\DFF_NFL_cheatsheet_2026-09-10.csv"
         flask load-weekly-salary "C:\\Downloads\\Week1_salaries_rotowire.csv" --year 2026
+        flask load-weekly-salary data\\fp_dk_salaries_week1_2026.csv.gz
     """
     import sys
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'scrapers'))
-    from combine_dk_salaries import detect_format, year_from_path, parse_dff, parse_rotowire
     import pandas as pd
 
     try:
@@ -813,22 +815,42 @@ def load_weekly_salary_command(csv_path, year):
         click.echo("ERROR: file is empty.", err=True)
         return
 
-    fmt = detect_format(df)
-    if fmt == 'unknown':
-        click.echo(f"ERROR: unrecognised file format. Columns found: {list(df.columns)[:8]}...", err=True)
-        click.echo("Expected either a DFF cheatsheet export or a RotoWire export.", err=True)
-        return
+    # Pre-processed formats (already in final shape, no DFF/RotoWire-style
+    # transformation needed) — currently just the FantasyPros salary
+    # scraper's output, identified by having both name_normalized and
+    # dk_salary columns already present. Skip format detection and
+    # parse_dff/parse_rotowire entirely; use the file as-is. This also
+    # means this path has no dependency on combine_dk_salaries.py at all
+    # (that import is deferred below, only for the DFF/RotoWire path).
+    if 'name_normalized' in df.columns and 'dk_salary' in df.columns:
+        click.echo("Format detected: pre-processed (e.g. FantasyPros salary scrape)")
+        parsed = df
+        detected_year = int(parsed['year'].iloc[0]) if 'year' in parsed.columns and pd.notna(parsed['year'].iloc[0]) else year
+        if detected_year is None:
+            click.echo("ERROR: couldn't determine the season year from the file "
+                       "or --year argument.", err=True)
+            return
+        click.echo(f"Year: {detected_year}")
+    else:
+        from combine_dk_salaries import detect_format, year_from_path, parse_dff, parse_rotowire
 
-    detected_year = year_from_path(csv_path, year)
-    if detected_year is None:
-        click.echo("ERROR: couldn't determine the season year from the filename "
-                   "or folder. Pass it explicitly with --year.", err=True)
-        return
+        fmt = detect_format(df)
+        if fmt == 'unknown':
+            click.echo(f"ERROR: unrecognised file format. Columns found: {list(df.columns)[:8]}...", err=True)
+            click.echo("Expected either a DFF cheatsheet export, a RotoWire export, "
+                       "or a pre-processed file with name_normalized/dk_salary columns.", err=True)
+            return
 
-    click.echo(f"Format detected: {fmt}")
-    click.echo(f"Year: {detected_year}")
+        detected_year = year_from_path(csv_path, year)
+        if detected_year is None:
+            click.echo("ERROR: couldn't determine the season year from the filename "
+                       "or folder. Pass it explicitly with --year.", err=True)
+            return
 
-    parsed = parse_dff(df, detected_year) if fmt == 'dff' else parse_rotowire(df, detected_year)
+        click.echo(f"Format detected: {fmt}")
+        click.echo(f"Year: {detected_year}")
+
+        parsed = parse_dff(df, detected_year) if fmt == 'dff' else parse_rotowire(df, detected_year)
 
     if parsed.empty:
         click.echo("ERROR: no valid player rows parsed from this file.", err=True)
@@ -1445,6 +1467,21 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             source_label = filename.replace('.csv.gz', '')
             count = upsert_salaries(df, source_label)
             click.echo(f"  Done: {count:,} rows from {filename}")
+
+        # FantasyPros weekly salary scrapes — one file per week
+        # (fp_dk_salaries_week{N}_{year}.csv.gz), unlike the bulk
+        # historical files above. Glob for all of them rather than
+        # hardcoding filenames, so new weeks get picked up automatically
+        # as the season progresses without needing code changes here.
+        import glob
+        fp_salary_files = sorted(glob.glob(os.path.join(data_dir, "fp_dk_salaries_week*_*.csv.gz")))
+        if not fp_salary_files:
+            click.echo(f"Skip (not found): {os.path.join(data_dir, 'fp_dk_salaries_week*_*.csv.gz')}")
+        for path in fp_salary_files:
+            click.echo(f"Loading {path} ...")
+            df = pd.read_csv(path)
+            count = upsert_salaries(df, 'fantasypros_dk_salary')
+            click.echo(f"  Done: {count:,} rows from {os.path.basename(path)}")
 
     # --- Load player stats file ---
     if not salaries_only:
