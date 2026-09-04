@@ -12,9 +12,10 @@
     <div class="header-left">
         <h1>FF DFS Challenge</h1>
         <nav class="main-nav">
-            <a href="{{ url_for('slate') }}" class="nav-link active">Slate</a>
+            <a href="{{ url_for('slate') }}" class="nav-link challenge-tab active">Slate</a>
+            <a href="{{ url_for('standings') }}" class="nav-link challenge-tab">Standings</a>
+            <a href="{{ url_for('props') }}" class="nav-link challenge-tab">Props</a>
             <a href="{{ url_for('history') }}" class="nav-link">History</a>
-            <a href="{{ url_for('standings') }}" class="nav-link">Standings</a>
             <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
             <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
             <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>

@@ -12,9 +12,10 @@
     <div class="header-left">
         <h1>FF DFS Challenge</h1>
         <nav class="main-nav">
-            <a href="{{ url_for('slate') }}" class="nav-link">Slate</a>
+            <a href="{{ url_for('slate') }}" class="nav-link challenge-tab">Slate</a>
+            <a href="{{ url_for('standings') }}" class="nav-link challenge-tab active">Standings</a>
+            <a href="{{ url_for('props') }}" class="nav-link challenge-tab">Props</a>
             <a href="{{ url_for('history') }}" class="nav-link">History</a>
-            <a href="{{ url_for('standings') }}" class="nav-link active">Standings</a>
             <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
             <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
             <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>
@@ -158,6 +159,40 @@
 
     {% else %}
     <p class="empty-state">No lineups found for {{ year }}.</p>
+    {% endif %}
+
+    <h2 class="standings-section-title">Prop Bet Challenge</h2>
+    {% if prop_standings %}
+    <div class="table-wrapper">
+        <table id="prop-standings-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Participant</th>
+                    <th class="right">Correct</th>
+                    <th class="right">Total Scored</th>
+                    <th class="right">Accuracy</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in prop_standings %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td class="player-name">{{ row['submitter'] }}</td>
+                    <td class="right"><strong>{{ row['correct'] }}</strong></td>
+                    <td class="right">{{ row['total_scored'] }}</td>
+                    <td class="right">{{ "%.1f"|format(row['accuracy_pct']) if row['accuracy_pct'] is not none else '—' }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p class="standings-note">
+        Ranked by total correct picks over the season (not accuracy %). Pending (not yet scored)
+        and push results aren't counted either way.
+    </p>
+    {% else %}
+    <p class="empty-state">No prop picks scored yet for {{ year }}.</p>
     {% endif %}
 
 {% endif %}

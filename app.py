@@ -3293,15 +3293,20 @@ def standings():
     """
     ph = _ph()
 
-    available_years = db_fetchall(
-        "SELECT DISTINCT year FROM lineups ORDER BY year DESC"
-    )
-    years = [r["year"] for r in available_years]
+    # Years come from BOTH lineups and prop picks — these are two
+    # independent challenges (per the Props feature's design), so a
+    # year with props submitted but no DFS lineups yet (or vice versa)
+    # should still render correctly rather than showing "no lineups
+    # submitted" and hiding everything, props included.
+    lineup_years = db_fetchall("SELECT DISTINCT year FROM lineups")
+    prop_years = db_fetchall("SELECT DISTINCT year FROM prop_picks")
+    years = sorted({r["year"] for r in lineup_years} | {r["year"] for r in prop_years}, reverse=True)
 
     if not years:
         return render_template("standings.html", year=None, years=[],
                                standings=[], weeks=[],
-                               standings_no_drop=[], weekly_top_scorers=[])
+                               standings_no_drop=[], weekly_top_scorers=[],
+                               prop_standings=[])
 
     req_year = request.args.get("year", type=int)
     sel_year = req_year if req_year in years else years[0]
@@ -3441,11 +3446,48 @@ def standings():
         winners = sorted([s for s, pts in scores_this_week.items() if pts == top_score])
         weekly_top_scorers.append({"week": w, "top_score": top_score, "winners": winners})
 
+    # Prop Bet Challenge standings — season-long, ranked by total
+    # correct picks (not accuracy %), matching "pick as many correct
+    # as possible over the course of the season" as stated. Pending
+    # (not-yet-scored) and push results are excluded from both the
+    # numerator and denominator rather than counted as wrong.
+    prop_week_rows = db_fetchall(f"""
+        SELECT DISTINCT week FROM prop_picks WHERE year = {ph}
+    """, (sel_year,))
+    prop_weeks = sorted(r["week"] for r in prop_week_rows)
+
+    prop_standings_by_submitter = {}   # submitter -> {"correct": n, "total_scored": n}
+    for w in prop_weeks:
+        week_scores = _score_props_for_week(sel_year, w)
+        picks_this_week = db_fetchall(f"""
+            SELECT submitter, prop_bet_id, pick FROM prop_picks
+            WHERE year = {ph} AND week = {ph}
+        """, (sel_year, w))
+        for p in picks_this_week:
+            outcome = week_scores.get(p["prop_bet_id"], {}).get("result")
+            if outcome is None or outcome == "push":
+                continue   # pending or push — not counted either way
+            entry = prop_standings_by_submitter.setdefault(p["submitter"], {"correct": 0, "total_scored": 0})
+            entry["total_scored"] += 1
+            if outcome == p["pick"]:
+                entry["correct"] += 1
+
+    prop_standings = []
+    for submitter, stats in prop_standings_by_submitter.items():
+        prop_standings.append({
+            "submitter": submitter,
+            "correct": stats["correct"],
+            "total_scored": stats["total_scored"],
+            "accuracy_pct": round(100 * stats["correct"] / stats["total_scored"], 1) if stats["total_scored"] else None,
+        })
+    prop_standings.sort(key=lambda r: r["correct"], reverse=True)
+
     return render_template("standings.html",
                            year=sel_year, years=years,
                            standings=leaderboard, weeks=weeks,
                            standings_no_drop=leaderboard_no_drop,
-                           weekly_top_scorers=weekly_top_scorers)
+                           weekly_top_scorers=weekly_top_scorers,
+                           prop_standings=prop_standings)
 
 
 @app.route("/submit-lineup", methods=["POST"])

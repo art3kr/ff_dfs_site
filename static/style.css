@@ -519,6 +519,30 @@ header {
 .nav-link:hover  { background: var(--bg-surface); color: var(--text); }
 .nav-link.active { background: var(--accent); color: #fff; }
 
+/* Challenge tabs (Slate, Standings, Props) — visually distinct from
+   the data/reference tabs, and grouped together first in nav order,
+   so participants can tell at a glance which tabs are "do something"
+   vs "look something up". Amber/gold rather than the blue --accent
+   used for the active-state highlight, so the two colors don't
+   compete with each other. */
+.nav-link.challenge-tab {
+    background: rgba(230, 168, 30, 0.12);
+    color: #e6a81e;
+    border: 1px solid rgba(230, 168, 30, 0.3);
+}
+.nav-link.challenge-tab:hover {
+    background: rgba(230, 168, 30, 0.22);
+    color: #e6a81e;
+}
+.nav-link.challenge-tab.active {
+    background: #e6a81e;
+    color: #1a1a1a;
+    border-color: #e6a81e;
+}
+.nav-link.challenge-tab:nth-of-type(3) {
+    margin-right: 10px;   /* gap between the challenge-tab group and data tabs */
+}
+
 /* -----------------------------------------------------------------------
    History page
    ----------------------------------------------------------------------- */
