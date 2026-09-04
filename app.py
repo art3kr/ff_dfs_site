@@ -459,6 +459,23 @@ def _auto_init():
             CREATE INDEX IF NOT EXISTS idx_hist_team_points_lookup
                 ON hist_team_points (year, week)
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS depth_charts (
+                id                 SERIAL PRIMARY KEY,
+                team               TEXT    NOT NULL,
+                pos                TEXT    NOT NULL,
+                string_rank        INTEGER NOT NULL,
+                player_name        TEXT    NOT NULL,
+                player_name_normalized TEXT NOT NULL,
+                ourlads_player_id  TEXT,
+                updated_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(team, pos, string_rank)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_depth_charts_name
+                ON depth_charts (player_name_normalized)
+        """)
         cur.execute("SELECT pg_advisory_unlock(918273645)")
     else:
         # SQLite: executescript for multi-statement init
@@ -654,6 +671,19 @@ def _auto_init():
             );
             CREATE INDEX IF NOT EXISTS idx_hist_team_points_lookup
                 ON hist_team_points (year, week);
+            CREATE TABLE IF NOT EXISTS depth_charts (
+                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                team               TEXT    NOT NULL,
+                pos                TEXT    NOT NULL,
+                string_rank        INTEGER NOT NULL,
+                player_name        TEXT    NOT NULL,
+                player_name_normalized TEXT NOT NULL,
+                ourlads_player_id  TEXT,
+                updated_at         TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(team, pos, string_rank)
+            );
+            CREATE INDEX IF NOT EXISTS idx_depth_charts_name
+                ON depth_charts (player_name_normalized);
         """)
         _migrate_hist_player_stats_sqlite(conn)
         _migrate_table_sqlite(conn, "game_schedule", GAME_SCHEDULE_MIGRATIONS)
@@ -1528,6 +1558,41 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             inserted += len(batch)
         return inserted
 
+    def replace_depth_charts(df: pd.DataFrame):
+        """
+        Full replace, not upsert — a player dropped from a team's
+        depth chart between scrapes shouldn't linger in the table
+        forever. This is a live/current-state table (like `players`),
+        not a historical one, so DELETE-then-INSERT is the correct
+        semantic here, unlike every other loader in this function.
+        """
+        cur.execute("DELETE FROM depth_charts")
+        conn.commit()
+
+        sql = f"""
+            INSERT INTO depth_charts
+                (team, pos, string_rank, player_name, player_name_normalized, ourlads_player_id)
+            VALUES ({_ph(6)})
+        """
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            name = str(r.get('player_name', ''))
+            batch.append((
+                str(r.get('team', '')), str(r.get('pos', '')), int(r.get('string_rank')),
+                name, normalize_name(name), _none_if_nan(r.get('ourlads_player_id')),
+            ))
+            if len(batch) >= batch_size:
+                cur.executemany(sql, batch)
+                conn.commit()
+                inserted += len(batch)
+                batch = []
+        if batch:
+            cur.executemany(sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
     def upsert_weather(df: pd.DataFrame):
         if _is_postgres():
             sql = f"""
@@ -1759,6 +1824,18 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             df = pd.read_csv(team_points_path)
             count = upsert_team_points(df)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(team_points_path)}")
+
+    # --- Load depth charts (single file, always reflects the latest
+    # scrape — full replace, not a historical/multi-week accumulation) ---
+    if not salaries_only:
+        depth_charts_path = os.path.join(data_dir, "ourlads_depth_charts.csv.gz")
+        if not os.path.exists(depth_charts_path):
+            click.echo(f"Skip (not found): {depth_charts_path}")
+        else:
+            click.echo(f"Loading {depth_charts_path} ...")
+            df = pd.read_csv(depth_charts_path)
+            count = replace_depth_charts(df)
+            click.echo(f"  Done: {count:,} rows from {os.path.basename(depth_charts_path)} (full replace)")
 
     cur.close()
     conn.close()

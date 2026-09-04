@@ -19,6 +19,11 @@ EXTRA_ALIASES = {
     'san diego chargers': 'lac',
     'st. louis rams': 'lar',
     'st louis rams': 'lar',
+    # ourlads.com uses its own quirky URL slugs for these two teams,
+    # confirmed via their site's own team-navigation links — different
+    # from every other source encountered so far (ESPN/PFR use ARI/LAR).
+    'arz': 'ari',
+    'ram': 'lar',
 }
 _lookup = {}
 
