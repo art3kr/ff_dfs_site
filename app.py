@@ -377,6 +377,43 @@ def _auto_init():
             CREATE INDEX IF NOT EXISTS idx_hist_game_info_lookup
                 ON hist_game_info (year, week)
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS hist_fantasy_points_against (
+                id                     SERIAL PRIMARY KEY,
+                year                   INTEGER NOT NULL,
+                position               TEXT    NOT NULL,
+                team                   TEXT    NOT NULL,
+                games                  INTEGER,
+                fantasy_pts            REAL,
+                dk_pts                 REAL,
+                fd_pts                 REAL,
+                fantasy_pts_per_game   REAL,
+                dk_pts_per_game        REAL,
+                fd_pts_per_game        REAL,
+                UNIQUE(year, position, team)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_hist_fpa_lookup
+                ON hist_fantasy_points_against (year, position)
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS hist_team_points (
+                id             SERIAL PRIMARY KEY,
+                year           INTEGER NOT NULL,
+                week           INTEGER NOT NULL,
+                team           TEXT    NOT NULL,
+                opponent       TEXT,
+                home_away      TEXT,
+                points_scored  INTEGER,
+                points_allowed INTEGER,
+                UNIQUE(year, week, team)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_hist_team_points_lookup
+                ON hist_team_points (year, week)
+        """)
         cur.execute("SELECT pg_advisory_unlock(918273645)")
     else:
         # SQLite: executescript for multi-statement init
@@ -543,6 +580,35 @@ def _auto_init():
             );
             CREATE INDEX IF NOT EXISTS idx_hist_game_info_lookup
                 ON hist_game_info (year, week);
+            CREATE TABLE IF NOT EXISTS hist_fantasy_points_against (
+                id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+                year                 INTEGER NOT NULL,
+                position             TEXT    NOT NULL,
+                team                 TEXT    NOT NULL,
+                games                INTEGER,
+                fantasy_pts          REAL,
+                dk_pts               REAL,
+                fd_pts               REAL,
+                fantasy_pts_per_game REAL,
+                dk_pts_per_game      REAL,
+                fd_pts_per_game      REAL,
+                UNIQUE(year, position, team)
+            );
+            CREATE INDEX IF NOT EXISTS idx_hist_fpa_lookup
+                ON hist_fantasy_points_against (year, position);
+            CREATE TABLE IF NOT EXISTS hist_team_points (
+                id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                year           INTEGER NOT NULL,
+                week           INTEGER NOT NULL,
+                team           TEXT    NOT NULL,
+                opponent       TEXT,
+                home_away      TEXT,
+                points_scored  INTEGER,
+                points_allowed INTEGER,
+                UNIQUE(year, week, team)
+            );
+            CREATE INDEX IF NOT EXISTS idx_hist_team_points_lookup
+                ON hist_team_points (year, week);
         """)
         _migrate_hist_player_stats_sqlite(conn)
         _migrate_table_sqlite(conn, "game_schedule", GAME_SCHEDULE_MIGRATIONS)
@@ -1317,6 +1383,106 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             inserted += len(batch)
         return inserted
 
+    def upsert_fantasy_points_against(df: pd.DataFrame):
+        if _is_postgres():
+            sql = f"""
+                INSERT INTO hist_fantasy_points_against
+                    (year, position, team, games, fantasy_pts, dk_pts, fd_pts,
+                     fantasy_pts_per_game, dk_pts_per_game, fd_pts_per_game)
+                VALUES ({_ph(10)})
+                ON CONFLICT (year, position, team) DO UPDATE SET
+                    games                = EXCLUDED.games,
+                    fantasy_pts          = EXCLUDED.fantasy_pts,
+                    dk_pts               = EXCLUDED.dk_pts,
+                    fd_pts               = EXCLUDED.fd_pts,
+                    fantasy_pts_per_game = EXCLUDED.fantasy_pts_per_game,
+                    dk_pts_per_game      = EXCLUDED.dk_pts_per_game,
+                    fd_pts_per_game      = EXCLUDED.fd_pts_per_game
+            """
+        else:
+            sql = f"""
+                INSERT INTO hist_fantasy_points_against
+                    (year, position, team, games, fantasy_pts, dk_pts, fd_pts,
+                     fantasy_pts_per_game, dk_pts_per_game, fd_pts_per_game)
+                VALUES ({_ph(10)})
+                ON CONFLICT(year, position, team) DO UPDATE SET
+                    games                = excluded.games,
+                    fantasy_pts          = excluded.fantasy_pts,
+                    dk_pts               = excluded.dk_pts,
+                    fd_pts               = excluded.fd_pts,
+                    fantasy_pts_per_game = excluded.fantasy_pts_per_game,
+                    dk_pts_per_game      = excluded.dk_pts_per_game,
+                    fd_pts_per_game      = excluded.fd_pts_per_game
+            """
+
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            batch.append((
+                int(r.get('year')), str(r.get('position', '')), str(r.get('team', '')),
+                _int_or_none(r.get('games')),
+                _float_or_none(r.get('fantasy_pts')), _float_or_none(r.get('dk_pts')),
+                _float_or_none(r.get('fd_pts')),
+                _float_or_none(r.get('fantasy_pts_per_game')),
+                _float_or_none(r.get('dk_pts_per_game')),
+                _float_or_none(r.get('fd_pts_per_game')),
+            ))
+            if len(batch) >= batch_size:
+                cur.executemany(sql, batch)
+                conn.commit()
+                inserted += len(batch)
+                click.echo(f"    ...{inserted:,} rows loaded")
+                batch = []
+        if batch:
+            cur.executemany(sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
+    def upsert_team_points(df: pd.DataFrame):
+        if _is_postgres():
+            sql = f"""
+                INSERT INTO hist_team_points
+                    (year, week, team, opponent, home_away, points_scored, points_allowed)
+                VALUES ({_ph(7)})
+                ON CONFLICT (year, week, team) DO UPDATE SET
+                    opponent       = EXCLUDED.opponent,
+                    home_away      = EXCLUDED.home_away,
+                    points_scored  = EXCLUDED.points_scored,
+                    points_allowed = EXCLUDED.points_allowed
+            """
+        else:
+            sql = f"""
+                INSERT INTO hist_team_points
+                    (year, week, team, opponent, home_away, points_scored, points_allowed)
+                VALUES ({_ph(7)})
+                ON CONFLICT(year, week, team) DO UPDATE SET
+                    opponent       = excluded.opponent,
+                    home_away      = excluded.home_away,
+                    points_scored  = excluded.points_scored,
+                    points_allowed = excluded.points_allowed
+            """
+
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            batch.append((
+                int(r.get('year')), int(r.get('week')), str(r.get('team', '')),
+                _none_if_nan(r.get('opponent')), _none_if_nan(r.get('home_away')),
+                _int_or_none(r.get('points_scored')), _int_or_none(r.get('points_allowed')),
+            ))
+            if len(batch) >= batch_size:
+                cur.executemany(sql, batch)
+                conn.commit()
+                inserted += len(batch)
+                click.echo(f"    ...{inserted:,} rows loaded")
+                batch = []
+        if batch:
+            cur.executemany(sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
     def upsert_weather(df: pd.DataFrame):
         if _is_postgres():
             sql = f"""
@@ -1527,6 +1693,28 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             count = upsert_dst_stats(df)
             click.echo(f"  Done: {count:,} rows from {DST_FILE}")
 
+    # --- Load fantasy-points-against files (one per year) ---
+    if not salaries_only:
+        fpa_files = sorted(glob.glob(os.path.join(data_dir, "fantasy_points_against_*.csv.gz")))
+        if not fpa_files:
+            click.echo(f"Skip (not found): {os.path.join(data_dir, 'fantasy_points_against_*.csv.gz')}")
+        for path in fpa_files:
+            click.echo(f"Loading {path} ...")
+            df = pd.read_csv(path)
+            count = upsert_fantasy_points_against(df)
+            click.echo(f"  Done: {count:,} rows from {os.path.basename(path)}")
+
+    # --- Load team points file (single file, all years combined) ---
+    if not salaries_only:
+        team_points_path = os.path.join(data_dir, "team_points_by_week.csv.gz")
+        if not os.path.exists(team_points_path):
+            click.echo(f"Skip (not found): {team_points_path}")
+        else:
+            click.echo(f"Loading {team_points_path} ...")
+            df = pd.read_csv(team_points_path)
+            count = upsert_team_points(df)
+            click.echo(f"  Done: {count:,} rows from {os.path.basename(team_points_path)}")
+
     cur.close()
     conn.close()
     click.echo("load-history complete.")
@@ -1666,6 +1854,8 @@ def slate():
     # individual rows rather than locking the whole slate at once.
     locked_teams = set()
     kickoff_by_team = {}   # team -> friendly display string, e.g. "Thu 8:20 PM ET"
+    day_by_team = {}       # team -> day name, e.g. "Thursday"
+    day_earliest_kickoff = {}   # day name -> earliest kickoff datetime that day (for ordering)
     total_teams_scheduled = 0
     if current_week:
         from datetime import datetime, timezone
@@ -1700,8 +1890,39 @@ def slate():
             kickoff_eastern = kickoff.astimezone(EASTERN)
             kickoff_by_team[r["team"]] = kickoff_eastern.strftime("%a %I:%M %p ET").lstrip("0").replace(" 0", " ")
 
+            day_name = kickoff_eastern.strftime("%A")   # "Thursday", "Sunday", etc.
+            day_by_team[r["team"]] = day_name
+            if day_name not in day_earliest_kickoff or kickoff < day_earliest_kickoff[day_name]:
+                day_earliest_kickoff[day_name] = kickoff
+
+    # Group players by day (chronological order, based on that day's
+    # earliest kickoff) while preserving the existing position/proj-pts
+    # ordering WITHIN each day — same single-table approach as before,
+    # just with day-separator rows the template renders between groups.
+    days_in_order = sorted(day_earliest_kickoff.keys(), key=lambda d: day_earliest_kickoff[d])
+    players_by_day = []   # list of (day_name, [players]) in chronological order
+    if players and days_in_order:
+        buckets = {d: [] for d in days_in_order}
+        no_schedule_bucket = []   # players whose team has no game_schedule row at all (rare/edge case)
+        for p in players:
+            d = day_by_team.get(p["team"])
+            if d:
+                buckets[d].append(p)
+            else:
+                no_schedule_bucket.append(p)
+        for d in days_in_order:
+            if buckets[d]:
+                players_by_day.append((d, buckets[d]))
+        if no_schedule_bucket:
+            players_by_day.append(("Date TBD", no_schedule_bucket))
+    elif players:
+        # No schedule loaded at all yet — fall back to one unlabeled group
+        # so the page still works, just without day separators.
+        players_by_day = [(None, players)]
+
     return render_template("slate.html",
                            players=players,
+                           players_by_day=players_by_day,
                            week=current_week,
                            year=current_year,
                            salary_cap=SALARY_CAP,
@@ -1849,6 +2070,94 @@ def player_career(pfr_id):
     return render_template("player.html",
                            found=True, pfr_id=pfr_id, name=info["name"],
                            games=games, career_totals=totals)
+
+
+@app.route("/fantasy-points-against")
+def fantasy_points_against():
+    """
+    Which teams are weak/strong matchups by position — season-level
+    fantasy points allowed, sourced from PFR's fantasy-points-against
+    pages. Filterable by year and position, sortable by DK pts/game
+    allowed (the primary metric, since this whole project is DK-focused).
+    """
+    available_years_rows = db_fetchall(
+        "SELECT DISTINCT year FROM hist_fantasy_points_against ORDER BY year DESC"
+    )
+    available_years = [r["year"] for r in available_years_rows]
+
+    if not available_years:
+        return render_template("fantasy_points_against.html", rows=[],
+                               year=None, available_years=[], position="ALL")
+
+    req_year = request.args.get("year", type=int)
+    sel_year = req_year if req_year in available_years else available_years[0]
+    sel_position = request.args.get("position", "ALL")
+
+    ph = _ph()
+    if sel_position != "ALL":
+        rows = db_fetchall(f"""
+            SELECT position, team, games, fantasy_pts, dk_pts, fd_pts,
+                   fantasy_pts_per_game, dk_pts_per_game, fd_pts_per_game
+            FROM hist_fantasy_points_against
+            WHERE year = {ph} AND position = {ph}
+            ORDER BY dk_pts_per_game DESC
+        """, (sel_year, sel_position))
+    else:
+        rows = db_fetchall(f"""
+            SELECT position, team, games, fantasy_pts, dk_pts, fd_pts,
+                   fantasy_pts_per_game, dk_pts_per_game, fd_pts_per_game
+            FROM hist_fantasy_points_against
+            WHERE year = {ph}
+            ORDER BY position, dk_pts_per_game DESC
+        """, (sel_year,))
+
+    return render_template("fantasy_points_against.html",
+                           rows=rows, year=sel_year, available_years=available_years,
+                           position=sel_position)
+
+
+@app.route("/team-points")
+def team_points():
+    """
+    Points scored/allowed by team, per week — same year/week selector
+    pattern as History/Weather.
+    """
+    year_week_rows = db_fetchall(
+        "SELECT DISTINCT year, week FROM hist_team_points ORDER BY year DESC, week DESC"
+    )
+    available = [(r["year"], r["week"]) for r in year_week_rows]
+
+    if not available:
+        return render_template("team_points.html", rows=[], year=None, week=None,
+                               available_years=[], available_weeks_by_year={})
+
+    req_year = request.args.get("year", type=int)
+    req_week = request.args.get("week", type=int)
+
+    if req_year is None or req_week is None or (req_year, req_week) not in available:
+        sel_year, sel_week = available[0]
+    else:
+        sel_year, sel_week = req_year, req_week
+
+    available_years = sorted({y for y, w in available}, reverse=True)
+    available_weeks_by_year = {}
+    for y, w in available:
+        available_weeks_by_year.setdefault(y, []).append(w)
+    for y in available_weeks_by_year:
+        available_weeks_by_year[y].sort()
+
+    ph = _ph()
+    rows = db_fetchall(f"""
+        SELECT team, opponent, home_away, points_scored, points_allowed
+        FROM hist_team_points
+        WHERE year = {ph} AND week = {ph}
+        ORDER BY points_scored DESC
+    """, (sel_year, sel_week))
+
+    return render_template("team_points.html",
+                           rows=rows, year=sel_year, week=sel_week,
+                           available_years=available_years,
+                           available_weeks_by_year=available_weeks_by_year)
 
 
 @app.route("/schedule")
@@ -2136,6 +2445,36 @@ def download_csv(data_type):
             ORDER BY week, kickoff
         """, (year,))
         filename = f"schedule_{year}.csv"
+
+    elif data_type == "fantasy-points-against":
+        position = request.args.get("position", "ALL")
+        if position != "ALL":
+            rows = db_fetchall(f"""
+                SELECT year, position, team, games, fantasy_pts, dk_pts, fd_pts,
+                       fantasy_pts_per_game, dk_pts_per_game, fd_pts_per_game
+                FROM hist_fantasy_points_against
+                WHERE year = {_ph()} AND position = {_ph()}
+                ORDER BY dk_pts_per_game DESC
+            """, (year, position))
+            filename = f"fantasy_points_against_{position}_{year}.csv"
+        else:
+            rows = db_fetchall(f"""
+                SELECT year, position, team, games, fantasy_pts, dk_pts, fd_pts,
+                       fantasy_pts_per_game, dk_pts_per_game, fd_pts_per_game
+                FROM hist_fantasy_points_against
+                WHERE year = {_ph()}
+                ORDER BY position, dk_pts_per_game DESC
+            """, (year,))
+            filename = f"fantasy_points_against_{year}.csv"
+
+    elif data_type == "team-points":
+        rows = db_fetchall(f"""
+            SELECT year, week, team, opponent, home_away, points_scored, points_allowed
+            FROM hist_team_points
+            WHERE year = {_ph()} AND week = {_ph()}
+            ORDER BY points_scored DESC
+        """, (year, week))
+        filename = f"team_points_week{week}_{year}.csv"
 
     else:
         return jsonify(error="Unknown data type"), 404

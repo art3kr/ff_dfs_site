@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Game Info{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge — Team Points{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -16,15 +16,15 @@
             <a href="{{ url_for('history') }}" class="nav-link">History</a>
             <a href="{{ url_for('standings') }}" class="nav-link">Standings</a>
             <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
-            <a href="{{ url_for('gameinfo') }}" class="nav-link active">Game Info</a>
+            <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
             <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>
             <a href="{{ url_for('fantasy_points_against') }}" class="nav-link">Fantasy Pts Against</a>
-            <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
+            <a href="{{ url_for('team_points') }}" class="nav-link active">Team Points</a>
         </nav>
         {% if year %}
-            <p class="subtitle">Week {{ week }}, {{ year }} &mdash; Roof, Surface, Vegas Lines, Attendance</p>
+            <p class="subtitle">Week {{ week }}, {{ year }} &mdash; Points Scored / Allowed by Team</p>
         {% else %}
-            <p class="subtitle">No game info data loaded yet.</p>
+            <p class="subtitle">No data loaded yet.</p>
         {% endif %}
     </div>
     <div class="header-right">
@@ -39,9 +39,15 @@
 
 <main class="history-main">
 
-    {% if available_years %}
+{% if not available_years %}
+    <p class="empty-state">
+        No data loaded yet. Run <code>scrapers/scrape_team_points.py --years YYYY</code>
+        then <code>flask load-history</code>.
+    </p>
+{% else %}
+
     <div class="page-controls">
-        <form class="history-selector" id="history-selector" method="GET" action="{{ url_for('gameinfo') }}">
+        <form class="history-selector" id="history-selector" method="GET" action="{{ url_for('team_points') }}">
             <label>
                 Year
                 <select name="year" id="year-select">
@@ -59,44 +65,29 @@
                 </select>
             </label>
         </form>
-        <div class="download-actions">
-            <a href="{{ url_for('download_csv', data_type='gameinfo', year=year, week=week) }}" class="download-btn">⬇ Download This Week</a>
-            <a href="{{ url_for('download_csv', data_type='gameinfo') }}" class="download-btn download-btn-all">⬇ Download All Data</a>
-        </div>
+        <a href="{{ url_for('download_csv', data_type='team-points', year=year, week=week) }}" class="download-btn">⬇ Download CSV</a>
     </div>
 
-    {% if games %}
+    {% if rows %}
     <div class="table-wrapper">
         <table id="history-table">
             <thead>
                 <tr>
-                    <th data-col="matchup">Matchup</th>
-                    <th data-col="date">Date/Time</th>
-                    <th data-col="location">Location</th>
-                    <th data-col="roof">Roof</th>
-                    <th data-col="surface">Surface</th>
-                    <th data-col="duration">Duration</th>
-                    <th data-col="attendance" class="right">Attendance</th>
-                    <th data-col="vegas_line">Vegas Line</th>
-                    <th data-col="over_under">O/U</th>
-                    <th data-col="temp">Temp</th>
-                    <th data-col="wind">Wind</th>
+                    <th data-col="team">Team</th>
+                    <th data-col="opponent">Opp</th>
+                    <th data-col="home_away">Loc</th>
+                    <th data-col="scored"  class="right">Points Scored</th>
+                    <th data-col="allowed" class="right">Points Allowed</th>
                 </tr>
             </thead>
             <tbody>
-                {% for g in games %}
+                {% for r in rows %}
                 <tr>
-                    <td class="player-name">{{ g['team_away'] | upper }} @ {{ g['team_home'] | upper }}</td>
-                    <td>{{ g['date'] or '—' }} {{ g['time'] or '' }}</td>
-                    <td>{{ g['location'] or '—' }}</td>
-                    <td>{{ g['roof'] or '—' }}</td>
-                    <td>{{ g['surface'] or '—' }}</td>
-                    <td>{{ g['duration'] or '—' }}</td>
-                    <td class="right">{{ g['attendance'] or '—' }}</td>
-                    <td>{{ g['vegas_line'] or '—' }}</td>
-                    <td>{{ g['over_under'] or '—' }}</td>
-                    <td>{{ g['temp'] or '—' }}</td>
-                    <td>{{ g['wind'] or '—' }}</td>
+                    <td class="player-name">{{ r['team'] | upper }}</td>
+                    <td>{% if r['home_away'] == 'a' %}@{% endif %}{{ r['opponent'] | upper }}</td>
+                    <td>{{ 'Away' if r['home_away'] == 'a' else 'Home' }}</td>
+                    <td class="right">{{ r['points_scored'] if r['points_scored'] is not none else '—' }}</td>
+                    <td class="right">{{ r['points_allowed'] if r['points_allowed'] is not none else '—' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -106,11 +97,7 @@
     <p class="empty-state">No games found for Week {{ week }}, {{ year }}.</p>
     {% endif %}
 
-    {% else %}
-    <p class="empty-state">
-        No game info data loaded yet. Run <code>scrapers/scrape_pfr.py</code> (game info portion) then <code>flask load-history</code>.
-    </p>
-    {% endif %}
+{% endif %}
 
 </main>
 

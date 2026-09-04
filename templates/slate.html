@@ -18,6 +18,8 @@
             <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
             <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
             <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>
+            <a href="{{ url_for('fantasy_points_against') }}" class="nav-link">Fantasy Pts Against</a>
+            <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
         </nav>
         {% if week %}
             <p class="subtitle">Week {{ week }}, {{ year }} &mdash; DraftKings Thu-Mon Slate</p>
@@ -90,7 +92,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for p in players %}
+                    {% for day_name, day_players in players_by_day %}
+                    {% if day_name %}
+                    <tr class="day-header-row">
+                        <td colspan="9" class="day-header-cell">{{ day_name }}</td>
+                    </tr>
+                    {% endif %}
+                    {% for p in day_players %}
                     {% set is_locked = p['team'] in locked_teams %}
                     <tr class="player-row pos-{{ p['position'] | lower }}{% if is_locked %} locked-row{% endif %}"
                         data-name="{{ p['name'] }}"
@@ -117,6 +125,7 @@
                             {% else %}—{% endif %}
                         </td>
                     </tr>
+                    {% endfor %}
                     {% endfor %}
                 </tbody>
             </table>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF DFS Challenge — Fantasy Points Against{% if year %} — {{ year }}{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>FF DFS Challenge</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('slate') }}" class="nav-link">Slate</a>
+            <a href="{{ url_for('history') }}" class="nav-link">History</a>
+            <a href="{{ url_for('standings') }}" class="nav-link">Standings</a>
+            <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
+            <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
+            <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>
+            <a href="{{ url_for('fantasy_points_against') }}" class="nav-link active">Fantasy Pts Against</a>
+            <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
+        </nav>
+        {% if year %}
+            <p class="subtitle">{{ year }} Season &mdash; Which teams are weak/strong matchups by position</p>
+        {% else %}
+            <p class="subtitle">No data loaded yet.</p>
+        {% endif %}
+    </div>
+    <div class="header-right">
+        {% if current_user.is_authenticated %}
+            <span class="user-badge">{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Sign in</a>
+        {% endif %}
+    </div>
+</header>
+
+<main class="history-main">
+
+{% if not available_years %}
+    <p class="empty-state">
+        No data loaded yet. Run <code>scrapers/scrape_fantasy_points_against.py --year YYYY</code>
+        then <code>flask load-history</code>.
+    </p>
+{% else %}
+
+    <div class="page-controls">
+        <form class="history-selector" method="GET" action="{{ url_for('fantasy_points_against') }}">
+            <label>
+                Season
+                <select name="year" onchange="this.form.submit()">
+                    {% for y in available_years %}
+                    <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <input type="hidden" name="position" value="{{ position }}">
+        </form>
+        <a href="{{ url_for('download_csv', data_type='fantasy-points-against', year=year, position=position) }}" class="download-btn">⬇ Download CSV</a>
+    </div>
+
+    <div class="filter-bar">
+        <span class="filter-label">Position:</span>
+        <a href="?year={{ year }}&position=ALL" class="filter-btn {% if position == 'ALL' %}active{% endif %}">All</a>
+        <a href="?year={{ year }}&position=QB" class="filter-btn {% if position == 'QB' %}active{% endif %}">QB</a>
+        <a href="?year={{ year }}&position=RB" class="filter-btn {% if position == 'RB' %}active{% endif %}">RB</a>
+        <a href="?year={{ year }}&position=WR" class="filter-btn {% if position == 'WR' %}active{% endif %}">WR</a>
+        <a href="?year={{ year }}&position=TE" class="filter-btn {% if position == 'TE' %}active{% endif %}">TE</a>
+    </div>
+
+    {% if rows %}
+    <div class="table-wrapper">
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th data-col="position">Pos</th>
+                    <th data-col="team">Team</th>
+                    <th data-col="games"    class="right">G</th>
+                    <th data-col="dk_pg"    class="right">DK Pts/G</th>
+                    <th data-col="dk_total" class="right">DK Pts (Season)</th>
+                    <th data-col="fd_pg"    class="right">FD Pts/G</th>
+                    <th data-col="fantasy_pg" class="right">FantPt/G</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rows %}
+                <tr class="pos-{{ r['position'] | lower }}">
+                    <td class="pos-badge">{{ r['position'] }}</td>
+                    <td class="player-name">{{ r['team'] | upper }}</td>
+                    <td class="right">{{ r['games'] }}</td>
+                    <td class="right"><strong>{{ "%.1f"|format(r['dk_pts_per_game']) if r['dk_pts_per_game'] is not none else '—' }}</strong></td>
+                    <td class="right">{{ "%.1f"|format(r['dk_pts']) if r['dk_pts'] is not none else '—' }}</td>
+                    <td class="right">{{ "%.1f"|format(r['fd_pts_per_game']) if r['fd_pts_per_game'] is not none else '—' }}</td>
+                    <td class="right">{{ "%.1f"|format(r['fantasy_pts_per_game']) if r['fantasy_pts_per_game'] is not none else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p class="standings-note">
+        Higher DK Pts/G allowed = softer matchup for that position against that defense.
+        Sorted by DK Pts/G allowed, highest (most exploitable) first.
+    </p>
+    {% else %}
+    <p class="empty-state">No data found for {{ year }}{% if position != 'ALL' %} ({{ position }}){% endif %}.</p>
+    {% endif %}
+
+{% endif %}
+
+</main>
+
+<script>
+    window.HISTORY_WEEKS_BY_YEAR = {};
+</script>
+<script src="{{ url_for('static', filename='history.js') }}"></script>
+
+</body>
+</html>

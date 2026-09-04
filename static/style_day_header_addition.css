@@ -1,0 +1,16 @@
+/* ADD THIS to static/style.css */
+
+.day-header-row {
+    background: var(--bg-surface);
+}
+
+.day-header-cell {
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}

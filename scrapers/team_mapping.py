@@ -5,7 +5,21 @@ import csv
 DATA_DIR     = os.path.join(os.path.dirname(__file__), '..', 'data')
 MAPPING_FILE = os.path.join(DATA_DIR, 'mapping_table', 'team_name_mapping_table.csv')
 
-EXTRA_ALIASES = {'jac': 'jax', 'washington': 'was'}
+EXTRA_ALIASES = {
+    'jac': 'jax',
+    'washington': 'was',
+    # Historical franchise name changes within the 2014-2025 window —
+    # confirmed real gap: "Washington Redskins" (2015 fantasy-points-
+    # against page) failed to normalize since our mapping CSV only has
+    # the current franchise name. Same issue would hit any other year
+    # touching these renamed/relocated teams.
+    'washington redskins': 'was',
+    'washington football team': 'was',
+    'oakland raiders': 'lvr',
+    'san diego chargers': 'lac',
+    'st. louis rams': 'lar',
+    'st louis rams': 'lar',
+}
 _lookup = {}
 
 def _build_lookup():

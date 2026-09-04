@@ -1,10 +1,20 @@
 """
 scrapers/combine_dst_scoring.py
 ----------------------------------
-Merges DST fantasy stats (scrape_dst_fantasy_stats.py) with team
-points-allowed data (scrape_team_points.py) and computes DraftKings'
-actual DST scoring formula — including the points-allowed bracket,
-which neither source alone provides.
+Merges DST fantasy stats with team points-allowed data
+(scrape_team_points.py) and computes DraftKings' actual DST scoring
+formula — including the points-allowed bracket, which neither source
+alone provides.
+
+DST stat category source is auto-detected per year:
+  - scrape_dst_fantasy_stats.py (FantasyPros) — current season only,
+    used automatically when data/dst_fantasy_stats_{year}.csv.gz exists
+  - scrape_pfr_defense_historical.py — any year, aggregated from
+    per-game PFR boxscores, used automatically as a fallback when the
+    FantasyPros file for that year doesn't exist
+Both share the identical output schema, so this script works the same
+way regardless of which one is actually feeding it. Override with
+--dst-stats-file to force a specific file instead of auto-detecting.
 
 DraftKings NFL Classic DST scoring:
     Sack:                    +1
@@ -39,10 +49,39 @@ import pandas as pd
 DATA_DIR    = os.path.join(os.path.dirname(__file__), '..', 'data')
 POINTS_FILE = os.path.join(DATA_DIR, 'team_points_by_week.csv.gz')
 OUTPUT_FILE = os.path.join(DATA_DIR, 'hist_dst_stats.csv.gz')
+HISTORICAL_FILE = os.path.join(DATA_DIR, 'hist_dst_stats_historical.csv.gz')
 
 OUT_COLUMNS = ['year', 'week', 'team', 'opponent', 'points_allowed', 'dk_pts',
                'sack', 'interception', 'fumble_rec', 'forced_fumble',
                'def_td', 'safety', 'special_teams_td']
+
+
+def find_dst_stats_file(year: int, dst_stats_file_arg: str | None) -> tuple[str | None, str]:
+    """
+    Two possible DST stat category sources, same output schema:
+      - scrape_dst_fantasy_stats.py (FantasyPros) — CURRENT SEASON ONLY,
+        one file per year: data/dst_fantasy_stats_{year}.csv.gz
+      - scrape_pfr_defense_historical.py — ANY year, aggregated from
+        per-game PFR boxscores, ALL years combined into one file:
+        data/hist_dst_stats_historical.csv.gz (needs filtering by year)
+
+    If --dst-stats-file was given explicitly, use it as-is (caller's
+    choice, no auto-detection). Otherwise try the FantasyPros file
+    first (it's the more complete/direct source when available — real
+    per-week category data straight from FantasyPros' own page), then
+    fall back to the historical aggregation.
+    """
+    if dst_stats_file_arg:
+        return dst_stats_file_arg, 'explicit (--dst-stats-file)'
+
+    fp_path = os.path.join(DATA_DIR, f'dst_fantasy_stats_{year}.csv.gz')
+    if os.path.exists(fp_path):
+        return fp_path, 'FantasyPros (current season)'
+
+    if os.path.exists(HISTORICAL_FILE):
+        return HISTORICAL_FILE, 'historical (aggregated from PFR boxscores)'
+
+    return None, 'none'
 
 
 def points_allowed_bonus(points_allowed: int) -> float:
@@ -75,21 +114,42 @@ def calculate_dst_dk_points(sack=0, interception=0, fumble_rec=0,
     return round(pts, 2)
 
 
-def main(year: int, dst_stats_file: str):
+def main(year: int, dst_stats_file_arg: str | None):
+    dst_stats_file, source_label = find_dst_stats_file(year, dst_stats_file_arg)
+
+    if dst_stats_file is None:
+        print(f"ERROR: no DST stats file found for {year}.")
+        print(f"  Tried: data/dst_fantasy_stats_{year}.csv.gz (FantasyPros, current season)")
+        print(f"  Tried: {HISTORICAL_FILE} (historical)")
+        print(f"Run scrape_dst_fantasy_stats.py (current season) or")
+        print(f"scrape_pfr_defense_historical.py (historical) first.")
+        return
     if not os.path.exists(dst_stats_file):
         print(f"ERROR: DST fantasy stats file not found: {dst_stats_file}")
-        print(f"Run scrape_dst_fantasy_stats.py first.")
         return
     if not os.path.exists(POINTS_FILE):
         print(f"ERROR: points-allowed file not found: {POINTS_FILE}")
         print(f"Run scrape_team_points.py first.")
         return
 
+    print(f"DST stats source: {source_label}")
+    print(f"  ({dst_stats_file})")
+
     dst_stats = pd.read_csv(dst_stats_file)
     points    = pd.read_csv(POINTS_FILE)
     points    = points[points['year'] == year]
 
-    print(f"DST fantasy stat rows for {year}: {len(dst_stats):,}")
+    # The historical file has ALL years combined — filter to just the
+    # requested one. Harmless no-op for the FantasyPros file, which is
+    # already single-year, but doing this unconditionally means we
+    # don't need to know which source we're dealing with here.
+    if 'year' in dst_stats.columns:
+        before = len(dst_stats)
+        dst_stats = dst_stats[dst_stats['year'] == year]
+        if len(dst_stats) < before:
+            print(f"  Filtered to {year}: {len(dst_stats):,} of {before:,} rows")
+
+    print(f"\nDST fantasy stat rows for {year}: {len(dst_stats):,}")
     print(f"Points-allowed rows for {year}:   {len(points):,}")
 
     merged = dst_stats.merge(
@@ -133,8 +193,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--year', type=int, required=True)
     parser.add_argument('--dst-stats-file', default=None,
-                        help='Defaults to data/dst_fantasy_stats_{year}.csv.gz')
+                        help='Explicit override. Default: auto-detect — tries '
+                             'data/dst_fantasy_stats_{year}.csv.gz (FantasyPros, '
+                             'current season) first, falls back to '
+                             'data/hist_dst_stats_historical.csv.gz (historical, '
+                             'any year) if that does not exist.')
     args = parser.parse_args()
 
-    dst_file = args.dst_stats_file or os.path.join(DATA_DIR, f'dst_fantasy_stats_{args.year}.csv.gz')
-    main(args.year, dst_file)
+    main(args.year, args.dst_stats_file)
