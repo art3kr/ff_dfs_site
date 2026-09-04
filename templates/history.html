@@ -54,7 +54,7 @@
                 Week
                 <select name="week" id="week-select">
                     {% for w in available_weeks_by_year[year] %}
-                    <option value="{{ w }}" {% if w == week %}selected{% endif %}>Week {{ w }}</option>
+                    <option value="{{ w }}" {% if w == week %}selected{% endif %}>{{ "Season" if w == "season" else "Week " ~ w }}</option>
                     {% endfor %}
                 </select>
             </label>
@@ -76,6 +76,59 @@
     </div>
 
     {% if players %}
+    {% if is_season %}
+    <div class="table-wrapper">
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th data-col="position">POS</th>
+                    <th data-col="name">Player</th>
+                    <th data-col="team">Team</th>
+                    <th data-col="games"     class="right">G</th>
+                    <th data-col="total_dk"  class="right">Total DK Pts</th>
+                    <th data-col="avg_dk"    class="right">Avg DK Pts</th>
+                    <th data-col="pass_yds"  class="right">Pass Yds</th>
+                    <th data-col="pass_td"   class="right">Pass TD</th>
+                    <th data-col="rush_yds"  class="right">Rush Yds</th>
+                    <th data-col="rush_td"   class="right">Rush TD</th>
+                    <th data-col="rec"       class="right">Rec</th>
+                    <th data-col="rec_yds"   class="right">Rec Yds</th>
+                    <th data-col="rec_td"    class="right">Rec TD</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in players %}
+                <tr class="pos-{{ p['position'] | lower }}">
+                    <td class="pos-badge">{{ p['position'] }}</td>
+                    <td class="player-name">
+                        {% if p['pfr_id'] %}
+                            <a href="{{ url_for('player_career', pfr_id=p['pfr_id']) }}" class="player-link">{{ p['name'] }}</a>
+                        {% else %}
+                            {{ p['name'] }}
+                        {% endif %}
+                    </td>
+                    <td>{{ p['team'] }}</td>
+                    <td class="right">{{ p['games'] }}</td>
+                    <td class="right"><strong>{{ "%.1f"|format(p['total_dk_pts']) if p['total_dk_pts'] is not none else '—' }}</strong></td>
+                    <td class="right">{{ "%.1f"|format(p['avg_dk_pts']) if p['avg_dk_pts'] is not none else '—' }}</td>
+                    <td class="right">{{ p['pass_yds'] if p['pass_yds'] is not none else '—' }}</td>
+                    <td class="right">{{ p['pass_td']  if p['pass_td']  is not none else '—' }}</td>
+                    <td class="right">{{ p['rush_yds'] if p['rush_yds'] is not none else '—' }}</td>
+                    <td class="right">{{ p['rush_td']  if p['rush_td']  is not none else '—' }}</td>
+                    <td class="right">{{ p['rec']      if p['rec']      is not none else '—' }}</td>
+                    <td class="right">{{ p['rec_yds']  if p['rec_yds']  is not none else '—' }}</td>
+                    <td class="right">{{ p['rec_td']   if p['rec_td']   is not none else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p class="standings-note">
+        Season totals aggregated from our own weekly results data (already validated against PFR's
+        own DK point values) — not a separate scrape. Salary/projection columns don't apply at the
+        season level, so they're omitted here. A player traded mid-season shows one row per team.
+    </p>
+    {% else %}
     <div class="table-wrapper">
         <table id="history-table">
             <thead>
@@ -131,6 +184,7 @@
             </tbody>
         </table>
     </div>
+    {% endif %}
     {% else %}
     <p class="empty-state">No players found for Week {{ week }}, {{ year }}.</p>
     {% endif %}

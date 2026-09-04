@@ -22,7 +22,7 @@
             <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
         </nav>
         {% if year %}
-            <p class="subtitle">{{ year }} Season &mdash; Which teams are weak/strong matchups by position</p>
+            <p class="subtitle">{{ year }} Season &mdash; How many fantasy points each team gives up to each position</p>
         {% else %}
             <p class="subtitle">No data loaded yet.</p>
         {% endif %}
@@ -58,7 +58,10 @@
             </label>
             <input type="hidden" name="position" value="{{ position }}">
         </form>
-        <a href="{{ url_for('download_csv', data_type='fantasy-points-against', year=year, position=position) }}" class="download-btn">⬇ Download CSV</a>
+        <div class="download-actions">
+            <a href="{{ url_for('download_csv', data_type='fantasy-points-against', year=year, position=position) }}" class="download-btn">⬇ Download This Season</a>
+            <a href="{{ url_for('download_csv', data_type='fantasy-points-against') }}" class="download-btn download-btn-all">⬇ Download All Data</a>
+        </div>
     </div>
 
     <div class="filter-bar">

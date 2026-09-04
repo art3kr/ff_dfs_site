@@ -1967,6 +1967,53 @@ def history():
         available_weeks_by_year.setdefault(y, []).append(w)
     for y in available_weeks_by_year:
         available_weeks_by_year[y].sort()
+        available_weeks_by_year[y].append("season")   # special option, always last
+
+    req_year = request.args.get("year", type=int)
+    req_week_raw = request.args.get("week")   # not type=int — "season" is a valid value too
+
+    if req_week_raw == "season" and req_year in available_years:
+        sel_year, sel_week = req_year, "season"
+    else:
+        req_week = request.args.get("week", type=int)
+        if req_year is None or req_week is None or (req_year, req_week) not in available:
+            sel_year, sel_week = available[0]   # most recent by default
+        else:
+            sel_year, sel_week = req_year, req_week
+
+    if sel_week == "season":
+        # Season totals, aggregated from our own already-DK-validated
+        # weekly hist_player_stats — not a fresh scrape of PFR's own
+        # season fantasy page. We deliberately don't re-scrape a
+        # separate source here: our weekly dk_pts_pfr_reported values
+        # were already extensively validated against PFR's own numbers
+        # earlier in this project, so summing them ourselves is at
+        # least as accurate and stays consistent with the rest of the
+        # site. Grouped by team too (not just player), so a
+        # mid-season trade shows as two separate season lines — an
+        # honest reflection of "stats while on team A" vs "team B"
+        # rather than merging them into one misleading row.
+        ph = _ph()
+        players = db_fetchall(f"""
+            SELECT
+                pfr_id, name, position, team,
+                COUNT(*) AS games,
+                SUM(pass_yds) AS pass_yds, SUM(pass_td) AS pass_td, SUM(pass_int) AS pass_int,
+                SUM(rush_att) AS rush_att, SUM(rush_yds) AS rush_yds, SUM(rush_td) AS rush_td,
+                SUM(rec) AS rec, SUM(rec_yds) AS rec_yds, SUM(rec_td) AS rec_td,
+                SUM(COALESCE(dk_pts_pfr_reported, dk_pts)) AS total_dk_pts,
+                AVG(COALESCE(dk_pts_pfr_reported, dk_pts)) AS avg_dk_pts
+            FROM hist_player_stats
+            WHERE year = {ph}
+            GROUP BY pfr_id, name, position, team
+            ORDER BY total_dk_pts DESC
+        """, (sel_year,))
+
+        return render_template("history.html",
+                               players=players, is_season=True,
+                               year=sel_year, week=sel_week,
+                               available_years=available_years,
+                               available_weeks_by_year=available_weeks_by_year)
 
     ph = _ph()
     players = db_fetchall(f"""
@@ -2002,7 +2049,7 @@ def history():
     """, (sel_year, sel_week))
 
     return render_template("history.html",
-                           players=players,
+                           players=players, is_season=False,
                            year=sel_year, week=sel_week,
                            available_years=available_years,
                            available_weeks_by_year=available_weeks_by_year)
@@ -2448,33 +2495,51 @@ def download_csv(data_type):
 
     elif data_type == "fantasy-points-against":
         position = request.args.get("position", "ALL")
-        if position != "ALL":
-            rows = db_fetchall(f"""
-                SELECT year, position, team, games, fantasy_pts, dk_pts, fd_pts,
-                       fantasy_pts_per_game, dk_pts_per_game, fd_pts_per_game
-                FROM hist_fantasy_points_against
-                WHERE year = {_ph()} AND position = {_ph()}
-                ORDER BY dk_pts_per_game DESC
-            """, (year, position))
-            filename = f"fantasy_points_against_{position}_{year}.csv"
+        if year is not None:
+            if position != "ALL":
+                rows = db_fetchall(f"""
+                    SELECT year, position, team, games, fantasy_pts, dk_pts, fd_pts,
+                           fantasy_pts_per_game, dk_pts_per_game, fd_pts_per_game
+                    FROM hist_fantasy_points_against
+                    WHERE year = {_ph()} AND position = {_ph()}
+                    ORDER BY dk_pts_per_game DESC
+                """, (year, position))
+                filename = f"fantasy_points_against_{position}_{year}.csv"
+            else:
+                rows = db_fetchall(f"""
+                    SELECT year, position, team, games, fantasy_pts, dk_pts, fd_pts,
+                           fantasy_pts_per_game, dk_pts_per_game, fd_pts_per_game
+                    FROM hist_fantasy_points_against
+                    WHERE year = {_ph()}
+                    ORDER BY position, dk_pts_per_game DESC
+                """, (year,))
+                filename = f"fantasy_points_against_{year}.csv"
         else:
-            rows = db_fetchall(f"""
+            # No year filter — full dataset across every year we have.
+            rows = db_fetchall("""
                 SELECT year, position, team, games, fantasy_pts, dk_pts, fd_pts,
                        fantasy_pts_per_game, dk_pts_per_game, fd_pts_per_game
                 FROM hist_fantasy_points_against
-                WHERE year = {_ph()}
-                ORDER BY position, dk_pts_per_game DESC
-            """, (year,))
-            filename = f"fantasy_points_against_{year}.csv"
+                ORDER BY year, position, dk_pts_per_game DESC
+            """)
+            filename = "fantasy_points_against_all.csv"
 
     elif data_type == "team-points":
-        rows = db_fetchall(f"""
-            SELECT year, week, team, opponent, home_away, points_scored, points_allowed
-            FROM hist_team_points
-            WHERE year = {_ph()} AND week = {_ph()}
-            ORDER BY points_scored DESC
-        """, (year, week))
-        filename = f"team_points_week{week}_{year}.csv"
+        if year is not None and week is not None:
+            rows = db_fetchall(f"""
+                SELECT year, week, team, opponent, home_away, points_scored, points_allowed
+                FROM hist_team_points
+                WHERE year = {_ph()} AND week = {_ph()}
+                ORDER BY points_scored DESC
+            """, (year, week))
+            filename = f"team_points_week{week}_{year}.csv"
+        else:
+            rows = db_fetchall("""
+                SELECT year, week, team, opponent, home_away, points_scored, points_allowed
+                FROM hist_team_points
+                ORDER BY year, week, points_scored DESC
+            """)
+            filename = "team_points_all.csv"
 
     else:
         return jsonify(error="Unknown data type"), 404
