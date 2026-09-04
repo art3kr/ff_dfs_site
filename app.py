@@ -93,6 +93,51 @@ ROSTER_SLOTS = {
     "DST":  (["DST", "D", "DEF"],        1),
 }
 
+# Each team's real primary brand color, used as a low-opacity row tint
+# on Best Matchups so players from the same team are visually grouped
+# at a glance. Kept as an rgba() string directly (rather than a hex +
+# separate opacity) so the template can drop it straight into an
+# inline style with no further conversion. Alpha kept low (0.10-0.14)
+# deliberately — full-saturation brand colors would be visually loud
+# and hurt text contrast against the dark theme; this is meant as a
+# subtle grouping cue, not a bold color block. Keyed by the canonical
+# PFR-style abbreviation used everywhere else in this project (team_mapping's
+# normalize_team() output), not raw brand/ESPN abbreviations.
+TEAM_ROW_COLORS = {
+    "ari": "rgba(151, 35, 63, 0.13)",     # Cardinals — cardinal red
+    "atl": "rgba(167, 25, 48, 0.13)",     # Falcons — red
+    "bal": "rgba(36, 23, 115, 0.14)",     # Ravens — purple
+    "buf": "rgba(0, 51, 141, 0.13)",      # Bills — royal blue
+    "car": "rgba(0, 133, 202, 0.12)",     # Panthers — blue
+    "chi": "rgba(200, 56, 3, 0.13)",      # Bears — orange
+    "cin": "rgba(251, 79, 20, 0.12)",     # Bengals — orange
+    "cle": "rgba(255, 60, 0, 0.12)",      # Browns — orange
+    "dal": "rgba(134, 147, 151, 0.14)",   # Cowboys — silver
+    "den": "rgba(0, 34, 68, 0.16)",       # Broncos — navy
+    "det": "rgba(0, 118, 182, 0.13)",     # Lions — blue
+    "gnb": "rgba(32, 55, 49, 0.16)",      # Packers — green
+    "hou": "rgba(167, 25, 48, 0.12)",     # Texans — red
+    "ind": "rgba(0, 44, 95, 0.14)",       # Colts — blue
+    "jax": "rgba(215, 162, 42, 0.14)",    # Jaguars — gold
+    "kan": "rgba(227, 24, 55, 0.13)",     # Chiefs — red
+    "lac": "rgba(0, 128, 198, 0.13)",     # Chargers — powder blue
+    "lar": "rgba(255, 163, 0, 0.14)",     # Rams — gold
+    "lvr": "rgba(165, 172, 175, 0.14)",   # Raiders — silver
+    "mia": "rgba(0, 142, 151, 0.13)",     # Dolphins — aqua
+    "min": "rgba(79, 38, 131, 0.13)",     # Vikings — purple
+    "nwe": "rgba(198, 12, 48, 0.12)",     # Patriots — red
+    "nor": "rgba(211, 188, 141, 0.16)",   # Saints — old gold
+    "nyg": "rgba(11, 34, 101, 0.14)",     # Giants — blue
+    "nyj": "rgba(18, 87, 64, 0.14)",      # Jets — green
+    "phi": "rgba(0, 76, 84, 0.16)",       # Eagles — midnight green
+    "pit": "rgba(255, 182, 18, 0.14)",    # Steelers — gold
+    "sea": "rgba(105, 190, 40, 0.13)",    # Seahawks — action green
+    "sfo": "rgba(170, 0, 0, 0.13)",       # 49ers — red
+    "tam": "rgba(213, 10, 10, 0.12)",     # Buccaneers — red
+    "ten": "rgba(75, 146, 219, 0.13)",    # Titans — light blue
+    "was": "rgba(90, 20, 20, 0.16)",      # Commanders — burgundy
+}
+
 # ---------------------------------------------------------------------------
 # Auto-init: create tables + optional bootstrap user on startup
 # ---------------------------------------------------------------------------
@@ -2369,7 +2414,8 @@ def best_matchups():
 
     if not available:
         return render_template("best_matchups.html", rows=[], year=None, week=None,
-                               available_years=[], available_weeks_by_year={}, position="ALL")
+                               available_years=[], available_weeks_by_year={}, position="ALL",
+                               team_colors=TEAM_ROW_COLORS)
 
     req_year = request.args.get("year", type=int)
     req_week = request.args.get("week", type=int)
@@ -2394,7 +2440,8 @@ def best_matchups():
                            rows=rows, year=sel_year, week=sel_week,
                            available_years=available_years,
                            available_weeks_by_year=available_weeks_by_year,
-                           position=sel_position)
+                           position=sel_position,
+                           team_colors=TEAM_ROW_COLORS)
 
 
 @app.route("/schedule")

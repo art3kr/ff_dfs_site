@@ -98,7 +98,11 @@
             </thead>
             <tbody>
                 {% for r in rows %}
-                <tr class="pos-{{ r['position'] | lower }}">
+                <tr class="pos-{{ r['position'] | lower }}"
+                    {% if r['team'] in team_colors %}
+                    style="background: {{ team_colors[r['team']] }};"
+                    data-team-color="1"
+                    {% endif %}>
                     <td class="pos-badge">{{ r['position'] }}</td>
                     <td class="player-name">{{ r['name'] }}</td>
                     <td>{{ r['team'] | upper }}</td>

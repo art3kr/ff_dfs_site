@@ -863,3 +863,58 @@ header {
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
+
+/* -----------------------------------------------------------------------
+   #history-table — shared by History, Weather, Game Info, Schedule,
+   Fantasy Pts Against, Team Points, Best Matchups, Player, Standings.
+   Previously had almost no dedicated styling (just a hover rule),
+   relying on browser table defaults — matching #slate-table's clean
+   look here (padding, zebra striping, bold uppercase headers, row
+   borders) benefits every one of those pages at once.
+   ----------------------------------------------------------------------- */
+
+#history-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+#history-table thead th {
+    background: var(--bg-surface);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+}
+#history-table thead th.right,
+#history-table tbody td.right { text-align: right; }
+#history-table thead th.sort-asc::after  { content: " ↑"; color: var(--accent); }
+#history-table thead th.sort-desc::after { content: " ↓"; color: var(--accent); }
+
+#history-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+}
+#history-table tbody tr:nth-child(even) { background: var(--bg-row-alt); }
+#history-table tbody tr:hover           { background: var(--bg-hover); }
+
+#history-table tbody td { padding: 8px 12px; }
+
+/* -----------------------------------------------------------------------
+   Best Matchups — team-tinted rows so all players from the same team
+   are visually grouped at a glance. Applied as an inline background
+   per row (color computed server-side from a canonical team-color
+   table), layered UNDER the zebra-stripe/hover rules above via
+   lower CSS specificity ordering — hover still visibly darkens/lightens
+   a team-tinted row rather than being invisible against it.
+   ----------------------------------------------------------------------- */
+
+#history-table tbody tr[data-team-color]:hover {
+    filter: brightness(1.25);
+}
