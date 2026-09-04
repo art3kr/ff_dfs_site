@@ -1316,10 +1316,14 @@ def load_schedule_command(year):
 @app.cli.command("load-history")
 @click.option("--data-dir", default="data",
               help="Folder containing the .csv.gz files produced by the scrapers.")
-@click.option("--salaries-only", is_flag=True, help="Only load salary files, skip player stats.")
-@click.option("--stats-only",    is_flag=True, help="Only load player stats, skip salary files.")
+@click.option("--salaries-only", is_flag=True, help="Only load salary files, skip everything else.")
+@click.option("--stats-only",    is_flag=True, help="Only load player stats, skip everything else.")
+@click.option("--weather-only",  is_flag=True,
+              help="Only load the weather file, skip everything else — for frequent "
+                   "re-runs as forecasts firm up or actual conditions come in, without "
+                   "waiting on the much slower full load.")
 @click.option("--batch-size", default=1000, type=int, help="Rows per bulk-insert batch.")
-def load_history_command(data_dir, salaries_only, stats_only, batch_size):
+def load_history_command(data_dir, salaries_only, stats_only, weather_only, batch_size):
     """
     Load the historical .csv.gz files produced by the scrapers into
     hist_dfs_salaries and hist_player_stats.
@@ -1350,6 +1354,11 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
     DST_FILE   = "hist_dst_stats.csv.gz"
     WEATHER_FILE   = "weekly_weather.csv.gz"
     GAME_INFO_FILE = "pfr_game_info_2014_2025.csv.gz"
+
+    # True only when no "-only" flag was passed — an unscoped run loads
+    # everything, same as before these flags existed. Any "-only" flag
+    # narrows to just its own section(s).
+    run_all = not (salaries_only or stats_only or weather_only)
 
     conn = _connect()
     cur  = _cursor(conn)
@@ -1869,7 +1878,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
         return inserted
 
     # --- Load salary files ---
-    if not stats_only:
+    if run_all or salaries_only:
         for filename in SALARY_FILES:
             path = os.path.join(data_dir, filename)
             if not os.path.exists(path):
@@ -1897,7 +1906,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             click.echo(f"  Done: {count:,} rows from {os.path.basename(path)}")
 
     # --- Load player stats file ---
-    if not salaries_only:
+    if run_all or stats_only:
         path = os.path.join(data_dir, STATS_FILE)
         if not os.path.exists(path):
             click.echo(f"Skip (not found): {path}")
@@ -1908,7 +1917,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             click.echo(f"  Done: {count:,} rows from {STATS_FILE}")
 
     # --- Load weather file ---
-    if not salaries_only:
+    if run_all or weather_only:
         path = os.path.join(data_dir, WEATHER_FILE)
         if not os.path.exists(path):
             click.echo(f"Skip (not found): {path}")
@@ -1919,7 +1928,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             click.echo(f"  Done: {count:,} rows from {WEATHER_FILE}")
 
     # --- Load game info file ---
-    if not salaries_only:
+    if run_all:
         path = os.path.join(data_dir, GAME_INFO_FILE)
         if not os.path.exists(path):
             click.echo(f"Skip (not found): {path}")
@@ -1930,7 +1939,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             click.echo(f"  Done: {count:,} rows from {GAME_INFO_FILE}")
 
     # --- Load DST (team defense) stats file ---
-    if not salaries_only:
+    if run_all:
         path = os.path.join(data_dir, DST_FILE)
         if not os.path.exists(path):
             click.echo(f"Skip (not found): {path}")
@@ -1941,7 +1950,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             click.echo(f"  Done: {count:,} rows from {DST_FILE}")
 
     # --- Load fantasy-points-against files (one per year) ---
-    if not salaries_only:
+    if run_all:
         fpa_files = sorted(glob.glob(os.path.join(data_dir, "fantasy_points_against_*.csv.gz")))
         if not fpa_files:
             click.echo(f"Skip (not found): {os.path.join(data_dir, 'fantasy_points_against_*.csv.gz')}")
@@ -1952,7 +1961,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
             click.echo(f"  Done: {count:,} rows from {os.path.basename(path)}")
 
     # --- Load team points file (single file, all years combined) ---
-    if not salaries_only:
+    if run_all:
         team_points_path = os.path.join(data_dir, "team_points_by_week.csv.gz")
         if not os.path.exists(team_points_path):
             click.echo(f"Skip (not found): {team_points_path}")
@@ -1964,7 +1973,7 @@ def load_history_command(data_dir, salaries_only, stats_only, batch_size):
 
     # --- Load depth charts (single file, always reflects the latest
     # scrape — full replace, not a historical/multi-week accumulation) ---
-    if not salaries_only:
+    if run_all:
         depth_charts_path = os.path.join(data_dir, "ourlads_depth_charts.csv.gz")
         if not os.path.exists(depth_charts_path):
             click.echo(f"Skip (not found): {depth_charts_path}")
