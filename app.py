@@ -2192,6 +2192,40 @@ def team_points():
         available_weeks_by_year.setdefault(y, []).append(w)
     for y in available_weeks_by_year:
         available_weeks_by_year[y].sort()
+        available_weeks_by_year[y].append("season")
+
+    req_year = request.args.get("year", type=int)
+    req_week_raw = request.args.get("week")
+
+    if req_week_raw == "season" and req_year in available_years:
+        sel_year, sel_week = req_year, "season"
+    else:
+        req_week = request.args.get("week", type=int)
+        if req_year is None or req_week is None or (req_year, req_week) not in available:
+            sel_year, sel_week = available[0]
+        else:
+            sel_year, sel_week = req_year, req_week
+
+    if sel_week == "season":
+        ph = _ph()
+        rows = db_fetchall(f"""
+            SELECT team,
+                   COUNT(*) AS games,
+                   SUM(points_scored)  AS total_scored,
+                   SUM(points_allowed) AS total_allowed,
+                   AVG(points_scored)  AS avg_scored,
+                   AVG(points_allowed) AS avg_allowed
+            FROM hist_team_points
+            WHERE year = {ph}
+            GROUP BY team
+            ORDER BY avg_scored DESC
+        """, (sel_year,))
+
+        return render_template("team_points.html",
+                               rows=rows, is_season=True,
+                               year=sel_year, week=sel_week,
+                               available_years=available_years,
+                               available_weeks_by_year=available_weeks_by_year)
 
     ph = _ph()
     rows = db_fetchall(f"""
@@ -2202,9 +2236,85 @@ def team_points():
     """, (sel_year, sel_week))
 
     return render_template("team_points.html",
-                           rows=rows, year=sel_year, week=sel_week,
+                           rows=rows, is_season=False,
+                           year=sel_year, week=sel_week,
                            available_years=available_years,
                            available_weeks_by_year=available_weeks_by_year)
+
+
+@app.route("/best-matchups")
+def best_matchups():
+    """
+    For a given slate (year/week from the live `players` table), shows
+    every player alongside how many DK points/game their specific
+    opponent gives up to that position on the season (from
+    hist_fantasy_points_against) — a good matchup is a strong player
+    facing a defense that's historically been generous to that
+    position. Default-sorted by the player's own projected points
+    (best players first); every column is independently sortable via
+    the shared history.js click-to-sort, so switching to "best
+    matchups" (sort by pts allowed instead) is just a header click.
+    """
+    year_week_rows = db_fetchall(
+        "SELECT DISTINCT year, week FROM players ORDER BY year DESC, week DESC"
+    )
+    available = [(r["year"], r["week"]) for r in year_week_rows]
+
+    if not available:
+        return render_template("best_matchups.html", rows=[], year=None, week=None,
+                               available_years=[], available_weeks_by_year={}, position="ALL")
+
+    req_year = request.args.get("year", type=int)
+    req_week = request.args.get("week", type=int)
+
+    if req_year is None or req_week is None or (req_year, req_week) not in available:
+        sel_year, sel_week = available[0]
+    else:
+        sel_year, sel_week = req_year, req_week
+
+    sel_position = request.args.get("position", "ALL")
+
+    available_years = sorted({y for y, w in available}, reverse=True)
+    available_weeks_by_year = {}
+    for y, w in available:
+        available_weeks_by_year.setdefault(y, []).append(w)
+    for y in available_weeks_by_year:
+        available_weeks_by_year[y].sort()
+
+    ph = _ph()
+    if sel_position != "ALL":
+        rows = db_fetchall(f"""
+            SELECT p.name AS name, p.position AS position, p.team AS team,
+                   p.opponent AS opponent, p.salary AS salary,
+                   p.projected_pts AS projected_pts, p.ownership_pct AS ownership_pct,
+                   fpa.dk_pts_per_game AS opp_dk_pts_allowed
+            FROM players p
+            LEFT JOIN hist_fantasy_points_against fpa
+                ON  fpa.year = p.year AND fpa.position = p.position
+                AND fpa.team = p.opponent
+            WHERE p.week = {ph} AND p.year = {ph} AND p.position = {ph}
+            ORDER BY p.projected_pts DESC
+        """, (sel_week, sel_year, sel_position))
+    else:
+        rows = db_fetchall(f"""
+            SELECT p.name AS name, p.position AS position, p.team AS team,
+                   p.opponent AS opponent, p.salary AS salary,
+                   p.projected_pts AS projected_pts, p.ownership_pct AS ownership_pct,
+                   fpa.dk_pts_per_game AS opp_dk_pts_allowed
+            FROM players p
+            LEFT JOIN hist_fantasy_points_against fpa
+                ON  fpa.year = p.year AND fpa.position = p.position
+                AND fpa.team = p.opponent
+            WHERE p.week = {ph} AND p.year = {ph}
+              AND p.position IN ('QB', 'RB', 'WR', 'TE')
+            ORDER BY p.projected_pts DESC
+        """, (sel_week, sel_year))
+
+    return render_template("best_matchups.html",
+                           rows=rows, year=sel_year, week=sel_week,
+                           available_years=available_years,
+                           available_weeks_by_year=available_weeks_by_year,
+                           position=sel_position)
 
 
 @app.route("/schedule")
@@ -2540,6 +2650,31 @@ def download_csv(data_type):
                 ORDER BY year, week, points_scored DESC
             """)
             filename = "team_points_all.csv"
+
+    elif data_type == "best-matchups":
+        position = request.args.get("position", "ALL")
+        if position != "ALL":
+            rows = db_fetchall(f"""
+                SELECT p.name, p.position, p.team, p.opponent, p.salary,
+                       p.projected_pts, p.ownership_pct, fpa.dk_pts_per_game AS opp_dk_pts_allowed
+                FROM players p
+                LEFT JOIN hist_fantasy_points_against fpa
+                    ON fpa.year = p.year AND fpa.position = p.position AND fpa.team = p.opponent
+                WHERE p.week = {_ph()} AND p.year = {_ph()} AND p.position = {_ph()}
+                ORDER BY p.projected_pts DESC
+            """, (week, year, position))
+        else:
+            rows = db_fetchall(f"""
+                SELECT p.name, p.position, p.team, p.opponent, p.salary,
+                       p.projected_pts, p.ownership_pct, fpa.dk_pts_per_game AS opp_dk_pts_allowed
+                FROM players p
+                LEFT JOIN hist_fantasy_points_against fpa
+                    ON fpa.year = p.year AND fpa.position = p.position AND fpa.team = p.opponent
+                WHERE p.week = {_ph()} AND p.year = {_ph()}
+                  AND p.position IN ('QB', 'RB', 'WR', 'TE')
+                ORDER BY p.projected_pts DESC
+            """, (week, year))
+        filename = f"best_matchups_week{week}_{year}.csv"
 
     else:
         return jsonify(error="Unknown data type"), 404

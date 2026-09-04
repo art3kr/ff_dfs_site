@@ -20,6 +20,7 @@
             <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>
             <a href="{{ url_for('fantasy_points_against') }}" class="nav-link">Fantasy Pts Against</a>
             <a href="{{ url_for('team_points') }}" class="nav-link active">Team Points</a>
+            <a href="{{ url_for('best_matchups') }}" class="nav-link">Best Matchups</a>
         </nav>
         {% if year %}
             <p class="subtitle">Week {{ week }}, {{ year }} &mdash; Points Scored / Allowed by Team</p>
@@ -60,7 +61,7 @@
                 Week
                 <select name="week" id="week-select">
                     {% for w in available_weeks_by_year[year] %}
-                    <option value="{{ w }}" {% if w == week %}selected{% endif %}>Week {{ w }}</option>
+                    <option value="{{ w }}" {% if w == week %}selected{% endif %}>{{ "Season" if w == "season" else "Week " ~ w }}</option>
                     {% endfor %}
                 </select>
             </label>
@@ -72,6 +73,34 @@
     </div>
 
     {% if rows %}
+    {% if is_season %}
+    <div class="table-wrapper">
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th data-col="team">Team</th>
+                    <th data-col="games"        class="right">G</th>
+                    <th data-col="avg_scored"   class="right">Avg Pts Scored</th>
+                    <th data-col="avg_allowed"  class="right">Avg Pts Allowed</th>
+                    <th data-col="total_scored" class="right">Total Scored</th>
+                    <th data-col="total_allowed" class="right">Total Allowed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rows %}
+                <tr>
+                    <td class="player-name">{{ r['team'] | upper }}</td>
+                    <td class="right">{{ r['games'] }}</td>
+                    <td class="right"><strong>{{ "%.1f"|format(r['avg_scored']) if r['avg_scored'] is not none else '—' }}</strong></td>
+                    <td class="right">{{ "%.1f"|format(r['avg_allowed']) if r['avg_allowed'] is not none else '—' }}</td>
+                    <td class="right">{{ r['total_scored'] if r['total_scored'] is not none else '—' }}</td>
+                    <td class="right">{{ r['total_allowed'] if r['total_allowed'] is not none else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
     <div class="table-wrapper">
         <table id="history-table">
             <thead>
@@ -96,6 +125,7 @@
             </tbody>
         </table>
     </div>
+    {% endif %}
     {% else %}
     <p class="empty-state">No games found for Week {{ week }}, {{ year }}.</p>
     {% endif %}
