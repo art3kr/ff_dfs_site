@@ -59,6 +59,7 @@
     {% endif %}
 
     {% if standings %}
+    <h2 class="standings-section-title">Season Standings — Lowest Week Dropped</h2>
     <div class="table-wrapper">
         <table id="standings-table">
             <thead>
@@ -97,6 +98,64 @@
         Struck-through score = each participant's dropped (lowest) week.
         "pending" = that week's lineup isn't fully scored yet (game results not yet available/scraped).
     </p>
+
+    <h2 class="standings-section-title">Season Standings — No Drop</h2>
+    <div class="table-wrapper">
+        <table id="standings-no-drop-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Participant</th>
+                    <th class="right">Weeks Scored</th>
+                    <th class="right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in standings_no_drop %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td class="player-name">{{ row['submitter'] }}</td>
+                    <td class="right">{{ row['weeks_scored'] }}</td>
+                    <td class="right total-col">{{ "%.1f"|format(row['total']) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="standings-section-title">Weekly High Scorer</h2>
+    <div class="table-wrapper">
+        <table id="weekly-top-table">
+            <thead>
+                <tr>
+                    <th>Week</th>
+                    <th>Top Score</th>
+                    <th>Winner{% if weekly_top_scorers and weekly_top_scorers[0]['winners']|length > 1 %}(s){% endif %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for w in weekly_top_scorers %}
+                <tr>
+                    <td>Week {{ w['week'] }}</td>
+                    <td class="right">
+                        {% if w['top_score'] is none %}
+                            <span class="pending-week" title="No fully-scored lineups yet">pending</span>
+                        {% else %}
+                            {{ "%.1f"|format(w['top_score']) }}
+                        {% endif %}
+                    </td>
+                    <td class="player-name">
+                        {% if w['winners'] %}
+                            {{ w['winners'] | join(', ') }}
+                            {% if w['winners']|length > 1 %}<span class="tie-badge">TIE</span>{% endif %}
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
     {% else %}
     <p class="empty-state">No lineups found for {{ year }}.</p>
     {% endif %}

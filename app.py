@@ -261,6 +261,39 @@ def _auto_init():
             )
         """)
         cur.execute("""
+            CREATE TABLE IF NOT EXISTS prop_bets (
+                id                      SERIAL PRIMARY KEY,
+                year                    INTEGER NOT NULL,
+                week                    INTEGER NOT NULL,
+                player_name             TEXT    NOT NULL,
+                player_name_normalized  TEXT    NOT NULL,
+                stat_field              TEXT    NOT NULL,
+                line                    REAL    NOT NULL,
+                created_at              TIMESTAMP DEFAULT NOW(),
+                UNIQUE(year, week, player_name_normalized, stat_field)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_prop_bets_lookup
+                ON prop_bets (year, week)
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS prop_picks (
+                id           SERIAL PRIMARY KEY,
+                year         INTEGER NOT NULL,
+                week         INTEGER NOT NULL,
+                submitter    TEXT    NOT NULL,
+                prop_bet_id  INTEGER NOT NULL REFERENCES prop_bets(id),
+                pick         TEXT    NOT NULL,
+                submitted_at TIMESTAMP DEFAULT NOW(),
+                UNIQUE(year, week, submitter, prop_bet_id)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_prop_picks_lookup
+                ON prop_picks (year, week, submitter)
+        """)
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS hist_dfs_salaries (
                 id              SERIAL PRIMARY KEY,
                 week            INTEGER NOT NULL,
@@ -508,6 +541,31 @@ def _auto_init():
                 submitted_at TEXT    DEFAULT (datetime('now')),
                 UNIQUE(week, year, submitter)
             );
+            CREATE TABLE IF NOT EXISTS prop_bets (
+                id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+                year                    INTEGER NOT NULL,
+                week                    INTEGER NOT NULL,
+                player_name             TEXT    NOT NULL,
+                player_name_normalized  TEXT    NOT NULL,
+                stat_field              TEXT    NOT NULL,
+                line                    REAL    NOT NULL,
+                created_at              TEXT    DEFAULT (datetime('now')),
+                UNIQUE(year, week, player_name_normalized, stat_field)
+            );
+            CREATE INDEX IF NOT EXISTS idx_prop_bets_lookup
+                ON prop_bets (year, week);
+            CREATE TABLE IF NOT EXISTS prop_picks (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                year         INTEGER NOT NULL,
+                week         INTEGER NOT NULL,
+                submitter    TEXT    NOT NULL,
+                prop_bet_id  INTEGER NOT NULL REFERENCES prop_bets(id),
+                pick         TEXT    NOT NULL,
+                submitted_at TEXT    DEFAULT (datetime('now')),
+                UNIQUE(year, week, submitter, prop_bet_id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_prop_picks_lookup
+                ON prop_picks (year, week, submitter);
             CREATE TABLE IF NOT EXISTS hist_dfs_salaries (
                 id              INTEGER PRIMARY KEY AUTOINCREMENT,
                 week            INTEGER NOT NULL,
@@ -911,6 +969,85 @@ def ingest_slate_command(week, year, slate_id):
     cur.close()
     conn.close()
     click.echo(f"Done. {inserted} players upserted, {skipped} skipped.")
+
+
+VALID_PROP_STAT_FIELDS = {
+    'pass_cmp', 'pass_att', 'pass_yds', 'pass_td', 'pass_int',
+    'rush_att', 'rush_yds', 'rush_td',
+    'rec_tgt', 'rec', 'rec_yds', 'rec_td',
+    'fumbles_lost', 'kick_ret_yds', 'kick_ret_td', 'punt_ret_yds', 'punt_ret_td',
+}
+
+
+@app.cli.command("add-props")
+@click.argument("csv_path", type=click.Path(exists=True))
+@click.option("--year", required=True, type=int)
+@click.option("--week", required=True, type=int)
+def add_props_command(csv_path, year, week):
+    """
+    Load a week's prop bet slate from a CSV — the manually-curated
+    ~20 props participants pick 5 of. Expected columns: player_name,
+    stat_field, line (e.g. "Bijan Robinson, rec, 5.5").
+
+    stat_field must be a real hist_player_stats column name (see
+    VALID_PROP_STAT_FIELDS) — props auto-score once that week's real
+    results are loaded via load-history, by comparing the actual value
+    in that column against the line. No separate manual result entry
+    needed. Composite prop types (e.g. "anytime TD" combining rush_td
+    + rec_td) aren't supported yet — every prop must map to exactly
+    one existing stat column.
+
+    Safe to re-run for the same week (upserts on player+stat_field),
+    e.g. to fix a typo in a line before anyone's picked yet.
+
+    Example CSV:
+        player_name,stat_field,line
+        Bijan Robinson,rec,5.5
+        Josh Allen,rush_td,0.5
+    """
+    import pandas as pd
+    df = pd.read_csv(csv_path)
+
+    required_cols = {'player_name', 'stat_field', 'line'}
+    if not required_cols.issubset(df.columns):
+        click.echo(f"ERROR: CSV must have columns {required_cols}. Found: {list(df.columns)}", err=True)
+        return
+
+    invalid_fields = set(df['stat_field'].unique()) - VALID_PROP_STAT_FIELDS
+    if invalid_fields:
+        click.echo(f"ERROR: unrecognized stat_field value(s): {invalid_fields}", err=True)
+        click.echo(f"Valid options: {sorted(VALID_PROP_STAT_FIELDS)}", err=True)
+        return
+
+    conn = get_db()
+    cur = conn.cursor()
+    ph = _ph(6)
+
+    if _is_postgres():
+        sql = f"""
+            INSERT INTO prop_bets (year, week, player_name, player_name_normalized, stat_field, line)
+            VALUES ({ph})
+            ON CONFLICT (year, week, player_name_normalized, stat_field) DO UPDATE SET
+                line = EXCLUDED.line
+        """
+    else:
+        sql = f"""
+            INSERT INTO prop_bets (year, week, player_name, player_name_normalized, stat_field, line)
+            VALUES ({ph})
+            ON CONFLICT(year, week, player_name_normalized, stat_field) DO UPDATE SET
+                line = excluded.line
+        """
+
+    count = 0
+    for _, row in df.iterrows():
+        name = str(row['player_name']).strip()
+        cur.execute(sql, (year, week, name, normalize_name(name), row['stat_field'], float(row['line'])))
+        count += 1
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    click.echo(f"Loaded {count} props for Week {week}, {year}.")
 
 
 @app.cli.command("load-weekly-salary")
