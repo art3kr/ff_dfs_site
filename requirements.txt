@@ -14,6 +14,7 @@ urllib3>=2.0
 # Data
 pandas>=2.0
 python-dotenv>=1.0
+scipy>=1.11          # statistical modeling for estimate_middling_ev.py
 
 # CLI
 click>=8.1
@@ -23,3 +24,9 @@ gunicorn>=21.2
 
 # Database (prod)
 psycopg2-binary>=2.9
+
+# Timezone data — Python's zoneinfo module (used throughout app.py for
+# kickoff times, day-of-week grouping, lock status) has no built-in
+# timezone database on Windows, unlike Linux/Mac. Without this,
+# ZoneInfo("America/New_York") raises ZoneInfoNotFoundError.
+tzdata>=2024.1

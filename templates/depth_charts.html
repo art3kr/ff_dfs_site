@@ -49,6 +49,14 @@
     </p>
 {% else %}
 
+    <div class="page-controls">
+        <span></span>
+        <div class="download-actions">
+            <a href="{{ url_for('download_csv', data_type='depth-charts', team=selected_team) }}" class="download-btn">⬇ Download {{ selected_team | upper }}</a>
+            <a href="{{ url_for('download_csv', data_type='depth-charts') }}" class="download-btn download-btn-all">⬇ Download All Teams</a>
+        </div>
+    </div>
+
     <div class="team-picker">
         {% for t in available_teams %}
         <a href="?team={{ t }}" class="team-picker-btn {% if t == selected_team %}active{% endif %}">{{ t | upper }}</a>

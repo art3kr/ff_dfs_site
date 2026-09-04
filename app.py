@@ -3291,6 +3291,24 @@ def download_csv(data_type):
         rows = _compute_best_matchups(year, week, position)
         filename = f"best_matchups_week{week}_{year}.csv"
 
+    elif data_type == "depth-charts":
+        team = request.args.get("team")
+        if team:
+            rows = db_fetchall(f"""
+                SELECT team, pos, string_rank, player_name
+                FROM depth_charts
+                WHERE team = {_ph()}
+                ORDER BY pos, string_rank
+            """, (team,))
+            filename = f"depth_chart_{team}.csv"
+        else:
+            rows = db_fetchall("""
+                SELECT team, pos, string_rank, player_name
+                FROM depth_charts
+                ORDER BY team, pos, string_rank
+            """)
+            filename = "depth_charts_all.csv"
+
     else:
         return jsonify(error="Unknown data type"), 404
 
