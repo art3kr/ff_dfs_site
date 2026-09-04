@@ -1,0 +1,25 @@
+player_name,stat_field,line,category_original,team,opponent,home_away,over_odds,over_book,under_odds,under_book,site_projection,projection_diff
+Joe Burrow,pass_yds,265.5,passing-yards,cin,tam,h,-120,fanatics,-110,bet365,269,-2.5
+Matthew Stafford,pass_yds,262.5,passing-yards,,sfo,h,-110,bet365,-111,draftkings,265,-1.5
+Bo Nix,pass_yds,218.5,passing-yards,den,kan,a,-110,bet365,-114,caesars,229,3.5
+Drake Maye,pass_yds,224.5,passing-yards,nwe,sea,a,-115,riverscasino,-114,fanduel,230,4.5
+Jahmyr Gibbs,rush_yds,81.5,rushing-yards,det,nor,h,-110,bet365,-117,riverscasino,84,0.5
+Derrick Henry,rush_yds,77.5,rushing-yards,bal,ind,a,-115,riverscasino,-110,draftkings,84,3.5
+Jonathan Taylor,rush_yds,75.5,rushing-yards,ind,bal,h,-120,fanatics,-112,draftkings,78,-0.5
+Saquon Barkley,rush_yds,73.5,rushing-yards,phi,was,h,-115,riverscasino,-110,bet365,77,-0.5
+James Cook,rush_yds,70.5,rushing-yards,buf,hou,a,-110,bet365,-112,draftkings,77,1.5
+Bijan Robinson,rush_yds,73.5,rushing-yards,atl,pit,a,-111,draftkings,-114,fanduel,80,6.5
+Javonte Williams,rush_yds,68.5,rushing-yards,dal,nyg,a,-110,bet365,-114,fanduel,77,4.5
+De'Von Achane,rush_yds,63.5,rushing-yards,mia,lvr,a,-110,bet365,-114,fanduel,73,4.5
+D'Andre Swift,rush_yds,67.5,rushing-yards,chi,car,a,-110,bet365,-120,fanatics,59,-8.5
+Omarion Hampton,rush_yds,61.5,rushing-yards,lac,ari,h,-113,caesars,-111,draftkings,62,-4.5
+Puka Nacua,rec_yds,87.5,receiving-yards,,sfo,h,-110,bet365,-110,fanatics,95,4.5
+Ja'Marr Chase,rec_yds,85.5,receiving-yards,cin,tam,h,-114,fanduel,-110,bet365,88,-1.5
+Tyler Allgeier,rec_yds,8.5,receiving-yards,ari,lac,a,-110,bet365,-110,bet365,8,-0.5
+Joshua Palmer,rec_yds,13.5,receiving-yards,buf,hou,a,-110,bet365,-110,bet365,18,4.5
+Jaxon Smith-Njigba,rec_yds,80.5,receiving-yards,sea,nwe,h,-120,fanatics,-113,caesars,92,10.5
+Amon-Ra St. Brown,rec_yds,75.5,receiving-yards,det,nor,h,-135,bet365,-113,riverscasino,78,0.5
+Chris Olave,rec_yds,75.5,receiving-yards,nor,det,a,-110,bet365,-113,draftkings,76,-0.5
+CeeDee Lamb,rec_yds,73.5,receiving-yards,dal,nyg,a,-110,bet365,-114,draftkings,79,2.5
+Justin Jefferson,rec_yds,70.5,receiving-yards,min,gnb,h,-120,fanatics,-112,draftkings,76,1.5
+Nico Collins,rec_yds,67.5,receiving-yards,hou,buf,h,-125,caesars,-110,bet365,77,7.5
