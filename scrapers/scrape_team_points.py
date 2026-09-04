@@ -45,7 +45,7 @@ from scrape_pfr import make_session, pfr_get, PFR_BASE, _int
 
 DATA_DIR    = os.path.join(os.path.dirname(__file__), '..', 'data')
 OUTPUT_FILE = os.path.join(DATA_DIR, 'team_points_by_week.csv.gz')
-SLEEP_YEAR  = 2.0
+SLEEP_YEAR  = 3.0   # increased from 2.0 — being more conservative given recent rate limiting
 
 OUT_COLUMNS = ['year', 'week', 'team', 'opponent', 'home_away',
                'points_scored', 'points_allowed']

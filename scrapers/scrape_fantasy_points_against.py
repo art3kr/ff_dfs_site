@@ -42,7 +42,7 @@ from scrape_pfr import make_session, pfr_get, PFR_BASE
 from team_mapping import normalize_team
 
 DATA_DIR   = os.path.join(os.path.dirname(__file__), '..', 'data')
-SLEEP_SEC  = 2.0
+SLEEP_SEC  = 4.0   # increased from 2.0 — hitting PFR rate limits at the old pace
 POSITIONS  = ['QB', 'RB', 'WR', 'TE']
 
 # Candidate data-stat names per logical field, tried in order.

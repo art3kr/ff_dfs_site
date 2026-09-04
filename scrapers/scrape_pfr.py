@@ -215,7 +215,12 @@ def get_headers() -> dict:
 def pfr_get(session: requests.Session, url: str, use_headers: bool = True) -> requests.Response | None:
     """
     GET a PFR page with retry logic for 403/429 responses.
-    - 429 (rate limited): wait SLEEP_ON_429 seconds then retry
+    - 429 (rate limited): respects a Retry-After header if PFR sends
+      one; otherwise waits SLEEP_ON_429 seconds, DOUBLING on each
+      successive retry within this call (exponential backoff) — a
+      flat wait repeated 3 times isn't long enough if the real
+      throttle window is longer than that, so each retry gives the
+      rate limit progressively more room to actually clear.
     - 403 (blocked):      wait SLEEP_ON_403 seconds then retry
       (if this keeps happening, PFR_CF_CLEARANCE has likely expired —
       get a fresh one from your browser, see the make_session() docstring)
@@ -228,6 +233,7 @@ def pfr_get(session: requests.Session, url: str, use_headers: bool = True) -> re
     the cf_clearance cookie was issued for. Kept as a no-op parameter for
     backward compatibility with existing call sites.
     """
+    backoff_429 = SLEEP_ON_429
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             r = session.get(url, verify=False, timeout=30)
@@ -240,8 +246,20 @@ def pfr_get(session: requests.Session, url: str, use_headers: bool = True) -> re
             return r
 
         if r.status_code == 429:
-            print(f"  Rate limited (429). Waiting {SLEEP_ON_429}s before retry {attempt+1}/{MAX_RETRIES}...")
-            time.sleep(SLEEP_ON_429)
+            # PFR may tell us exactly how long to wait — more reliable
+            # than our own guess if it's present.
+            retry_after = r.headers.get('Retry-After')
+            if retry_after:
+                try:
+                    wait = float(retry_after)
+                except ValueError:
+                    wait = backoff_429
+            else:
+                wait = backoff_429
+            print(f"  Rate limited (429). Waiting {wait:.0f}s before retry {attempt+1}/{MAX_RETRIES}"
+                  f"{' (server-specified via Retry-After)' if retry_after else ' (exponential backoff)'}...")
+            time.sleep(wait)
+            backoff_429 *= 2   # double for next attempt, in case this one is still too short
             continue
 
         if r.status_code == 403:

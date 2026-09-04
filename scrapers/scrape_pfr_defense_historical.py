@@ -53,7 +53,7 @@ from team_mapping import normalize_team
 DATA_DIR      = os.path.join(os.path.dirname(__file__), '..', 'data')
 SCHEDULES_DIR = os.path.join(DATA_DIR, 'schedules')
 OUTPUT_FILE   = os.path.join(DATA_DIR, 'hist_dst_stats_historical.csv.gz')
-SLEEP_SEC     = 2.5
+SLEEP_SEC     = 5.0   # increased from 2.5 — hitting PFR rate limits at the old pace
 FAILURE_CIRCUIT_BREAKER = 5
 
 OUT_COLUMNS = ['year', 'week', 'team', 'sack', 'interception', 'fumble_rec',
