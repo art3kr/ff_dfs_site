@@ -2242,18 +2242,125 @@ def team_points():
                            available_weeks_by_year=available_weeks_by_year)
 
 
+def _trailing_average(history_sorted_desc: list, n: int = 10):
+    """
+    history_sorted_desc: list of (year, week, value) already sorted
+    most-recent-first. Returns (avg, count) using up to the last n —
+    averages whatever's available if fewer than n exist, rather than
+    requiring a full window.
+    """
+    window = history_sorted_desc[:n]
+    if not window:
+        return None, 0
+    values = [v for (_, _, v) in window]
+    return sum(values) / len(values), len(values)
+
+
+def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> list:
+    """
+    Shared computation used by both the /best-matchups page and its
+    CSV download, so the two can never drift out of sync. See the
+    /best-matchups route's docstring for the full explanation of the
+    trailing-10-game, season-boundary-crossing approach.
+    """
+    ph = _ph()
+    if sel_position != "ALL":
+        slate = db_fetchall(f"""
+            SELECT name, position, team, opponent, salary, projected_pts, ownership_pct
+            FROM players
+            WHERE week = {ph} AND year = {ph} AND position = {ph}
+        """, (sel_week, sel_year, sel_position))
+    else:
+        slate = db_fetchall(f"""
+            SELECT name, position, team, opponent, salary, projected_pts, ownership_pct
+            FROM players
+            WHERE week = {ph} AND year = {ph}
+              AND position IN ('QB', 'RB', 'WR', 'TE')
+        """, (sel_week, sel_year))
+
+    if not slate:
+        return []
+
+    defense_rows = db_fetchall(f"""
+        SELECT year, week, opponent AS team, position,
+               SUM(COALESCE(dk_pts_pfr_reported, dk_pts)) AS pts_allowed
+        FROM hist_player_stats
+        WHERE position IN ('QB', 'RB', 'WR', 'TE')
+          AND (year < {ph} OR (year = {ph} AND week < {ph}))
+        GROUP BY year, week, opponent, position
+    """, (sel_year, sel_year, sel_week))
+
+    defense_history = {}
+    for r in defense_rows:
+        key = (r["team"], r["position"])
+        defense_history.setdefault(key, []).append((r["year"], r["week"], r["pts_allowed"]))
+    for key in defense_history:
+        defense_history[key].sort(key=lambda x: (x[0], x[1]), reverse=True)
+
+    slate_names_normalized = {normalize_name(p["name"]) for p in slate}
+    if slate_names_normalized:
+        placeholders = ", ".join([ph] * len(slate_names_normalized))
+        player_rows = db_fetchall(f"""
+            SELECT name_normalized, year, week, COALESCE(dk_pts_pfr_reported, dk_pts) AS dk_pts
+            FROM hist_player_stats
+            WHERE name_normalized IN ({placeholders})
+              AND (year < {ph} OR (year = {ph} AND week < {ph}))
+        """, tuple(slate_names_normalized) + (sel_year, sel_year, sel_week))
+    else:
+        player_rows = []
+
+    player_history = {}
+    for r in player_rows:
+        player_history.setdefault(r["name_normalized"], []).append((r["year"], r["week"], r["dk_pts"]))
+    for key in player_history:
+        player_history[key].sort(key=lambda x: (x[0], x[1]), reverse=True)
+
+    rows = []
+    for p in slate:
+        name_norm = normalize_name(p["name"])
+        opp_key = (p["opponent"], p["position"])
+        opp_avg, opp_games = _trailing_average(defense_history.get(opp_key, []))
+        player_avg, player_games = _trailing_average(player_history.get(name_norm, []))
+
+        rows.append({
+            "name": p["name"], "position": p["position"], "team": p["team"],
+            "opponent": p["opponent"], "salary": p["salary"],
+            "projected_pts": p["projected_pts"], "ownership_pct": p["ownership_pct"],
+            "opp_avg_pts_allowed": opp_avg, "opp_games_count": opp_games,
+            "player_avg_dk_pts": player_avg, "player_games_count": player_games,
+        })
+
+    rows.sort(key=lambda r: (
+        r["opp_avg_pts_allowed"] if r["opp_avg_pts_allowed"] is not None else -1,
+        r["player_avg_dk_pts"] if r["player_avg_dk_pts"] is not None else -1,
+    ), reverse=True)
+
+    return rows
+
+
 @app.route("/best-matchups")
 def best_matchups():
     """
     For a given slate (year/week from the live `players` table), shows
-    every player alongside how many DK points/game their specific
-    opponent gives up to that position on the season (from
-    hist_fantasy_points_against) — a good matchup is a strong player
-    facing a defense that's historically been generous to that
-    position. Default-sorted by the player's own projected points
-    (best players first); every column is independently sortable via
-    the shared history.js click-to-sort, so switching to "best
-    matchups" (sort by pts allowed instead) is just a header click.
+    every player alongside two TRAILING 10-game averages (crossing
+    season boundaries when needed, e.g. Week 2 of a new season pulls
+    from the end of the prior season to fill out the window):
+      - the opponent's average fantasy points allowed to that position,
+        derived directly from hist_player_stats (summing every
+        opposing-position player's DK points each game they faced this
+        team) rather than the season-total hist_fantasy_points_against
+        table, which has no per-game granularity and so can't support
+        a trailing window at all
+      - the player's own average DK points over their last 10 games
+
+    hist_fantasy_points_against intentionally isn't used here at all —
+    it was the right tool for the season-level Fantasy Points Against
+    page, but the wrong one for this trailing-window calculation.
+
+    Sorted by opponent points allowed (descending — most exploitable
+    matchups first), then by the player's own trailing average
+    (descending) as the tiebreaker. Every column stays independently
+    sortable via history.js for anyone who wants a different view.
     """
     year_week_rows = db_fetchall(
         "SELECT DISTINCT year, week FROM players ORDER BY year DESC, week DESC"
@@ -2281,34 +2388,7 @@ def best_matchups():
     for y in available_weeks_by_year:
         available_weeks_by_year[y].sort()
 
-    ph = _ph()
-    if sel_position != "ALL":
-        rows = db_fetchall(f"""
-            SELECT p.name AS name, p.position AS position, p.team AS team,
-                   p.opponent AS opponent, p.salary AS salary,
-                   p.projected_pts AS projected_pts, p.ownership_pct AS ownership_pct,
-                   fpa.dk_pts_per_game AS opp_dk_pts_allowed
-            FROM players p
-            LEFT JOIN hist_fantasy_points_against fpa
-                ON  fpa.year = p.year AND fpa.position = p.position
-                AND fpa.team = p.opponent
-            WHERE p.week = {ph} AND p.year = {ph} AND p.position = {ph}
-            ORDER BY p.projected_pts DESC
-        """, (sel_week, sel_year, sel_position))
-    else:
-        rows = db_fetchall(f"""
-            SELECT p.name AS name, p.position AS position, p.team AS team,
-                   p.opponent AS opponent, p.salary AS salary,
-                   p.projected_pts AS projected_pts, p.ownership_pct AS ownership_pct,
-                   fpa.dk_pts_per_game AS opp_dk_pts_allowed
-            FROM players p
-            LEFT JOIN hist_fantasy_points_against fpa
-                ON  fpa.year = p.year AND fpa.position = p.position
-                AND fpa.team = p.opponent
-            WHERE p.week = {ph} AND p.year = {ph}
-              AND p.position IN ('QB', 'RB', 'WR', 'TE')
-            ORDER BY p.projected_pts DESC
-        """, (sel_week, sel_year))
+    rows = _compute_best_matchups(sel_year, sel_week, sel_position)
 
     return render_template("best_matchups.html",
                            rows=rows, year=sel_year, week=sel_week,
@@ -2653,27 +2733,7 @@ def download_csv(data_type):
 
     elif data_type == "best-matchups":
         position = request.args.get("position", "ALL")
-        if position != "ALL":
-            rows = db_fetchall(f"""
-                SELECT p.name, p.position, p.team, p.opponent, p.salary,
-                       p.projected_pts, p.ownership_pct, fpa.dk_pts_per_game AS opp_dk_pts_allowed
-                FROM players p
-                LEFT JOIN hist_fantasy_points_against fpa
-                    ON fpa.year = p.year AND fpa.position = p.position AND fpa.team = p.opponent
-                WHERE p.week = {_ph()} AND p.year = {_ph()} AND p.position = {_ph()}
-                ORDER BY p.projected_pts DESC
-            """, (week, year, position))
-        else:
-            rows = db_fetchall(f"""
-                SELECT p.name, p.position, p.team, p.opponent, p.salary,
-                       p.projected_pts, p.ownership_pct, fpa.dk_pts_per_game AS opp_dk_pts_allowed
-                FROM players p
-                LEFT JOIN hist_fantasy_points_against fpa
-                    ON fpa.year = p.year AND fpa.position = p.position AND fpa.team = p.opponent
-                WHERE p.week = {_ph()} AND p.year = {_ph()}
-                  AND p.position IN ('QB', 'RB', 'WR', 'TE')
-                ORDER BY p.projected_pts DESC
-            """, (week, year))
+        rows = _compute_best_matchups(year, week, position)
         filename = f"best_matchups_week{week}_{year}.csv"
 
     else:

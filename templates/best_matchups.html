@@ -90,7 +90,10 @@
                     <th data-col="salary"      class="right">Salary</th>
                     <th data-col="proj"        class="right">Proj Pts</th>
                     <th data-col="own"         class="right">Proj Own%</th>
-                    <th data-col="opp_allowed" class="right">Opp DK Pts/G Allowed</th>
+                    <th data-col="opp_allowed" class="right">Opp Avg Pts Allowed (L10)</th>
+                    <th data-col="opp_games"   class="right">Opp Games</th>
+                    <th data-col="player_avg"  class="right">Player Avg Pts (L10)</th>
+                    <th data-col="player_games" class="right">Player Games</th>
                 </tr>
             </thead>
             <tbody>
@@ -101,23 +104,28 @@
                     <td>{{ r['team'] | upper }}</td>
                     <td>{{ r['opponent'] | upper }}</td>
                     <td class="right">${{ "{:,}".format(r['salary']) if r['salary'] else '—' }}</td>
-                    <td class="right"><strong>{{ "%.1f"|format(r['projected_pts']) if r['projected_pts'] else '—' }}</strong></td>
+                    <td class="right">{{ "%.1f"|format(r['projected_pts']) if r['projected_pts'] else '—' }}</td>
                     <td class="right">{{ "%.1f"|format(r['ownership_pct']) if r['ownership_pct'] else '—' }}%</td>
                     <td class="right">
-                        {% if r['opp_dk_pts_allowed'] is not none %}
-                            {{ "%.1f"|format(r['opp_dk_pts_allowed']) }}
-                        {% else %}—{% endif %}
+                        <strong>{{ "%.1f"|format(r['opp_avg_pts_allowed']) if r['opp_avg_pts_allowed'] is not none else '—' }}</strong>
                     </td>
+                    <td class="right">{{ r['opp_games_count'] }}</td>
+                    <td class="right">
+                        {{ "%.1f"|format(r['player_avg_dk_pts']) if r['player_avg_dk_pts'] is not none else '—' }}
+                    </td>
+                    <td class="right">{{ r['player_games_count'] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     <p class="standings-note">
-        Default-sorted by each player's own projected points. Click "Opp DK Pts/G Allowed" to
-        sort by matchup quality instead — a high number there means that opponent has historically
-        been generous to that position this season. "—" means we don't have season-long
-        fantasy-points-against data for that matchup yet.
+        Sorted by the opponent's average fantasy points allowed to this position over their last
+        10 games (highest first — the most exploitable matchups), then by the player's own average
+        over their last 10 games. Both trailing windows cross season boundaries when needed (e.g.
+        early in a new season, they pull from the end of the prior one) and average whatever games
+        are available if fewer than 10 exist — the "Games" columns show exactly how many games each
+        average is based on. "—" means we have no historical data for that team/player at all yet.
     </p>
     {% else %}
     <p class="empty-state">No players found for Week {{ week }}, {{ year }}{% if position != 'ALL' %} ({{ position }}){% endif %}.</p>
