@@ -232,18 +232,28 @@ def main(years: list[int]):
             sched = sched.drop_duplicates(subset=['boxscore_url'])
 
             print(f"  {len(sched)} unique games found")
+            skipped_already_done = 0
 
             for i, row in sched.iterrows():
                 boxscore_url = row['boxscore_url']
                 week = int(row['week'])
 
-                # Skip if we already have data for both teams in this game.
-                # We don't know both team abbreviations ahead of the fetch
-                # in a normalized form without re-deriving them, so just
-                # check whether ANY row already exists for this exact
-                # boxscore by checking a cheap proxy: skip only if fully
-                # redundant isn't easily knowable in advance — safe to
-                # just re-fetch occasionally; upserts are idempotent.
+                # Real resume-safety check: team_1/team_2 are already
+                # available in the schedule data (used above for the BYE
+                # filter), so we actually CAN know both teams before
+                # fetching anything — normalize them and check if we
+                # already have both teams' data for this (year, week).
+                # If so, skip the request entirely rather than re-fetching
+                # a game we already have (the previous version of this
+                # script always re-fetched everything on every run).
+                team_1_norm = normalize_team(str(row.get('team_1', '')))
+                team_2_norm = normalize_team(str(row.get('team_2', '')))
+                if (team_1_norm and team_2_norm and
+                        (year, week, team_1_norm) in done_pairs and
+                        (year, week, team_2_norm) in done_pairs):
+                    skipped_already_done += 1
+                    continue
+
                 print(f"  [{i+1}] {boxscore_url}", end='', flush=True)
 
                 game_rows = scrape_boxscore_defense(boxscore_url, year, week, session)
@@ -267,6 +277,10 @@ def main(years: list[int]):
                 existing = _save(existing, game_rows)
                 print(f" -> {len(game_rows)} team rows")
                 time.sleep(SLEEP_SEC)
+
+            if skipped_already_done:
+                print(f"  Skipped {skipped_already_done} already-completed games "
+                      f"(both teams' data already present)")
 
     print(f"\nDone. {len(existing):,} total rows -> {OUTPUT_FILE}")
 
