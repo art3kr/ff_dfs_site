@@ -2042,6 +2042,15 @@ def slate():
         # so the page still works, just without day separators.
         players_by_day = [(None, players)]
 
+    depth_chart_strings = {}   # name -> "1st"/"2nd"/"3rd"/"—" display string
+    if players:
+        STRING_LABELS = {1: "1st", 2: "2nd", 3: "3rd"}
+        names_normalized = {normalize_name(p["name"]) for p in players}
+        lookup = _get_depth_chart_lookup(names_normalized)
+        for p in players:
+            string_rank, _pos = lookup.get(normalize_name(p["name"]), (None, None))
+            depth_chart_strings[p["name"]] = STRING_LABELS.get(string_rank, "—")
+
     return render_template("slate.html",
                            players=players,
                            players_by_day=players_by_day,
@@ -2051,7 +2060,8 @@ def slate():
                            existing_lineup=existing_lineup,
                            locked_teams=sorted(locked_teams),
                            total_teams_scheduled=total_teams_scheduled,
-                           kickoff_by_team=kickoff_by_team)
+                           kickoff_by_team=kickoff_by_team,
+                           depth_chart_strings=depth_chart_strings)
 
 
 @app.route("/history")
@@ -2378,6 +2388,35 @@ def _trailing_average(history_sorted_desc: list, n: int = 10):
     return sum(values) / len(values), len(values)
 
 
+def _get_depth_chart_lookup(names_normalized: set) -> dict:
+    """
+    Shared by the Slate page (show each player's string) and Best
+    Matchups (filter out anyone not on a depth chart at all) — one
+    lookup, so both stay consistent with each other rather than
+    re-implementing the same join twice.
+
+    Matches purely by normalized player name, not name+position: a
+    given name should only appear once across the whole depth chart
+    table regardless of which of ourlads' specific position labels
+    it's filed under (e.g. a WR is under LWR/RWR/SWR, never a bare
+    "WR"), so we don't need to know a slate player's exact WR slot in
+    advance — just look up their name and take whatever string_rank
+    comes back.
+
+    Returns {name_normalized: (string_rank, pos)}.
+    """
+    if not names_normalized:
+        return {}
+    ph = _ph()
+    placeholders = ", ".join([ph] * len(names_normalized))
+    rows = db_fetchall(f"""
+        SELECT player_name_normalized, string_rank, pos
+        FROM depth_charts
+        WHERE player_name_normalized IN ({placeholders})
+    """, tuple(names_normalized))
+    return {r["player_name_normalized"]: (r["string_rank"], r["pos"]) for r in rows}
+
+
 def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> list:
     """
     Shared computation used by both the /best-matchups page and its
@@ -2399,6 +2438,18 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
             WHERE week = {ph} AND year = {ph}
               AND position IN ('QB', 'RB', 'WR', 'TE')
         """, (sel_week, sel_year))
+
+    if not slate:
+        return []
+
+    # Filter to only players who are actually on a depth chart this
+    # week — removes recently-cut/inactive players who might still
+    # linger in salary data but aren't real options. Matches purely by
+    # normalized name (see _get_depth_chart_lookup's docstring for why
+    # that's sufficient here).
+    slate_names_normalized_pre_filter = {normalize_name(p["name"]) for p in slate}
+    depth_chart_lookup = _get_depth_chart_lookup(slate_names_normalized_pre_filter)
+    slate = [p for p in slate if normalize_name(p["name"]) in depth_chart_lookup]
 
     if not slate:
         return []
@@ -2437,6 +2488,8 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
     for key in player_history:
         player_history[key].sort(key=lambda x: (x[0], x[1]), reverse=True)
 
+    STRING_LABELS = {1: "1st", 2: "2nd", 3: "3rd"}
+
     rows = []
     for p in slate:
         name_norm = normalize_name(p["name"])
@@ -2444,12 +2497,15 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
         opp_avg, opp_games = _trailing_average(defense_history.get(opp_key, []))
         player_avg, player_games = _trailing_average(player_history.get(name_norm, []))
 
+        string_rank, _dc_pos = depth_chart_lookup.get(name_norm, (None, None))
+
         rows.append({
             "name": p["name"], "position": p["position"], "team": p["team"],
             "opponent": p["opponent"], "salary": p["salary"],
             "projected_pts": p["projected_pts"], "ownership_pct": p["ownership_pct"],
             "opp_avg_pts_allowed": opp_avg, "opp_games_count": opp_games,
             "player_avg_dk_pts": player_avg, "player_games_count": player_games,
+            "depth_chart_string": STRING_LABELS.get(string_rank, str(string_rank) if string_rank else "—"),
         })
 
     rows.sort(key=lambda r: (
@@ -2519,6 +2575,50 @@ def best_matchups():
                            available_weeks_by_year=available_weeks_by_year,
                            position=sel_position,
                            team_colors=TEAM_ROW_COLORS)
+
+
+@app.route("/depth-charts")
+def depth_charts():
+    """
+    Standalone browse of the full depth chart data — grouped by team,
+    QB/RB/WR(as its 3 ourlads slots: LWR/RWR/SWR)/TE, 1st-3rd string.
+    Always reflects the latest scrape (this table is a full-replace,
+    not historical — see replace_depth_charts()).
+    """
+    rows = db_fetchall("""
+        SELECT team, pos, string_rank, player_name
+        FROM depth_charts
+        ORDER BY team, pos, string_rank
+    """)
+
+    if not rows:
+        return render_template("depth_charts.html", positions=[], selected_team=None,
+                               available_teams=[])
+
+    available_teams = sorted({r["team"] for r in rows})
+    req_team = request.args.get("team")
+    sel_team = req_team if req_team in available_teams else available_teams[0]
+
+    STRING_LABELS = {1: "1st", 2: "2nd", 3: "3rd"}
+
+    # Group this team's rows by position, ordered QB/RB/LWR/RWR/SWR/TE
+    # (matching ourlads' own Offense-table row order) rather than
+    # alphabetically, since that's the order fantasy users expect.
+    POSITION_ORDER = ['QB', 'RB', 'LWR', 'RWR', 'SWR', 'TE']
+    by_position = {}
+    for r in rows:
+        if r["team"] != sel_team:
+            continue
+        by_position.setdefault(r["pos"], []).append({
+            "string_label": STRING_LABELS.get(r["string_rank"], str(r["string_rank"])),
+            "player_name": r["player_name"],
+        })
+
+    ordered_positions = [(pos, by_position[pos]) for pos in POSITION_ORDER if pos in by_position]
+
+    return render_template("depth_charts.html",
+                           positions=ordered_positions, selected_team=sel_team,
+                           available_teams=available_teams)
 
 
 @app.route("/schedule")

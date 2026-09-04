@@ -21,6 +21,7 @@
             <a href="{{ url_for('fantasy_points_against') }}" class="nav-link">Fantasy Pts Against</a>
             <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
             <a href="{{ url_for('best_matchups') }}" class="nav-link active">Best Matchups</a>
+            <a href="{{ url_for('depth_charts') }}" class="nav-link">Depth Charts</a>
         </nav>
         {% if year %}
             <p class="subtitle">Week {{ week }}, {{ year }} &mdash; This week's slate vs. each opponent's season-long weakness by position</p>
@@ -86,6 +87,7 @@
                     <th data-col="position">Pos</th>
                     <th data-col="name">Player</th>
                     <th data-col="team">Team</th>
+                    <th data-col="string">String</th>
                     <th data-col="opponent">Opp</th>
                     <th data-col="salary"      class="right">Salary</th>
                     <th data-col="proj"        class="right">Proj Pts</th>
@@ -106,6 +108,7 @@
                     <td class="pos-badge">{{ r['position'] }}</td>
                     <td class="player-name">{{ r['name'] }}</td>
                     <td>{{ r['team'] | upper }}</td>
+                    <td>{{ r['depth_chart_string'] }}</td>
                     <td>{{ r['opponent'] | upper }}</td>
                     <td class="right">${{ "{:,}".format(r['salary']) if r['salary'] else '—' }}</td>
                     <td class="right">{{ "%.1f"|format(r['projected_pts']) if r['projected_pts'] else '—' }}</td>
@@ -124,7 +127,8 @@
         </table>
     </div>
     <p class="standings-note">
-        Sorted by the opponent's average fantasy points allowed to this position over their last
+        Only players currently on their team's depth chart (QB/RB/WR/TE, 1st-3rd string) are
+        shown here. Sorted by the opponent's average fantasy points allowed to this position over their last
         10 games (highest first — the most exploitable matchups), then by the player's own average
         over their last 10 games. Both trailing windows cross season boundaries when needed (e.g.
         early in a new season, they pull from the end of the prior one) and average whatever games

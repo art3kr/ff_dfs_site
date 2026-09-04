@@ -918,3 +918,75 @@ header {
 #history-table tbody tr[data-team-color]:hover {
     filter: brightness(1.25);
 }
+
+/* -----------------------------------------------------------------------
+   Depth Charts page
+   ----------------------------------------------------------------------- */
+
+.team-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.team-picker-btn {
+    padding: 5px 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.team-picker-btn:hover  { background: var(--bg-hover); }
+.team-picker-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.depth-chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.depth-chart-position {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.depth-chart-position-title {
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--bg-row-alt);
+    border-bottom: 1px solid var(--border);
+}
+
+.depth-chart-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.depth-chart-table td {
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+}
+
+.depth-chart-table tr:last-child td { border-bottom: none; }
+
+.depth-chart-string {
+    width: 40px;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 0.75rem;
+}

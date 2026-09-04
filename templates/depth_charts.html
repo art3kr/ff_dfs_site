@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF DFS Challenge — Depth Charts{% if selected_team %} — {{ selected_team | upper }}{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>FF DFS Challenge</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('slate') }}" class="nav-link">Slate</a>
+            <a href="{{ url_for('history') }}" class="nav-link">History</a>
+            <a href="{{ url_for('standings') }}" class="nav-link">Standings</a>
+            <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
+            <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
+            <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>
+            <a href="{{ url_for('fantasy_points_against') }}" class="nav-link">Fantasy Pts Against</a>
+            <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
+            <a href="{{ url_for('best_matchups') }}" class="nav-link">Best Matchups</a>
+            <a href="{{ url_for('depth_charts') }}" class="nav-link active">Depth Charts</a>
+        </nav>
+        {% if selected_team %}
+            <p class="subtitle">{{ selected_team | upper }} &mdash; QB / RB / WR / TE, 1st-3rd string</p>
+        {% else %}
+            <p class="subtitle">No depth chart data loaded yet.</p>
+        {% endif %}
+    </div>
+    <div class="header-right">
+        {% if current_user.is_authenticated %}
+            <span class="user-badge">{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Sign in</a>
+        {% endif %}
+    </div>
+</header>
+
+<main class="history-main">
+
+{% if not available_teams %}
+    <p class="empty-state">
+        No depth chart data loaded yet. Run <code>scrapers/scrape_ourlads_depth_charts.py</code>
+        then <code>flask load-history</code>.
+    </p>
+{% else %}
+
+    <div class="team-picker">
+        {% for t in available_teams %}
+        <a href="?team={{ t }}" class="team-picker-btn {% if t == selected_team %}active{% endif %}">{{ t | upper }}</a>
+        {% endfor %}
+    </div>
+
+    {% if positions %}
+    <div class="depth-chart-grid">
+        {% for pos, entries in positions %}
+        <div class="depth-chart-position">
+            <h3 class="depth-chart-position-title">{{ pos }}</h3>
+            <table class="depth-chart-table">
+                <tbody>
+                    {% for e in entries %}
+                    <tr>
+                        <td class="depth-chart-string">{{ e['string_label'] }}</td>
+                        <td class="player-name">{{ e['player_name'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">No depth chart data found for {{ selected_team | upper }}.</p>
+    {% endif %}
+
+{% endif %}
+
+</main>
+
+</body>
+</html>
