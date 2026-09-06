@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF DFS Challenge — My Lineups{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>FF DFS Challenge</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('slate') }}" class="nav-link challenge-tab">Slate</a>
+            <a href="{{ url_for('standings') }}" class="nav-link challenge-tab">Standings</a>
+            <a href="{{ url_for('props') }}" class="nav-link challenge-tab">Props</a>
+            <a href="{{ url_for('my_lineups') }}" class="nav-link challenge-tab active">My Lineups</a>
+            <a href="{{ url_for('history') }}" class="nav-link">History</a>
+            <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
+            <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
+            <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>
+            <a href="{{ url_for('fantasy_points_against') }}" class="nav-link">Fantasy Pts Against</a>
+            <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
+            <a href="{{ url_for('best_matchups') }}" class="nav-link">Best Matchups</a>
+            <a href="{{ url_for('depth_charts') }}" class="nav-link">Depth Charts</a>
+        </nav>
+        {% if week %}
+            <p class="subtitle">{{ submitter }}'s Week {{ week }}, {{ year }} lineup</p>
+        {% else %}
+            <p class="subtitle">No lineups submitted yet.</p>
+        {% endif %}
+    </div>
+    <div class="header-right">
+        {% if current_user.is_authenticated %}
+            <span class="user-badge">{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Sign in</a>
+        {% endif %}
+    </div>
+</header>
+
+<main class="history-main">
+
+{% if not available_years %}
+    <p class="empty-state">No lineups have been submitted yet.</p>
+{% else %}
+
+    <div class="page-controls">
+        <form class="history-selector" id="history-selector" method="GET" action="{{ url_for('my_lineups') }}">
+            <label>
+                Participant
+                <select name="submitter" onchange="this.form.submit()">
+                    {% for s in available_submitters %}
+                    <option value="{{ s }}" {% if s == submitter %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                Year
+                <select name="year" id="year-select">
+                    {% for y in available_years %}
+                    <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                Week
+                <select name="week" id="week-select">
+                    {% for w in available_weeks_by_year[year] %}
+                    <option value="{{ w }}" {% if w == week %}selected{% endif %}>Week {{ w }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </form>
+    </div>
+
+    {% if rows %}
+    <div class="table-wrapper">
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th>Slot</th>
+                    <th>Player</th>
+                    <th>Pos</th>
+                    <th class="right">Salary</th>
+                    <th class="right">Proj Pts</th>
+                    <th class="right">Actual Pts</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rows %}
+                <tr>
+                    <td class="pos-badge">{{ r['slot'] }}</td>
+                    <td class="player-name">{{ r['name'] }}</td>
+                    <td>{{ r['position'] }}</td>
+                    <td class="right">${{ "{:,}".format(r['salary']) if r['salary'] else '—' }}</td>
+                    <td class="right">{{ "%.1f"|format(r['projected_pts']) if r['projected_pts'] else '—' }}</td>
+                    <td class="right">
+                        {% if r['actual_pts'] is not none %}
+                            <strong>{{ "%.1f"|format(r['actual_pts']) }}</strong>
+                        {% else %}
+                            <span class="pending-week" title="Not yet fully scored">pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3"><strong>Total</strong></td>
+                    <td class="right"><strong>${{ "{:,}".format(total_salary) if total_salary else '—' }}</strong></td>
+                    <td></td>
+                    <td class="right">
+                        {% if all_matched %}
+                            <strong>{{ "%.1f"|format(total) }}</strong>
+                        {% else %}
+                            <span class="pending-week">pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    {% if not all_matched %}
+    <p class="standings-note">
+        This week isn't fully scored yet — some games may not be finished, or the week's
+        results haven't been loaded. The total will appear once all 9 players have a result.
+    </p>
+    {% endif %}
+    {% else %}
+    <p class="empty-state">No lineup found for {{ submitter }}, Week {{ week }}, {{ year }}.</p>
+    {% endif %}
+
+{% endif %}
+
+</main>
+
+<script>
+    window.HISTORY_WEEKS_BY_YEAR = {{ available_weeks_by_year | tojson }};
+</script>
+<script src="{{ url_for('static', filename='history.js') }}"></script>
+{% include '_info_modal.html' %}
+</body>
+</html>

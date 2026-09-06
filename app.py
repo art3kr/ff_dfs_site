@@ -2963,6 +2963,122 @@ def _score_props_for_week(year: int, week: int) -> dict:
     return result
 
 
+@app.route("/my-lineups")
+def my_lineups():
+    """
+    Lets anyone browse a past week's submitted lineup, player by
+    player, with each player's actual result — not just the single
+    total number standings shows. Reuses the exact same matching rules
+    as standings() (DST by team via team_mapping, offense by
+    normalized name), rebuilt here independently rather than
+    refactored out of standings() to avoid touching that already-
+    tested code path.
+
+    Defaults to the logged-in user's own most recent submission, but
+    anyone's lineup for a past week can be viewed — standings already
+    reveals everyone's weekly TOTAL, so there's no additional secrecy
+    concern in showing the per-player breakdown once a week's done.
+    """
+    ph = _ph()
+
+    available = db_fetchall(
+        "SELECT DISTINCT year, week, submitter FROM lineups ORDER BY year DESC, week DESC, submitter"
+    )
+    if not available:
+        return render_template("my_lineups.html", rows=None, year=None, week=None,
+                               submitter=None, available_years=[], available_weeks_by_year={},
+                               available_submitters=[], total=None, all_matched=False)
+
+    available_years = sorted({r["year"] for r in available}, reverse=True)
+    available_weeks_by_year = {}
+    for r in available:
+        available_weeks_by_year.setdefault(r["year"], set()).add(r["week"])
+    for y in available_weeks_by_year:
+        available_weeks_by_year[y] = sorted(available_weeks_by_year[y])
+    available_submitters = sorted({r["submitter"] for r in available})
+
+    req_year = request.args.get("year", type=int)
+    req_week = request.args.get("week", type=int)
+    req_submitter = request.args.get("submitter")
+
+    # Default submitter: the logged-in user if they've ever submitted
+    # anything, otherwise just whoever's first alphabetically.
+    default_submitter = available_submitters[0]
+    if current_user.is_authenticated and current_user.username in available_submitters:
+        default_submitter = current_user.username
+
+    valid_combo = (req_year, req_week, req_submitter) in {(r["year"], r["week"], r["submitter"]) for r in available}
+    if valid_combo:
+        sel_year, sel_week, sel_submitter = req_year, req_week, req_submitter
+    else:
+        # Most recent (year, week) for the chosen/default submitter
+        sub = req_submitter if req_submitter in available_submitters else default_submitter
+        sub_rows = [r for r in available if r["submitter"] == sub]
+        sel_year, sel_week, sel_submitter = sub_rows[0]["year"], sub_rows[0]["week"], sub
+
+    lineup_row = db_fetchone(f"""
+        SELECT lineup_json, total_salary, submitted_at FROM lineups
+        WHERE year = {ph} AND week = {ph} AND submitter = {ph}
+    """, (sel_year, sel_week, sel_submitter))
+
+    players = json.loads(lineup_row["lineup_json"])
+
+    # Same matching approach as standings(), scoped to just this one
+    # lineup's 9 players rather than every lineup for the season.
+    names = {normalize_name(p["name"]) for p in players if (p.get("slot") or "").upper() != "DST"}
+    teams = {normalize_team(p["name"]) for p in players if (p.get("slot") or "").upper() == "DST"}
+    teams.discard('')
+
+    scores_by_name = {}
+    if names:
+        placeholders = ", ".join([ph] * len(names))
+        stat_rows = db_fetchall(f"""
+            SELECT name_normalized, COALESCE(dk_pts_pfr_reported, dk_pts) AS actual_pts
+            FROM hist_player_stats
+            WHERE year = {ph} AND week = {ph} AND name_normalized IN ({placeholders})
+        """, (sel_year, sel_week) + tuple(names))
+        scores_by_name = {r["name_normalized"]: r["actual_pts"] for r in stat_rows}
+
+    scores_by_team = {}
+    if teams:
+        placeholders = ", ".join([ph] * len(teams))
+        dst_rows = db_fetchall(f"""
+            SELECT team, dk_pts FROM hist_dst_stats
+            WHERE year = {ph} AND week = {ph} AND team IN ({placeholders})
+        """, (sel_year, sel_week) + tuple(teams))
+        scores_by_team = {r["team"]: r["dk_pts"] for r in dst_rows}
+
+    rows = []
+    total = 0.0
+    matched_count = 0
+    for p in players:
+        is_dst = (p.get("slot") or "").upper() == "DST"
+        if is_dst:
+            team = normalize_team(p["name"])
+            actual = scores_by_team.get(team)
+        else:
+            actual = scores_by_name.get(normalize_name(p["name"]))
+
+        if actual is not None:
+            total += actual
+            matched_count += 1
+
+        rows.append({
+            "slot": p.get("slot"), "name": p["name"], "position": p.get("position"),
+            "salary": p.get("salary"), "projected_pts": p.get("projected_pts"),
+            "actual_pts": actual,
+        })
+
+    all_matched = (matched_count == 9)
+
+    return render_template("my_lineups.html",
+                           rows=rows, year=sel_year, week=sel_week, submitter=sel_submitter,
+                           available_years=available_years, available_weeks_by_year=available_weeks_by_year,
+                           available_submitters=available_submitters,
+                           total=round(total, 2) if all_matched else None,
+                           all_matched=all_matched, total_salary=lineup_row["total_salary"])
+
+
 @app.route("/props")
 def props():
     """
