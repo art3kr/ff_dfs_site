@@ -24,6 +24,7 @@
             <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
             <a href="{{ url_for('best_matchups') }}" class="nav-link active">Best Matchups</a>
             <a href="{{ url_for('depth_charts') }}" class="nav-link">Depth Charts</a>
+            <a href="{{ url_for('implied_points') }}" class="nav-link">Implied Points</a>
         </nav>
         {% if year %}
             <p class="subtitle">Week {{ week }}, {{ year }} &mdash; This week's slate vs. each opponent's season-long weakness by position</p>
@@ -92,7 +93,6 @@
                     <th data-col="string">Str</th>
                     <th data-col="opponent">Opp</th>
                     <th data-col="salary"      class="right">Salary</th>
-                    <th data-col="proj"        class="right">Proj</th>
                     <th data-col="opp_allowed" class="right" title="Opponent's average fantasy points allowed to this position over their last 10 games">Opp Pts<br>(L10)</th>
                     <th data-col="opp_rank"    class="right" title="Opponent's rank among all 32 teams (1 = fewest allowed)">Opp<br>Rank</th>
                     <th data-col="player_avg"  class="right" title="Player's own average fantasy points over their last 10 games">Plyr Pts<br>(L10)</th>
@@ -101,6 +101,7 @@
                     <th data-col="ou" class="right">O/U</th>
                     <th data-col="spread" class="right">Spread</th>
                     <th data-col="fav">Fav</th>
+                    <th data-col="implied" class="right" title="Implied fantasy points from the prop betting market">Implied<br>Pts</th>
                 </tr>
             </thead>
             <tbody>
@@ -116,7 +117,6 @@
                     <td>{{ r['depth_chart_string'] }}</td>
                     <td>{{ r['opponent'] | upper }}</td>
                     <td class="right">${{ "{:,}".format(r['salary']) if r['salary'] else '—' }}</td>
-                    <td class="right">{{ "%.1f"|format(r['projected_pts']) if r['projected_pts'] else '—' }}</td>
                     <td class="right">
                         <strong>{{ "%.1f"|format(r['opp_avg_pts_allowed']) if r['opp_avg_pts_allowed'] is not none else '—' }}</strong>
                         {% if r['opp_games_count'] %}<span class="games-suffix">({{ r['opp_games_count'] }}g)</span>{% endif %}
@@ -145,6 +145,11 @@
                     <td class="right">{{ r['over_under'] if r['over_under'] else '—' }}</td>
                     <td class="right">{{ r['spread'] if r['spread'] is not none else '—' }}</td>
                     <td>{{ r['favorite'] | upper if r['favorite'] else '—' }}</td>
+                    <td class="right">
+                        {% if r['implied_points'] is not none %}
+                        <strong style="color: {{ r['implied_points_color'] }};">{{ "%.1f"|format(r['implied_points']) }}</strong>
+                        {% else %}—{% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

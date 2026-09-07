@@ -24,6 +24,7 @@
             <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
             <a href="{{ url_for('best_matchups') }}" class="nav-link">Best Matchups</a>
             <a href="{{ url_for('depth_charts') }}" class="nav-link">Depth Charts</a>
+            <a href="{{ url_for('implied_points') }}" class="nav-link">Implied Points</a>
         </nav>
         {% if week %}
             <p class="subtitle">Week {{ week }}, {{ year }} &mdash; DraftKings Thu-Mon Slate</p>
@@ -91,16 +92,14 @@
                         <th data-col="kickoff">Kickoff</th>
                         <th data-col="string">String</th>
                         <th data-col="salary"        class="right">Salary</th>
-                        <th data-col="projected_pts" class="right">Proj Pts</th>
-                        <th data-col="ownership_pct" class="right">Proj Own%</th>
-                        <th data-col="value"         class="right">Value</th>
+                        <th data-col="implied"        class="right" title="Implied fantasy points from the prop betting market">Implied Pts</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for day_name, day_players in players_by_day %}
                     {% if day_name %}
                     <tr class="day-header-row">
-                        <td colspan="10" class="day-header-cell">{{ day_name }}</td>
+                        <td colspan="8" class="day-header-cell">{{ day_name }}</td>
                     </tr>
                     {% endif %}
                     {% for p in day_players %}
@@ -123,12 +122,9 @@
                         <td class="kickoff-cell">{{ kickoff_by_team.get(p['team'], '—') }}</td>
                         <td>{{ depth_chart_strings.get(p['name'], '—') }}</td>
                         <td class="right">${{ "{:,}".format(p['salary']) if p['salary'] else '—' }}</td>
-                        <td class="right">{{ "%.1f"|format(p['projected_pts']) if p['projected_pts'] else '—' }}</td>
-                        <td class="right">{{ "%.1f"|format(p['ownership_pct']) if p['ownership_pct'] else '—' }}%</td>
                         <td class="right">
-                            {% if p['salary'] and p['projected_pts'] %}
-                                {{ "%.2f"|format(p['projected_pts'] / (p['salary'] / 1000)) }}
-                            {% else %}—{% endif %}
+                            {% set implied = implied_points_by_name.get(p['name']) %}
+                            {{ "%.1f"|format(implied) if implied is not none else '—' }}
                         </td>
                     </tr>
                     {% endfor %}

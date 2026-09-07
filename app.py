@@ -2590,6 +2590,14 @@ def slate():
             string_rank, _pos = lookup.get(normalize_name(p["name"]), (None, None))
             depth_chart_strings[p["name"]] = STRING_LABELS.get(string_rank, "—")
 
+    # Reuses the same shared computation as the standalone Implied
+    # Points page and Best Matchups — one source of truth for how
+    # implied points get derived from prop lines.
+    implied_points_by_name = {}
+    if current_week is not None:
+        implied_rows = _compute_implied_points_table(current_year, current_week)
+        implied_points_by_name = {r["name"]: r["implied_points"] for r in implied_rows}
+
     return render_template("slate.html",
                            players=players,
                            players_by_day=players_by_day,
@@ -2600,7 +2608,8 @@ def slate():
                            locked_teams=sorted(locked_teams),
                            total_teams_scheduled=total_teams_scheduled,
                            kickoff_by_team=kickoff_by_team,
-                           depth_chart_strings=depth_chart_strings)
+                           depth_chart_strings=depth_chart_strings,
+                           implied_points_by_name=implied_points_by_name)
 
 
 @app.route("/history")
@@ -2927,6 +2936,64 @@ def _trailing_average(history_sorted_desc: list, n: int = 10):
     return sum(values) / len(values), len(values)
 
 
+def _compute_implied_points_table(sel_year: int, sel_week: int) -> list:
+    """
+    Shared by the standalone Implied Points page and Best Matchups, so
+    both stay consistent. implied_points/value are None (not 0) when a
+    player has zero props at all — 0.0 would misleadingly look like
+    "computed as zero" rather than "no data available".
+    """
+    ph = _ph()
+    slate = db_fetchall(f"""
+        SELECT name, position, team, opponent, salary
+        FROM players
+        WHERE week = {ph} AND year = {ph}
+    """, (sel_week, sel_year))
+
+    if not slate:
+        return []
+
+    names_normalized = {normalize_name(p["name"]) for p in slate}
+    placeholders = ", ".join([ph] * len(names_normalized))
+    prop_rows = db_fetchall(f"""
+        SELECT player_name_normalized, category, over_line, under_line
+        FROM scoresandodds_props
+        WHERE player_name_normalized IN ({placeholders})
+    """, tuple(names_normalized))
+
+    props_by_player = {}
+    for r in prop_rows:
+        line = r["over_line"] if r["over_line"] is not None else r["under_line"]
+        if line is None:
+            continue
+        props_by_player.setdefault(r["player_name_normalized"], {})[r["category"]] = line
+
+    depth_chart_lookup = _get_depth_chart_lookup(names_normalized)
+    STRING_LABELS = {1: "1st", 2: "2nd", 3: "3rd"}
+
+    rows = []
+    for p in slate:
+        name_norm = normalize_name(p["name"])
+        player_props = props_by_player.get(name_norm, {})
+        implied_pts, categories_used = _compute_implied_points(player_props)
+
+        string_rank, _dc_pos = depth_chart_lookup.get(name_norm, (None, None))
+        has_data = bool(categories_used)
+        value = round(implied_pts / (p["salary"] / 1000), 2) if (has_data and p["salary"]) else None
+
+        rows.append({
+            "name": p["name"], "position": p["position"], "team": p["team"],
+            "opponent": p["opponent"], "salary": p["salary"],
+            "depth_chart_string": STRING_LABELS.get(string_rank, str(string_rank) if string_rank else "—"),
+            "implied_points": implied_pts if has_data else None,
+            "value": value,
+            "categories_used": categories_used,
+        })
+
+    rows.sort(key=lambda r: r["implied_points"] if r["implied_points"] is not None else -1, reverse=True)
+    return rows
+
+
 def _get_depth_chart_lookup(names_normalized: set) -> dict:
     """
     Shared by the Slate page (show each player's string) and Best
@@ -3015,7 +3082,24 @@ def _compute_implied_points(props_for_player: dict) -> tuple:
     return round(points, 2), categories_used
 
 
+def _value_to_color(value, min_value, max_value) -> str | None:
+    """
+    Same green-to-red gradient as _rank_to_color, but scaled by a raw
+    value's position between the min and max of whatever's being
+    displayed, not a discrete rank. Highest value = most green, lowest
+    = most red.
+    """
+    if value is None or min_value is None or max_value is None or max_value == min_value:
+        return None
+    fraction = (max_value - value) / (max_value - min_value)   # 0.0 at max (green), 1.0 at min (red)
+    fraction = max(0.0, min(1.0, fraction))
+    r = round(76 + fraction * (244 - 76))
+    g = round(175 + fraction * (67 - 175))
+    b = round(80 + fraction * (54 - 80))
+    return f"rgb({r},{g},{b})"
 
+
+def _rank_to_color(rank, total) -> str | None:
     """
     Rank 1 = pure green, rank `total` = pure red, everything between
     interpolated smoothly. Same convention for both the opponent
@@ -3098,6 +3182,13 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
     # team, no year/week filtering needed.
     game_odds_rows = db_fetchall("SELECT team, spread, spread_odds, over_under, favorite FROM game_odds")
     game_odds_by_team = {r["team"]: r for r in game_odds_rows}
+
+    # Reuses the same shared computation as the standalone Implied
+    # Points page rather than duplicating prop-matching/scoring logic
+    # here — slightly wasteful (queries `players` a second time) but
+    # keeps one source of truth for how implied points get computed.
+    implied_points_rows = _compute_implied_points_table(sel_year, sel_week)
+    implied_points_by_name = {normalize_name(r["name"]): r for r in implied_points_rows}
     slate = [p for p in slate if normalize_name(p["name"]) in depth_chart_lookup]
 
     if not slate:
@@ -3214,6 +3305,8 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
         roof_type = TEAM_ROOF_TYPE.get(home_team)
 
         odds_row = game_odds_by_team.get(p["team"])
+        implied_row = implied_points_by_name.get(name_norm)
+        implied_points = implied_row["implied_points"] if implied_row else None
 
         rows.append({
             "name": p["name"], "position": p["position"], "team": p["team"],
@@ -3230,7 +3323,21 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
             "over_under": odds_row["over_under"] if odds_row else None,
             "spread": odds_row["spread"] if odds_row else None,
             "favorite": odds_row["favorite"] if odds_row else None,
+            "implied_points": implied_points,
         })
+
+    # Value-based coloring needs the min/max among whatever's actually
+    # being displayed (this position/week), computed after the loop
+    # rather than per-row, since a single row can't know the full
+    # range on its own.
+    implied_values = [r["implied_points"] for r in rows if r["implied_points"] is not None]
+    if implied_values:
+        min_implied, max_implied = min(implied_values), max(implied_values)
+        for r in rows:
+            r["implied_points_color"] = _value_to_color(r["implied_points"], min_implied, max_implied)
+    else:
+        for r in rows:
+            r["implied_points_color"] = None
 
     rows.sort(key=lambda r: (
         r["opp_avg_pts_allowed"] if r["opp_avg_pts_allowed"] is not None else -1,
@@ -3300,6 +3407,28 @@ def best_matchups():
                            available_weeks_by_year=available_weeks_by_year,
                            position=sel_position,
                            team_colors=TEAM_ROW_COLORS)
+
+
+@app.route("/implied-points")
+def implied_points():
+    """
+    This week's slate with an implied fantasy point total derived
+    from scoresandodds prop lines — see _compute_implied_points() for
+    exactly what's included/excluded and why (anytime-TD props and the
+    mixed-rate passing-and-rushing-yards composite are both real gaps,
+    not silently papered over).
+    """
+    current = db_fetchone("SELECT MAX(year) AS year FROM players")
+    if not current or not current["year"]:
+        return render_template("implied_points.html", rows=[], year=None, week=None)
+
+    sel_year = current["year"]
+    week_row = db_fetchone(f"SELECT MAX(week) AS week FROM players WHERE year = {_ph()}", (sel_year,))
+    sel_week = week_row["week"] if week_row else None
+
+    rows = _compute_implied_points_table(sel_year, sel_week) if sel_week else []
+
+    return render_template("implied_points.html", rows=rows, year=sel_year, week=sel_week)
 
 
 @app.route("/depth-charts")
@@ -3980,6 +4109,10 @@ def download_csv(data_type):
                 ORDER BY team, pos, string_rank
             """)
             filename = "depth_charts_all.csv"
+
+    elif data_type == "implied-points":
+        rows = _compute_implied_points_table(year, week)
+        filename = f"implied_points_week{week}_{year}.csv"
 
     else:
         return jsonify(error="Unknown data type"), 404

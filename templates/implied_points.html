@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF DFS Challenge — Implied Points{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>FF DFS Challenge</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('slate') }}" class="nav-link challenge-tab">Slate</a>
+            <a href="{{ url_for('standings') }}" class="nav-link challenge-tab">Standings</a>
+            <a href="{{ url_for('props') }}" class="nav-link challenge-tab">Props</a>
+            <a href="{{ url_for('my_lineups') }}" class="nav-link challenge-tab">My Lineups</a>
+            <a href="{{ url_for('history') }}" class="nav-link">History</a>
+            <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
+            <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
+            <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>
+            <a href="{{ url_for('fantasy_points_against') }}" class="nav-link">Fantasy Pts Against</a>
+            <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
+            <a href="{{ url_for('best_matchups') }}" class="nav-link">Best Matchups</a>
+            <a href="{{ url_for('depth_charts') }}" class="nav-link">Depth Charts</a>
+            <a href="{{ url_for('implied_points') }}" class="nav-link active">Implied Points</a>
+        </nav>
+        {% if week %}
+            <p class="subtitle">Week {{ week }}, {{ year }} — fantasy points implied by the prop betting market</p>
+        {% else %}
+            <p class="subtitle">No slate loaded yet.</p>
+        {% endif %}
+    </div>
+    <div class="header-right">
+        {% if current_user.is_authenticated %}
+            <span class="user-badge">{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Sign in</a>
+        {% endif %}
+    </div>
+</header>
+
+<main class="history-main">
+
+{% if not rows and not week %}
+    <p class="empty-state">No slate loaded yet.</p>
+{% else %}
+
+    <div class="page-controls">
+        <span></span>
+        <div class="download-actions">
+            <a href="{{ url_for('download_csv', data_type='implied-points', year=year, week=week) }}" class="download-btn">⬇ Download</a>
+        </div>
+    </div>
+
+    <p class="standings-note">
+        Derived from prop betting lines, not a traditional projection. <strong>Two known gaps</strong>:
+        anytime-touchdown props aren't included (they're priced as odds, not a line, and can't be
+        reliably converted without a "no" side price) and "passing &amp; rushing yards" combo props
+        are excluded entirely (that stat mixes two different scoring rates that can't be safely
+        split apart). Both mean these totals are real underestimates for players who score
+        touchdowns or have a lot of that combined prop specifically. A dash means no usable prop
+        data was found for that player at all.
+    </p>
+
+    {% if rows %}
+    <div class="table-wrapper">
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th>Pos</th>
+                    <th>Player</th>
+                    <th>Team</th>
+                    <th>Str</th>
+                    <th>Opp</th>
+                    <th class="right">Salary</th>
+                    <th class="right">Implied Pts</th>
+                    <th class="right">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rows %}
+                <tr>
+                    <td class="pos-badge">{{ r['position'] }}</td>
+                    <td class="player-name">{{ r['name'] }}</td>
+                    <td>{{ r['team'] | upper }}</td>
+                    <td>{{ r['depth_chart_string'] }}</td>
+                    <td>{{ r['opponent'] | upper }}</td>
+                    <td class="right">${{ "{:,}".format(r['salary']) if r['salary'] else '—' }}</td>
+                    <td class="right">
+                        {% if r['implied_points'] is not none %}
+                            <strong title="From: {{ r['categories_used'] | join(', ') }}">{{ "%.1f"|format(r['implied_points']) }}</strong>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="right">{{ "%.2f"|format(r['value']) if r['value'] is not none else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No players found for the current slate.</p>
+    {% endif %}
+
+{% endif %}
+
+</main>
+
+<script src="{{ url_for('static', filename='history.js') }}"></script>
+{% include '_info_modal.html' %}
+</body>
+</html>
