@@ -2699,6 +2699,23 @@ def _get_depth_chart_lookup(names_normalized: set) -> dict:
     return {r["player_name_normalized"]: (r["string_rank"], r["pos"]) for r in rows}
 
 
+def _rank_to_color(rank, total) -> str | None:
+    """
+    Rank 1 = pure green, rank `total` = pure red, everything between
+    interpolated smoothly. Same convention for both the opponent
+    defense column and the player scoring column, per explicit
+    confirmation — rank 1 is always the most intense color regardless
+    of which column, fading toward red as the rank number increases.
+    """
+    if rank is None or total is None or total <= 1:
+        return None
+    fraction = (rank - 1) / (total - 1)   # 0.0 at rank=1, 1.0 at rank=total
+    r = round(76 + fraction * (244 - 76))
+    g = round(175 + fraction * (67 - 175))
+    b = round(80 + fraction * (54 - 80))
+    return f"rgb({r},{g},{b})"
+
+
 def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> list:
     """
     Shared computation used by both the /best-matchups page and its
@@ -2772,6 +2789,63 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
 
     STRING_LABELS = {1: "1st", 2: "2nd", 3: "3rd"}
 
+    # --- League-wide rankings (not just this week's slate) ---
+    # Opponent rank: defense_history already covers every team (the
+    # query above has no team filter), so we can rank all 32 defenses
+    # per position directly from what's already been fetched.
+    positions_needed = {p["position"] for p in slate}
+
+    opp_avg_by_team_pos = {}   # (team, position) -> trailing avg
+    for (team, pos), history in defense_history.items():
+        if pos in positions_needed:
+            avg, _ = _trailing_average(history)
+            if avg is not None:
+                opp_avg_by_team_pos[(team, pos)] = avg
+
+    opp_rank_by_team_pos = {}   # (team, position) -> rank (1 = fewest allowed)
+    for pos in positions_needed:
+        teams_this_pos = [(team, avg) for (team, p), avg in opp_avg_by_team_pos.items() if p == pos]
+        teams_this_pos.sort(key=lambda x: x[1])   # ascending: fewest allowed first
+        total = len(teams_this_pos)
+        for i, (team, avg) in enumerate(teams_this_pos, start=1):
+            opp_rank_by_team_pos[(team, pos)] = (i, total)
+
+    # Player rank: needs a SEPARATE, broader query — player_history above
+    # is scoped to just this week's slate names, but ranking needs every
+    # player at the position, not just who's playing this week.
+    ph2 = _ph()
+    if positions_needed:
+        pos_placeholders = ", ".join([ph2] * len(positions_needed))
+        league_rows = db_fetchall(f"""
+            SELECT position, name_normalized, year, week, COALESCE(dk_pts_pfr_reported, dk_pts) AS dk_pts
+            FROM hist_player_stats
+            WHERE position IN ({pos_placeholders})
+              AND (year < {ph2} OR (year = {ph2} AND week < {ph2}))
+        """, tuple(positions_needed) + (sel_year, sel_year, sel_week))
+    else:
+        league_rows = []
+
+    league_history = {}   # (position, name_normalized) -> [(year, week, pts), ...]
+    for r in league_rows:
+        key = (r["position"], r["name_normalized"])
+        league_history.setdefault(key, []).append((r["year"], r["week"], r["dk_pts"]))
+    for key in league_history:
+        league_history[key].sort(key=lambda x: (x[0], x[1]), reverse=True)
+
+    player_avg_by_pos_name = {}
+    for (pos, name_norm), history in league_history.items():
+        avg, _ = _trailing_average(history)
+        if avg is not None:
+            player_avg_by_pos_name[(pos, name_norm)] = avg
+
+    player_rank_by_pos_name = {}   # (position, name_normalized) -> (rank, total)
+    for pos in positions_needed:
+        players_this_pos = [(name, avg) for (p, name), avg in player_avg_by_pos_name.items() if p == pos]
+        players_this_pos.sort(key=lambda x: x[1], reverse=True)   # descending: highest avg first
+        total = len(players_this_pos)
+        for i, (name, avg) in enumerate(players_this_pos, start=1):
+            player_rank_by_pos_name[(pos, name)] = (i, total)
+
     rows = []
     for p in slate:
         name_norm = normalize_name(p["name"])
@@ -2781,12 +2855,19 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
 
         string_rank, _dc_pos = depth_chart_lookup.get(name_norm, (None, None))
 
+        opp_rank, opp_rank_total = opp_rank_by_team_pos.get((p["opponent"], p["position"]), (None, None))
+        player_rank, player_rank_total = player_rank_by_pos_name.get((p["position"], name_norm), (None, None))
+
         rows.append({
             "name": p["name"], "position": p["position"], "team": p["team"],
             "opponent": p["opponent"], "salary": p["salary"],
             "projected_pts": p["projected_pts"], "ownership_pct": p["ownership_pct"],
             "opp_avg_pts_allowed": opp_avg, "opp_games_count": opp_games,
+            "opp_rank": opp_rank, "opp_rank_total": opp_rank_total,
+            "opp_rank_color": _rank_to_color(opp_rank, opp_rank_total),
             "player_avg_dk_pts": player_avg, "player_games_count": player_games,
+            "player_rank": player_rank, "player_rank_total": player_rank_total,
+            "player_rank_color": _rank_to_color(player_rank, player_rank_total),
             "depth_chart_string": STRING_LABELS.get(string_rank, str(string_rank) if string_rank else "—"),
         })
 
@@ -2806,11 +2887,12 @@ def best_matchups():
     season boundaries when needed, e.g. Week 2 of a new season pulls
     from the end of the prior season to fill out the window):
       - the opponent's average fantasy points allowed to that position,
-        derived directly from hist_player_stats (summing every
+        derived directly from hist_player_stats (summing EVERY
         opposing-position player's DK points each game they faced this
-        team) rather than the season-total hist_fantasy_points_against
-        table, which has no per-game granularity and so can't support
-        a trailing window at all
+        team — the total the position GROUP produced, not just one
+        featured player) rather than the season-total
+        hist_fantasy_points_against table, which has no per-game
+        granularity and so can't support a trailing window at all
       - the player's own average DK points over their last 10 games
 
     hist_fantasy_points_against intentionally isn't used here at all —

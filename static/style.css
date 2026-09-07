@@ -1139,3 +1139,20 @@ header {
 .prop-result-under   { background: rgba(244, 67, 54, 0.15);  color: #f44336; }
 .prop-result-push    { background: rgba(158, 158, 158, 0.15); color: var(--text-muted); }
 .prop-result-pending { background: var(--bg-row-alt); color: var(--text-muted); }
+
+/* -----------------------------------------------------------------------
+   Best Matchups — rank circles (opponent defense rank, player rank)
+   ----------------------------------------------------------------------- */
+
+.rank-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 2px solid;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--bg-surface);
+}
