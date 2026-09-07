@@ -202,3 +202,27 @@ betting research using the same props data, documented in
 --all --combine`) is the same command as step 6 above, so if you've
 already run the weekly prep, that file's already fresh and you can
 skip straight to that workflow's Step 2.
+
+---
+
+## Future Ideas — Not Yet Implemented
+
+Notes on data sources worth revisiting later, not committed to yet.
+
+### FirstDown Studio weekly implied points
+Currently only scraping season-long FirstDown Studio data
+(`scrape_firstdown_studio.py`). Once the season is underway, FirstDown
+Studio may also expose week-by-week implied point totals per player —
+worth checking whether that's live yet, and if so, whether it's worth
+a standalone tab or folding into the existing Implied Points page
+alongside the scoresandodds-derived numbers.
+
+### FantasyPros projections
+https://www.fantasypros.com/nfl/projections/qb.php (and the equivalent
+pages for RB/WR/TE/etc.) has its own weekly fantasy point projections
+per player — a genuinely different methodology from the prop-market-
+derived Implied Points page (FantasyPros is an analyst projection, not
+a betting-market-implied number). Could be scraped as its own column
+or its own comparison page once there's a real need to see the two
+side by side. Not investigated yet — unknown whether the page is
+easily scrapeable (no diagnostic run against it so far).

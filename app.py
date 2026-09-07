@@ -3282,10 +3282,10 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
             if avg is not None:
                 opp_avg_by_team_pos[(team, pos)] = avg
 
-    opp_rank_by_team_pos = {}   # (team, position) -> rank (1 = fewest allowed)
+    opp_rank_by_team_pos = {}   # (team, position) -> rank (1 = MOST allowed, softest defense — best matchup to target)
     for pos in positions_needed:
         teams_this_pos = [(team, avg) for (team, p), avg in opp_avg_by_team_pos.items() if p == pos]
-        teams_this_pos.sort(key=lambda x: x[1])   # ascending: fewest allowed first
+        teams_this_pos.sort(key=lambda x: x[1], reverse=True)   # descending: most allowed first
         total = len(teams_this_pos)
         for i, (team, avg) in enumerate(teams_this_pos, start=1):
             opp_rank_by_team_pos[(team, pos)] = (i, total)
