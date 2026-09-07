@@ -1186,3 +1186,17 @@ header {
     color: var(--text-muted);
     font-weight: 400;
 }
+
+/* -----------------------------------------------------------------------
+   Best Matchups — roof type badge (dome=blue, outdoor=red)
+   ----------------------------------------------------------------------- */
+
+.roof-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+.roof-badge.roof-dome    { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
+.roof-badge.roof-outdoor { background: rgba(244, 67, 54, 0.2);  color: #f44336; }

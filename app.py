@@ -510,6 +510,19 @@ def _auto_init():
             CREATE INDEX IF NOT EXISTS idx_depth_charts_name
                 ON depth_charts (player_name_normalized)
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS game_odds (
+                id           SERIAL PRIMARY KEY,
+                team         TEXT NOT NULL,
+                opponent     TEXT,
+                spread       REAL,
+                spread_odds  TEXT,
+                over_under   TEXT,
+                favorite     TEXT,
+                updated_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(team)
+            )
+        """)
         cur.execute("SELECT pg_advisory_unlock(918273645)")
     else:
         # SQLite: executescript for multi-statement init
@@ -743,6 +756,17 @@ def _auto_init():
             );
             CREATE INDEX IF NOT EXISTS idx_depth_charts_name
                 ON depth_charts (player_name_normalized);
+            CREATE TABLE IF NOT EXISTS game_odds (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                team         TEXT NOT NULL,
+                opponent     TEXT,
+                spread       REAL,
+                spread_odds  TEXT,
+                over_under   TEXT,
+                favorite     TEXT,
+                updated_at   TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(team)
+            );
         """)
         _migrate_hist_player_stats_sqlite(conn)
         _migrate_table_sqlite(conn, "game_schedule", GAME_SCHEDULE_MIGRATIONS)
@@ -1960,6 +1984,39 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, batc
             inserted += len(batch)
         return inserted
 
+    def replace_game_odds(df: pd.DataFrame):
+        """
+        Full replace, not upsert — same reasoning as depth_charts:
+        odds change moment to moment, so stale lines shouldn't linger
+        in the table once a fresher scrape has run.
+        """
+        cur.execute("DELETE FROM game_odds")
+        conn.commit()
+
+        sql = f"""
+            INSERT INTO game_odds
+                (team, opponent, spread, spread_odds, over_under, favorite)
+            VALUES ({_ph(6)})
+        """
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            batch.append((
+                str(r.get('team', '')), _none_if_nan(r.get('opponent')),
+                _none_if_nan(r.get('spread')), _none_if_nan(r.get('spread_odds')),
+                _none_if_nan(r.get('over_under')), _none_if_nan(r.get('favorite')),
+            ))
+            if len(batch) >= batch_size:
+                cur.executemany(sql, batch)
+                conn.commit()
+                inserted += len(batch)
+                batch = []
+        if batch:
+            cur.executemany(sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
     def upsert_weather(df: pd.DataFrame):
         if _is_postgres():
             sql = f"""
@@ -2203,6 +2260,19 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, batc
             df = pd.read_csv(depth_charts_path)
             count = replace_depth_charts(df)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(depth_charts_path)} (full replace)")
+
+    # --- Load game-level odds (spread/total/favorite) — same
+    # full-replace reasoning as depth charts, since odds change
+    # moment to moment ---
+    if run_all:
+        game_odds_path = os.path.join(data_dir, "scoresandodds_game_odds.csv.gz")
+        if not os.path.exists(game_odds_path):
+            click.echo(f"Skip (not found): {game_odds_path}")
+        else:
+            click.echo(f"Loading {game_odds_path} ...")
+            df = pd.read_csv(game_odds_path)
+            count = replace_game_odds(df)
+            click.echo(f"  Done: {count:,} rows from {os.path.basename(game_odds_path)} (full replace)")
 
     cur.close()
     conn.close()
@@ -2801,6 +2871,25 @@ def _rank_to_color(rank, total) -> str | None:
     return f"rgb({r},{g},{b})"
 
 
+# Each team's HOME stadium roof type — a fixed, known fact (unlike
+# spread/total/favorite, which genuinely change week to week and need
+# a live odds source). No scraping needed, and this never goes stale:
+# a team's home stadium doesn't change mid-season. Retractable roofs
+# are listed as "dome" since PFR's own convention treats them the same
+# way for this purpose, and the closed/open decision on a given day
+# doesn't change the STADIUM's classification here.
+TEAM_ROOF_TYPE = {
+    'ari': 'dome', 'atl': 'dome', 'bal': 'outdoor', 'buf': 'outdoor',
+    'car': 'outdoor', 'chi': 'outdoor', 'cin': 'outdoor', 'cle': 'outdoor',
+    'dal': 'dome', 'den': 'outdoor', 'det': 'dome', 'gnb': 'outdoor',
+    'hou': 'dome', 'ind': 'dome', 'jax': 'outdoor', 'kan': 'outdoor',
+    'lac': 'dome', 'lar': 'dome', 'lvr': 'dome', 'mia': 'outdoor',
+    'min': 'dome', 'nwe': 'outdoor', 'nor': 'dome', 'nyg': 'outdoor',
+    'nyj': 'outdoor', 'phi': 'outdoor', 'pit': 'outdoor', 'sea': 'outdoor',
+    'sfo': 'outdoor', 'tam': 'outdoor', 'ten': 'outdoor', 'was': 'outdoor',
+}
+
+
 def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> list:
     """
     Shared computation used by both the /best-matchups page and its
@@ -2833,6 +2922,21 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
     # that's sufficient here).
     slate_names_normalized_pre_filter = {normalize_name(p["name"]) for p in slate}
     depth_chart_lookup = _get_depth_chart_lookup(slate_names_normalized_pre_filter)
+
+    # Which team is HOME determines whose stadium (and roof type)
+    # applies — players table doesn't carry home_away directly, so
+    # this needs its own lookup against game_schedule.
+    home_away_rows = db_fetchall(f"""
+        SELECT team, home_away FROM game_schedule
+        WHERE year = {ph} AND week = {ph}
+    """, (sel_year, sel_week))
+    home_away_by_team = {r["team"]: r["home_away"] for r in home_away_rows}
+
+    # Pre-game spread/total/favorite — a live, full-replace table
+    # (see replace_game_odds), so this is just a straight lookup by
+    # team, no year/week filtering needed.
+    game_odds_rows = db_fetchall("SELECT team, spread, spread_odds, over_under, favorite FROM game_odds")
+    game_odds_by_team = {r["team"]: r for r in game_odds_rows}
     slate = [p for p in slate if normalize_name(p["name"]) in depth_chart_lookup]
 
     if not slate:
@@ -2943,6 +3047,13 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
         opp_rank, opp_rank_total = opp_rank_by_team_pos.get((p["opponent"], p["position"]), (None, None))
         player_rank, player_rank_total = player_rank_by_pos_name.get((p["position"], name_norm), (None, None))
 
+        # Whichever team is home determines whose stadium's roof
+        # applies to this game.
+        home_team = p["team"] if home_away_by_team.get(p["team"]) == 'h' else p["opponent"]
+        roof_type = TEAM_ROOF_TYPE.get(home_team)
+
+        odds_row = game_odds_by_team.get(p["team"])
+
         rows.append({
             "name": p["name"], "position": p["position"], "team": p["team"],
             "opponent": p["opponent"], "salary": p["salary"],
@@ -2954,6 +3065,10 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
             "player_rank": player_rank, "player_rank_total": player_rank_total,
             "player_rank_color": _rank_to_color(player_rank, player_rank_total),
             "depth_chart_string": STRING_LABELS.get(string_rank, str(string_rank) if string_rank else "—"),
+            "roof_type": roof_type,
+            "over_under": odds_row["over_under"] if odds_row else None,
+            "spread": odds_row["spread"] if odds_row else None,
+            "favorite": odds_row["favorite"] if odds_row else None,
         })
 
     rows.sort(key=lambda r: (
