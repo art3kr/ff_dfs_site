@@ -523,6 +523,25 @@ def _auto_init():
                 UNIQUE(team)
             )
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS scoresandodds_props (
+                id                      SERIAL PRIMARY KEY,
+                category                TEXT NOT NULL,
+                player_name             TEXT NOT NULL,
+                player_name_normalized  TEXT NOT NULL,
+                team                    TEXT,
+                opponent                TEXT,
+                over_line               REAL,
+                under_line              REAL,
+                moneyline_odds          TEXT,
+                updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(category, player_name_normalized)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_scoresandodds_props_name
+                ON scoresandodds_props (player_name_normalized)
+        """)
         cur.execute("SELECT pg_advisory_unlock(918273645)")
     else:
         # SQLite: executescript for multi-statement init
@@ -767,6 +786,21 @@ def _auto_init():
                 updated_at   TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(team)
             );
+            CREATE TABLE IF NOT EXISTS scoresandodds_props (
+                id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+                category                TEXT NOT NULL,
+                player_name             TEXT NOT NULL,
+                player_name_normalized  TEXT NOT NULL,
+                team                    TEXT,
+                opponent                TEXT,
+                over_line               REAL,
+                under_line              REAL,
+                moneyline_odds          TEXT,
+                updated_at              TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(category, player_name_normalized)
+            );
+            CREATE INDEX IF NOT EXISTS idx_scoresandodds_props_name
+                ON scoresandodds_props (player_name_normalized);
         """)
         _migrate_hist_player_stats_sqlite(conn)
         _migrate_table_sqlite(conn, "game_schedule", GAME_SCHEDULE_MIGRATIONS)
@@ -1753,7 +1787,16 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, batc
             batch.append((
                 str(r.get('pfr_id', '')), str(r.get('name', '')), str(r.get('name_normalized', '')),
                 int(r.get('year')), int(r.get('week')), _none_if_nan(r.get('game_date')),
-                _none_if_nan(r.get('team')), _none_if_nan(r.get('opponent')),
+                # normalize_team() applied HERE, not just at scrape time —
+                # confirmed real: a stale CSV on disk (scraped before the
+                # oak/sdg/stl fix existed) silently re-introduced the exact
+                # same legacy codes on every load-history re-run, since this
+                # is an upsert that overwrites team/opponent unconditionally
+                # from whatever's in the CSV. Normalizing at the ingestion
+                # point itself means this bug class can't recur regardless
+                # of what any past or future CSV file happens to contain.
+                _none_if_nan(normalize_team(r.get('team')) if pd.notna(r.get('team')) else None),
+                _none_if_nan(normalize_team(r.get('opponent')) if pd.notna(r.get('opponent')) else None),
                 _none_if_nan(r.get('home_away')), _none_if_nan(r.get('position')),
                 _float_or_none(r.get('dk_pts')),
                 _float_or_none(r.get('dk_pts_pfr_reported')),
@@ -1932,9 +1975,17 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, batc
         inserted = 0
         batch = []
         for _, r in df.iterrows():
+            # normalize_team() at ingestion, same reasoning as
+            # upsert_stats() — a stale CSV can silently reintroduce
+            # legacy codes on every load-history re-run otherwise.
+            team_raw = r.get('team')
+            team = normalize_team(team_raw) if pd.notna(team_raw) else str(team_raw)
+            opponent_raw = r.get('opponent')
+            opponent = normalize_team(opponent_raw) if pd.notna(opponent_raw) else None
+
             batch.append((
-                int(r.get('year')), int(r.get('week')), str(r.get('team', '')),
-                _none_if_nan(r.get('opponent')), _none_if_nan(r.get('home_away')),
+                int(r.get('year')), int(r.get('week')), team,
+                _none_if_nan(opponent), _none_if_nan(r.get('home_away')),
                 _int_or_none(r.get('points_scored')), _int_or_none(r.get('points_allowed')),
             ))
             if len(batch) >= batch_size:
@@ -2005,6 +2056,45 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, batc
                 str(r.get('team', '')), _none_if_nan(r.get('opponent')),
                 _none_if_nan(r.get('spread')), _none_if_nan(r.get('spread_odds')),
                 _none_if_nan(r.get('over_under')), _none_if_nan(r.get('favorite')),
+            ))
+            if len(batch) >= batch_size:
+                cur.executemany(sql, batch)
+                conn.commit()
+                inserted += len(batch)
+                batch = []
+        if batch:
+            cur.executemany(sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
+    def replace_scoresandodds_props(df: pd.DataFrame):
+        """
+        Full replace, not upsert — same reasoning as depth_charts and
+        game_odds: props change week to week (and within a week as
+        lines move), so a stale row shouldn't linger once a fresher
+        scrape has run. One row per (category, player) — e.g. Josh
+        Allen has separate rows for passing-yards, passing-tds,
+        rushing-yards, etc.
+        """
+        cur.execute("DELETE FROM scoresandodds_props")
+        conn.commit()
+
+        sql = f"""
+            INSERT INTO scoresandodds_props
+                (category, player_name, player_name_normalized, team, opponent,
+                 over_line, under_line, moneyline_odds)
+            VALUES ({_ph(8)})
+        """
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            name = str(r.get('player_name', ''))
+            batch.append((
+                str(r.get('category', '')), name, normalize_name(name),
+                _none_if_nan(r.get('team')), _none_if_nan(r.get('opponent')),
+                _float_or_none(r.get('over_line')), _float_or_none(r.get('under_line')),
+                _none_if_nan(r.get('moneyline_odds')),
             ))
             if len(batch) >= batch_size:
                 cur.executemany(sql, batch)
@@ -2273,6 +2363,18 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, batc
             df = pd.read_csv(game_odds_path)
             count = replace_game_odds(df)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(game_odds_path)} (full replace)")
+
+    # --- Load player props (used for implied fantasy points) — same
+    # full-replace reasoning as above ---
+    if run_all:
+        props_path = os.path.join(data_dir, "scoresandodds_props_all.csv.gz")
+        if not os.path.exists(props_path):
+            click.echo(f"Skip (not found): {props_path}")
+        else:
+            click.echo(f"Loading {props_path} ...")
+            df = pd.read_csv(props_path)
+            count = replace_scoresandodds_props(df)
+            click.echo(f"  Done: {count:,} rows from {os.path.basename(props_path)} (full replace)")
 
     cur.close()
     conn.close()
@@ -2854,7 +2956,66 @@ def _get_depth_chart_lookup(names_normalized: set) -> dict:
     return {r["player_name_normalized"]: (r["string_rank"], r["pos"]) for r in rows}
 
 
-def _rank_to_color(rank, total) -> str | None:
+# DraftKings scoring rates by category. Two yardage RATES exist
+# (0.04/yd passing, 0.1/yd rushing+receiving) — receiving and rushing
+# share a rate, so they can be safely summed or substituted for each
+# other's composite, but passing yards CANNOT be mixed with either,
+# which is why "passing-and-rushing-yards" is deliberately excluded
+# below rather than guessed at (we don't know the split between the
+# two yardage types within that single combined number, and applying
+# either rate to the whole total would be wrong).
+IMPLIED_POINTS_RATES = {
+    'passing-yards': 0.04,
+    'passing-tds': 4.0,
+    'interceptions': -1.0,
+    'rushing-yards': 0.1,
+    'receiving-yards': 0.1,
+    'receptions': 1.0,
+    'rushing-and-receiving-yards': 0.1,   # safe fallback only when
+                                            # individual rush/rec props
+                                            # aren't separately available
+}
+
+
+def _compute_implied_points(props_for_player: dict) -> tuple:
+    """
+    props_for_player: {category: line_value} for one player (using
+    whichever of over_line/under_line was available — these props are
+    genuinely two-sided on a single line, not asymmetric, so either
+    side works as "the" line).
+
+    Returns (implied_points, categories_used) — categories_used lists
+    exactly what contributed, for transparency (so a user can sanity-
+    check the number rather than trust an opaque total).
+
+    NOT included: "touchdowns" (any-TD) and "passing-and-rushing-
+    yards" — the anytime-TD prop is moneyline-shaped (odds, not a
+    line) and would need de-vigging we can't do without a "no" side
+    price; passing-and-rushing-yards mixes two different scoring rates
+    that can't be safely split apart. Both are real gaps in this
+    total, not silently papered over — flagged here and wherever this
+    total is displayed.
+    """
+    points = 0.0
+    categories_used = []
+
+    has_individual_rush = 'rushing-yards' in props_for_player
+    has_individual_rec = 'receiving-yards' in props_for_player
+
+    for category, rate in IMPLIED_POINTS_RATES.items():
+        if category not in props_for_player:
+            continue
+        # Skip the combined rush+rec prop if we already have EITHER
+        # individual one — using both would double-count.
+        if category == 'rushing-and-receiving-yards' and (has_individual_rush or has_individual_rec):
+            continue
+        points += props_for_player[category] * rate
+        categories_used.append(category)
+
+    return round(points, 2), categories_used
+
+
+
     """
     Rank 1 = pure green, rank `total` = pure red, everything between
     interpolated smoothly. Same convention for both the opponent
