@@ -153,8 +153,19 @@ def scrape_category(category_key: str, include_projection: bool = True) -> pd.Da
     structure_mismatches = 0
 
     for li in rows:
-        name_tag = li.find('a')
+        # Confirmed real bug: li.find('a') blindly grabs the FIRST <a>
+        # tag in the row, which for "field"/generic betting options
+        # (very long-shot prices like +3000, +2200, with no actual
+        # named player) is the ODDS LINK itself, not a player name —
+        # confirmed via real scraped data showing player_name="+3000"
+        # etc. with team/opponent/home_away all missing too, exactly
+        # what you'd expect from a row with no real player-name link
+        # at all. Only accept an <a> whose href actually matches the
+        # confirmed real player-link pattern; skip the row entirely
+        # (not silently take a fake name) if no such link exists.
+        name_tag = li.find('a', href=lambda h: h and h.startswith('/prop-bets/'))
         if not name_tag:
+            structure_mismatches += 1
             continue
         player_name = name_tag.get_text(strip=True)
 

@@ -1601,8 +1601,12 @@ def load_schedule_command(year):
               help="Only load the weather file, skip everything else — for frequent "
                    "re-runs as forecasts firm up or actual conditions come in, without "
                    "waiting on the much slower full load.")
+@click.option("--props-only",    is_flag=True,
+              help="Only load scoresandodds player props, skip everything else — for "
+                   "frequent re-runs as prop lines move, without waiting on the much "
+                   "slower full load.")
 @click.option("--batch-size", default=1000, type=int, help="Rows per bulk-insert batch.")
-def load_history_command(data_dir, salaries_only, stats_only, weather_only, batch_size):
+def load_history_command(data_dir, salaries_only, stats_only, weather_only, props_only, batch_size):
     """
     Load the historical .csv.gz files produced by the scrapers into
     hist_dfs_salaries and hist_player_stats.
@@ -1637,7 +1641,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, batc
     # True only when no "-only" flag was passed — an unscoped run loads
     # everything, same as before these flags existed. Any "-only" flag
     # narrows to just its own section(s).
-    run_all = not (salaries_only or stats_only or weather_only)
+    run_all = not (salaries_only or stats_only or weather_only or props_only)
 
     conn = _connect()
     cur  = _cursor(conn)
@@ -2076,16 +2080,51 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, batc
         scrape has run. One row per (category, player) — e.g. Josh
         Allen has separate rows for passing-yards, passing-tds,
         rushing-yards, etc.
+
+        Uses ON CONFLICT DO UPDATE for the actual row-by-row inserts
+        (despite the DELETE-first "full replace" framing above) — a
+        real UniqueViolation crash was confirmed on a live Postgres
+        run with a genuinely bad row (player_name_normalized="650" for
+        a touchdowns prop, clearly not an actual name). A plain INSERT
+        lets one bad row take down the entire load; upserting means a
+        duplicate key updates in place instead of crashing everything
+        else that scraped correctly. This doesn't fix the underlying
+        data-quality issue — see diagnose_scoresandodds_props_dupes.py
+        for that — it just stops one bad row from blocking every good
+        one.
         """
         cur.execute("DELETE FROM scoresandodds_props")
         conn.commit()
 
-        sql = f"""
-            INSERT INTO scoresandodds_props
-                (category, player_name, player_name_normalized, team, opponent,
-                 over_line, under_line, moneyline_odds)
-            VALUES ({_ph(8)})
-        """
+        if _is_postgres():
+            sql = f"""
+                INSERT INTO scoresandodds_props
+                    (category, player_name, player_name_normalized, team, opponent,
+                     over_line, under_line, moneyline_odds)
+                VALUES ({_ph(8)})
+                ON CONFLICT (category, player_name_normalized) DO UPDATE SET
+                    player_name = EXCLUDED.player_name,
+                    team        = EXCLUDED.team,
+                    opponent    = EXCLUDED.opponent,
+                    over_line   = EXCLUDED.over_line,
+                    under_line  = EXCLUDED.under_line,
+                    moneyline_odds = EXCLUDED.moneyline_odds
+            """
+        else:
+            sql = f"""
+                INSERT INTO scoresandodds_props
+                    (category, player_name, player_name_normalized, team, opponent,
+                     over_line, under_line, moneyline_odds)
+                VALUES ({_ph(8)})
+                ON CONFLICT(category, player_name_normalized) DO UPDATE SET
+                    player_name = excluded.player_name,
+                    team        = excluded.team,
+                    opponent    = excluded.opponent,
+                    over_line   = excluded.over_line,
+                    under_line  = excluded.under_line,
+                    moneyline_odds = excluded.moneyline_odds
+            """
+
         inserted = 0
         batch = []
         for _, r in df.iterrows():
@@ -2366,7 +2405,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, batc
 
     # --- Load player props (used for implied fantasy points) — same
     # full-replace reasoning as above ---
-    if run_all:
+    if run_all or props_only:
         props_path = os.path.join(data_dir, "scoresandodds_props_all.csv.gz")
         if not os.path.exists(props_path):
             click.echo(f"Skip (not found): {props_path}")
