@@ -24,6 +24,16 @@ EXTRA_ALIASES = {
     # from every other source encountered so far (ESPN/PFR use ARI/LAR).
     'arz': 'ari',
     'ram': 'lar',
+    # Short PFR-style codes for these same relocated franchises,
+    # confirmed present in hist_player_stats for 2010-2019 rows —
+    # different from the full-name aliases above (those cover "Oakland
+    # Raiders", not the bare 3-letter code actually stored in the data).
+    # Without these, these three teams silently double-count as
+    # "extra" teams in any league-wide ranking (confirmed: caused a
+    # rank of 35 instead of 32 on Best Matchups' opponent ranking).
+    'oak': 'lvr',
+    'sdg': 'lac',
+    'stl': 'lar',
 }
 _lookup = {}
 

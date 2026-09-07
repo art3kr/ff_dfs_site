@@ -981,6 +981,83 @@ def create_users_batch_command(usernames_file, output):
                    "once hashed.")
 
 
+LEGACY_TEAM_CODE_FIXES = {'oak': 'lvr', 'sdg': 'lac', 'stl': 'lar'}
+
+# (table, column) pairs known to store team codes — built from the
+# same team_mapping-based scrapers, so plausibly share the same
+# legacy-code issue confirmed in hist_player_stats. Wrapped per-table
+# in a try/except below in case a specific column doesn't exist on
+# some deployment, rather than letting one missing column crash the
+# whole cleanup.
+TEAM_CODE_COLUMNS = [
+    ("hist_player_stats", "team"), ("hist_player_stats", "opponent"),
+    ("hist_team_points", "team"), ("hist_team_points", "opponent"),
+    ("game_schedule", "team"), ("game_schedule", "opponent"),
+    ("players", "team"), ("players", "opponent"),
+]
+
+
+@app.cli.command("fix-legacy-team-codes")
+@click.option("--commit", is_flag=True,
+              help="Actually apply the fix. Without this flag, only reports what "
+                   "WOULD change — always run without it first.")
+def fix_legacy_team_codes_command(commit):
+    """
+    One-time cleanup for a confirmed real bug: some historical rows
+    (2010-2019) still carry old pre-relocation team codes (oak, sdg,
+    stl) instead of their current equivalents (lvr, lac, lar) — added
+    to team_mapping.py's aliases, but that only prevents the issue
+    going forward; this fixes rows already in the database. Confirmed
+    via scrapers/diagnose_team_count_inflation.py: caused a rank of 35
+    instead of 32 on Best Matchups' opponent ranking, since the same
+    real team was being counted as two different ones.
+
+    Dry-run by default — always check the report before passing
+    --commit on a database you care about.
+    """
+    ph = _ph()
+    conn = _connect()
+    cur = _cursor(conn)
+
+    total_would_change = 0
+
+    for table, column in TEAM_CODE_COLUMNS:
+        try:
+            for old_code, new_code in LEGACY_TEAM_CODE_FIXES.items():
+                count_row = cur.execute(
+                    f"SELECT COUNT(*) FROM {table} WHERE {column} = {ph}", (old_code,)
+                ).fetchone()
+                count = count_row[0] if not _is_postgres() else count_row[0]
+                if count == 0:
+                    continue
+
+                total_would_change += count
+                click.echo(f"{table}.{column}: {count} row(s) with '{old_code}' -> '{new_code}'"
+                           f"{'  [WOULD FIX]' if not commit else ''}")
+
+                if commit:
+                    cur.execute(
+                        f"UPDATE {table} SET {column} = {ph} WHERE {column} = {ph}",
+                        (new_code, old_code)
+                    )
+        except Exception as e:
+            click.echo(f"  Skipping {table}.{column} — {e}", err=True)
+            conn.rollback()
+
+    if commit:
+        conn.commit()
+
+    cur.close()
+    conn.close()
+
+    if total_would_change == 0:
+        click.echo("No legacy team codes found — nothing to fix.")
+    elif commit:
+        click.echo(f"\nDone. Fixed {total_would_change} row(s) across all tables checked.")
+    else:
+        click.echo(f"\n{total_would_change} row(s) would be fixed. Re-run with --commit to apply.")
+
+
 @app.cli.command("list-users")
 def list_users_command():
     """List all registered participants."""

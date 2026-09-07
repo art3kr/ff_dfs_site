@@ -83,22 +83,20 @@
 
     {% if rows %}
     <div class="table-wrapper">
-        <table id="history-table">
+        <table id="history-table" class="compact-table">
             <thead>
                 <tr>
                     <th data-col="position">Pos</th>
                     <th data-col="name">Player</th>
                     <th data-col="team">Team</th>
-                    <th data-col="string">String</th>
+                    <th data-col="string">Str</th>
                     <th data-col="opponent">Opp</th>
                     <th data-col="salary"      class="right">Salary</th>
-                    <th data-col="proj"        class="right">Proj Pts</th>
-                    <th data-col="opp_allowed" class="right">Opp Avg Pts Allowed (L10)</th>
-                    <th data-col="opp_rank"    class="right">Opp Rank</th>
-                    <th data-col="opp_games"   class="right">Opp Games</th>
-                    <th data-col="player_avg"  class="right">Player Avg Pts (L10)</th>
-                    <th data-col="player_rank" class="right">Player Rank</th>
-                    <th data-col="player_games" class="right">Player Games</th>
+                    <th data-col="proj"        class="right">Proj</th>
+                    <th data-col="opp_allowed" class="right" title="Opponent's average fantasy points allowed to this position over their last 10 games">Opp Pts<br>(L10)</th>
+                    <th data-col="opp_rank"    class="right" title="Opponent's rank among all 32 teams (1 = fewest allowed)">Opp<br>Rank</th>
+                    <th data-col="player_avg"  class="right" title="Player's own average fantasy points over their last 10 games">Plyr Pts<br>(L10)</th>
+                    <th data-col="player_rank" class="right" title="Player's rank league-wide at their position (1 = highest scorer)">Plyr<br>Rank</th>
                 </tr>
             </thead>
             <tbody>
@@ -117,22 +115,22 @@
                     <td class="right">{{ "%.1f"|format(r['projected_pts']) if r['projected_pts'] else '—' }}</td>
                     <td class="right">
                         <strong>{{ "%.1f"|format(r['opp_avg_pts_allowed']) if r['opp_avg_pts_allowed'] is not none else '—' }}</strong>
+                        {% if r['opp_games_count'] %}<span class="games-suffix">({{ r['opp_games_count'] }}g)</span>{% endif %}
                     </td>
                     <td class="right">
                         {% if r['opp_rank'] %}
                         <span class="rank-circle" style="border-color: {{ r['opp_rank_color'] }}; color: {{ r['opp_rank_color'] }};">{{ r['opp_rank'] }}</span>
                         {% else %}—{% endif %}
                     </td>
-                    <td class="right">{{ r['opp_games_count'] }}</td>
                     <td class="right">
                         {{ "%.1f"|format(r['player_avg_dk_pts']) if r['player_avg_dk_pts'] is not none else '—' }}
+                        {% if r['player_games_count'] %}<span class="games-suffix">({{ r['player_games_count'] }}g)</span>{% endif %}
                     </td>
                     <td class="right">
                         {% if r['player_rank'] %}
                         <span class="rank-circle" style="border-color: {{ r['player_rank_color'] }}; color: {{ r['player_rank_color'] }};">{{ r['player_rank'] }}</span>
                         {% else %}—{% endif %}
                     </td>
-                    <td class="right">{{ r['player_games_count'] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

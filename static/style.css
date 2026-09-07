@@ -1156,3 +1156,33 @@ header {
     font-weight: 700;
     background: var(--bg-surface);
 }
+
+/* -----------------------------------------------------------------------
+   Best Matchups — compact table mode. Scoped to #history-table.compact-table
+   specifically (not the bare #history-table shared across many other
+   pages) so this doesn't affect History/Weather/Game Info/etc, and the
+   ID itself is left untouched in case sorting JS depends on it.
+   ----------------------------------------------------------------------- */
+
+#history-table.compact-table {
+    white-space: normal;   /* allow header text to wrap to 2 lines */
+}
+
+#history-table.compact-table thead th {
+    font-size: 0.68rem;
+    padding: 8px 6px;
+    line-height: 1.25;
+    max-width: 70px;
+}
+
+#history-table.compact-table tbody td {
+    padding: 6px 6px;
+    font-size: 0.82rem;
+}
+
+.games-suffix {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-weight: 400;
+}
