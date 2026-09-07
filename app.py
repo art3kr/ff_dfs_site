@@ -1024,10 +1024,18 @@ def fix_legacy_team_codes_command(commit):
     for table, column in TEAM_CODE_COLUMNS:
         try:
             for old_code, new_code in LEGACY_TEAM_CODE_FIXES.items():
-                count_row = cur.execute(
-                    f"SELECT COUNT(*) FROM {table} WHERE {column} = {ph}", (old_code,)
-                ).fetchone()
-                count = count_row[0] if not _is_postgres() else count_row[0]
+                # execute() and fetchone() must be SEPARATE statements —
+                # psycopg2's execute() returns None (unlike sqlite3's,
+                # which returns the cursor itself and allows chaining).
+                # Confirmed real: this exact chaining bug broke every
+                # single table/column check on a real Postgres run.
+                # Explicit alias + named access (not positional [0]) —
+                # RealDictCursor rows (used for Postgres) don't support
+                # integer indexing at all, unlike sqlite3.Row, which
+                # supports both. Confirmed real: this exact positional-
+                # indexing bug broke every check on a real Postgres run.
+                cur.execute(f"SELECT COUNT(*) AS cnt FROM {table} WHERE {column} = {ph}", (old_code,))
+                count = cur.fetchone()['cnt']
                 if count == 0:
                     continue
 
