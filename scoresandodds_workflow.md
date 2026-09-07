@@ -1,6 +1,13 @@
 # ScoresAndOdds Market Analysis Workflow
 
-Four steps, run in order. Each one's output feeds the next.
+Personal betting research (middling/arbitrage opportunities) — separate
+from the weekly site operations documented in `README.md`. Four steps,
+run in order. Each one's output feeds the next.
+
+**Note:** Step 1 below is the same command as step 6 of the README's
+"Beginning of week" checklist (which feeds the Prop Bet Challenge
+instead). If you've already run the weekly prep, that file's already
+fresh — skip straight to Step 2.
 
 ## 1. Scrape all prop categories
 
