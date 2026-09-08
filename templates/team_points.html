@@ -93,7 +93,11 @@
             </thead>
             <tbody>
                 {% for r in rows %}
-                <tr>
+                <tr
+                    {% if r['team'] in team_colors %}
+                    style="background: {{ team_colors[r['team']] }};"
+                    data-team-color="1"
+                    {% endif %}>
                     <td class="player-name">{{ r['team'] | upper }}</td>
                     <td class="right">{{ r['games'] }}</td>
                     <td class="right"><strong>{{ "%.1f"|format(r['avg_scored']) if r['avg_scored'] is not none else '—' }}</strong></td>
@@ -119,7 +123,11 @@
             </thead>
             <tbody>
                 {% for r in rows %}
-                <tr>
+                <tr
+                    {% if r['team'] in team_colors %}
+                    style="background: {{ team_colors[r['team']] }};"
+                    data-team-color="1"
+                    {% endif %}>
                     <td class="player-name">{{ r['team'] | upper }}</td>
                     <td>{% if r['home_away'] == 'a' %}@{% endif %}{{ r['opponent'] | upper }}</td>
                     <td>{{ 'Away' if r['home_away'] == 'a' else 'Home' }}</td>

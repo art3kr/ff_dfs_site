@@ -974,6 +974,12 @@ header {
 }
 
 .team-picker-btn:hover  { background: var(--bg-hover); }
+.team-picker-btn[data-team-color]:hover {
+    /* Inline background always wins over this rule's own background
+       property, same as table rows above — filter still applies on
+       top of it, so hover stays visible instead of doing nothing. */
+    filter: brightness(1.25);
+}
 .team-picker-btn.active {
     background: var(--accent);
     border-color: var(--accent);

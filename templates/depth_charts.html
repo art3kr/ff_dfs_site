@@ -62,7 +62,11 @@
 
     <div class="team-picker">
         {% for t in available_teams %}
-        <a href="?team={{ t }}" class="team-picker-btn {% if t == selected_team %}active{% endif %}">{{ t | upper }}</a>
+        <a href="?team={{ t }}" class="team-picker-btn {% if t == selected_team %}active{% endif %}"
+            {% if t != selected_team and t in team_colors %}
+            style="background: {{ team_colors[t] }};"
+            data-team-color="1"
+            {% endif %}>{{ t | upper }}</a>
         {% endfor %}
     </div>
 

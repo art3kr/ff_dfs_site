@@ -2976,7 +2976,8 @@ def team_points():
 
     if not available:
         return render_template("team_points.html", rows=[], year=None, week=None,
-                               available_years=[], available_weeks_by_year={})
+                               available_years=[], available_weeks_by_year={},
+                               team_colors=TEAM_ROW_COLORS)
 
     req_year = request.args.get("year", type=int)
     req_week = request.args.get("week", type=int)
@@ -3025,7 +3026,8 @@ def team_points():
                                rows=rows, is_season=True,
                                year=sel_year, week=sel_week,
                                available_years=available_years,
-                               available_weeks_by_year=available_weeks_by_year)
+                               available_weeks_by_year=available_weeks_by_year,
+                               team_colors=TEAM_ROW_COLORS)
 
     ph = _ph()
     rows = db_fetchall(f"""
@@ -3039,7 +3041,8 @@ def team_points():
                            rows=rows, is_season=False,
                            year=sel_year, week=sel_week,
                            available_years=available_years,
-                           available_weeks_by_year=available_weeks_by_year)
+                           available_weeks_by_year=available_weeks_by_year,
+                           team_colors=TEAM_ROW_COLORS)
 
 
 def _trailing_average(history_sorted_desc: list, n: int = 10):
@@ -3621,7 +3624,7 @@ def implied_team_points():
         })
 
     rows.sort(key=lambda r: r["implied_total"] if r["implied_total"] is not None else -1, reverse=True)
-    return render_template("implied_team_points.html", rows=rows)
+    return render_template("implied_team_points.html", rows=rows, team_colors=TEAM_ROW_COLORS)
 
 
 @app.route("/depth-charts")
@@ -3640,7 +3643,7 @@ def depth_charts():
 
     if not rows:
         return render_template("depth_charts.html", positions=[], selected_team=None,
-                               available_teams=[])
+                               available_teams=[], team_colors=TEAM_ROW_COLORS)
 
     available_teams = sorted({r["team"] for r in rows})
     req_team = request.args.get("team")
@@ -3674,7 +3677,7 @@ def depth_charts():
 
     return render_template("depth_charts.html",
                            positions=ordered_positions, selected_team=sel_team,
-                           available_teams=available_teams)
+                           available_teams=available_teams, team_colors=TEAM_ROW_COLORS)
 
 
 def _score_props_for_week(year: int, week: int) -> dict:

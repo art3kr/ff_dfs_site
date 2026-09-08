@@ -64,7 +64,11 @@
             </thead>
             <tbody>
                 {% for r in rows %}
-                <tr>
+                <tr
+                    {% if r['team'] in team_colors %}
+                    style="background: {{ team_colors[r['team']] }};"
+                    data-team-color="1"
+                    {% endif %}>
                     <td class="player-name">{{ r['team'] | upper }}</td>
                     <td>{{ r['opponent'] | upper if r['opponent'] else '—' }}</td>
                     <td class="right">{{ r['spread'] if r['spread'] is not none else '—' }}</td>
