@@ -24,6 +24,7 @@
             <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
             <a href="{{ url_for('best_matchups') }}" class="nav-link">Best Matchups</a>
             <a href="{{ url_for('depth_charts') }}" class="nav-link">Depth Charts</a>
+            <a href="{{ url_for('implied_points') }}" class="nav-link">Implied Points</a>
         </nav>
         {% if year %}
             <p class="subtitle">Week {{ week }}, {{ year }} &mdash; Game Conditions</p>
@@ -66,6 +67,7 @@
         <div class="download-actions">
             <a href="{{ url_for('download_csv', data_type='weather', year=year, week=week) }}" class="download-btn">⬇ Download This Week</a>
             <a href="{{ url_for('download_csv', data_type='weather') }}" class="download-btn download-btn-all">⬇ Download All Data</a>
+            <a href="{{ url_for('download_csv', data_type='weather-by-team', year=year, week=week) }}" class="download-btn" title="One row per team instead of one per game — makes merging with History a direct match on year/week/team instead of needing to check both away_team and home_team">⬇ Download for Merging with History</a>
         </div>
     </div>
 

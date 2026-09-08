@@ -3238,9 +3238,9 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
                SUM(COALESCE(dk_pts_pfr_reported, dk_pts)) AS pts_allowed
         FROM hist_player_stats
         WHERE position IN ('QB', 'RB', 'WR', 'TE')
-          AND (year < {ph} OR (year = {ph} AND week < {ph}))
+          AND year >= {ph} AND (year < {ph} OR (year = {ph} AND week < {ph}))
         GROUP BY year, week, opponent, position
-    """, (sel_year, sel_year, sel_week))
+    """, (sel_year - 1, sel_year, sel_year, sel_week))
 
     defense_history = {}
     for r in defense_rows:
@@ -3300,8 +3300,8 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
             SELECT position, name_normalized, year, week, COALESCE(dk_pts_pfr_reported, dk_pts) AS dk_pts
             FROM hist_player_stats
             WHERE position IN ({pos_placeholders})
-              AND (year < {ph2} OR (year = {ph2} AND week < {ph2}))
-        """, tuple(positions_needed) + (sel_year, sel_year, sel_week))
+              AND year >= {ph2} AND (year < {ph2} OR (year = {ph2} AND week < {ph2}))
+        """, tuple(positions_needed) + (sel_year - 1, sel_year, sel_year, sel_week))
     else:
         league_rows = []
 
@@ -4032,6 +4032,32 @@ def download_csv(data_type):
             """)
             filename = "weather_all.csv"
 
+    elif data_type == "weather-by-team":
+        # One row per TEAM instead of one row per GAME — makes merging
+        # with History trivial (a direct (year, week, team) match,
+        # same convention History already uses) instead of needing an
+        # OR-condition against separate away_team/home_team columns.
+        if year is not None and week is not None:
+            game_rows = db_fetchall(f"""
+                SELECT year, week, game_date, status, away_team, home_team,
+                       away_score, home_score, temp_f, condition, wind_mph, wind_direction
+                FROM hist_weather WHERE year = {_ph()} AND week = {_ph()}
+            """, (year, week))
+            filename = f"weather_by_team_week{week}_{year}.csv"
+        else:
+            game_rows = db_fetchall("""
+                SELECT year, week, game_date, status, away_team, home_team,
+                       away_score, home_score, temp_f, condition, wind_mph, wind_direction
+                FROM hist_weather ORDER BY year, week
+            """)
+            filename = "weather_by_team_all.csv"
+        rows = []
+        for g in game_rows:
+            shared = {k: g[k] for k in ('year', 'week', 'game_date', 'status',
+                                        'temp_f', 'condition', 'wind_mph', 'wind_direction')}
+            rows.append({**shared, 'team': g['away_team'], 'opponent': g['home_team'], 'home_away': 'a'})
+            rows.append({**shared, 'team': g['home_team'], 'opponent': g['away_team'], 'home_away': 'h'})
+
     elif data_type == "gameinfo":
         if year is not None and week is not None:
             rows = db_fetchall(f"""
@@ -4049,6 +4075,32 @@ def download_csv(data_type):
                 FROM hist_game_info ORDER BY year, week
             """)
             filename = "gameinfo_all.csv"
+
+    elif data_type == "gameinfo-by-team":
+        # Same per-team reshaping as weather-by-team, for the same reason.
+        if year is not None and week is not None:
+            game_rows = db_fetchall(f"""
+                SELECT year, week, team_home, team_away, date, time, location,
+                       won_toss, won_ot_toss, roof, surface, duration, attendance,
+                       vegas_line, over_under, temp, humidity, wind
+                FROM hist_game_info WHERE year = {_ph()} AND week = {_ph()}
+            """, (year, week))
+            filename = f"gameinfo_by_team_week{week}_{year}.csv"
+        else:
+            game_rows = db_fetchall("""
+                SELECT year, week, team_home, team_away, date, time, location,
+                       won_toss, won_ot_toss, roof, surface, duration, attendance,
+                       vegas_line, over_under, temp, humidity, wind
+                FROM hist_game_info ORDER BY year, week
+            """)
+            filename = "gameinfo_by_team_all.csv"
+        rows = []
+        for g in game_rows:
+            shared = {k: g[k] for k in ('year', 'week', 'date', 'time', 'location',
+                                        'roof', 'surface', 'duration', 'attendance',
+                                        'vegas_line', 'over_under', 'temp', 'humidity', 'wind')}
+            rows.append({**shared, 'team': g['team_away'], 'opponent': g['team_home'], 'home_away': 'a'})
+            rows.append({**shared, 'team': g['team_home'], 'opponent': g['team_away'], 'home_away': 'h'})
 
     elif data_type == "player":
         pfr_id = request.args.get("pfr_id", "")
