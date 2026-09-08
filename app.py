@@ -2934,7 +2934,8 @@ def fantasy_points_against():
 
     if not available_years:
         return render_template("fantasy_points_against.html", rows=[],
-                               year=None, available_years=[], position="ALL")
+                               year=None, available_years=[], position="ALL",
+                               team_colors=TEAM_ROW_COLORS)
 
     req_year = request.args.get("year", type=int)
     sel_year = req_year if req_year in available_years else available_years[0]
@@ -2960,7 +2961,7 @@ def fantasy_points_against():
 
     return render_template("fantasy_points_against.html",
                            rows=rows, year=sel_year, available_years=available_years,
-                           position=sel_position)
+                           position=sel_position, team_colors=TEAM_ROW_COLORS)
 
 
 @app.route("/team-points")
