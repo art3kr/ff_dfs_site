@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF DFS Challenge — Implied Team Points</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>FF DFS Challenge</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('slate') }}" class="nav-link challenge-tab">Slate</a>
+            <a href="{{ url_for('standings') }}" class="nav-link challenge-tab">Standings</a>
+            <a href="{{ url_for('props') }}" class="nav-link challenge-tab">Props</a>
+            <a href="{{ url_for('my_lineups') }}" class="nav-link challenge-tab">My Lineups</a>
+            <a href="{{ url_for('history') }}" class="nav-link">History</a>
+            <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
+            <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
+            <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>
+            <a href="{{ url_for('fantasy_points_against') }}" class="nav-link">Fantasy Pts Against</a>
+            <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
+            <a href="{{ url_for('best_matchups') }}" class="nav-link">Best Matchups</a>
+            <a href="{{ url_for('depth_charts') }}" class="nav-link">Depth Charts</a>
+            <a href="{{ url_for('implied_points') }}" class="nav-link">Implied Player Points</a>
+            <a href="{{ url_for('implied_team_points') }}" class="nav-link active">Implied Team Points</a>
+        </nav>
+        <p class="subtitle">How many points each team is expected to score, derived from the spread and game total</p>
+    </div>
+    <div class="header-right">
+        {% if current_user.is_authenticated %}
+            <span class="user-badge">{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Sign in</a>
+        {% endif %}
+    </div>
+</header>
+
+<main class="history-main">
+
+{% if not rows %}
+    <p class="empty-state">No game odds loaded yet — run scrape_scoresandodds_game_odds.py then flask load-history.</p>
+{% else %}
+
+    <p class="standings-note">
+        Standard formula: implied total = (game O/U ÷ 2) − (spread ÷ 2). A negative spread means
+        favored, which raises the implied total; a positive spread lowers it. Both teams' implied
+        totals always add up to the game's O/U.
+    </p>
+
+    <div class="table-wrapper">
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Opp</th>
+                    <th class="right">Spread</th>
+                    <th class="right">O/U</th>
+                    <th class="right">Implied Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rows %}
+                <tr>
+                    <td class="player-name">{{ r['team'] | upper }}</td>
+                    <td>{{ r['opponent'] | upper if r['opponent'] else '—' }}</td>
+                    <td class="right">{{ r['spread'] if r['spread'] is not none else '—' }}</td>
+                    <td class="right">{{ r['over_under'] if r['over_under'] is not none else '—' }}</td>
+                    <td class="right">
+                        {% if r['implied_total'] is not none %}
+                        <strong>{{ "%.1f"|format(r['implied_total']) }}</strong>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endif %}
+
+</main>
+
+<script src="{{ url_for('static', filename='history.js') }}"></script>
+{% include '_info_modal.html' %}
+</body>
+</html>

@@ -3551,6 +3551,48 @@ def implied_points():
     return render_template("implied_points.html", rows=rows, year=sel_year, week=sel_week)
 
 
+@app.route("/implied-team-points")
+def implied_team_points():
+    """
+    Implied team scoring totals derived from the standard spread/total
+    formula: implied_total = (over_under / 2) - (spread / 2). Verified
+    against FirstDown Studio's own published numbers (their Chiefs/
+    Broncos Week 1 row: 22.8 and 19.8, computed from spread -3.0/+3.0
+    and O/U 42.5) before building this — this is a standard, publicly
+    known formula, not their proprietary calculation, and we already
+    have both spread and over_under in game_odds (scraped from
+    scoresandodds), so no new scraper was needed for this at all.
+    """
+    game_odds_rows = db_fetchall("SELECT team, opponent, spread, over_under FROM game_odds")
+
+    rows = []
+    for r in game_odds_rows:
+        spread = r["spread"]
+        over_under = r["over_under"]
+        # over_under is stored as a string like "o44.5" from the
+        # scraper (matches the props/O-U convention elsewhere) — strip
+        # the o/u prefix before treating it as a number.
+        ou_value = None
+        if over_under:
+            try:
+                ou_value = float(str(over_under).lstrip('ou'))
+            except ValueError:
+                ou_value = None
+
+        implied_total = None
+        if spread is not None and ou_value is not None:
+            implied_total = round(ou_value / 2 - spread / 2, 1)
+
+        rows.append({
+            "team": r["team"], "opponent": r["opponent"],
+            "spread": spread, "over_under": ou_value,
+            "implied_total": implied_total,
+        })
+
+    rows.sort(key=lambda r: r["implied_total"] if r["implied_total"] is not None else -1, reverse=True)
+    return render_template("implied_team_points.html", rows=rows)
+
+
 @app.route("/depth-charts")
 def depth_charts():
     """

@@ -24,7 +24,8 @@
             <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
             <a href="{{ url_for('best_matchups') }}" class="nav-link">Best Matchups</a>
             <a href="{{ url_for('depth_charts') }}" class="nav-link">Depth Charts</a>
-            <a href="{{ url_for('implied_points') }}" class="nav-link active">Implied Points</a>
+            <a href="{{ url_for('implied_points') }}" class="nav-link active">Implied Player Points</a>
+            <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if week %}
             <p class="subtitle">Week {{ week }}, {{ year }} — fantasy points implied by the prop betting market</p>
