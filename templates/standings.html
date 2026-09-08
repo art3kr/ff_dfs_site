@@ -50,19 +50,6 @@
     <p class="empty-state">No lineups have been submitted yet — standings will appear once the season gets underway.</p>
 {% else %}
 
-    {% if years|length > 1 %}
-    <form class="history-selector" method="GET" action="{{ url_for('standings') }}">
-        <label>
-            Season
-            <select name="year" onchange="this.form.submit()">
-                {% for y in years %}
-                <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
-                {% endfor %}
-            </select>
-        </label>
-    </form>
-    {% endif %}
-
     {% if standings %}
     <h2 class="standings-section-title">Season Standings — Lowest Week Dropped</h2>
     <div class="table-wrapper">

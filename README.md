@@ -226,3 +226,45 @@ a betting-market-implied number). Could be scraped as its own column
 or its own comparison page once there's a real need to see the two
 side by side. Not investigated yet — unknown whether the page is
 easily scrapeable (no diagnostic run against it so far).
+
+---
+
+## Merging Downloaded Data Across Tabs
+
+Most downloads already share the same `year`, `week`, and `team`
+columns, so merging them together (e.g. History + Team Points, or
+History + Implied Points) is a direct match on those three columns —
+no special steps needed.
+
+**Two exceptions:** Weather and Game Info are stored per-GAME (one row
+per matchup, with separate `home_team`/`away_team` — or `team_home`/
+`team_away` for Game Info specifically — columns) rather than per-TEAM
+like everything else. Merging one of these directly against History
+would need an OR-condition (match either column), which most
+spreadsheet tools can't do in a single lookup.
+
+**Use the "Download for Merging with History" button** on both the
+Weather and Game Info pages instead of their regular download — it
+reshapes each game into two rows (one per team) with a plain `team`
+column, matching every other download's convention.
+
+### Example: adding Weather conditions to a History export in Excel
+
+1. Download History for the week you want (the regular download button).
+2. On the Weather page, use the **merge-friendly** download for the same week.
+3. Open both in Excel. In the History sheet, add a new column and use:
+   ```
+   =XLOOKUP([@team], WeatherSheet!A:A, WeatherSheet!G:G)
+   ```
+   (adjust the column letters to match where `team` and the value you want,
+   e.g. `condition`, actually land in your specific download — they're not
+   guaranteed to be in the same position every time a column gets added).
+4. Fill down. Since both files use the same `team` codes (lowercase,
+   e.g. `kan`, `buf`) for the same week, this matches every row directly.
+
+If you're joining on more than one column (e.g. `year` AND `week` AND
+`team`, when combining data across multiple weeks at once), concatenate
+them into a helper column in both sheets first (e.g.
+`=A2&"-"&B2&"-"&C2`) and `XLOOKUP`/`VLOOKUP` against that combined
+column instead — a multi-column match isn't natively supported by
+either function.

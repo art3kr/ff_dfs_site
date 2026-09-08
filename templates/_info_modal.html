@@ -56,6 +56,28 @@
                 weekly total anyway.</p>
             </details>
 
+            <details>
+                <summary>Scoring and DK Points</summary>
+                <p>Every score on this site uses DraftKings' own NFL scoring rules — same
+                formula whether it's a full lineup or an implied points estimate.</p>
+                <p><strong>Passing:</strong> 0.04 pts/yard (1 pt per 25 yards), 4 pts/TD,
+                -1 pt/interception, +3 bonus for 300+ yards in a game.</p>
+                <p><strong>Rushing &amp; Receiving:</strong> 0.1 pts/yard (1 pt per 10 yards),
+                6 pts/TD, +3 bonus for 100+ yards in a game (rushing and receiving yards
+                are bonused separately — a player could earn both in the same game).</p>
+                <p><strong>Receptions:</strong> 1 pt each (full PPR), regardless of yardage.</p>
+                <p><strong>Other offense:</strong> -1 pt per fumble lost; 2 pts for a
+                2-point conversion (passing, rushing, or receiving).</p>
+                <p><strong>Defense/Special Teams (DST):</strong> 1 pt/sack, 2 pts/interception,
+                2 pts/fumble recovery, 6 pts for any defensive or special-teams touchdown,
+                2 pts/safety, plus a tiered bonus based on points allowed that game (fewer
+                points allowed means more bonus points, with the bonus turning negative once
+                the defense allows a lot of points).</p>
+                <p>DraftKings occasionally adjusts these numbers — this reflects their
+                standard rules as of when this was written; their own rules page is the
+                final word if something here ever looks off.</p>
+            </details>
+
             <h3 class="info-section-title">Reference & Research (data to help you decide)</h3>
 
             <details>
@@ -163,10 +185,14 @@
             </details>
 
             <details>
-                <summary>DK Points</summary>
-                <p>DraftKings' specific fantasy scoring formula — not the same as standard
-                fantasy football scoring. It includes bonuses for milestones (like 100+
-                rushing yards) that other formats don't always have.</p>
+                <summary>Merging downloaded data across tabs</summary>
+                <p>Most downloads already share the same <code>year</code>, <code>week</code>,
+                and <code>team</code> columns, so combining two of them in Excel/Sheets is a
+                direct match on those columns (e.g. a VLOOKUP/XLOOKUP on <code>team</code>).
+                Weather and Game Info are the exception — they're stored one row per game
+                rather than per team. Use the <strong>"Download for Merging with History"</strong>
+                button on those two pages instead of their regular download to get a
+                per-team version that matches everyone else's format.</p>
             </details>
 
         </div>

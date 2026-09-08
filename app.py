@@ -982,6 +982,57 @@ def _generate_password(used: set) -> str:
             return candidate
 
 
+@app.cli.command("export-critical-data")
+@click.option("--output-dir", default="backups",
+              help="Directory to save the export files (default: ./backups).")
+def export_critical_data_command(output_dir):
+    """
+    Exports lineups, prop_bets, and prop_picks — the three tables with
+    no external source to rebuild from if lost. Everything else (game
+    stats, salaries, weather, odds) can be re-scraped after the fact;
+    these three are the actual submissions and curated prop lines
+    themselves, which exist nowhere else once entered.
+
+    Scores are never stored directly (see _score_props_for_week() and
+    my_lineups()'s own docstring) — they're computed fresh every time
+    by joining lineup_json/prop_picks against hist_player_stats, which
+    is itself always re-scrapable from PFR. So as long as these three
+    tables survive, every score can always be recomputed exactly as
+    it is today, even from a completely empty database otherwise.
+
+    Run this regularly (e.g. weekly, alongside your other weekly
+    commands) and keep the output somewhere OTHER than the database
+    itself — a backup that lives in the same place as what it's
+    backing up doesn't help if that place is what's lost.
+    """
+    import csv
+    os.makedirs(output_dir, exist_ok=True)
+    timestamp = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).strftime("%Y%m%d_%H%M%S")
+
+    tables = {
+        "lineups": "SELECT * FROM lineups ORDER BY year, week, submitter",
+        "prop_bets": "SELECT * FROM prop_bets ORDER BY year, week, player_name",
+        "prop_picks": "SELECT * FROM prop_picks ORDER BY year, week, submitter",
+    }
+
+    for table_name, query in tables.items():
+        rows = db_fetchall(query)
+        out_path = os.path.join(output_dir, f"{table_name}_{timestamp}.csv")
+        if not rows:
+            click.echo(f"{table_name}: no rows — skipping (nothing to back up yet).")
+            continue
+        with open(out_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=list(dict(rows[0]).keys()))
+            writer.writeheader()
+            for r in rows:
+                writer.writerow(dict(r))
+        click.echo(f"{table_name}: {len(rows)} rows -> {out_path}")
+
+    click.echo(f"\nDone. Copy the {output_dir}/ folder somewhere durable (not just this "
+               f"machine/container) — cloud storage, email it to yourself, a git repo, "
+               f"anywhere that survives independently of the database.")
+
+
 @app.cli.command("create-users-batch")
 @click.argument("usernames_file", type=click.Path(exists=True))
 @click.option("--output", default=None,
@@ -4601,8 +4652,7 @@ def standings():
                                standings_no_drop=[], weekly_top_scorers=[],
                                prop_standings=[], prop_weeks=[])
 
-    req_year = request.args.get("year", type=int)
-    sel_year = req_year if req_year in years else years[0]
+    sel_year = years[0]
 
     lineup_rows = db_fetchall(f"""
         SELECT submitter, week, lineup_json
