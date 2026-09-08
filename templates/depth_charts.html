@@ -28,7 +28,10 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if selected_team %}
-            <p class="subtitle">{{ selected_team | upper }} &mdash; QB / RB / WR / TE, 1st-3rd string</p>
+            <p class="subtitle">
+                {{ selected_team | upper }} &mdash; QB / RB / WR / TE, 1st-3rd string
+                {% if current_week %}&mdash; current as of Week {{ current_week }}, {{ current_year }}{% endif %}
+            </p>
         {% else %}
             <p class="subtitle">No depth chart data loaded yet.</p>
         {% endif %}

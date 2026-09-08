@@ -1,6 +1,7 @@
 import os
 import sys
 import random
+import datetime
 from dotenv import load_dotenv
 load_dotenv()
 import json
@@ -3118,6 +3119,50 @@ def _compute_implied_points_table(sel_year: int, sel_week: int) -> list:
     return rows
 
 
+def _get_current_nfl_week():
+    """
+    The actual current NFL week, derived from game_schedule's real
+    kickoff timestamps — not just "whatever (year, week) happens to be
+    latest in some other table". Confirmed real bug this fixes: the
+    Weather page was defaulting to the latest (year, week) present in
+    hist_weather, which could be far ahead of the season's actual
+    progress if that table has rows loaded for future weeks already.
+
+    Definition: the week whose earliest kickoff is the largest value
+    still <= now — this naturally advances to the next week exactly
+    when that week's first game (typically Thursday night) kicks off,
+    without needing to hardcode NFL's Tue-to-Mon week boundary.
+
+    Returns (year, week) or (None, None) if game_schedule is empty.
+    """
+    # .replace(tzinfo=None) keeps this a naive ISO string matching how
+    # kickoff values are actually stored (no timezone suffix) — using
+    # the recommended now(UTC) without stripping tzinfo would produce
+    # a "+00:00"-suffixed string that could compare incorrectly
+    # against the naive values already in the database.
+    now_iso = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat()
+    ph = _ph()
+
+    row = db_fetchone(f"""
+        SELECT year, week FROM game_schedule
+        WHERE kickoff <= {ph}
+        GROUP BY year, week
+        ORDER BY MIN(kickoff) DESC
+        LIMIT 1
+    """, (now_iso,))
+    if row:
+        return row["year"], row["week"]
+
+    # Season hasn't started yet (every kickoff is still in the future)
+    # — fall back to the earliest available week instead.
+    row = db_fetchone("""
+        SELECT year, week FROM game_schedule
+        ORDER BY kickoff ASC
+        LIMIT 1
+    """)
+    return (row["year"], row["week"]) if row else (None, None)
+
+
 def _get_depth_chart_lookup(names_normalized: set) -> dict:
     """
     Shared by the Slate page (show each player's string) and Best
@@ -3634,8 +3679,12 @@ def depth_charts():
     Standalone browse of the full depth chart data — grouped by team,
     QB/RB/WR(as its 3 ourlads slots: LWR/RWR/SWR)/TE, 1st-3rd string.
     Always reflects the latest scrape (this table is a full-replace,
-    not historical — see replace_depth_charts()).
+    not historical — see replace_depth_charts()). Shows the actual
+    current NFL week (see _get_current_nfl_week) as a "current as of"
+    note, since this table has no week column of its own to display.
     """
+    current_year, current_week = _get_current_nfl_week()
+
     rows = db_fetchall("""
         SELECT team, pos, string_rank, player_name
         FROM depth_charts
@@ -3644,7 +3693,8 @@ def depth_charts():
 
     if not rows:
         return render_template("depth_charts.html", positions=[], selected_team=None,
-                               available_teams=[], team_colors=TEAM_ROW_COLORS)
+                               available_teams=[], team_colors=TEAM_ROW_COLORS,
+                               current_year=current_year, current_week=current_week)
 
     available_teams = sorted({r["team"] for r in rows})
     req_team = request.args.get("team")
@@ -3678,7 +3728,8 @@ def depth_charts():
 
     return render_template("depth_charts.html",
                            positions=ordered_positions, selected_team=sel_team,
-                           available_teams=available_teams, team_colors=TEAM_ROW_COLORS)
+                           available_teams=available_teams, team_colors=TEAM_ROW_COLORS,
+                           current_year=current_year, current_week=current_week)
 
 
 def _score_props_for_week(year: int, week: int) -> dict:
@@ -4036,7 +4087,13 @@ def schedule():
 def weather():
     """
     Weekly weather browser — past and upcoming game conditions, same
-    year/week selector pattern as /history.
+    year/week selector pattern as /history. Defaults to the ACTUAL
+    current NFL week (see _get_current_nfl_week) rather than just
+    whichever (year, week) happens to be latest in hist_weather —
+    confirmed real bug: that table can have rows loaded for future
+    weeks well before the season's actually reached them, which was
+    defaulting this page to a week far ahead of where the season
+    actually stood.
     """
     year_week_rows = db_fetchall(
         "SELECT DISTINCT year, week FROM hist_weather ORDER BY year DESC, week DESC"
@@ -4050,7 +4107,13 @@ def weather():
     req_year = request.args.get("year", type=int)
     req_week = request.args.get("week", type=int)
 
-    if req_year is None or req_week is None or (req_year, req_week) not in available:
+    if req_year is None or req_week is None:
+        current_year, current_week = _get_current_nfl_week()
+        if (current_year, current_week) in available:
+            sel_year, sel_week = current_year, current_week
+        else:
+            sel_year, sel_week = available[0]
+    elif (req_year, req_week) not in available:
         sel_year, sel_week = available[0]
     else:
         sel_year, sel_week = req_year, req_week
