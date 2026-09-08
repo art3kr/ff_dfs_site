@@ -542,6 +542,22 @@ def _auto_init():
             CREATE INDEX IF NOT EXISTS idx_scoresandodds_props_name
                 ON scoresandodds_props (player_name_normalized)
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS player_injuries (
+                id                      SERIAL PRIMARY KEY,
+                player_name             TEXT NOT NULL,
+                player_name_normalized  TEXT NOT NULL,
+                position                TEXT,
+                team                    TEXT,
+                status                  TEXT NOT NULL,
+                updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(player_name_normalized)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_player_injuries_name
+                ON player_injuries (player_name_normalized)
+        """)
         cur.execute("SELECT pg_advisory_unlock(918273645)")
     else:
         # SQLite: executescript for multi-statement init
@@ -801,6 +817,18 @@ def _auto_init():
             );
             CREATE INDEX IF NOT EXISTS idx_scoresandodds_props_name
                 ON scoresandodds_props (player_name_normalized);
+            CREATE TABLE IF NOT EXISTS player_injuries (
+                id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_name             TEXT NOT NULL,
+                player_name_normalized  TEXT NOT NULL,
+                position                TEXT,
+                team                    TEXT,
+                status                  TEXT NOT NULL,
+                updated_at              TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(player_name_normalized)
+            );
+            CREATE INDEX IF NOT EXISTS idx_player_injuries_name
+                ON player_injuries (player_name_normalized);
         """)
         _migrate_hist_player_stats_sqlite(conn)
         _migrate_table_sqlite(conn, "game_schedule", GAME_SCHEDULE_MIGRATIONS)
@@ -1605,8 +1633,12 @@ def load_schedule_command(year):
               help="Only load scoresandodds player props, skip everything else — for "
                    "frequent re-runs as prop lines move, without waiting on the much "
                    "slower full load.")
+@click.option("--injuries-only", is_flag=True,
+              help="Only load player injury statuses, skip everything else — for "
+                   "frequent re-runs as statuses change day to day, without waiting "
+                   "on the much slower full load.")
 @click.option("--batch-size", default=1000, type=int, help="Rows per bulk-insert batch.")
-def load_history_command(data_dir, salaries_only, stats_only, weather_only, props_only, batch_size):
+def load_history_command(data_dir, salaries_only, stats_only, weather_only, props_only, injuries_only, batch_size):
     """
     Load the historical .csv.gz files produced by the scrapers into
     hist_dfs_salaries and hist_player_stats.
@@ -1641,7 +1673,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
     # True only when no "-only" flag was passed — an unscoped run loads
     # everything, same as before these flags existed. Any "-only" flag
     # narrows to just its own section(s).
-    run_all = not (salaries_only or stats_only or weather_only or props_only)
+    run_all = not (salaries_only or stats_only or weather_only or props_only or injuries_only)
 
     conn = _connect()
     cur  = _cursor(conn)
@@ -2146,6 +2178,43 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             inserted += len(batch)
         return inserted
 
+    def replace_player_injuries(df: pd.DataFrame):
+        """
+        Full replace, not upsert — same reasoning as depth_charts,
+        game_odds, and scoresandodds_props: injury status changes day
+        to day, so a stale row shouldn't linger once a fresher scrape
+        has run. One row per player (a player only has one current
+        status at a time, unlike props where the same player can have
+        many rows across different categories).
+        """
+        cur.execute("DELETE FROM player_injuries")
+        conn.commit()
+
+        sql = f"""
+            INSERT INTO player_injuries
+                (player_name, player_name_normalized, position, team, status)
+            VALUES ({_ph(5)})
+        """
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            name = str(r.get('player_name', ''))
+            batch.append((
+                name, str(r.get('player_name_normalized', normalize_name(name))),
+                _none_if_nan(r.get('position')), _none_if_nan(r.get('team')),
+                str(r.get('status', '')),
+            ))
+            if len(batch) >= batch_size:
+                cur.executemany(sql, batch)
+                conn.commit()
+                inserted += len(batch)
+                batch = []
+        if batch:
+            cur.executemany(sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
     def upsert_weather(df: pd.DataFrame):
         if _is_postgres():
             sql = f"""
@@ -2414,6 +2483,18 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             df = pd.read_csv(props_path)
             count = replace_scoresandodds_props(df)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(props_path)} (full replace)")
+
+    # --- Load player injury statuses — same full-replace reasoning
+    # as above (status changes day to day) ---
+    if run_all or injuries_only:
+        injuries_path = os.path.join(data_dir, "draftedge_injuries.csv.gz")
+        if not os.path.exists(injuries_path):
+            click.echo(f"Skip (not found): {injuries_path}")
+        else:
+            click.echo(f"Loading {injuries_path} ...")
+            df = pd.read_csv(injuries_path)
+            count = replace_player_injuries(df)
+            click.echo(f"  Done: {count:,} rows from {os.path.basename(injuries_path)} (full replace)")
 
     cur.close()
     conn.close()
@@ -3494,6 +3575,14 @@ def depth_charts():
 
     STRING_LABELS = {1: "1st", 2: "2nd", 3: "3rd"}
 
+    # Injury status lookup — Ourlads (the depth chart source) already
+    # filters out injured players entirely, so in practice Out/
+    # Doubtful/IR players realistically won't ever appear here at
+    # all — Questionable is the status expected to actually show up
+    # most often, though this looks up all four regardless.
+    injury_rows = db_fetchall("SELECT player_name_normalized, status FROM player_injuries")
+    injury_by_name = {r["player_name_normalized"]: r["status"] for r in injury_rows}
+
     # Group this team's rows by position, ordered QB/RB/LWR/RWR/SWR/TE
     # (matching ourlads' own Offense-table row order) rather than
     # alphabetically, since that's the order fantasy users expect.
@@ -3505,6 +3594,7 @@ def depth_charts():
         by_position.setdefault(r["pos"], []).append({
             "string_label": STRING_LABELS.get(r["string_rank"], str(r["string_rank"])),
             "player_name": r["player_name"],
+            "injury_status": injury_by_name.get(normalize_name(r["player_name"])),
         })
 
     ordered_positions = [(pos, by_position[pos]) for pos in POSITION_ORDER if pos in by_position]

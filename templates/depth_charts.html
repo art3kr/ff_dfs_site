@@ -24,6 +24,7 @@
             <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
             <a href="{{ url_for('best_matchups') }}" class="nav-link">Best Matchups</a>
             <a href="{{ url_for('depth_charts') }}" class="nav-link active">Depth Charts</a>
+            <a href="{{ url_for('implied_points') }}" class="nav-link">Implied Points</a>
         </nav>
         {% if selected_team %}
             <p class="subtitle">{{ selected_team | upper }} &mdash; QB / RB / WR / TE, 1st-3rd string</p>
@@ -74,7 +75,18 @@
                     {% for e in entries %}
                     <tr>
                         <td class="depth-chart-string">{{ e['string_label'] }}</td>
-                        <td class="player-name">{{ e['player_name'] }}</td>
+                        <td class="player-name">
+                            {{ e['player_name'] }}
+                            {% if e['injury_status'] == 'questionable' %}
+                            <span class="injury-badge injury-q" title="Questionable">Q</span>
+                            {% elif e['injury_status'] == 'out' %}
+                            <span class="injury-badge injury-red" title="Out">O</span>
+                            {% elif e['injury_status'] == 'doubtful' %}
+                            <span class="injury-badge injury-red" title="Doubtful">D</span>
+                            {% elif e['injury_status'] == 'ir' %}
+                            <span class="injury-badge injury-red" title="Injured Reserve">IR</span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

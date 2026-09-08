@@ -1200,3 +1200,18 @@ header {
 }
 .roof-badge.roof-dome    { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
 .roof-badge.roof-outdoor { background: rgba(244, 67, 54, 0.2);  color: #f44336; }
+
+/* -----------------------------------------------------------------------
+   Depth Charts — injury status badges
+   ----------------------------------------------------------------------- */
+
+.injury-badge {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+.injury-badge.injury-q   { background: rgba(230, 200, 20, 0.25); color: #e6c814; }
+.injury-badge.injury-red { background: rgba(244, 67, 54, 0.2);   color: #f44336; }
