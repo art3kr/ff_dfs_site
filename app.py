@@ -3123,15 +3123,27 @@ def _get_current_nfl_week():
     """
     The actual current NFL week, derived from game_schedule's real
     kickoff timestamps — not just "whatever (year, week) happens to be
-    latest in some other table". Confirmed real bug this fixes: the
-    Weather page was defaulting to the latest (year, week) present in
-    hist_weather, which could be far ahead of the season's actual
-    progress if that table has rows loaded for future weeks already.
+    latest in some other table". Confirmed real bug this originally
+    fixed: the Weather page was defaulting to the latest (year, week)
+    present in hist_weather, which could be far ahead of the season's
+    actual progress if that table has rows loaded for future weeks
+    already.
 
-    Definition: the week whose earliest kickoff is the largest value
-    still <= now — this naturally advances to the next week exactly
-    when that week's first game (typically Thursday night) kicks off,
-    without needing to hardcode NFL's Tue-to-Mon week boundary.
+    Definition: the EARLIEST week whose games haven't all concluded
+    yet (last kickoff + a buffer for game duration is still in the
+    future) — not "the most recently started week". That distinction
+    matters specifically in the pre-season gap: confirmed real bug
+    where treating it as "most recently started" meant the tail end of
+    the previous season's last completed week won out over the
+    upcoming season's Week 1, even though Week 1 depth charts and
+    weather forecasts are already real and published before that
+    week's games actually kick off — a week's content (depth charts,
+    weather forecasts, lineup decisions) is genuinely current before
+    its games start, not just after they've begun.
+
+    The 24-hour buffer past the last kickoff comfortably covers a
+    Monday night game's duration and pushes the transition into
+    Tuesday, matching the NFL's own conventional week boundary.
 
     Returns (year, week) or (None, None) if game_schedule is empty.
     """
@@ -3140,24 +3152,26 @@ def _get_current_nfl_week():
     # the recommended now(UTC) without stripping tzinfo would produce
     # a "+00:00"-suffixed string that could compare incorrectly
     # against the naive values already in the database.
-    now_iso = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat()
+    buffer_cutoff_iso = (datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+                         - datetime.timedelta(hours=24)).isoformat()
     ph = _ph()
 
     row = db_fetchone(f"""
         SELECT year, week FROM game_schedule
-        WHERE kickoff <= {ph}
         GROUP BY year, week
-        ORDER BY MIN(kickoff) DESC
+        HAVING MAX(kickoff) >= {ph}
+        ORDER BY year ASC, week ASC
         LIMIT 1
-    """, (now_iso,))
+    """, (buffer_cutoff_iso,))
     if row:
         return row["year"], row["week"]
 
-    # Season hasn't started yet (every kickoff is still in the future)
-    # — fall back to the earliest available week instead.
+    # No week currently in progress or upcoming (e.g. the whole loaded
+    # schedule is fully in the past) — fall back to the latest
+    # available week instead.
     row = db_fetchone("""
         SELECT year, week FROM game_schedule
-        ORDER BY kickoff ASC
+        ORDER BY year DESC, week DESC
         LIMIT 1
     """)
     return (row["year"], row["week"]) if row else (None, None)
