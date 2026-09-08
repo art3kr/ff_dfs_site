@@ -99,11 +99,20 @@ header .subtitle { color: var(--text-muted); font-size: 0.85rem; }
 .table-wrapper {
     border-radius: 8px;
     border: 1px solid var(--border);
-    overflow: hidden;
+    /* Sizes to the table's own content (so a narrow table like
+       Weather doesn't stretch to fill the full page width), capped at
+       the available space so it never overflows the page itself.
+       overflow-x: auto makes a genuinely wide table (many columns,
+       e.g. Game Info) horizontally scrollable on a narrow screen
+       instead of getting silently clipped — overflow-y stays hidden
+       so the rounded corners above still clip correctly on that axis. */
+    width: fit-content;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 #slate-table {
-    width: 100%;
     border-collapse: collapse;
     white-space: nowrap;
 }
@@ -898,7 +907,6 @@ header {
    ----------------------------------------------------------------------- */
 
 #history-table {
-    width: 100%;
     border-collapse: collapse;
     white-space: nowrap;
 }
