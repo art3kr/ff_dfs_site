@@ -79,6 +79,15 @@
     </div>
     {% endif %}
 
+    <!-- Already-submitted banner, same structure/styling as Slate's -->
+    <div class="existing-banner" id="props-existing-banner" {% if not props_submitted_at %}style="display: none;"{% endif %}>
+        <span class="existing-icon">✓</span>
+        <div>
+            <strong>Picks submitted</strong>
+            <span class="existing-time" id="props-existing-time">{% if props_submitted_at %}{{ props_submitted_at[:16] }} UTC{% endif %}</span>
+        </div>
+    </div>
+
     <div class="props-grid" id="props-grid">
         {% for p in prop_rows %}
         {% set score = scores.get(p['id']) %}

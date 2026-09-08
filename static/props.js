@@ -85,6 +85,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (result.ok) {
                     msgEl.textContent = "Picks submitted!";
                     msgEl.className = "props-submit-success";
+
+                    // Show/update the persistent confirmation banner
+                    // immediately — this endpoint doesn't reload the
+                    // page, so without this the banner would only
+                    // appear on a manual refresh.
+                    var banner = document.getElementById("props-existing-banner");
+                    var timeEl = document.getElementById("props-existing-time");
+                    if (banner && timeEl && result.data.submitted_at) {
+                        timeEl.textContent = result.data.submitted_at.slice(0, 16) + " UTC";
+                        banner.style.display = "";
+                    }
                 } else {
                     msgEl.textContent = result.data.error || "Something went wrong.";
                     msgEl.className = "props-submit-error";

@@ -3939,7 +3939,7 @@ def props():
     if not available:
         return render_template("props.html", prop_rows=[], year=None, week=None,
                                available_years=[], available_weeks_by_year={},
-                               existing_picks={}, scores={})
+                               existing_picks={}, scores={}, props_submitted_at=None)
 
     req_year = request.args.get("year", type=int)
     req_week = request.args.get("week", type=int)
@@ -3966,18 +3966,26 @@ def props():
     scores = _score_props_for_week(sel_year, sel_week)
 
     existing_picks = {}
+    props_submitted_at = None
     if current_user.is_authenticated:
         pick_rows = db_fetchall(f"""
-            SELECT prop_bet_id, pick FROM prop_picks
+            SELECT prop_bet_id, pick, submitted_at FROM prop_picks
             WHERE year = {ph} AND week = {ph} AND submitter = {ph}
         """, (sel_year, sel_week, current_user.username))
         existing_picks = {r["prop_bet_id"]: r["pick"] for r in pick_rows}
+        # All 5 picks are submitted together in one batch, so they
+        # share the same (or effectively the same) timestamp — max()
+        # here is just a safe way to pick one without assuming they're
+        # all identical to the millisecond.
+        if pick_rows:
+            props_submitted_at = max(r["submitted_at"] for r in pick_rows if r["submitted_at"])
 
     return render_template("props.html",
                            prop_rows=prop_rows, year=sel_year, week=sel_week,
                            available_years=available_years,
                            available_weeks_by_year=available_weeks_by_year,
-                           existing_picks=existing_picks, scores=scores)
+                           existing_picks=existing_picks, scores=scores,
+                           props_submitted_at=props_submitted_at)
 
 
 @app.route("/submit-props", methods=["POST"])
@@ -4013,15 +4021,21 @@ def submit_props():
     cur = conn.cursor()
     cur.execute(f"DELETE FROM prop_picks WHERE year = {ph} AND week = {ph} AND submitter = {ph}",
                 (year, week, current_user.username))
+    # Set explicitly (rather than relying on the column's DB-side
+    # default) so the exact same value can be returned in the response
+    # below — the frontend needs this to show the "Picks submitted"
+    # confirmation banner immediately, since this endpoint doesn't
+    # trigger a page reload.
+    submitted_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat()
     for p in picks:
         cur.execute(f"""
-            INSERT INTO prop_picks (year, week, submitter, prop_bet_id, pick)
-            VALUES ({_ph(5)})
-        """, (year, week, current_user.username, p["prop_bet_id"], p["pick"]))
+            INSERT INTO prop_picks (year, week, submitter, prop_bet_id, pick, submitted_at)
+            VALUES ({_ph(6)})
+        """, (year, week, current_user.username, p["prop_bet_id"], p["pick"], submitted_at))
     conn.commit()
     cur.close()
 
-    return jsonify(success=True)
+    return jsonify(success=True, submitted_at=submitted_at)
 
 
 @app.route("/schedule")
@@ -4499,7 +4513,7 @@ def standings():
         return render_template("standings.html", year=None, years=[],
                                standings=[], weeks=[],
                                standings_no_drop=[], weekly_top_scorers=[],
-                               prop_standings=[])
+                               prop_standings=[], prop_weeks=[])
 
     req_year = request.args.get("year", type=int)
     sel_year = req_year if req_year in years else years[0]
@@ -4650,20 +4664,44 @@ def standings():
     prop_weeks = sorted(r["week"] for r in prop_week_rows)
 
     prop_standings_by_submitter = {}   # submitter -> {"correct": n, "total_scored": n}
+    prop_week_by_submitter = {}        # submitter -> {week: (correct, total) or None (pending)}
     for w in prop_weeks:
         week_scores = _score_props_for_week(sel_year, w)
         picks_this_week = db_fetchall(f"""
             SELECT submitter, prop_bet_id, pick FROM prop_picks
             WHERE year = {ph} AND week = {ph}
         """, (sel_year, w))
+
+        # Tallied per-submitter for THIS week specifically, alongside
+        # (not replacing) the existing season-total accumulation below
+        # — same per-pick counting rules (push excluded from both
+        # numerator and denominator), just also grouped by week so the
+        # Standings page can show a per-week breakdown the same way
+        # lineup standings already do.
+        week_tally = {}   # submitter -> {"correct": n, "total": n, "has_pending": bool}
         for p in picks_this_week:
             outcome = week_scores.get(p["prop_bet_id"], {}).get("result")
-            if outcome is None or outcome == "push":
+            tally = week_tally.setdefault(p["submitter"], {"correct": 0, "total": 0, "has_pending": False})
+            if outcome is None:
+                tally["has_pending"] = True
+                continue
+            if outcome == "push":
                 continue   # pending or push — not counted either way
+
             entry = prop_standings_by_submitter.setdefault(p["submitter"], {"correct": 0, "total_scored": 0})
             entry["total_scored"] += 1
+            tally["total"] += 1
             if outcome == p["pick"]:
                 entry["correct"] += 1
+                tally["correct"] += 1
+
+        for submitter, tally in week_tally.items():
+            prop_week_by_submitter.setdefault(submitter, {})
+            # A week shows as "pending" as a whole if ANY pick in it is
+            # still unscored — matching lineup standings' own all-or-
+            # nothing convention for a week's status, so the two
+            # sections read consistently.
+            prop_week_by_submitter[submitter][w] = None if tally["has_pending"] else (tally["correct"], tally["total"])
 
     prop_standings = []
     for submitter, stats in prop_standings_by_submitter.items():
@@ -4672,6 +4710,7 @@ def standings():
             "correct": stats["correct"],
             "total_scored": stats["total_scored"],
             "accuracy_pct": round(100 * stats["correct"] / stats["total_scored"], 1) if stats["total_scored"] else None,
+            "week_scores": prop_week_by_submitter.get(submitter, {}),
         })
     prop_standings.sort(key=lambda r: r["correct"], reverse=True)
 
@@ -4680,7 +4719,7 @@ def standings():
                            standings=leaderboard, weeks=weeks,
                            standings_no_drop=leaderboard_no_drop,
                            weekly_top_scorers=weekly_top_scorers,
-                           prop_standings=prop_standings)
+                           prop_standings=prop_standings, prop_weeks=prop_weeks)
 
 
 @app.route("/submit-lineup", methods=["POST"])

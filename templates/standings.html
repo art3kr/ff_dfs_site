@@ -172,6 +172,9 @@
                 <tr>
                     <th>Rank</th>
                     <th>Participant</th>
+                    {% for w in prop_weeks %}
+                    <th class="right">Wk{{ w }}</th>
+                    {% endfor %}
                     <th class="right">Correct</th>
                     <th class="right">Total Scored</th>
                     <th class="right">Accuracy</th>
@@ -182,6 +185,18 @@
                 <tr>
                     <td>{{ loop.index }}</td>
                     <td class="player-name">{{ row['submitter'] }}</td>
+                    {% for w in prop_weeks %}
+                        {% set week_result = row['week_scores'].get(w) %}
+                        <td class="right">
+                            {% if week_result is none %}
+                                {% if w in row['week_scores'] %}
+                                <span class="pending-week" title="Not yet fully scored">pending</span>
+                                {% else %}—{% endif %}
+                            {% else %}
+                                {{ week_result[0] }}/{{ week_result[1] }}
+                            {% endif %}
+                        </td>
+                    {% endfor %}
                     <td class="right"><strong>{{ row['correct'] }}</strong></td>
                     <td class="right">{{ row['total_scored'] }}</td>
                     <td class="right">{{ "%.1f"|format(row['accuracy_pct']) if row['accuracy_pct'] is not none else '—' }}%</td>
@@ -191,8 +206,10 @@
         </table>
     </div>
     <p class="standings-note">
-        Ranked by total correct picks over the season (not accuracy %). Pending (not yet scored)
-        and push results aren't counted either way.
+        Ranked by total correct picks over the season (not accuracy %). Per-week columns show
+        "pending" until that week's picks are fully scored (game results not yet available/
+        scraped) — a dash means that participant didn't submit picks that week at all. Pending
+        and push results aren't counted in the season totals either way.
     </p>
     {% else %}
     <p class="empty-state">No prop picks scored yet for {{ year }}.</p>
