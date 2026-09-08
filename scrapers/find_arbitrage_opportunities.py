@@ -9,6 +9,12 @@ middling (find_middling_opportunities.py), which specifically needs
 DIFFERENT lines and only pays off big if the result lands between
 them (small loss otherwise).
 
+To execute an opportunity: bet OVER at 'over_book' using the
+'stake_over' amount, and UNDER at 'under_book' using 'stake_under'.
+Since it's the same line, exactly one of those two bets must win, and
+the stake sizing is calculated so either outcome pays the same
+guaranteed profit.
+
 Deliberately scoped to same-line only. A different-line combination
 (Over at a lower line + Under at a higher line) can also sometimes
 guarantee at-worst-one-side-wins, but that's the same territory
@@ -159,10 +165,11 @@ def main(input_path: str, min_profit_pct: float, top_n: int, total_stake: float,
 
     print(f"\nUnlike middling, this profit is guaranteed regardless of the actual result — "
           f"both bets are on the SAME line, so exactly one must win (barring a push on a "
-          f"whole-number line, which this doesn't model separately). Real risk here is "
-          f"execution: books limiting bet size or account access for players who "
-          f"consistently place this kind of action, and line movement between placing "
-          f"the two bets.")
+          f"whole-number line, which this doesn't model separately). Bet OVER at "
+          f"'over_book' (stake_over amount) and UNDER at 'under_book' (stake_under "
+          f"amount) — real risk here is execution: books limiting bet size or account "
+          f"access for players who consistently place this kind of action, and line "
+          f"movement between placing the two bets.")
 
 
 if __name__ == "__main__":
