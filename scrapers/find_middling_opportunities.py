@@ -64,12 +64,25 @@ def _balanced_stakes(over_odds: float, under_odds: float, total_stake: float) ->
 
 
 def find_middles(df: pd.DataFrame, min_width: float, total_stake: float,
-                 exclude_books: set = None) -> pd.DataFrame:
+                 exclude_books: set = None, exclude_book_categories: set = None) -> pd.DataFrame:
     if exclude_books:
         before = len(df)
         df = df[~df['book'].str.lower().isin(exclude_books)]
         print(f"Excluding books {sorted(exclude_books)}: {before - len(df)} rows removed, "
               f"{len(df)} remain")
+
+    if exclude_book_categories:
+        # Excludes a specific (book, category) pair only — e.g. Caesars
+        # not offering rushing-and-receiving-yards lines shouldn't
+        # remove Caesars from every OTHER category, or remove that
+        # category from every OTHER book.
+        before = len(df)
+        book_lower = df['book'].str.lower()
+        category_lower = df['category'].str.lower()
+        pair_lower = book_lower + '|' + category_lower
+        df = df[~pair_lower.isin(exclude_book_categories)]
+        print(f"Excluding specific (book, category) pairs {sorted(exclude_book_categories)}: "
+              f"{before - len(df)} rows removed, {len(df)} remain")
 
     opportunities = []
 
@@ -114,39 +127,65 @@ def find_middles(df: pd.DataFrame, min_width: float, total_stake: float,
 
 
 def main(input_path: str, min_width: float, top_n: int, total_stake: float,
-        exclude_books: set = None):
+        exclude_books: set = None, exclude_book_categories: set = None, with_ev: bool = False):
     df = pd.read_csv(input_path)
     print(f"Loaded {len(df)} book-level rows across "
           f"{df.groupby(['player_name', 'category']).ngroups} (player, category) pairs")
 
-    opportunities = find_middles(df, min_width, total_stake, exclude_books)
+    opportunities = find_middles(df, min_width, total_stake, exclude_books, exclude_book_categories)
 
     if opportunities.empty:
         print(f"\nNo middling opportunities found with width >= {min_width}.")
         return
 
     print(f"\n{len(opportunities)} opportunities found with width >= {min_width}")
-    print(f"\nTop {min(top_n, len(opportunities))} by middle width "
-          f"(sized for a ${total_stake:.0f} total stake per opportunity):\n")
 
-    display_cols = ['player_name', 'category', 'low_book', 'low_line', 'high_book', 'high_line',
-                    'middle_width', 'stake_over', 'stake_under', 'loss_if_miss', 'profit_if_middle_hits']
-    print(opportunities[display_cols].head(top_n).to_string(index=False))
-
-    # Distinct filename when book-filtered, so this doesn't overwrite
-    # the unrestricted run's results — you can keep both around, e.g.
-    # to compare "what's usable now" against "what's out there if I
-    # travel somewhere these books are legal".
     base = input_path.replace('.csv.gz', '').replace('.csv', '')
-    suffix = '_middling_opportunities_filtered.csv' if exclude_books else '_middling_opportunities.csv'
+    is_filtered = bool(exclude_books or exclude_book_categories)
+    suffix = '_middling_opportunities_filtered.csv' if is_filtered else '_middling_opportunities.csv'
     out_path = base + suffix
+
+    if with_ev:
+        # Reuses estimate_middling_ev.py's actual computation directly
+        # (not a reimplementation) — this needs the Flask app +
+        # database, unlike everything above, which is why --with-ev
+        # is opt-in rather than the default: the plain middling-width
+        # calculation can run standalone with no database at all, and
+        # turning that into a hard requirement for every run would
+        # take that away.
+        import estimate_middling_ev
+        opportunities = estimate_middling_ev.compute_ev_for_opportunities(opportunities, df, exclude_books)
+        estimable = opportunities.dropna(subset=['expected_value'])
+        print(f"EV computed for {len(estimable)}/{len(opportunities)} opportunities "
+              f"({len(opportunities) - len(estimable)} skipped — see 'note' column for why)")
+        if not estimable.empty:
+            opportunities = pd.concat([
+                estimable.sort_values('expected_value', ascending=False),
+                opportunities[opportunities['expected_value'].isna()]
+            ])
+        display_cols = ['player_name', 'category', 'low_book', 'low_line', 'high_book', 'high_line',
+                        'middle_width', 'p_middle_hits', 'expected_value', 'note']
+        print(f"\nTop {min(top_n, len(opportunities))} (sorted by expected value where available):\n")
+        print(opportunities[display_cols].head(top_n).to_string(index=False))
+    else:
+        print(f"\nTop {min(top_n, len(opportunities))} by middle width "
+              f"(sized for a ${total_stake:.0f} total stake per opportunity):\n")
+        display_cols = ['player_name', 'category', 'low_book', 'low_line', 'high_book', 'high_line',
+                        'middle_width', 'stake_over', 'stake_under', 'loss_if_miss', 'profit_if_middle_hits']
+        print(opportunities[display_cols].head(top_n).to_string(index=False))
+
     opportunities.to_csv(out_path, index=False)
     print(f"\nFull results saved -> {out_path}")
 
     print(f"\nStake sizing balances the two legs so losing EITHER side alone costs the "
-          f"same ('loss_if_miss') — bet more on whichever leg has worse odds. This "
-          f"still ranks by middle WIDTH only, not a modeled probability of landing in "
-          f"it. Remember middling is a variance play (usually the small 'loss_if_miss' "
+          f"same ('loss_if_miss') — bet more on whichever leg has worse odds."
+          + (" EV estimates use the market's consensus line for the mean and the "
+             "player's real historical variance — see estimate_middling_ev.py's "
+             "own docstring for the real limitations (needs 6+ historical games, "
+             "weak for low-count stats)." if with_ev else
+             " This still ranks by middle WIDTH only, not a modeled probability of "
+             "landing in it — pass --with-ev for a real EV estimate instead.")
+          + " Remember middling is a variance play (usually the small 'loss_if_miss' "
           f"amount, occasionally the big 'profit_if_middle_hits' payout), not "
           f"guaranteed profit like pure arbitrage.")
 
@@ -166,10 +205,34 @@ if __name__ == "__main__":
                              "consideration, e.g. 'bet365,underdog,prizepicks' — for "
                              "books unavailable in your state. Omit for the "
                              "unrestricted view across every book.")
+    parser.add_argument("--exclude-book-category", default=None,
+                        help="Comma-separated book:category pairs to exclude — for a "
+                             "book that's missing a specific market entirely (e.g. "
+                             "Caesars not offering rushing-and-receiving-yards lines), "
+                             "without removing that book from every other category or "
+                             "that category from every other book. Format: "
+                             "'caesars:rushing-and-receiving-yards,otherbook:othercat'.")
+    parser.add_argument("--with-ev", action="store_true",
+                        help="Also compute expected value for each opportunity, in the "
+                             "same run — needs the Flask app/database (unlike everything "
+                             "else here, which is pure CSV processing), so this is opt-in "
+                             "rather than the default.")
     args = parser.parse_args()
 
     exclude_set = None
     if args.exclude_books:
         exclude_set = {b.strip().lower() for b in args.exclude_books.split(',')}
 
-    main(args.input, args.min_width, args.top, args.total_stake, exclude_set)
+    exclude_book_category_set = None
+    if args.exclude_book_category:
+        exclude_book_category_set = set()
+        for pair in args.exclude_book_category.split(','):
+            book, _, category = pair.strip().partition(':')
+            if not category:
+                print(f"ERROR: '--exclude-book-category' entry {pair!r} isn't in "
+                      f"'book:category' format — skipping it.")
+                continue
+            exclude_book_category_set.add(f"{book.strip().lower()}|{category.strip().lower()}")
+
+    main(args.input, args.min_width, args.top, args.total_stake, exclude_set,
+        exclude_book_category_set, args.with_ev)

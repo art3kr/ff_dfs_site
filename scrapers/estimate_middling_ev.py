@@ -83,16 +83,32 @@ def get_player_history(app_module, name_normalized: str, stat_field: str, compos
     return [r["val"] for r in rows if r["val"] is not None]
 
 
-def main(opportunities_path: str, market_data_path: str):
+def compute_ev_for_opportunities(opps: pd.DataFrame, market: pd.DataFrame,
+                                 exclude_books: set = None) -> pd.DataFrame:
+    """
+    The actual EV computation, taking DataFrames directly rather than
+    file paths — lets find_middling_opportunities.py call this
+    in-memory (via --with-ev) without writing an intermediate file to
+    disk just to read it back. main() below is now a thin wrapper
+    around this for the standalone-script use case.
+
+    exclude_books matters here even though the opportunities passed in
+    were likely already book-filtered upstream: market_mean (the
+    consensus used for the actual EV math) is computed fresh from
+    `market` below, so without this filter it could still be pulled by
+    lines from books you can't use, even when the opportunities
+    themselves already excluded them.
+    """
     import app as app_module
 
-    opps = pd.read_csv(opportunities_path)
-    market = pd.read_csv(market_data_path)
+    if exclude_books:
+        before = len(market)
+        market = market[~market['book'].str.lower().isin(exclude_books)]
+        print(f"Excluding books {sorted(exclude_books)} from market consensus: "
+              f"{before - len(market)} rows removed, {len(market)} remain")
 
-    print(f"Loaded {len(opps)} opportunities, {len(market)} market rows")
+    print(f"Computing EV for {len(opps)} opportunities against {len(market)} market rows")
 
-    # Composite fields need their SQL sum expression, same as
-    # _score_props_for_week() in app.py
     composite_exprs = {
         'pass_rush_yds': '(COALESCE(pass_yds, 0) + COALESCE(rush_yds, 0))',
         'rush_rec_yds':  '(COALESCE(rush_yds, 0) + COALESCE(rec_yds, 0))',
@@ -110,8 +126,6 @@ def main(opportunities_path: str, market_data_path: str):
 
             name_norm = normalize_name(opp['player_name'])
 
-            # Market consensus mean: average of this player+category's
-            # quoted lines across all books
             player_market_rows = market[
                 (market['player_name'] == opp['player_name']) & (market['category'] == category)
             ]
@@ -153,7 +167,14 @@ def main(opportunities_path: str, market_data_path: str):
                 'note': note,
             })
 
-    result_df = pd.DataFrame(results)
+    return pd.DataFrame(results)
+
+
+def main(opportunities_path: str, market_data_path: str, exclude_books: set = None):
+    opps = pd.read_csv(opportunities_path)
+    market = pd.read_csv(market_data_path)
+
+    result_df = compute_ev_for_opportunities(opps, market, exclude_books)
     estimable = result_df.dropna(subset=['expected_value'])
     print(f"\nEstimated EV for {len(estimable)}/{len(opps)} opportunities "
           f"({len(opps) - len(estimable)} skipped — see 'note' column for why)")
@@ -174,5 +195,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--opportunities", required=True)
     parser.add_argument("--market-data", required=True)
+    parser.add_argument("--exclude-books", default=None,
+                        help="Comma-separated book slugs to exclude from the market "
+                             "consensus calculation, e.g. 'bet365,underdog,prizepicks' — "
+                             "should match whatever was passed to "
+                             "find_middling_opportunities.py, so the EV estimate's "
+                             "consensus mean isn't pulled by books you can't actually use.")
     args = parser.parse_args()
-    main(args.opportunities, args.market_data)
+
+    exclude_set = None
+    if args.exclude_books:
+        exclude_set = {b.strip().lower() for b in args.exclude_books.split(',')}
+
+    main(args.opportunities, args.market_data, exclude_set)

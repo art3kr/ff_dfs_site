@@ -3427,6 +3427,10 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
         odds_row = game_odds_by_team.get(p["team"])
         implied_row = implied_points_by_name.get(name_norm)
         implied_points = implied_row["implied_points"] if implied_row else None
+        team_implied_total = _compute_implied_team_total(
+            odds_row["spread"] if odds_row else None,
+            odds_row["over_under"] if odds_row else None,
+        )
 
         rows.append({
             "name": p["name"], "position": p["position"], "team": p["team"],
@@ -3444,6 +3448,7 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
             "spread": odds_row["spread"] if odds_row else None,
             "favorite": odds_row["favorite"] if odds_row else None,
             "implied_points": implied_points,
+            "team_implied_total": team_implied_total,
         })
 
     # Value-based coloring needs the min/max among whatever's actually
@@ -3458,6 +3463,18 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
     else:
         for r in rows:
             r["implied_points_color"] = None
+
+    # Same value-based coloring for team implied totals — computed
+    # separately since it's a different scale/metric from player
+    # implied points, not a shared min/max.
+    team_implied_values = [r["team_implied_total"] for r in rows if r["team_implied_total"] is not None]
+    if team_implied_values:
+        min_team, max_team = min(team_implied_values), max(team_implied_values)
+        for r in rows:
+            r["team_implied_total_color"] = _value_to_color(r["team_implied_total"], min_team, max_team)
+    else:
+        for r in rows:
+            r["team_implied_total_color"] = None
 
     rows.sort(key=lambda r: (
         r["opp_avg_pts_allowed"] if r["opp_avg_pts_allowed"] is not None else -1,
@@ -3551,17 +3568,32 @@ def implied_points():
     return render_template("implied_points.html", rows=rows, year=sel_year, week=sel_week)
 
 
+def _compute_implied_team_total(spread, over_under) -> float | None:
+    """
+    Standard spread/total formula: implied_total = (over_under / 2) -
+    (spread / 2). Verified against FirstDown Studio's own published
+    numbers (Chiefs/Broncos Week 1: 22.8 and 19.8, from spread
+    -3.0/+3.0 and O/U 42.5) — a standard, publicly known formula, not
+    proprietary to them. Shared by both /implied-team-points and Best
+    Matchups so the same number is computed the same way everywhere.
+    """
+    if spread is None or not over_under:
+        return None
+    try:
+        # over_under is stored as a string like "o44.5" (matches the
+        # props/O-U convention elsewhere) — strip the o/u prefix.
+        ou_value = float(str(over_under).lstrip('ou'))
+    except ValueError:
+        return None
+    return round(ou_value / 2 - spread / 2, 1)
+
+
 @app.route("/implied-team-points")
 def implied_team_points():
     """
     Implied team scoring totals derived from the standard spread/total
-    formula: implied_total = (over_under / 2) - (spread / 2). Verified
-    against FirstDown Studio's own published numbers (their Chiefs/
-    Broncos Week 1 row: 22.8 and 19.8, computed from spread -3.0/+3.0
-    and O/U 42.5) before building this — this is a standard, publicly
-    known formula, not their proprietary calculation, and we already
-    have both spread and over_under in game_odds (scraped from
-    scoresandodds), so no new scraper was needed for this at all.
+    formula — see _compute_implied_team_total() for the actual
+    calculation and how it was verified.
     """
     game_odds_rows = db_fetchall("SELECT team, opponent, spread, over_under FROM game_odds")
 
@@ -3569,19 +3601,18 @@ def implied_team_points():
     for r in game_odds_rows:
         spread = r["spread"]
         over_under = r["over_under"]
-        # over_under is stored as a string like "o44.5" from the
-        # scraper (matches the props/O-U convention elsewhere) — strip
-        # the o/u prefix before treating it as a number.
+        implied_total = _compute_implied_team_total(spread, over_under)
+
+        # Parsed for DISPLAY (matches pre-refactor behavior: numeric
+        # 42.5, not the raw "o42.5" string) - separate from the shared
+        # helper's own internal parsing, since it only returns the
+        # final implied_total, not this intermediate value.
         ou_value = None
         if over_under:
             try:
                 ou_value = float(str(over_under).lstrip('ou'))
             except ValueError:
-                ou_value = None
-
-        implied_total = None
-        if spread is not None and ou_value is not None:
-            implied_total = round(ou_value / 2 - spread / 2, 1)
+                pass
 
         rows.append({
             "team": r["team"], "opponent": r["opponent"],

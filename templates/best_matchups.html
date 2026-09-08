@@ -103,6 +103,7 @@
                     <th data-col="spread" class="right">Spread</th>
                     <th data-col="fav">Fav</th>
                     <th data-col="implied" class="right" title="Implied fantasy points from the prop betting market">Implied<br>Pts</th>
+                    <th data-col="team_implied" class="right" title="Implied team scoring total from the game's spread and O/U">Team<br>Implied</th>
                 </tr>
             </thead>
             <tbody>
@@ -149,6 +150,11 @@
                     <td class="right">
                         {% if r['implied_points'] is not none %}
                         <strong style="color: {{ r['implied_points_color'] }};">{{ "%.1f"|format(r['implied_points']) }}</strong>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="right">
+                        {% if r['team_implied_total'] is not none %}
+                        <strong style="color: {{ r['team_implied_total_color'] }};">{{ "%.1f"|format(r['team_implied_total']) }}</strong>
                         {% else %}—{% endif %}
                     </td>
                 </tr>
