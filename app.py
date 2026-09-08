@@ -3922,38 +3922,120 @@ def my_lineups():
                            all_matched=all_matched, total_salary=lineup_row["total_salary"])
 
 
+@app.route("/my-props")
+def my_props():
+    """
+    Lets anyone browse a past week's submitted prop picks, pick by
+    pick, with each pick's actual result — same relationship to
+    Standings that my_lineups() has (standings shows the season
+    totals, this shows the per-pick breakdown for one week).
+
+    Defaults to the logged-in user's own most recent submission, same
+    pattern as my_lineups() — matches that function's own comment on
+    why showing anyone's past picks isn't an added secrecy concern:
+    Standings already reveals everyone's per-week correct/pending
+    status, just not which specific picks they made.
+    """
+    ph = _ph()
+
+    available = db_fetchall(
+        "SELECT DISTINCT year, week, submitter FROM prop_picks ORDER BY year DESC, week DESC, submitter"
+    )
+    if not available:
+        return render_template("my_props.html", rows=None, year=None, week=None,
+                               submitter=None, available_years=[], available_weeks_by_year={},
+                               available_submitters=[], total_correct=None, all_matched=False)
+
+    available_years = sorted({r["year"] for r in available}, reverse=True)
+    available_weeks_by_year = {}
+    for r in available:
+        available_weeks_by_year.setdefault(r["year"], set()).add(r["week"])
+    for y in available_weeks_by_year:
+        available_weeks_by_year[y] = sorted(available_weeks_by_year[y])
+    available_submitters = sorted({r["submitter"] for r in available})
+
+    req_year = request.args.get("year", type=int)
+    req_week = request.args.get("week", type=int)
+    req_submitter = request.args.get("submitter")
+
+    default_submitter = available_submitters[0]
+    if current_user.is_authenticated and current_user.username in available_submitters:
+        default_submitter = current_user.username
+
+    valid_combo = (req_year, req_week, req_submitter) in {(r["year"], r["week"], r["submitter"]) for r in available}
+    if valid_combo:
+        sel_year, sel_week, sel_submitter = req_year, req_week, req_submitter
+    else:
+        sub = req_submitter if req_submitter in available_submitters else default_submitter
+        sub_rows = [r for r in available if r["submitter"] == sub]
+        sel_year, sel_week, sel_submitter = sub_rows[0]["year"], sub_rows[0]["week"], sub
+
+    pick_rows = db_fetchall(f"""
+        SELECT pb.id, pb.player_name, pb.stat_field, pb.line, pp.pick
+        FROM prop_picks pp
+        JOIN prop_bets pb ON pb.id = pp.prop_bet_id
+        WHERE pp.year = {ph} AND pp.week = {ph} AND pp.submitter = {ph}
+        ORDER BY pb.player_name
+    """, (sel_year, sel_week, sel_submitter))
+
+    week_scores = _score_props_for_week(sel_year, sel_week)
+
+    rows = []
+    total_correct = 0
+    matched_count = 0
+    for p in pick_rows:
+        outcome = week_scores.get(p["id"], {})
+        result = outcome.get("result")
+        actual = outcome.get("actual")
+
+        is_correct = None
+        if result is not None and result != "push":
+            matched_count += 1
+            is_correct = (result == p["pick"])
+            if is_correct:
+                total_correct += 1
+        elif result == "push":
+            matched_count += 1   # scored (as a push), just doesn't count for/against
+
+        rows.append({
+            "player_name": p["player_name"], "stat_field": p["stat_field"], "line": p["line"],
+            "pick": p["pick"], "actual": actual, "result": result, "is_correct": is_correct,
+        })
+
+    all_matched = (matched_count == len(pick_rows))
+
+    return render_template("my_props.html",
+                           rows=rows, year=sel_year, week=sel_week, submitter=sel_submitter,
+                           available_years=available_years, available_weeks_by_year=available_weeks_by_year,
+                           available_submitters=available_submitters,
+                           total_correct=total_correct if all_matched else None,
+                           all_matched=all_matched)
+
+
 @app.route("/props")
 def props():
     """
+    Always shows the current week's props only — no year/week
+    selector, matching slate()'s own pattern exactly (latest (year,
+    week) present in the table, since only one week's props are ever
+    "live" for picking at a time). Past weeks' picks live on the new
+    My Props page instead, same relationship as Slate vs. My Lineups.
+
     NOTE — no lock mechanism yet: picks can be changed anytime,
     including after games have started. Lineups have per-game locking
     (see game_schedule); props don't yet. Worth adding the same
     protection here if this becomes a real fairness concern in
     practice.
     """
-    year_week_rows = db_fetchall(
-        "SELECT DISTINCT year, week FROM prop_bets ORDER BY year DESC, week DESC"
+    row = db_fetchone(
+        "SELECT year, week FROM prop_bets ORDER BY year DESC, week DESC LIMIT 1"
     )
-    available = [(r["year"], r["week"]) for r in year_week_rows]
 
-    if not available:
+    if row is None:
         return render_template("props.html", prop_rows=[], year=None, week=None,
-                               available_years=[], available_weeks_by_year={},
                                existing_picks={}, scores={}, props_submitted_at=None)
 
-    req_year = request.args.get("year", type=int)
-    req_week = request.args.get("week", type=int)
-    if req_year is None or req_week is None or (req_year, req_week) not in available:
-        sel_year, sel_week = available[0]
-    else:
-        sel_year, sel_week = req_year, req_week
-
-    available_years = sorted({y for y, w in available}, reverse=True)
-    available_weeks_by_year = {}
-    for y, w in available:
-        available_weeks_by_year.setdefault(y, []).append(w)
-    for y in available_weeks_by_year:
-        available_weeks_by_year[y].sort()
+    sel_year, sel_week = row["year"], row["week"]
 
     ph = _ph()
     prop_rows = db_fetchall(f"""
@@ -3988,8 +4070,6 @@ def props():
 
     return render_template("props.html",
                            prop_rows=prop_rows, year=sel_year, week=sel_week,
-                           available_years=available_years,
-                           available_weeks_by_year=available_weeks_by_year,
                            existing_picks=existing_picks, scores=scores,
                            props_submitted_at=props_submitted_at)
 
@@ -4709,8 +4789,19 @@ def standings():
             # sections read consistently.
             prop_week_by_submitter[submitter][w] = None if tally["has_pending"] else (tally["correct"], tally["total"])
 
+    # Union of every submitter who has EVER submitted prop picks this
+    # season — not just those in prop_standings_by_submitter, which
+    # only gets an entry once a submitter has at least one fully-
+    # scored pick. Confirmed real gap: a submitter whose only activity
+    # so far is a still-pending week (very common right after they
+    # submit for the first time) was missing from Standings entirely
+    # under the old logic, even though they should show up with a
+    # "pending" indicator for that week.
+    all_prop_submitters = set(prop_standings_by_submitter.keys()) | set(prop_week_by_submitter.keys())
+
     prop_standings = []
-    for submitter, stats in prop_standings_by_submitter.items():
+    for submitter in all_prop_submitters:
+        stats = prop_standings_by_submitter.get(submitter, {"correct": 0, "total_scored": 0})
         prop_standings.append({
             "submitter": submitter,
             "correct": stats["correct"],

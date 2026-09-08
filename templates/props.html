@@ -15,6 +15,7 @@
             <a href="{{ url_for('slate') }}" class="nav-link challenge-tab">Slate</a>
             <a href="{{ url_for('standings') }}" class="nav-link challenge-tab">Standings</a>
             <a href="{{ url_for('props') }}" class="nav-link challenge-tab active">Props</a>
+            <a href="{{ url_for('my_props') }}" class="nav-link challenge-tab">My Props</a>
             <a href="{{ url_for('my_lineups') }}" class="nav-link challenge-tab">My Lineups</a>
             <a href="{{ url_for('history') }}" class="nav-link">History</a>
             <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
@@ -45,30 +46,9 @@
 
 <main class="history-main">
 
-{% if not available_years %}
-    <p class="empty-state">No props loaded yet for any week.</p>
+{% if not week %}
+    <p class="empty-state">No props loaded yet for the current week.</p>
 {% else %}
-
-    <div class="page-controls">
-        <form class="history-selector" id="history-selector" method="GET" action="{{ url_for('props') }}">
-            <label>
-                Year
-                <select name="year" id="year-select">
-                    {% for y in available_years %}
-                    <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-            <label>
-                Week
-                <select name="week" id="week-select">
-                    {% for w in available_weeks_by_year[year] %}
-                    <option value="{{ w }}" {% if w == week %}selected{% endif %}>Week {{ w }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-        </form>
-    </div>
 
     {% if prop_rows %}
     {% if current_user.is_authenticated %}
@@ -128,9 +108,7 @@
         isAuthenticated: {{ current_user.is_authenticated | tojson }},
         existingPicks: {{ existing_picks | tojson }}
     };
-    window.HISTORY_WEEKS_BY_YEAR = {{ available_weeks_by_year | tojson }};
 </script>
-<script src="{{ url_for('static', filename='history.js') }}"></script>
 <script src="{{ url_for('static', filename='props.js') }}"></script>
 
 {% include '_info_modal.html' %}

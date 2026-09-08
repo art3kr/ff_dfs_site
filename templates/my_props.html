@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Game Info{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge — My Props{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -15,11 +15,11 @@
             <a href="{{ url_for('slate') }}" class="nav-link challenge-tab">Slate</a>
             <a href="{{ url_for('standings') }}" class="nav-link challenge-tab">Standings</a>
             <a href="{{ url_for('props') }}" class="nav-link challenge-tab">Props</a>
-            <a href="{{ url_for('my_props') }}" class="nav-link challenge-tab">My Props</a>
+            <a href="{{ url_for('my_props') }}" class="nav-link challenge-tab active">My Props</a>
             <a href="{{ url_for('my_lineups') }}" class="nav-link challenge-tab">My Lineups</a>
             <a href="{{ url_for('history') }}" class="nav-link">History</a>
             <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
-            <a href="{{ url_for('gameinfo') }}" class="nav-link active">Game Info</a>
+            <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
             <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>
             <a href="{{ url_for('fantasy_points_against') }}" class="nav-link">Fantasy Pts Against</a>
             <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
@@ -28,10 +28,10 @@
             <a href="{{ url_for('implied_points') }}" class="nav-link">Implied Player Points</a>
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
-        {% if year %}
-            <p class="subtitle">Week {{ week }}, {{ year }} &mdash; Roof, Surface, Vegas Lines, Attendance</p>
+        {% if week %}
+            <p class="subtitle">{{ submitter }}'s Week {{ week }}, {{ year }} prop picks</p>
         {% else %}
-            <p class="subtitle">No game info data loaded yet.</p>
+            <p class="subtitle">No prop picks submitted yet.</p>
         {% endif %}
     </div>
     <div class="header-right">
@@ -46,9 +46,20 @@
 
 <main class="history-main">
 
-    {% if available_years %}
+{% if not available_years %}
+    <p class="empty-state">No prop picks have been submitted yet.</p>
+{% else %}
+
     <div class="page-controls">
-        <form class="history-selector" id="history-selector" method="GET" action="{{ url_for('gameinfo') }}">
+        <form class="history-selector" id="history-selector" method="GET" action="{{ url_for('my_props') }}">
+            <label>
+                Participant
+                <select name="submitter" onchange="this.form.submit()">
+                    {% for s in available_submitters %}
+                    <option value="{{ s }}" {% if s == submitter %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </label>
             <label>
                 Year
                 <select name="year" id="year-select">
@@ -66,59 +77,68 @@
                 </select>
             </label>
         </form>
-        <div class="download-actions">
-            <a href="{{ url_for('download_csv', data_type='gameinfo', year=year, week=week) }}" class="download-btn">⬇ Download This Week</a>
-            <a href="{{ url_for('download_csv', data_type='gameinfo') }}" class="download-btn download-btn-all">⬇ Download All Data</a>
-            <a href="{{ url_for('download_csv', data_type='gameinfo-by-team', year=year, week=week) }}" class="download-btn" title="One row per team instead of one per game — makes merging with History a direct match on year/week/team">⬇ Download for Merging with History</a>
-        </div>
     </div>
 
-    {% if games %}
+    {% if rows %}
     <div class="table-wrapper">
         <table id="history-table">
             <thead>
                 <tr>
-                    <th data-col="matchup">Matchup</th>
-                    <th data-col="date">Date/Time</th>
-                    <th data-col="location">Location</th>
-                    <th data-col="roof">Roof</th>
-                    <th data-col="surface">Surface</th>
-                    <th data-col="duration">Duration</th>
-                    <th data-col="attendance" class="right">Attendance</th>
-                    <th data-col="vegas_line">Vegas Line</th>
-                    <th data-col="over_under">O/U</th>
-                    <th data-col="temp">Temp</th>
-                    <th data-col="wind">Wind</th>
+                    <th>Player</th>
+                    <th>Stat</th>
+                    <th class="right">Line</th>
+                    <th>Pick</th>
+                    <th class="right">Actual</th>
+                    <th>Result</th>
                 </tr>
             </thead>
             <tbody>
-                {% for g in games %}
+                {% for r in rows %}
                 <tr>
-                    <td class="player-name">{{ g['team_away'] | upper }} @ {{ g['team_home'] | upper }}</td>
-                    <td>{{ g['date'] or '—' }} {{ g['time'] or '' }}</td>
-                    <td>{{ g['location'] or '—' }}</td>
-                    <td>{{ g['roof'] or '—' }}</td>
-                    <td>{{ g['surface'] or '—' }}</td>
-                    <td>{{ g['duration'] or '—' }}</td>
-                    <td class="right">{{ g['attendance'] or '—' }}</td>
-                    <td>{{ g['vegas_line'] or '—' }}</td>
-                    <td>{{ g['over_under'] or '—' }}</td>
-                    <td>{{ g['temp'] or '—' }}</td>
-                    <td>{{ g['wind'] or '—' }}</td>
+                    <td class="player-name">{{ r['player_name'] }}</td>
+                    <td>{{ r['stat_field'] }}</td>
+                    <td class="right">{{ r['line'] }}</td>
+                    <td>{{ r['pick'] | capitalize }}</td>
+                    <td class="right">{{ r['actual'] if r['actual'] is not none else '—' }}</td>
+                    <td>
+                        {% if r['result'] is none %}
+                            <span class="pending-week" title="Not yet scored">pending</span>
+                        {% elif r['result'] == 'push' %}
+                            <span title="Line landed exactly on the result">push</span>
+                        {% elif r['is_correct'] %}
+                            <strong style="color: #4caf50;">Correct</strong>
+                        {% else %}
+                            <span style="color: #f44336;">Incorrect</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5"><strong>Total Correct</strong></td>
+                    <td>
+                        {% if all_matched %}
+                            <strong>{{ total_correct }} / {{ rows | length }}</strong>
+                        {% else %}
+                            <span class="pending-week">pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tfoot>
         </table>
     </div>
-    {% else %}
-    <p class="empty-state">No games found for Week {{ week }}, {{ year }}.</p>
-    {% endif %}
-
-    {% else %}
-    <p class="empty-state">
-        No game info data loaded yet. Run <code>scrapers/scrape_pfr.py</code> (game info portion) then <code>flask load-history</code>.
+    {% if not all_matched %}
+    <p class="standings-note">
+        This week isn't fully scored yet — some games may not be finished, or the week's
+        results haven't been loaded. The total will appear once every pick has a result.
     </p>
     {% endif %}
+    {% else %}
+    <p class="empty-state">No prop picks found for {{ submitter }}, Week {{ week }}, {{ year }}.</p>
+    {% endif %}
+
+{% endif %}
 
 </main>
 
@@ -126,7 +146,6 @@
     window.HISTORY_WEEKS_BY_YEAR = {{ available_weeks_by_year | tojson }};
 </script>
 <script src="{{ url_for('static', filename='history.js') }}"></script>
-
 {% include '_info_modal.html' %}
 </body>
 </html>
