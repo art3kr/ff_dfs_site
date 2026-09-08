@@ -3977,8 +3977,14 @@ def props():
         # share the same (or effectively the same) timestamp — max()
         # here is just a safe way to pick one without assuming they're
         # all identical to the millisecond.
+        # str() wrap matches the exact same safeguard already used for
+        # existing_lineup.submitted_at in slate() — psycopg2 returns
+        # TIMESTAMP columns as real datetime objects, not strings, and
+        # this value gets sliced ([:16]) in the template, which
+        # crashes on a datetime object. Confirmed real: this exact
+        # crash reproduced without the str() wrap.
         if pick_rows:
-            props_submitted_at = max(r["submitted_at"] for r in pick_rows if r["submitted_at"])
+            props_submitted_at = str(max(r["submitted_at"] for r in pick_rows if r["submitted_at"]))
 
     return render_template("props.html",
                            prop_rows=prop_rows, year=sel_year, week=sel_week,
