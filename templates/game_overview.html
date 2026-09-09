@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Implied Team Points</title>
+    <title>FF DFS Challenge — Game Overview{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -18,7 +18,7 @@
             <a href="{{ url_for('my_props') }}" class="nav-link challenge-tab">My Props</a>
             <a href="{{ url_for('my_lineups') }}" class="nav-link challenge-tab">My Lineups</a>
             <a href="{{ url_for('history') }}" class="nav-link">History</a>
-            <a href="{{ url_for('game_overview') }}" class="nav-link">Game Overview</a>
+            <a href="{{ url_for('game_overview') }}" class="nav-link active">Game Overview</a>
             <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
             <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
             <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>
@@ -27,9 +27,13 @@
             <a href="{{ url_for('best_matchups') }}" class="nav-link">Best Matchups</a>
             <a href="{{ url_for('depth_charts') }}" class="nav-link">Depth Charts</a>
             <a href="{{ url_for('implied_points') }}" class="nav-link">Implied Player Points</a>
-            <a href="{{ url_for('implied_team_points') }}" class="nav-link active">Implied Team Points</a>
+            <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
-        <p class="subtitle">How many points each team is expected to score, derived from the spread and game total</p>
+        {% if week %}
+            <p class="subtitle">Week {{ week }}, {{ year }} — Vegas line, weather, and roof type for each game</p>
+        {% else %}
+            <p class="subtitle">No games loaded yet for the current week.</p>
+        {% endif %}
     </div>
     <div class="header-right">
         {% if current_user.is_authenticated %}
@@ -43,43 +47,48 @@
 
 <main class="history-main">
 
-{% if not rows %}
-    <p class="empty-state">No game odds loaded yet — run scrape_scoresandodds_game_odds.py then flask load-history.</p>
+{% if not games %}
+    <p class="empty-state">No games loaded yet for the current week — run the weather and game odds scrapers, then flask load-history.</p>
 {% else %}
-
-    <p class="standings-note">
-        Standard formula: implied total = (game O/U ÷ 2) − (spread ÷ 2). A negative spread means
-        favored, which raises the implied total; a positive spread lowers it. Both teams' implied
-        totals always add up to the game's O/U.
-    </p>
 
     <div class="table-wrapper">
         <table id="history-table">
             <thead>
                 <tr>
-                    <th>Team</th>
-                    <th>Opp</th>
+                    <th>Matchup</th>
+                    <th>Kickoff</th>
+                    <th>Roof</th>
+                    <th>Weather</th>
                     <th class="right">Spread</th>
                     <th class="right">O/U</th>
-                    <th class="right">Implied Total</th>
+                    <th>Favorite</th>
+                    <th class="right">Away Implied</th>
+                    <th class="right">Home Implied</th>
                 </tr>
             </thead>
             <tbody>
-                {% for r in rows %}
-                <tr
-                    {% if r['team'] in team_colors %}
-                    style="background: {{ team_colors[r['team']] }};"
-                    data-team-color="1"
-                    {% endif %}>
-                    <td class="player-name">{{ r['team'] | upper }}</td>
-                    <td>{{ r['opponent'] | upper if r['opponent'] else '—' }}</td>
-                    <td class="right">{{ r['spread'] if r['spread'] is not none else '—' }}</td>
-                    <td class="right">{{ r['over_under'] if r['over_under'] is not none else '—' }}</td>
-                    <td class="right">
-                        {% if r['implied_total'] is not none %}
-                        <strong>{{ "%.1f"|format(r['implied_total']) }}</strong>
+                {% for g in games %}
+                <tr>
+                    <td class="player-name">{{ g['away_team'] | upper }} @ {{ g['home_team'] | upper }}</td>
+                    <td>{{ g['game_date'] if g['game_date'] else '—' }}</td>
+                    <td>
+                        {% if g['roof_type'] == 'dome' %}
+                        <span class="roof-badge roof-dome">Dome</span>
+                        {% elif g['roof_type'] == 'outdoor' %}
+                        <span class="roof-badge roof-outdoor">Outdoor</span>
                         {% else %}—{% endif %}
                     </td>
+                    <td>
+                        {% if g['condition'] %}
+                            {{ g['condition'] }}{% if g['temp_f'] is not none %}, {{ g['temp_f'] }}&deg;F{% endif %}
+                            {% if g['wind_mph'] %}, {{ g['wind_mph'] }}mph {{ g['wind_direction'] }}{% endif %}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="right">{{ g['spread'] if g['spread'] is not none else '—' }}</td>
+                    <td class="right">{{ g['over_under'] if g['over_under'] is not none else '—' }}</td>
+                    <td>{{ g['favorite'] | upper if g['favorite'] else '—' }}</td>
+                    <td class="right">{{ "%.1f"|format(g['away_implied']) if g['away_implied'] is not none else '—' }}</td>
+                    <td class="right">{{ "%.1f"|format(g['home_implied']) if g['home_implied'] is not none else '—' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

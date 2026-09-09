@@ -4248,6 +4248,80 @@ def schedule():
                            year=sel_year, available_years=available_years)
 
 
+@app.route("/game-overview")
+def game_overview():
+    """
+    "Lay of the land" for each of this week's games in one place —
+    Vegas line, weather, and roof type — since answering "what's the
+    line, what's the weather, dome or outside" currently means
+    checking three separate tabs. Always shows the current week only
+    (no year/week selector), same reasoning as Slate/Props: game_odds
+    itself has no history at all (it's a live, full-replace table),
+    so a selector would only ever have one real option anyway.
+
+    Vegas line comes from game_odds (live, pre-game), NOT
+    hist_game_info's own vegas_line/over_under columns — those are
+    confirmed post-game only (PFR's boxscore pages don't populate
+    until a game is complete), which would show nothing for the
+    upcoming week this page is actually meant for. Roof type uses the
+    same static TEAM_ROOF_TYPE lookup as Best Matchups, for the same
+    reason: it's a fixed per-stadium fact, not something that needs
+    scraping or that a post-game source has to be relied upon for.
+    """
+    current_year, current_week = _get_current_nfl_week()
+    if current_year is None:
+        return render_template("game_overview.html", games=[], year=None, week=None)
+
+    ph = _ph()
+    weather_rows = db_fetchall(f"""
+        SELECT away_team, home_team, game_date, status, temp_f, condition, wind_mph, wind_direction
+        FROM hist_weather
+        WHERE year = {ph} AND week = {ph}
+        ORDER BY game_date
+    """, (current_year, current_week))
+
+    game_odds_rows = db_fetchall("SELECT team, opponent, spread, over_under, favorite FROM game_odds")
+    odds_by_team = {r["team"]: r for r in game_odds_rows}
+
+    games = []
+    for w in weather_rows:
+        home_odds = odds_by_team.get(w["home_team"])
+        away_odds = odds_by_team.get(w["away_team"])
+
+        home_implied = _compute_implied_team_total(
+            home_odds["spread"] if home_odds else None,
+            home_odds["over_under"] if home_odds else None,
+        )
+        away_implied = _compute_implied_team_total(
+            away_odds["spread"] if away_odds else None,
+            away_odds["over_under"] if away_odds else None,
+        )
+
+        # Either team's row has the same spread/O-U from that game's
+        # perspective (opposite sign on spread) - home's is used as
+        # "the" display value, arbitrarily but consistently.
+        spread = home_odds["spread"] if home_odds else None
+        over_under = None
+        if home_odds and home_odds["over_under"]:
+            try:
+                over_under = float(str(home_odds["over_under"]).lstrip('ou'))
+            except ValueError:
+                pass
+        favorite = home_odds["favorite"] if home_odds else None
+
+        games.append({
+            "away_team": w["away_team"], "home_team": w["home_team"],
+            "game_date": w["game_date"], "status": w["status"],
+            "roof_type": TEAM_ROOF_TYPE.get(w["home_team"]),
+            "temp_f": w["temp_f"], "condition": w["condition"],
+            "wind_mph": w["wind_mph"], "wind_direction": w["wind_direction"],
+            "spread": spread, "over_under": over_under, "favorite": favorite,
+            "away_implied": away_implied, "home_implied": home_implied,
+        })
+
+    return render_template("game_overview.html", games=games, year=current_year, week=current_week)
+
+
 @app.route("/weather")
 def weather():
     """
