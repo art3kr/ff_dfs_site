@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Fantasy Points Against{% if year %} — {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge — Usage{% if year %} — {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -22,8 +22,8 @@
             <a href="{{ url_for('weather') }}" class="nav-link">Weather</a>
             <a href="{{ url_for('gameinfo') }}" class="nav-link">Game Info</a>
             <a href="{{ url_for('schedule') }}" class="nav-link">Schedule</a>
-            <a href="{{ url_for('fantasy_points_against') }}" class="nav-link active">Fantasy Pts Against</a>
-            <a href="{{ url_for('usage') }}" class="nav-link">Usage</a>
+            <a href="{{ url_for('fantasy_points_against') }}" class="nav-link">Fantasy Pts Against</a>
+            <a href="{{ url_for('usage') }}" class="nav-link active">Usage</a>
             <a href="{{ url_for('team_points') }}" class="nav-link">Team Points</a>
             <a href="{{ url_for('best_matchups') }}" class="nav-link">Best Matchups</a>
             <a href="{{ url_for('depth_charts') }}" class="nav-link">Depth Charts</a>
@@ -31,7 +31,7 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if year %}
-            <p class="subtitle">{{ year }} Season &mdash; How many fantasy points each team gives up to each position</p>
+            <p class="subtitle">{{ year }} Season &mdash; Target share and touch share of each player's own team</p>
         {% else %}
             <p class="subtitle">No data loaded yet.</p>
         {% endif %}
@@ -49,14 +49,11 @@
 <main class="history-main">
 
 {% if not available_years %}
-    <p class="empty-state">
-        No data loaded yet. Run <code>scrapers/scrape_fantasy_points_against.py --year YYYY</code>
-        then <code>flask load-history</code>.
-    </p>
+    <p class="empty-state">No data loaded yet.</p>
 {% else %}
 
     <div class="page-controls">
-        <form class="history-selector" method="GET" action="{{ url_for('fantasy_points_against') }}">
+        <form class="history-selector" method="GET" action="{{ url_for('usage') }}">
             <label>
                 Season
                 <select name="year" onchange="this.form.submit()">
@@ -67,16 +64,11 @@
             </label>
             <input type="hidden" name="position" value="{{ position }}">
         </form>
-        <div class="download-actions">
-            <a href="{{ url_for('download_csv', data_type='fantasy-points-against', year=year, position=position) }}" class="download-btn">⬇ Download This Season</a>
-            <a href="{{ url_for('download_csv', data_type='fantasy-points-against') }}" class="download-btn download-btn-all">⬇ Download All Data</a>
-        </div>
     </div>
 
     <div class="filter-bar">
         <span class="filter-label">Position:</span>
         <a href="?year={{ year }}&position=ALL" class="filter-btn {% if position == 'ALL' %}active{% endif %}">All</a>
-        <a href="?year={{ year }}&position=QB" class="filter-btn {% if position == 'QB' %}active{% endif %}">QB</a>
         <a href="?year={{ year }}&position=RB" class="filter-btn {% if position == 'RB' %}active{% endif %}">RB</a>
         <a href="?year={{ year }}&position=WR" class="filter-btn {% if position == 'WR' %}active{% endif %}">WR</a>
         <a href="?year={{ year }}&position=TE" class="filter-btn {% if position == 'TE' %}active{% endif %}">TE</a>
@@ -87,13 +79,14 @@
         <table id="history-table">
             <thead>
                 <tr>
-                    <th data-col="position">Pos</th>
-                    <th data-col="team">Team</th>
-                    <th data-col="games"    class="right">G</th>
-                    <th data-col="dk_pg"    class="right">DK Pts/G</th>
-                    <th data-col="dk_total" class="right">DK Pts (Season)</th>
-                    <th data-col="fd_pg"    class="right">FD Pts/G</th>
-                    <th data-col="fantasy_pg" class="right">FantPt/G</th>
+                    <th>Pos</th>
+                    <th>Player</th>
+                    <th>Team</th>
+                    <th class="right">G</th>
+                    <th class="right">Tgt/G</th>
+                    <th class="right">Touch/G</th>
+                    <th class="right" title="Player's targets divided by their team's total targets this season">Tgt % of Team</th>
+                    <th class="right" title="Player's touches (rush att + rec) divided by their team's total touches this season">Touch % of Team</th>
                 </tr>
             </thead>
             <tbody>
@@ -104,20 +97,22 @@
                     data-team-color="1"
                     {% endif %}>
                     <td class="pos-badge">{{ r['position'] }}</td>
-                    <td class="player-name">{{ r['team'] | upper }}</td>
+                    <td class="player-name">{{ r['name'] }}</td>
+                    <td>{{ r['team'] | upper }}</td>
                     <td class="right">{{ r['games'] }}</td>
-                    <td class="right"><strong>{{ "%.1f"|format(r['dk_pts_per_game']) if r['dk_pts_per_game'] is not none else '—' }}</strong></td>
-                    <td class="right">{{ "%.1f"|format(r['dk_pts']) if r['dk_pts'] is not none else '—' }}</td>
-                    <td class="right">{{ "%.1f"|format(r['fd_pts_per_game']) if r['fd_pts_per_game'] is not none else '—' }}</td>
-                    <td class="right">{{ "%.1f"|format(r['fantasy_pts_per_game']) if r['fantasy_pts_per_game'] is not none else '—' }}</td>
+                    <td class="right">{{ r['targets_per_game'] }}</td>
+                    <td class="right">{{ r['touches_per_game'] }}</td>
+                    <td class="right"><strong>{{ r['target_share'] if r['target_share'] is not none else '—' }}%</strong></td>
+                    <td class="right">{{ r['touch_share'] if r['touch_share'] is not none else '—' }}%</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     <p class="standings-note">
-        Higher DK Pts/G allowed = softer matchup for that position against that defense.
-        Sorted by DK Pts/G allowed, highest (most exploitable) first.
+        "% of Team" is share of that player's own team's season total, NOT a share of snaps
+        played (a different, also common definition other sites use — we don't have snap
+        count data yet). Sorted by target share, highest first.
     </p>
     {% else %}
     <p class="empty-state">No data found for {{ year }}{% if position != 'ALL' %} ({{ position }}){% endif %}.</p>

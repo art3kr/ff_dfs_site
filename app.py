@@ -2971,6 +2971,87 @@ def player_career(pfr_id):
                            games=games, career_totals=totals)
 
 
+@app.route("/usage")
+def usage():
+    """
+    Season-to-date target share and touch share per player: a
+    player's own targets/touches divided by their TEAM's total for
+    the season, not a share of snaps played (which would need real
+    snap count data — not scraped yet, see the README's Future Ideas
+    section). This is a genuinely different, also standard metric
+    (the one FantasyPros' own "Tgt %"/"Rush %" reports are NOT this —
+    those use snaps as the denominator), so the column headers spell
+    out "of team" specifically rather than implying the two are the
+    same thing.
+
+    Touch share denominator (team's total rush_att + rec) includes
+    every position, not just RB/WR/TE — a QB's own rushes are still
+    real team touches, and excluding them would overstate everyone
+    else's actual share of the offense.
+    """
+    ph = _ph()
+
+    available_years = [r["year"] for r in db_fetchall(
+        "SELECT DISTINCT year FROM hist_player_stats ORDER BY year DESC"
+    )]
+    if not available_years:
+        return render_template("usage.html", rows=[], year=None, position="ALL",
+                               available_years=[], team_colors=TEAM_ROW_COLORS)
+
+    req_year = request.args.get("year", type=int)
+    sel_year = req_year if req_year in available_years else available_years[0]
+    sel_position = request.args.get("position", "ALL")
+
+    # Team totals for the season - the shared denominator every
+    # player's own share gets divided by.
+    team_totals_rows = db_fetchall(f"""
+        SELECT team,
+               SUM(COALESCE(rec_tgt, 0)) AS team_targets,
+               SUM(COALESCE(rush_att, 0) + COALESCE(rec, 0)) AS team_touches
+        FROM hist_player_stats
+        WHERE year = {ph}
+        GROUP BY team
+    """, (sel_year,))
+    team_totals = {r["team"]: r for r in team_totals_rows}
+
+    position_filter = "" if sel_position == "ALL" else f"AND position = {ph}"
+    params = (sel_year,) if sel_position == "ALL" else (sel_year, sel_position)
+
+    player_rows = db_fetchall(f"""
+        SELECT name, position, team,
+               SUM(COALESCE(rec_tgt, 0)) AS targets,
+               SUM(COALESCE(rush_att, 0) + COALESCE(rec, 0)) AS touches,
+               COUNT(*) AS games
+        FROM hist_player_stats
+        WHERE year = {ph} AND position IN ('RB', 'WR', 'TE') {position_filter}
+        GROUP BY name, position, team
+        HAVING games > 0
+    """, params)
+
+    rows = []
+    for p in player_rows:
+        team_total = team_totals.get(p["team"])
+        target_share = None
+        touch_share = None
+        if team_total and team_total["team_targets"]:
+            target_share = round(100 * p["targets"] / team_total["team_targets"], 1)
+        if team_total and team_total["team_touches"]:
+            touch_share = round(100 * p["touches"] / team_total["team_touches"], 1)
+
+        rows.append({
+            "name": p["name"], "position": p["position"], "team": p["team"],
+            "games": p["games"], "targets": p["targets"], "touches": p["touches"],
+            "target_share": target_share, "touch_share": touch_share,
+            "targets_per_game": round(p["targets"] / p["games"], 1),
+            "touches_per_game": round(p["touches"] / p["games"], 1),
+        })
+
+    rows.sort(key=lambda r: r["target_share"] if r["target_share"] is not None else -1, reverse=True)
+
+    return render_template("usage.html", rows=rows, year=sel_year, position=sel_position,
+                           available_years=available_years, team_colors=TEAM_ROW_COLORS)
+
+
 @app.route("/fantasy-points-against")
 def fantasy_points_against():
     """
