@@ -559,6 +559,22 @@ def _auto_init():
             CREATE INDEX IF NOT EXISTS idx_player_injuries_name
                 ON player_injuries (player_name_normalized)
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS firstdown_studio_rankings (
+                id                      SERIAL PRIMARY KEY,
+                player_name             TEXT NOT NULL,
+                player_name_normalized  TEXT NOT NULL,
+                team                    TEXT,
+                position                TEXT,
+                pts                     REAL,
+                updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(player_name_normalized)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_firstdown_studio_rankings_name
+                ON firstdown_studio_rankings (player_name_normalized)
+        """)
         cur.execute("SELECT pg_advisory_unlock(918273645)")
     else:
         # SQLite: executescript for multi-statement init
@@ -830,6 +846,18 @@ def _auto_init():
             );
             CREATE INDEX IF NOT EXISTS idx_player_injuries_name
                 ON player_injuries (player_name_normalized);
+            CREATE TABLE IF NOT EXISTS firstdown_studio_rankings (
+                id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_name             TEXT NOT NULL,
+                player_name_normalized  TEXT NOT NULL,
+                team                    TEXT,
+                position                TEXT,
+                pts                     REAL,
+                updated_at              TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(player_name_normalized)
+            );
+            CREATE INDEX IF NOT EXISTS idx_firstdown_studio_rankings_name
+                ON firstdown_studio_rankings (player_name_normalized);
         """)
         _migrate_hist_player_stats_sqlite(conn)
         _migrate_table_sqlite(conn, "game_schedule", GAME_SCHEDULE_MIGRATIONS)
@@ -1689,8 +1717,12 @@ def load_schedule_command(year):
               help="Only load player injury statuses, skip everything else — for "
                    "frequent re-runs as statuses change day to day, without waiting "
                    "on the much slower full load.")
+@click.option("--firstdown-only", is_flag=True,
+              help="Only load FirstDown Studio's rankings, skip everything else — for "
+                   "frequent re-runs as their numbers update through the week, without "
+                   "waiting on the much slower full load.")
 @click.option("--batch-size", default=1000, type=int, help="Rows per bulk-insert batch.")
-def load_history_command(data_dir, salaries_only, stats_only, weather_only, props_only, injuries_only, batch_size):
+def load_history_command(data_dir, salaries_only, stats_only, weather_only, props_only, injuries_only, firstdown_only, batch_size):
     """
     Load the historical .csv.gz files produced by the scrapers into
     hist_dfs_salaries and hist_player_stats.
@@ -1725,7 +1757,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
     # True only when no "-only" flag was passed — an unscoped run loads
     # everything, same as before these flags existed. Any "-only" flag
     # narrows to just its own section(s).
-    run_all = not (salaries_only or stats_only or weather_only or props_only or injuries_only)
+    run_all = not (salaries_only or stats_only or weather_only or props_only or injuries_only or firstdown_only)
 
     conn = _connect()
     cur  = _cursor(conn)
@@ -2267,6 +2299,66 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             inserted += len(batch)
         return inserted
 
+    def replace_firstdown_studio_rankings(df: pd.DataFrame):
+        """
+        Full replace, not upsert at the table level — same reasoning
+        as the other live/current-week-only sources: this reflects
+        whatever FirstDown Studio's rankings currently show, not a
+        historical record.
+
+        Uses ON CONFLICT DO UPDATE for the row-by-row inserts, same
+        lesson learned from a real UniqueViolation crash on
+        scoresandodds_props: even though a duplicate
+        player_name_normalized shouldn't normally happen here (one row
+        per player), a plain INSERT lets any single bad/duplicate row
+        take down the entire load rather than gracefully overwriting.
+        """
+        cur.execute("DELETE FROM firstdown_studio_rankings")
+        conn.commit()
+
+        if _is_postgres():
+            sql = f"""
+                INSERT INTO firstdown_studio_rankings
+                    (player_name, player_name_normalized, team, position, pts)
+                VALUES ({_ph(5)})
+                ON CONFLICT (player_name_normalized) DO UPDATE SET
+                    player_name = EXCLUDED.player_name,
+                    team        = EXCLUDED.team,
+                    position    = EXCLUDED.position,
+                    pts         = EXCLUDED.pts
+            """
+        else:
+            sql = f"""
+                INSERT INTO firstdown_studio_rankings
+                    (player_name, player_name_normalized, team, position, pts)
+                VALUES ({_ph(5)})
+                ON CONFLICT(player_name_normalized) DO UPDATE SET
+                    player_name = excluded.player_name,
+                    team        = excluded.team,
+                    position    = excluded.position,
+                    pts         = excluded.pts
+            """
+
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            name = str(r.get('player_name', ''))
+            batch.append((
+                name, str(r.get('player_name_normalized', normalize_name(name))),
+                _none_if_nan(r.get('team')), _none_if_nan(r.get('position')),
+                _float_or_none(r.get('pts')),
+            ))
+            if len(batch) >= batch_size:
+                cur.executemany(sql, batch)
+                conn.commit()
+                inserted += len(batch)
+                batch = []
+        if batch:
+            cur.executemany(sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
     def upsert_weather(df: pd.DataFrame):
         if _is_postgres():
             sql = f"""
@@ -2547,6 +2639,19 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             df = pd.read_csv(injuries_path)
             count = replace_player_injuries(df)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(injuries_path)} (full replace)")
+
+    # --- Load FirstDown Studio's Vegas-derived rankings (comparison
+    # column on Implied Player Points) — same full-replace reasoning
+    # as above ---
+    if run_all or firstdown_only:
+        fds_path = os.path.join(data_dir, "firstdown_studio_rankings.csv.gz")
+        if not os.path.exists(fds_path):
+            click.echo(f"Skip (not found): {fds_path}")
+        else:
+            click.echo(f"Loading {fds_path} ...")
+            df = pd.read_csv(fds_path)
+            count = replace_firstdown_studio_rankings(df)
+            click.echo(f"  Done: {count:,} rows from {os.path.basename(fds_path)} (full replace)")
 
     cur.close()
     conn.close()
@@ -3228,6 +3333,18 @@ def _compute_implied_points_table(sel_year: int, sel_week: int) -> list:
     depth_chart_lookup = _get_depth_chart_lookup(names_normalized)
     STRING_LABELS = {1: "1st", 2: "2nd", 3: "3rd"}
 
+    # FirstDown Studio's own Vegas-derived Pts estimate — a comparison
+    # point, not a replacement. Their number appears to include an
+    # anytime-TD contribution ours deliberately excludes (see
+    # _compute_implied_points()'s own docstring for why), so the two
+    # numbers diverging is often exactly where that gap shows up.
+    fds_rows = db_fetchall(f"""
+        SELECT player_name_normalized, pts
+        FROM firstdown_studio_rankings
+        WHERE player_name_normalized IN ({placeholders})
+    """, tuple(names_normalized))
+    fds_pts_by_player = {r["player_name_normalized"]: r["pts"] for r in fds_rows}
+
     rows = []
     for p in slate:
         name_norm = normalize_name(p["name"])
@@ -3245,6 +3362,7 @@ def _compute_implied_points_table(sel_year: int, sel_week: int) -> list:
             "implied_points": implied_pts if has_data else None,
             "value": value,
             "categories_used": categories_used,
+            "firstdown_studio_pts": fds_pts_by_player.get(name_norm),
         })
 
     rows.sort(key=lambda r: r["implied_points"] if r["implied_points"] is not None else -1, reverse=True)

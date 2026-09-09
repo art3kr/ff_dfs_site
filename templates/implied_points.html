@@ -66,7 +66,11 @@
         are excluded entirely (that stat mixes two different scoring rates that can't be safely
         split apart). Both mean these totals are real underestimates for players who score
         touchdowns or have a lot of that combined prop specifically. A dash means no usable prop
-        data was found for that player at all.
+        data was found for that player at all. <strong>FDS Pts</strong> is FirstDown Studio's own
+        Vegas-derived estimate, shown as a comparison point — their number appears to include a
+        touchdown estimate ours doesn't, so a big gap between the two often shows up specifically
+        for touchdown-heavy players. It's a third-party, opaque calculation, not something we can
+        verify the internals of.
     </p>
 
     {% if rows %}
@@ -81,6 +85,7 @@
                     <th>Opp</th>
                     <th class="right">Salary</th>
                     <th class="right">Implied Pts</th>
+                    <th class="right" title="FirstDown Studio's own Vegas-derived estimate — a third-party comparison, not our own calculation">FDS Pts</th>
                     <th class="right">Value</th>
                 </tr>
             </thead>
@@ -98,6 +103,7 @@
                             <strong title="From: {{ r['categories_used'] | join(', ') }}">{{ "%.1f"|format(r['implied_points']) }}</strong>
                         {% else %}—{% endif %}
                     </td>
+                    <td class="right">{{ "%.1f"|format(r['firstdown_studio_pts']) if r['firstdown_studio_pts'] is not none else '—' }}</td>
                     <td class="right">{{ "%.2f"|format(r['value']) if r['value'] is not none else '—' }}</td>
                 </tr>
                 {% endfor %}
