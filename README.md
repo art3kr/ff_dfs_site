@@ -209,13 +209,22 @@ skip straight to that workflow's Step 2.
 
 Notes on data sources worth revisiting later, not committed to yet.
 
-### FirstDown Studio weekly implied points
-Currently only scraping season-long FirstDown Studio data
-(`scrape_firstdown_studio.py`). Once the season is underway, FirstDown
-Studio may also expose week-by-week implied point totals per player —
-worth checking whether that's live yet, and if so, whether it's worth
-a standalone tab or folding into the existing Implied Points page
-alongside the scoresandodds-derived numbers.
+### Live DK fantasy scoring during games
+Everything currently scores from `hist_player_stats`, which is
+post-game only (PFR's boxscore pages don't populate until a game is
+complete). ESPN runs a free, unauthenticated JSON API
+(`site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event={id}`)
+that exposes box score stats *during* games, which could feed live DK
+point totals using the same scoring formula already documented in the
+site's own info modal.
+
+Confirmed real and free — genuinely possible — but a bigger lift than
+it sounds: needs an actual polling mechanism running repeatedly during
+game windows (not a one-time weekly scrape like everything else here),
+a separate live-stats table, and changes to the scoring logic itself
+so My Lineups/Standings know to show live vs. final data. Closer to a
+new subsystem than an added column. Revisit if live tracking becomes
+a real priority.
 
 ### FantasyPros projections
 https://www.fantasypros.com/nfl/projections/qb.php (and the equivalent
