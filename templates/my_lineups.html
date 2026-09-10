@@ -96,9 +96,12 @@
             </thead>
             <tbody>
                 {% for r in rows %}
-                <tr>
+                <tr {% if r['is_locked'] %}class="locked-row"{% endif %}>
                     <td class="pos-badge">{{ r['slot'] }}</td>
-                    <td class="player-name">{{ r['name'] }}</td>
+                    <td class="player-name">
+                        {{ r['name'] }}
+                        {% if r['is_locked'] %}<span class="locked-badge">LOCKED</span>{% endif %}
+                    </td>
                     <td>{{ r['position'] }}</td>
                     <td class="right">${{ "{:,}".format(r['salary']) if r['salary'] else '—' }}</td>
                     <td class="right">{{ "%.1f"|format(r['projected_pts']) if r['projected_pts'] else '—' }}</td>

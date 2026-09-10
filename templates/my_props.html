@@ -96,8 +96,11 @@
             </thead>
             <tbody>
                 {% for r in rows %}
-                <tr>
-                    <td class="player-name">{{ r['player_name'] }}</td>
+                <tr {% if r['is_locked'] %}class="locked-row"{% endif %}>
+                    <td class="player-name">
+                        {{ r['player_name'] }}
+                        {% if r['is_locked'] %}<span class="locked-badge">LOCKED</span>{% endif %}
+                    </td>
                     <td>{{ r['stat_field'] }}</td>
                     <td class="right">{{ r['line'] }}</td>
                     <td>{{ r['pick'] | capitalize }}</td>

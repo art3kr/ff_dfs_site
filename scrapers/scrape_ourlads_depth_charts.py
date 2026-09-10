@@ -26,14 +26,37 @@ Structure confirmed via live diagnostic (Sept 2026):
     WR list — preserved as-is rather than artificially collapsed,
     since it's more useful this way (shows who starts at each specific
     WR spot) — flagged as a design choice, not assumed silently
+  - Injury status: confirmed real via a targeted check against Brock
+    Bowers (TE, LV — confirmed currently injured) — his player <a> tag
+    carries class="lc_red", while healthy players nearby have
+    class="". This is a BINARY flag only — Ourlads' HTML doesn't
+    distinguish Questionable/Doubtful/Out/IR anywhere we can see, just
+    "flagged red" or not. Treated as "out" specifically per the
+    original report of what this means, but that's an assumption
+    based on what was described, not something independently confirmed
+    from the page itself — if it turns out to mean something broader
+    (e.g. "banged up" generally), this mapping should be revisited.
+    Two other color classes were seen on an unrelated page (lc_gold,
+    lc_purple) that turned out to mean a recent trade and a rookie
+    draft class respectively, NOT injury status — only lc_red is
+    treated as injury-related here, nothing else.
 
 Team list (all 32 URL slugs) taken directly from ourlads' own
 navigation sidebar, confirmed via live fetch — not guessed. Two of
 these (ARZ, RAM) are ourlads-specific quirks different from every
 other source in this project; added as new team_mapping aliases.
 
-Output: data/ourlads_depth_charts.csv.gz
-  Columns: team, pos, string_rank, player_name, ourlads_player_id
+Output:
+  data/ourlads_depth_charts.csv.gz
+    Columns: team, pos, string_rank, player_name, ourlads_player_id
+  data/ourlads_injuries.csv.gz
+    Columns: player_name, player_name_normalized, team, position, status
+    (same shape as draftedge_injuries.csv.gz, so both can load into
+    the same player_injuries table) — only injured (lc_red) players
+    appear here at all, one row per team's Offense table only (same
+    positions as the depth chart itself; Ourlads' injury marking on
+    Defense/Special Teams isn't captured since this scraper doesn't
+    read those tables)
 
 Usage:
     python scrapers/scrape_ourlads_depth_charts.py
@@ -51,9 +74,10 @@ from bs4 import BeautifulSoup
 sys.path.insert(0, os.path.dirname(__file__))
 from team_mapping import normalize_team
 
-DATA_DIR    = os.path.join(os.path.dirname(__file__), '..', 'data')
-OUTPUT_FILE = os.path.join(DATA_DIR, 'ourlads_depth_charts.csv.gz')
-SLEEP_SEC   = 2.0
+DATA_DIR         = os.path.join(os.path.dirname(__file__), '..', 'data')
+OUTPUT_FILE      = os.path.join(DATA_DIR, 'ourlads_depth_charts.csv.gz')
+INJURIES_FILE    = os.path.join(DATA_DIR, 'ourlads_injuries.csv.gz')
+SLEEP_SEC        = 2.0
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
@@ -80,7 +104,12 @@ OURLADS_TEAMS = [
 # table. WR is 3 distinct slots there, not one generic list.
 WANTED_POSITIONS = {'QB', 'RB', 'TE', 'LWR', 'RWR', 'SWR'}
 
+# Confirmed real via a targeted check against Brock Bowers (see module
+# docstring) — only this class is treated as injury-related.
+INJURY_CLASS = 'lc_red'
+
 OUT_COLUMNS = ['team', 'pos', 'string_rank', 'player_name', 'ourlads_player_id']
+INJURY_COLUMNS = ['player_name', 'player_name_normalized', 'team', 'position', 'status']
 
 
 def _parse_player_name(raw_link_text: str) -> str:
@@ -105,6 +134,10 @@ def _parse_player_name(raw_link_text: str) -> str:
     return f"{first_name} {last_name}".strip()
 
 
+def normalize_name(name: str) -> str:
+    return re.sub(r"[^a-z0-9 ]", "", name.lower().strip())
+
+
 def _find_offense_table(soup):
     """
     No id/class distinguishes the Offense table from Defense/Special
@@ -122,32 +155,34 @@ def _find_offense_table(soup):
     return None
 
 
-def scrape_team(ourlads_slug: str) -> list[dict]:
+def scrape_team(ourlads_slug: str) -> tuple:
+    """Returns (depth_chart_records, injury_records) for one team."""
     url = f"https://www.ourlads.com/nfldepthcharts/depthchart/{ourlads_slug}"
     print(f"  Fetching {url}")
     try:
         r = requests.get(url, headers=HEADERS, timeout=15)
     except requests.RequestException as e:
         print(f"    Request error: {e}")
-        return []
+        return [], []
 
     if r.status_code != 200:
         print(f"    HTTP {r.status_code}")
-        return []
+        return [], []
 
     soup = BeautifulSoup(r.content, 'html.parser')
     table = _find_offense_table(soup)
     if not table:
         print(f"    Couldn't find the Offense table (heading text may have changed)")
-        return []
+        return [], []
 
     team = normalize_team(ourlads_slug)
     if not team:
         print(f"    WARNING: couldn't normalize team slug '{ourlads_slug}' — skipping entirely")
-        return []
+        return [], []
 
     rows = table.find_all('tr')
     records = []
+    injury_records = []
 
     for row in rows[1:]:   # skip header row
         cells = row.find_all('td')
@@ -173,27 +208,40 @@ def scrape_team(ourlads_slug: str) -> list[dict]:
 
             player_id_match = re.search(r'/player/(\d+)/', link.get('href', ''))
             player_id = player_id_match.group(1) if player_id_match else None
+            player_name = _parse_player_name(raw_text)
 
             records.append({
                 'team': team,
                 'pos': pos,
                 'string_rank': rank,
-                'player_name': _parse_player_name(raw_text),
+                'player_name': player_name,
                 'ourlads_player_id': player_id,
             })
 
-    print(f"    {len(records)} depth chart entries parsed")
-    return records
+            link_classes = link.get('class') or []
+            if INJURY_CLASS in link_classes:
+                injury_records.append({
+                    'player_name': player_name,
+                    'player_name_normalized': normalize_name(player_name),
+                    'team': team,
+                    'position': pos,
+                    'status': 'out',
+                })
+
+    print(f"    {len(records)} depth chart entries parsed, {len(injury_records)} flagged injured")
+    return records, injury_records
 
 
 def main():
     os.makedirs(DATA_DIR, exist_ok=True)
     all_records = []
+    all_injuries = []
 
     for slug in OURLADS_TEAMS:
         print(f"\n{slug}:")
-        records = scrape_team(slug)
+        records, injuries = scrape_team(slug)
         all_records.extend(records)
+        all_injuries.extend(injuries)
         time.sleep(SLEEP_SEC)
 
     if not all_records:
@@ -209,6 +257,12 @@ def main():
     if teams_found < len(OURLADS_TEAMS):
         missing = set(normalize_team(t) for t in OURLADS_TEAMS) - set(df['team'].unique())
         print(f"Missing teams: {missing}")
+
+    injuries_df = pd.DataFrame(all_injuries, columns=INJURY_COLUMNS)
+    injuries_df.to_csv(INJURIES_FILE, index=False, compression='gzip')
+    print(f"\nSaved {len(injuries_df)} injury rows -> {INJURIES_FILE}")
+    if not injuries_df.empty:
+        print(injuries_df.to_string(index=False))
 
     print(f"\nSample — Buffalo's depth chart:")
     print(df[df['team'] == 'buf'].to_string(index=False))

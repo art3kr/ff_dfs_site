@@ -114,7 +114,25 @@ def scrape() -> pd.DataFrame:
         print(f"  Skipped statuses not requested: {skipped_status}")
     print(f"  {len(records)} rows kept (Out/Doubtful/Questionable/IR)")
 
-    return pd.DataFrame(records)
+    result = pd.DataFrame(records)
+
+    # Confirmed real concern: if the source page ever lists the same
+    # player twice with different statuses (a stale cached row
+    # alongside a fresh one, a mid-week update not fully replacing the
+    # old entry, etc.), both would silently end up here, and whichever
+    # one loads last into the DB wins — not necessarily the correct
+    # one. Surfacing this explicitly rather than letting it pass
+    # silently, since a mismatched status is exactly the kind of thing
+    # that's easy to not notice until someone checks the site directly.
+    if not result.empty:
+        dupes = result[result.duplicated(subset=['player_name_normalized'], keep=False)]
+        if not dupes.empty:
+            print(f"\n*** WARNING: {dupes['player_name_normalized'].nunique()} player(s) appear "
+                  f"more than once with possibly different statuses — the loader will keep "
+                  f"whichever one loads last, which may not be the correct/current one: ***")
+            print(dupes.sort_values('player_name_normalized').to_string(index=False))
+
+    return result
 
 
 def main():

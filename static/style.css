@@ -685,9 +685,12 @@ header {
    Per-game lineup lock (once a team's kickoff has passed)
    ----------------------------------------------------------------------- */
 
-#slate-table tbody tr.locked-row {
+#slate-table tbody tr.locked-row,
+#history-table tbody tr.locked-row {
     opacity: 0.45;
-    cursor: not-allowed;
+}
+#slate-table tbody tr.locked-row {
+    cursor: not-allowed;   /* Slate-specific: a locked row can't be clicked to select */
 }
 
 #slate-table tbody tr.locked-row.selected {
@@ -1229,3 +1232,18 @@ header {
 }
 .injury-badge.injury-q   { background: rgba(230, 200, 20, 0.25); color: #e6c814; }
 .injury-badge.injury-red { background: rgba(244, 67, 54, 0.2);   color: #f44336; }
+
+/* -----------------------------------------------------------------------
+   Props — disabled pick buttons + sign-in prompt for logged-out visitors
+   ----------------------------------------------------------------------- */
+
+.prop-pick-btn[disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.prop-signin-prompt {
+    margin: 6px 0 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+.prop-signin-prompt a { color: var(--accent); }

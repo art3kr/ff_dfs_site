@@ -53,6 +53,13 @@
 {% else %}
 
     {% if prop_rows %}
+    <div class="page-controls">
+        <span></span>
+        <div class="download-actions">
+            <a href="{{ url_for('download_csv', data_type='props') }}" class="download-btn">⬇ Download</a>
+        </div>
+    </div>
+
     {% if current_user.is_authenticated %}
     <div class="props-picker-bar">
         <span id="props-count">0 / 5 selected</span>
@@ -84,6 +91,12 @@
                 <button class="prop-pick-btn {% if existing_pick == 'over' %}selected{% endif %}" data-pick="over">Over</button>
                 <button class="prop-pick-btn {% if existing_pick == 'under' %}selected{% endif %}" data-pick="under">Under</button>
             </div>
+            {% else %}
+            <div class="prop-pick-buttons">
+                <button class="prop-pick-btn" disabled>Over</button>
+                <button class="prop-pick-btn" disabled>Under</button>
+            </div>
+            <p class="prop-signin-prompt"><a href="{{ url_for('login') }}">Sign in</a> to make a pick</p>
             {% endif %}
             {% if score and score['result'] %}
             <div class="prop-result prop-result-{{ score['result'] }}">

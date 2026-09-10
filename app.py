@@ -2273,21 +2273,95 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
 
     def replace_player_injuries(df: pd.DataFrame):
         """
-        Full replace, not upsert — same reasoning as depth_charts,
-        game_odds, and scoresandodds_props: injury status changes day
-        to day, so a stale row shouldn't linger once a fresher scrape
-        has run. One row per player (a player only has one current
-        status at a time, unlike props where the same player can have
-        many rows across different categories).
+        Full replace, not upsert at the table level — same reasoning
+        as depth_charts, game_odds, and scoresandodds_props: injury
+        status changes day to day, so a stale row shouldn't linger
+        once a fresher scrape has run.
+
+        Uses ON CONFLICT DO UPDATE for the row-by-row inserts, same
+        lesson learned from a real UniqueViolation crash on
+        scoresandodds_props, and confirmed relevant here specifically:
+        a real duplicate-player report on draftedge's own page (same
+        player listed twice with two different statuses) means a
+        plain INSERT could crash here too if that source ever produces
+        a genuine duplicate player_name_normalized within one scrape.
         """
         cur.execute("DELETE FROM player_injuries")
         conn.commit()
 
-        sql = f"""
-            INSERT INTO player_injuries
-                (player_name, player_name_normalized, position, team, status)
-            VALUES ({_ph(5)})
+        if _is_postgres():
+            sql = f"""
+                INSERT INTO player_injuries
+                    (player_name, player_name_normalized, position, team, status)
+                VALUES ({_ph(5)})
+                ON CONFLICT (player_name_normalized) DO UPDATE SET
+                    player_name = EXCLUDED.player_name,
+                    position    = EXCLUDED.position,
+                    team        = EXCLUDED.team,
+                    status      = EXCLUDED.status
+            """
+        else:
+            sql = f"""
+                INSERT INTO player_injuries
+                    (player_name, player_name_normalized, position, team, status)
+                VALUES ({_ph(5)})
+                ON CONFLICT(player_name_normalized) DO UPDATE SET
+                    player_name = excluded.player_name,
+                    position    = excluded.position,
+                    team        = excluded.team,
+                    status      = excluded.status
+            """
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            name = str(r.get('player_name', ''))
+            batch.append((
+                name, str(r.get('player_name_normalized', normalize_name(name))),
+                _none_if_nan(r.get('position')), _none_if_nan(r.get('team')),
+                str(r.get('status', '')),
+            ))
+            if len(batch) >= batch_size:
+                cur.executemany(sql, batch)
+                conn.commit()
+                inserted += len(batch)
+                batch = []
+        if batch:
+            cur.executemany(sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
+    def fill_gap_player_injuries(df: pd.DataFrame):
         """
+        For draftedge's injury data specifically — adds a player ONLY
+        if no row already exists for them (from Ourlads, loaded
+        first), NEVER overwrites an existing one. This is the actual
+        priority rule asked for: Ourlads' own injury flag (from the
+        same depth chart page already being scraped) takes precedence
+        since it's typically more current/closer to game day; draftedge
+        only fills in players Ourlads didn't flag at all — e.g.
+        Defense/Special Teams players, since this scraper's depth
+        chart pass only reads the Offense table.
+
+        Deliberately NOT a full replace — this is called after
+        replace_player_injuries() has already run for Ourlads' own
+        data in the same load-history invocation, so the two calls
+        together implement the priority order, not either one alone.
+        """
+        if _is_postgres():
+            sql = f"""
+                INSERT INTO player_injuries
+                    (player_name, player_name_normalized, position, team, status)
+                VALUES ({_ph(5)})
+                ON CONFLICT (player_name_normalized) DO NOTHING
+            """
+        else:
+            sql = f"""
+                INSERT INTO player_injuries
+                    (player_name, player_name_normalized, position, team, status)
+                VALUES ({_ph(5)})
+                ON CONFLICT(player_name_normalized) DO NOTHING
+            """
         inserted = 0
         batch = []
         for _, r in df.iterrows():
@@ -2612,6 +2686,23 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             count = replace_depth_charts(df)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(depth_charts_path)} (full replace)")
 
+    # --- Load Ourlads' own injury flags (from the same depth chart
+    # scrape) — MUST run before draftedge's injury load below, since
+    # Ourlads takes priority: it's typically more current (comes from
+    # the same page as the depth chart itself), and draftedge should
+    # only fill in players Ourlads didn't flag, never overwrite one it
+    # did. Gated by BOTH --depth-charts-only and --injuries-only,
+    # since it's conceptually part of each. ---
+    if run_all or depth_charts_only or injuries_only:
+        ourlads_injuries_path = os.path.join(data_dir, "ourlads_injuries.csv.gz")
+        if not os.path.exists(ourlads_injuries_path):
+            click.echo(f"Skip (not found): {ourlads_injuries_path}")
+        else:
+            click.echo(f"Loading {ourlads_injuries_path} ...")
+            df = pd.read_csv(ourlads_injuries_path)
+            count = replace_player_injuries(df)
+            click.echo(f"  Done: {count:,} rows from {os.path.basename(ourlads_injuries_path)} (full replace)")
+
     # --- Load game-level odds (spread/total/favorite) — same
     # full-replace reasoning as depth charts, since odds change
     # moment to moment ---
@@ -2637,8 +2728,9 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             count = replace_scoresandodds_props(df)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(props_path)} (full replace)")
 
-    # --- Load player injury statuses — same full-replace reasoning
-    # as above (status changes day to day) ---
+    # --- Load draftedge's injury statuses — fills gaps ONLY, never
+    # overwrites a player Ourlads already flagged above (must run
+    # AFTER the Ourlads load for that priority to actually hold) ---
     if run_all or injuries_only:
         injuries_path = os.path.join(data_dir, "draftedge_injuries.csv.gz")
         if not os.path.exists(injuries_path):
@@ -2646,8 +2738,9 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         else:
             click.echo(f"Loading {injuries_path} ...")
             df = pd.read_csv(injuries_path)
-            count = replace_player_injuries(df)
-            click.echo(f"  Done: {count:,} rows from {os.path.basename(injuries_path)} (full replace)")
+            count = fill_gap_player_injuries(df)
+            click.echo(f"  Done: {count:,} rows from {os.path.basename(injuries_path)} "
+                      f"(gap-fill only — players Ourlads already flagged were left untouched)")
 
     # --- Load FirstDown Studio's Vegas-derived rankings (comparison
     # column on Implied Player Points) — same full-replace reasoning
@@ -3376,6 +3469,42 @@ def _compute_implied_points_table(sel_year: int, sel_week: int) -> list:
 
     rows.sort(key=lambda r: r["implied_points"] if r["implied_points"] is not None else -1, reverse=True)
     return rows
+
+
+def _get_locked_teams(year: int, week: int) -> set:
+    """
+    Which teams' games have already kicked off for a given year/week —
+    same logic already used by slate() for its own per-game locking,
+    extracted here so My Props and My Lineups can mark rows as
+    "already played" too, for ANY past week, not just the current one.
+    For a fully-completed past week, every team will correctly come
+    back locked; for a week still in progress, only the teams whose
+    games have actually started will.
+    """
+    if not year or not week:
+        return set()
+
+    from datetime import datetime, timezone
+    ph = _ph()
+    schedule_rows = db_fetchall(
+        f"SELECT team, kickoff FROM game_schedule WHERE year = {ph} AND week = {ph}",
+        (year, week)
+    )
+    now = datetime.now(timezone.utc)
+    locked = set()
+    for r in schedule_rows:
+        kickoff = r["kickoff"]
+        if isinstance(kickoff, str):
+            try:
+                kickoff = datetime.fromisoformat(kickoff).replace(tzinfo=timezone.utc)
+            except ValueError:
+                continue
+        elif kickoff is not None and kickoff.tzinfo is None:
+            kickoff = kickoff.replace(tzinfo=timezone.utc)
+
+        if kickoff and now >= kickoff:
+            locked.add(r["team"])
+    return locked
 
 
 def _get_current_nfl_week():
@@ -4132,14 +4261,19 @@ def my_lineups():
     teams.discard('')
 
     scores_by_name = {}
+    team_by_name = {}
     if names:
         placeholders = ", ".join([ph] * len(names))
         stat_rows = db_fetchall(f"""
-            SELECT name_normalized, COALESCE(dk_pts_pfr_reported, dk_pts) AS actual_pts
+            SELECT name_normalized, team, COALESCE(dk_pts_pfr_reported, dk_pts) AS actual_pts
             FROM hist_player_stats
             WHERE year = {ph} AND week = {ph} AND name_normalized IN ({placeholders})
         """, (sel_year, sel_week) + tuple(names))
         scores_by_name = {r["name_normalized"]: r["actual_pts"] for r in stat_rows}
+        # Historical team for THIS specific past week — not the live
+        # `players` table (which only has the current/latest week and
+        # would be wrong for any earlier week being viewed here).
+        team_by_name = {r["name_normalized"]: r["team"] for r in stat_rows}
 
     scores_by_team = {}
     if teams:
@@ -4150,6 +4284,8 @@ def my_lineups():
         """, (sel_year, sel_week) + tuple(teams))
         scores_by_team = {r["team"]: r["dk_pts"] for r in dst_rows}
 
+    locked_teams = _get_locked_teams(sel_year, sel_week)
+
     rows = []
     total = 0.0
     matched_count = 0
@@ -4159,7 +4295,9 @@ def my_lineups():
             team = normalize_team(p["name"])
             actual = scores_by_team.get(team)
         else:
-            actual = scores_by_name.get(normalize_name(p["name"]))
+            name_norm = normalize_name(p["name"])
+            actual = scores_by_name.get(name_norm)
+            team = team_by_name.get(name_norm)
 
         if actual is not None:
             total += actual
@@ -4169,6 +4307,7 @@ def my_lineups():
             "slot": p.get("slot"), "name": p["name"], "position": p.get("position"),
             "salary": p.get("salary"), "projected_pts": p.get("projected_pts"),
             "actual_pts": actual,
+            "is_locked": bool(team and team in locked_teams),
         })
 
     all_matched = (matched_count == 9)
@@ -4238,6 +4377,21 @@ def my_props():
     """, (sel_year, sel_week, sel_submitter))
 
     week_scores = _score_props_for_week(sel_year, sel_week)
+    locked_teams = _get_locked_teams(sel_year, sel_week)
+
+    # Team lookup for THIS specific past week — prop_bets itself has
+    # no team column, and (same reasoning as my_lineups()) the live
+    # `players` table would only have the current/latest week, which
+    # would be wrong for any earlier week being viewed here.
+    team_by_name = {}
+    if pick_rows:
+        names = {normalize_name(p["player_name"]) for p in pick_rows}
+        placeholders = ", ".join([ph] * len(names))
+        team_rows = db_fetchall(f"""
+            SELECT DISTINCT name_normalized, team FROM hist_player_stats
+            WHERE year = {ph} AND week = {ph} AND name_normalized IN ({placeholders})
+        """, (sel_year, sel_week) + tuple(names))
+        team_by_name = {r["name_normalized"]: r["team"] for r in team_rows}
 
     rows = []
     total_correct = 0
@@ -4256,9 +4410,12 @@ def my_props():
         elif result == "push":
             matched_count += 1   # scored (as a push), just doesn't count for/against
 
+        team = team_by_name.get(normalize_name(p["player_name"]))
+
         rows.append({
             "player_name": p["player_name"], "stat_field": p["stat_field"], "line": p["line"],
             "pick": p["pick"], "actual": actual, "result": result, "is_correct": is_correct,
+            "is_locked": bool(team and team in locked_teams),
         })
 
     all_matched = (matched_count == len(pick_rows))
@@ -4881,6 +5038,36 @@ def download_csv(data_type):
     elif data_type == "implied-points":
         rows = _compute_implied_points_table(year, week)
         filename = f"implied_points_week{week}_{year}.csv"
+
+    elif data_type == "props":
+        # Always the current week, same as the page itself (props has
+        # no year/week selector — see props() route's own docstring
+        # for why) — year/week query params are ignored here on
+        # purpose, matching that page's behavior exactly.
+        row = db_fetchone(
+            "SELECT year, week FROM prop_bets ORDER BY year DESC, week DESC LIMIT 1"
+        )
+        if row is None:
+            rows = []
+            filename = "props.csv"
+        else:
+            cur_year, cur_week = row["year"], row["week"]
+            prop_bet_rows = db_fetchall(f"""
+                SELECT id, player_name, stat_field, line
+                FROM prop_bets
+                WHERE year = {_ph()} AND week = {_ph()}
+                ORDER BY player_name
+            """, (cur_year, cur_week))
+            week_scores = _score_props_for_week(cur_year, cur_week)
+            rows = []
+            for p in prop_bet_rows:
+                outcome = week_scores.get(p["id"], {})
+                rows.append({
+                    "player_name": p["player_name"], "stat_field": p["stat_field"],
+                    "line": p["line"], "actual": outcome.get("actual"),
+                    "result": outcome.get("result"),
+                })
+            filename = f"props_week{cur_week}_{cur_year}.csv"
 
     else:
         return jsonify(error="Unknown data type"), 404
