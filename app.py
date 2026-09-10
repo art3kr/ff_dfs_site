@@ -1721,8 +1721,16 @@ def load_schedule_command(year):
               help="Only load FirstDown Studio's rankings, skip everything else — for "
                    "frequent re-runs as their numbers update through the week, without "
                    "waiting on the much slower full load.")
+@click.option("--depth-charts-only", is_flag=True,
+              help="Only load depth charts, skip everything else — for frequent "
+                   "re-runs as depth charts get updated through the week, without "
+                   "waiting on the much slower full load.")
+@click.option("--game-odds-only", is_flag=True,
+              help="Only load game-level spread/total/favorite, skip everything else — "
+                   "for frequent re-runs as lines move through the week, without "
+                   "waiting on the much slower full load.")
 @click.option("--batch-size", default=1000, type=int, help="Rows per bulk-insert batch.")
-def load_history_command(data_dir, salaries_only, stats_only, weather_only, props_only, injuries_only, firstdown_only, batch_size):
+def load_history_command(data_dir, salaries_only, stats_only, weather_only, props_only, injuries_only, firstdown_only, depth_charts_only, game_odds_only, batch_size):
     """
     Load the historical .csv.gz files produced by the scrapers into
     hist_dfs_salaries and hist_player_stats.
@@ -1757,7 +1765,8 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
     # True only when no "-only" flag was passed — an unscoped run loads
     # everything, same as before these flags existed. Any "-only" flag
     # narrows to just its own section(s).
-    run_all = not (salaries_only or stats_only or weather_only or props_only or injuries_only or firstdown_only)
+    run_all = not (salaries_only or stats_only or weather_only or props_only or injuries_only
+                  or firstdown_only or depth_charts_only or game_odds_only)
 
     conn = _connect()
     cur  = _cursor(conn)
@@ -2593,7 +2602,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
 
     # --- Load depth charts (single file, always reflects the latest
     # scrape — full replace, not a historical/multi-week accumulation) ---
-    if run_all:
+    if run_all or depth_charts_only:
         depth_charts_path = os.path.join(data_dir, "ourlads_depth_charts.csv.gz")
         if not os.path.exists(depth_charts_path):
             click.echo(f"Skip (not found): {depth_charts_path}")
@@ -2606,7 +2615,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
     # --- Load game-level odds (spread/total/favorite) — same
     # full-replace reasoning as depth charts, since odds change
     # moment to moment ---
-    if run_all:
+    if run_all or game_odds_only:
         game_odds_path = os.path.join(data_dir, "scoresandodds_game_odds.csv.gz")
         if not os.path.exists(game_odds_path):
             click.echo(f"Skip (not found): {game_odds_path}")
