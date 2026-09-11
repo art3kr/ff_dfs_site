@@ -35,6 +35,14 @@ data/*.csv.gz
 data/_pfr_checkpoints/
 
 # -----------------------------------------------------------------------
+# Critical-data backups (flask export-critical-data) — plaintext CSV
+# exports of lineups/prop_bets/prop_picks. Never commit: this is the
+# participants' own submitted data, and the whole point of the backup
+# is that it lives somewhere OTHER than the repo/database.
+# -----------------------------------------------------------------------
+backups/
+
+# -----------------------------------------------------------------------
 # Committed data files (small, static — keep in git)
 # data/schedules/*.csv       ← schedule CSVs (16 files, ~4KB each)
 # data/rotowire_slate_catalog.csv  ← slate ID lookup table
