@@ -1,3 +1,4 @@
+{% import '_download_buttons.html' as dl %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -79,6 +80,10 @@
                 </select>
             </label>
         </form>
+        {{ dl.bar([
+            {'href': url_for('download_csv', data_type='my-lineups', year=year, week=week, submitter=submitter), 'label': 'This Lineup'},
+            {'href': url_for('download_csv', data_type='my-lineups', year=year), 'label': 'All Lineups', 'secondary': True, 'title': 'Every lineup from every participant, for every week of this season - one row per player'},
+        ]) }}
     </div>
 
     {% if rows %}

@@ -1,3 +1,4 @@
+{% import '_download_buttons.html' as dl %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,7 +71,9 @@
         {% else %}
         <span></span>
         {% endif %}
-        <a href="{{ url_for('download_csv', data_type='schedule', year=year) }}" class="download-btn">⬇ Download Full Schedule</a>
+        {{ dl.bar([
+            {'href': url_for('download_csv', data_type='schedule', year=year), 'label': 'This Season'},
+        ]) }}
     </div>
 
     <div class="week-jump">

@@ -175,6 +175,29 @@ Testing on SQLite is also deliberate, not just safety: it's the only
 engine that reproduces the timestamp-comparison bug class in gotcha 3
 above, since Postgres silently casts the string and hides it.
 
+**Every tab downloads, every download starts with the same join keys.**
+Adding a new data page means adding a `/download/<data_type>` branch
+too — `test_app.py::test_every_tab_has_a_download` fails otherwise.
+Three rules hold the exports together:
+- Buttons go through the `templates/_download_buttons.html` macro
+  (`{% import '_download_buttons.html' as dl %}` then `{{ dl.bar([...]) }}`),
+  never hand-written `<a class="download-btn">`. Before that macro
+  existed there were nine different label spellings across fourteen
+  buttons. Stick to the standard vocabulary in its header comment:
+  This Week / This Season / This Team / All Data / Merge-Friendly.
+- Run rows through `_prepend_keys(...)` so every CSV opens with
+  `year`, `week`, `team`, `name_normalized` in a predictable place —
+  `csv.DictWriter` takes column order from the first row's keys.
+  Live full-replace tables with no week of their own (depth charts,
+  game odds) get the current NFL week stamped on, or they can't be
+  merged against anything.
+- Player-grain exports get `_with_name_key(...)`. `name_normalized`
+  is the documented join key; display names differ between sources and
+  matching on them silently drops rows.
+
+The grain/key table lives in `_info_modal.html` and `README.md` — keep
+all three in sync when adding an export.
+
 **Never build a new scraper without a diagnostic run against the real
 target page first.** Every scraper in this project was built only
 after a `diagnose_*.py` script dumped the actual HTML/JSON structure
@@ -209,6 +232,17 @@ comments/docs rather than presenting a guess as fact.
   Implied Team Points, Best Matchups, and Game Overview.
 - `_score_props_for_week(year, week)` — shared by Props, My Props,
   and Standings' prop section.
+- `_lineup_player_rows(year, week, submitter)` — every submitted
+  lineup's players with their real scored result, the per-player grain
+  under both Standings and the My Lineups export.
+  `_score_lineups_for_year(year)` rolls it up to
+  `{submitter: {week: total or None}}`, applying the all-9-must-match
+  rule. Standings and its CSV both go through it.
+- `_compute_usage_rows()`, `_compute_game_overview_rows()`,
+  `_compute_implied_team_points_rows()` — page/CSV pairs, same
+  one-source-of-truth reason as the above.
+- `_prepend_keys()` / `_with_name_key()` — every CSV export runs
+  through these. See the download conventions below.
 - `TEAM_ROW_COLORS` — static per-team brand-color tint, used for the
   background tint on Best Matchups, Team Points, Fantasy Points
   Against, Implied Team Points, and the Depth Charts team buttons.

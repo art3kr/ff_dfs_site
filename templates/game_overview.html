@@ -1,3 +1,4 @@
+{% import '_download_buttons.html' as dl %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,6 +52,13 @@
 {% if not games %}
     <p class="empty-state">No games loaded yet for the current week — run the weather and game odds scrapers, then flask load-history.</p>
 {% else %}
+
+    <div class="page-controls">
+        <span></span>
+        {{ dl.bar([
+            {'href': url_for('download_csv', data_type='game-overview'), 'label': 'This Week'},
+        ]) }}
+    </div>
 
     <div class="table-wrapper">
         <table id="history-table">

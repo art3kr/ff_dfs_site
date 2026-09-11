@@ -147,14 +147,27 @@ flask load-weekly-salary data/fp_dk_salaries_weekN_2026.csv.gz --year 2026
 python scrapers/scrape_weekly_weather.py --year 2026 --weeks N
 
 # 4. Scrape depth charts (updates weekly — who's starting, who's
-#    been dropped, injury-related depth chart moves)
+#    been dropped, injury-related depth chart moves). Also emits
+#    ourlads_injuries.csv.gz, which load-history loads BEFORE
+#    draftedge below, since Ourlads takes priority.
 python scrapers/scrape_ourlads_depth_charts.py
 
-# 5. Scrape season-long Vegas props (or weekly, once FirstDown Studio
-#    turns that on)
+# 5. Injury statuses — gap-fill only; never overwrites an Ourlads flag
+python scrapers/scrape_draftedge_injuries.py
+
+# 6. Game odds — spread / over-under / favorite. Feeds Implied Team
+#    Points, Game Overview, and Best Matchups' odds columns.
+python scrapers/scrape_scoresandodds_game_odds.py
+
+# 7. FirstDown Studio's per-player Vegas-derived Pts — this is the one
+#    the FDS Pts column on Implied Player Points reads.
+python scrapers/scrape_firstdown_studio_rankings.py
+
+# 8. FirstDown Studio season-long projections. NOTE: load-history does
+#    NOT read this file — it's reference data for your own research.
 python scrapers/scrape_firstdown_studio.py --position all
 
-# 6. Prop Bet Challenge — scrape candidate props, generate the
+# 9. Prop Bet Challenge — scrape candidate props, generate the
 #    weekly slate, review it, then publish
 python scrapers/scrape_scoresandodds_props.py --all --combine
 python scrapers/convert_scoresandodds_to_props_csv.py --output data/props_candidates_weekN_2026.csv
@@ -162,9 +175,14 @@ python scrapers/select_top_props_by_category.py --input data/props_candidates_we
 # --- review data/props_weekN_2026.csv before the next line ---
 flask add-props data/props_weekN_2026.csv --year 2026 --week N
 
-# 7. Persist everything into the database
+# 10. Persist everything into the database
 flask load-history
 ```
+
+`weekly_before.bat` also runs `flask export-critical-data` as its very
+first step, before anything else writes — `lineups`, `prop_bets` and
+`prop_picks` are the only three tables with no external source to
+re-scrape from.
 
 ### End of week (after all games have played)
 
@@ -183,16 +201,23 @@ python scrapers/scrape_dst_fantasy_stats.py --year 2026 --weeks N
 # 4. Combine into final DK-accurate DST scores
 python scrapers/combine_dst_scoring.py --year 2026
 
-# 5. Game info — roof, surface, actual weather, vegas lines, attendance
-python scrapers/scrape_pfr.py --years 2026 --skip-players   # game info portion
-
-# 6. Weather — re-scrape to get "Final" status + actual conditions
+# 5. Weather — re-scrape to get "Final" status + actual conditions
 python scrapers/scrape_weekly_weather.py --year 2026 --weeks N
+
+# 6. Fantasy points against — season-to-date totals, so this only
+#    changes once a week's games have actually been played
+python scrapers/scrape_fantasy_points_against.py --year 2026 --position all
 
 # 7. Persist everything — Standings, History, and My Lineups all
 #    auto-recompute once this is loaded; prop picks auto-score too
 flask load-history
 ```
+
+Step 1 covers game info too (roof, surface, actual weather, Vegas
+lines, attendance) — `scrape_pfr.py` does players *and* games in one
+pass unless you pass `--skip-games`. `weekly_after.bat` likewise opens
+with `flask export-critical-data`, which is the most valuable backup
+point of the week since every lineup and prop pick is now final.
 
 ### Separately: market analysis / arbitrage research
 
@@ -258,40 +283,50 @@ easily scrapeable (no diagnostic run against it so far).
 
 ## Merging Downloaded Data Across Tabs
 
-Most downloads already share the same `year`, `week`, and `team`
-columns, so merging them together (e.g. History + Team Points, or
-History + Implied Points) is a direct match on those three columns —
-no special steps needed.
+Every tab has a download button, and every export is forced through
+`_prepend_keys()` so it *starts* with the same join-key columns in the
+same order. What you join on depends on the file's grain:
 
-**Two exceptions:** Weather and Game Info are stored per-GAME (one row
-per matchup, with separate `home_team`/`away_team` — or `team_home`/
-`team_away` for Game Info specifically — columns) rather than per-TEAM
-like everything else. Merging one of these directly against History
-would need an OR-condition (match either column), which most
-spreadsheet tools can't do in a single lookup.
+| One row is… | Join on | Tabs |
+|---|---|---|
+| a player in a week | `year` + `week` + `name_normalized` | Slate, History, Best Matchups, Implied Player Points, Props, My Props, My Lineups, player career |
+| a player in a season | `year` + `name_normalized` | Usage |
+| a team in a week | `year` + `week` + `team` | Team Points, Implied Team Points, Depth Charts, Weather/Game Info (merge-friendly) |
+| a team in a season | `year` + `team` (+ `position`) | Fantasy Pts Against |
+| a single game | `year` + `week` + `home_team`/`away_team` | Weather, Game Info, Game Overview, Schedule |
+| a participant in a week | `year` + `week` + `submitter` | Standings |
 
-**Use the "Download for Merging with History" button** on both the
-Weather and Game Info pages instead of their regular download — it
-reshapes each game into two rows (one per team) with a plain `team`
-column, matching every other download's convention.
+**Join players on `name_normalized`, never the display name.** Sources
+spell names differently ("A.J. Brown" vs "AJ Brown"), so a match on
+`name` silently drops rows. Every player-grain export carries
+`name_normalized` — added by `_with_name_key()` for the tables that
+don't store one of their own.
+
+Two tables have no natural year/week of their own and get the *current*
+NFL week stamped on at export time so they can still be merged: Depth
+Charts and Implied Team Points (both are live full-replace tables —
+see the table taxonomy in `CLAUDE.md`).
+
+**The game-grain exception:** Weather, Game Info, Game Overview and
+Schedule are one row per matchup, with separate `home_team`/`away_team`
+(or `team_home`/`team_away`) columns. Matching those against a per-team
+file needs an OR-condition that VLOOKUP/XLOOKUP can't express, so
+Weather and Game Info each have a **Merge-Friendly** button that
+reshapes every game into two rows with a plain `team` column.
 
 ### Example: adding Weather conditions to a History export in Excel
 
-1. Download History for the week you want (the regular download button).
-2. On the Weather page, use the **merge-friendly** download for the same week.
-3. Open both in Excel. In the History sheet, add a new column and use:
+1. Download History for the week you want ("This Week").
+2. On the Weather page, use **Merge-Friendly** for the same week.
+3. In the History sheet, add a column and use:
    ```
    =XLOOKUP([@team], WeatherSheet!A:A, WeatherSheet!G:G)
    ```
-   (adjust the column letters to match where `team` and the value you want,
-   e.g. `condition`, actually land in your specific download — they're not
-   guaranteed to be in the same position every time a column gets added).
-4. Fill down. Since both files use the same `team` codes (lowercase,
-   e.g. `kan`, `buf`) for the same week, this matches every row directly.
+   (adjust the column letters to where `team` and the value you want
+   actually land — they shift as columns get added.)
+4. Fill down. Both files use the same lowercase team codes (`kan`,
+   `buf`), so every row matches.
 
-If you're joining on more than one column (e.g. `year` AND `week` AND
-`team`, when combining data across multiple weeks at once), concatenate
-them into a helper column in both sheets first (e.g.
-`=A2&"-"&B2&"-"&C2`) and `XLOOKUP`/`VLOOKUP` against that combined
-column instead — a multi-column match isn't natively supported by
-either function.
+Joining on more than one column (year AND week AND team) isn't
+natively supported by either function — build a helper column in both
+sheets first (`=A2&"-"&B2&"-"&C2`) and look up against that.

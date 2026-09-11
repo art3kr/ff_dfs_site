@@ -1,0 +1,38 @@
+{# templates/_download_buttons.html
+   One macro for every download button on the site, so the markup,
+   icon, and label vocabulary can't drift page to page the way they
+   did before this existed (nine different label spellings across
+   fourteen buttons). Same shared-include reasoning as _info_modal.html.
+
+   Usage — import at the top of the page, then call it wherever the
+   buttons belong (normally inside .page-controls):
+
+       {% import '_download_buttons.html' as dl %}
+
+       {{ dl.bar([
+            {'href': url_for('download_csv', data_type='history',
+                             year=year, week=week), 'label': 'This Week'},
+            {'href': url_for('download_csv', data_type='history'),
+             'label': 'All Data', 'secondary': True},
+       ]) }}
+
+   Standard label vocabulary — stick to these rather than inventing a
+   new phrasing per page:
+     'This Week'      what's currently on screen, for a week-scoped page
+     'This Season'    ditto for a year-scoped page
+     'This Team'      ditto for a team-scoped page
+     'All Data'       every year/week we hold  (use secondary: True)
+     'Merge-Friendly' the one-row-per-team reshape of a per-game table
+
+   Keys: href (required), label (required), secondary (dimmer styling
+   for the broader/bulk option), title (hover text). #}
+
+{% macro bar(buttons) %}
+<div class="download-actions">
+    {% for b in buttons %}
+    <a href="{{ b.href }}"
+       class="download-btn{% if b.secondary %} download-btn-all{% endif %}"
+       {% if b.title %}title="{{ b.title }}"{% endif %}>&#11015; {{ b.label }}</a>
+    {% endfor %}
+</div>
+{% endmacro %}

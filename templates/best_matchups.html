@@ -1,3 +1,4 @@
+{% import '_download_buttons.html' as dl %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,7 +75,9 @@
             </label>
             <input type="hidden" name="position" value="{{ position }}">
         </form>
-        <a href="{{ url_for('download_csv', data_type='best-matchups', year=year, week=week, position=position) }}" class="download-btn">⬇ Download CSV</a>
+        {{ dl.bar([
+            {'href': url_for('download_csv', data_type='best-matchups', year=year, week=week, position=position), 'label': 'This Week'},
+        ]) }}
     </div>
 
     <div class="filter-bar">

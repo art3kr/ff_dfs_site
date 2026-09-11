@@ -80,6 +80,21 @@ SLATE = [("Patrick Mahomes", "kan", "QB", 1),      # locked team
          ("Tua Tagovailoa",  "mia", "QB", 1),
          ("Raheem Mostert",  "mia", "RB", None)]   # no depth-chart entry
 
+# A full 9-slot lineup with known points, so standings totals are
+# arithmetic we can actually assert rather than "didn't crash".
+# Week 1 sums to 89.0, week 2 to 50.0 (each player worth half).
+LINEUP = [("QB",   "Patrick Mahomes", "QB",  20.0),
+          ("RB",   "Raheem Mostert",  "RB",  10.0),
+          ("RB",   "James Cook",      "RB",   5.0),
+          ("WR",   "Stefon Diggs",    "WR",  12.0),
+          ("WR",   "Tyreek Hill",     "WR",  15.0),
+          ("WR",   "Jaylen Waddle",   "WR",   3.0),
+          ("TE",   "Travis Kelce",    "TE",   7.0),
+          ("FLEX", "Rashee Rice",     "WR",   8.0),
+          ("DST",  "Buffalo Bills",   "DST",  9.0)]   # scored via hist_dst_stats
+WEEK1_TOTAL = 89.0
+WEEK2_TOTAL = 44.5    # half of each offensive player, DST included
+
 prop_ids = {}
 
 
@@ -112,6 +127,28 @@ def seed():
             cur.execute("INSERT INTO depth_charts (team, pos, string_rank, player_name, "
                         "player_name_normalized) VALUES (?,?,?,?,?)",
                         (team, pos, rank, name, flaskapp.normalize_name(name)))
+
+    # Two scored weeks of one submitted lineup, so standings can be
+    # checked as real arithmetic (including the drop-lowest-week rule).
+    import json as _json
+    for wk, factor in [(1, 1.0), (2, 0.5)]:
+        players = [{"slot": slot, "name": name, "position": pos, "salary": 5000}
+                   for slot, name, pos, _ in LINEUP]
+        cur.execute("INSERT INTO lineups (week, year, submitter, lineup_json, total_salary) "
+                    "VALUES (?,?,?,?,?)",
+                    (wk, YEAR, "tester", _json.dumps(players), 45000))
+        for slot, name, pos, pts in LINEUP:
+            if slot == "DST":
+                cur.execute("INSERT INTO hist_dst_stats (year, week, team, dk_pts) "
+                            "VALUES (?,?,?,?)",
+                            (YEAR, wk, flaskapp.normalize_team(name), pts * factor))
+            else:
+                cur.execute(
+                    "INSERT INTO hist_player_stats (pfr_id, name, name_normalized, year, "
+                    "week, team, position, dk_pts) VALUES (?,?,?,?,?,?,?,?)",
+                    ("%s%02d" % (flaskapp.normalize_name(name)[:6].replace(" ", ""), wk),
+                     name, flaskapp.normalize_name(name), YEAR, wk, "buf", pos,
+                     pts * factor))
     conn.commit()
     conn.close()
 
@@ -249,6 +286,111 @@ def test_slate_filter_attributes():
           ('colspan="%d"' % ncols) in html)
 
 
+def test_standings_scoring():
+    section("standings scoring (_score_lineups_for_year)")
+    with flaskapp.app.app_context():
+        by_submitter, weeks = flaskapp._score_lineups_for_year(YEAR)
+    check("both weeks present", weeks == [1, 2])
+    check("week 1 totals %.1f (got %s)" % (WEEK1_TOTAL, by_submitter["tester"].get(1)),
+          by_submitter["tester"].get(1) == WEEK1_TOTAL)
+    check("week 2 totals %.1f (got %s)" % (WEEK2_TOTAL, by_submitter["tester"].get(2)),
+          by_submitter["tester"].get(2) == WEEK2_TOTAL)
+
+    html = client.get("/standings").get_data(as_text=True)
+    check("page shows the no-drop total (%.1f)" % (WEEK1_TOTAL + WEEK2_TOTAL),
+          "%.1f" % (WEEK1_TOTAL + WEEK2_TOTAL) in html)
+    check("page shows the drop-lowest total (%.1f)" % WEEK1_TOTAL,
+          "%.1f" % WEEK1_TOTAL in html)
+
+    # A lineup missing even one real result must not score at all.
+    conn = flaskapp._connect()
+    conn.execute("DELETE FROM hist_player_stats WHERE week = 2 AND name_normalized = ?",
+                 (flaskapp.normalize_name("Travis Kelce"),))
+    conn.commit()
+    conn.close()
+    with flaskapp.app.app_context():
+        by_submitter, _ = flaskapp._score_lineups_for_year(YEAR)
+    check("a week with an unmatched player scores None (pending)",
+          by_submitter["tester"].get(2) is None)
+
+
+# (data_type, querystring, expected leading key columns)
+DOWNLOADS = [
+    ("slate",                   "?year=2026&week=1", ["year", "week", "team", "name", "name_normalized"]),
+    ("history",                 "?year=2026&week=1", None),
+    ("history",                 "",                  None),
+    ("weather",                 "?year=2026&week=1", None),
+    ("weather-by-team",         "?year=2026&week=1", None),
+    ("gameinfo",                "?year=2026&week=1", None),
+    ("gameinfo-by-team",        "?year=2026&week=1", None),
+    ("player",                  "?pfr_id=nobody",    None),
+    ("schedule",                "?year=2026",        None),
+    ("fantasy-points-against",  "?year=2026",        None),
+    ("team-points",             "?year=2026&week=1", None),
+    ("best-matchups",           "?year=2026&week=1", None),
+    ("depth-charts",            "",                  ["year", "week", "team", "name_normalized"]),
+    ("implied-points",          "?year=2026&week=1", ["year", "week", "team", "name", "name_normalized"]),
+    ("props",                   "",                  ["year", "week", "name_normalized"]),
+    ("usage",                   "?year=2026",        None),
+    ("implied-team-points",     "",                  None),
+    ("game-overview",           "",                  None),
+    ("standings",               "?year=2026",        ["year", "week", "submitter"]),
+    ("my-lineups",              "?year=2026",        ["year", "week", "submitter"]),
+    ("my-lineups",              "?year=2026&week=1&submitter=tester", ["year", "week", "submitter"]),
+    ("my-props",                "?year=2026",        ["year", "week", "submitter"]),
+]
+
+
+def test_downloads():
+    section("every download type responds as CSV")
+    for data_type, qs, expected_keys in DOWNLOADS:
+        r = client.get("/download/%s%s" % (data_type, qs))
+        label = "%s%s" % (data_type, qs)
+        if r.status_code != 200:
+            check("%-52s -> %d" % (label, r.status_code), False)
+            continue
+        is_csv = "text/csv" in r.headers.get("Content-Type", "")
+        has_attachment = "attachment" in r.headers.get("Content-Disposition", "")
+        body = r.get_data(as_text=True)
+        header = body.splitlines()[0].split(",") if body.strip() else []
+
+        ok = is_csv and has_attachment
+        if expected_keys:
+            # Column ORDER matters here: _prepend_keys exists so every
+            # export opens with the same join keys in the same place.
+            ok = ok and header[:len(expected_keys)] == expected_keys
+        check("%-52s (%d cols)" % (label, len(header)), ok)
+
+    r = client.get("/download/not-a-real-type")
+    check("unknown data type returns 404", r.status_code == 404)
+
+
+def test_every_tab_has_a_download():
+    section("every data tab offers a download")
+    import re
+    nav = re.findall(r"url_for\('(\w+)'\)", open("templates/slate.html", encoding="utf-8").read())
+    tabs = [t for t in dict.fromkeys(nav) if t not in ("static", "login", "logout", "slate")]
+    tab_template = {
+        "standings": "standings.html", "props": "props.html", "my_props": "my_props.html",
+        "my_lineups": "my_lineups.html", "history": "history.html",
+        "game_overview": "game_overview.html", "weather": "weather.html",
+        "gameinfo": "gameinfo.html", "schedule": "schedule.html",
+        "fantasy_points_against": "fantasy_points_against.html", "usage": "usage.html",
+        "team_points": "team_points.html", "best_matchups": "best_matchups.html",
+        "depth_charts": "depth_charts.html", "implied_points": "implied_points.html",
+        "implied_team_points": "implied_team_points.html",
+    }
+    for tab in tabs:
+        tpl = tab_template.get(tab)
+        if not tpl:
+            check("nav tab '%s' has a known template" % tab, False)
+            continue
+        src = open(os.path.join("templates", tpl), encoding="utf-8").read()
+        check("%-24s uses dl.bar()" % tab, "dl.bar(" in src)
+    check("slate.html uses dl.bar()",
+          "dl.bar(" in open("templates/slate.html", encoding="utf-8").read())
+
+
 def test_routes_smoke():
     section("every GET route returns 200")
     for path in ["/", "/history", "/team-points", "/usage", "/props", "/my-props",
@@ -291,7 +433,10 @@ if __name__ == "__main__":
     test_props_lock()
     test_props_page()
     test_slate_filter_attributes()
+    test_downloads()
+    test_every_tab_has_a_download()
     test_routes_smoke()
+    test_standings_scoring()         # mutates hist_player_stats at the end
     test_timestamp_format()          # must stay last; rewrites game_schedule
 
     print()

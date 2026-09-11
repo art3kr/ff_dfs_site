@@ -3210,6 +3210,20 @@ def usage():
     sel_year = req_year if req_year in available_years else available_years[0]
     sel_position = request.args.get("position", "ALL")
 
+    rows = _compute_usage_rows(sel_year, sel_position)
+
+    return render_template("usage.html", rows=rows, year=sel_year, position=sel_position,
+                           available_years=available_years, team_colors=TEAM_ROW_COLORS)
+
+
+def _compute_usage_rows(sel_year: int, sel_position: str) -> list:
+    """
+    Shared by the Usage page and its CSV export — see usage()'s own
+    docstring for what target/touch share actually mean here (share of
+    the player's own TEAM's season total, not of snaps played).
+    """
+    ph = _ph()
+
     # Team totals for the season - the shared denominator every
     # player's own share gets divided by.
     team_totals_rows = db_fetchall(f"""
@@ -3254,9 +3268,7 @@ def usage():
         })
 
     rows.sort(key=lambda r: r["target_share"] if r["target_share"] is not None else -1, reverse=True)
-
-    return render_template("usage.html", rows=rows, year=sel_year, position=sel_position,
-                           available_years=available_years, team_colors=TEAM_ROW_COLORS)
+    return rows
 
 
 @app.route("/fantasy-points-against")
@@ -4107,6 +4119,12 @@ def implied_team_points():
     formula — see _compute_implied_team_total() for the actual
     calculation and how it was verified.
     """
+    rows = _compute_implied_team_points_rows()
+    return render_template("implied_team_points.html", rows=rows, team_colors=TEAM_ROW_COLORS)
+
+
+def _compute_implied_team_points_rows() -> list:
+    """Shared by the Implied Team Points page and its CSV export."""
     game_odds_rows = db_fetchall("SELECT team, opponent, spread, over_under FROM game_odds")
 
     rows = []
@@ -4133,7 +4151,7 @@ def implied_team_points():
         })
 
     rows.sort(key=lambda r: r["implied_total"] if r["implied_total"] is not None else -1, reverse=True)
-    return render_template("implied_team_points.html", rows=rows, team_colors=TEAM_ROW_COLORS)
+    return rows
 
 
 @app.route("/depth-charts")
@@ -4253,6 +4271,104 @@ def _score_props_for_week(year: int, week: int) -> dict:
                 result[p["id"]] = {"actual": actual, "result": "push"}   # rare with .5 lines
 
     return result
+
+
+def _lineup_player_rows(year: int, week: int = None, submitter: str = None) -> list:
+    """
+    Every submitted lineup's players for a season, each carrying its
+    real scored result — the per-player grain underneath both Standings
+    and the My Lineups CSV export.
+
+    Matching rules are the ones standings() has always used: offensive
+    players join hist_player_stats on (year, week, name_normalized),
+    and the DST pick joins hist_dst_stats on (year, week, team) via
+    team_mapping.normalize_team(), since DST names arrive in wildly
+    inconsistent formats depending on which salary source was used.
+
+    week/submitter narrow the scope; omitting both returns the whole
+    season. actual_pts is None for a player whose real result hasn't
+    loaded yet.
+    """
+    ph = _ph()
+    where = [f"year = {ph}"]
+    params = [year]
+    if week is not None:
+        where.append(f"week = {ph}")
+        params.append(week)
+    if submitter is not None:
+        where.append(f"submitter = {ph}")
+        params.append(submitter)
+
+    lineup_rows = db_fetchall(
+        f"SELECT submitter, week, lineup_json, total_salary FROM lineups "
+        f"WHERE {' AND '.join(where)} ORDER BY week, submitter",
+        tuple(params)
+    )
+    if not lineup_rows:
+        return []
+
+    # One query for the whole year, then looked up in memory — same
+    # approach standings() has always taken, rather than a query per
+    # lineup.
+    scores_by_week_name, team_by_week_name = {}, {}
+    for r in db_fetchall(
+        f"SELECT week, name_normalized, team, "
+        f"COALESCE(dk_pts_pfr_reported, dk_pts) AS actual_pts "
+        f"FROM hist_player_stats WHERE year = {ph}", (year,)
+    ):
+        scores_by_week_name[(r["week"], r["name_normalized"])] = r["actual_pts"]
+        team_by_week_name[(r["week"], r["name_normalized"])] = r["team"]
+
+    scores_by_week_team = {
+        (r["week"], r["team"]): r["dk_pts"]
+        for r in db_fetchall(
+            f"SELECT week, team, dk_pts FROM hist_dst_stats WHERE year = {ph}", (year,))
+    }
+
+    rows = []
+    for lr in lineup_rows:
+        for p in json.loads(lr["lineup_json"]):
+            name_norm = normalize_name(p["name"])
+            if (p.get("slot") or "").upper() == "DST":
+                team = normalize_team(p["name"])
+                actual = scores_by_week_team.get((lr["week"], team)) if team else None
+            else:
+                actual = scores_by_week_name.get((lr["week"], name_norm))
+                team = team_by_week_name.get((lr["week"], name_norm))
+            rows.append({
+                "year": year, "week": lr["week"], "submitter": lr["submitter"],
+                "slot": p.get("slot"), "name": p.get("name"),
+                "name_normalized": name_norm, "position": p.get("position"),
+                "team": team, "salary": p.get("salary"),
+                "projected_pts": p.get("projected_pts"), "actual_pts": actual,
+                "lineup_total_salary": lr["total_salary"],
+            })
+    return rows
+
+
+def _score_lineups_for_year(year: int) -> tuple:
+    """
+    Season scoring rolled up from _lineup_player_rows(): returns
+    ({submitter: {week: total or None}}, sorted_week_list).
+
+    A week only counts once ALL 9 of that lineup's players have a
+    matched result; otherwise it's None ("pending") rather than a
+    misleadingly low partial score. Shared by standings() and the
+    standings CSV export so the two can't disagree.
+    """
+    grouped = {}
+    weeks_seen = set()
+    for r in _lineup_player_rows(year):
+        weeks_seen.add(r["week"])
+        grouped.setdefault((r["submitter"], r["week"]), []).append(r)
+
+    by_submitter = {}
+    for (sub, wk), players in grouped.items():
+        matched = [p["actual_pts"] for p in players if p["actual_pts"] is not None]
+        by_submitter.setdefault(sub, {})
+        by_submitter[sub][wk] = round(sum(matched), 2) if len(matched) == 9 else None
+
+    return by_submitter, sorted(weeks_seen)
 
 
 @app.route("/my-lineups")
@@ -4765,6 +4881,12 @@ def game_overview():
     if current_year is None:
         return render_template("game_overview.html", games=[], year=None, week=None)
 
+    games = _compute_game_overview_rows(current_year, current_week)
+    return render_template("game_overview.html", games=games, year=current_year, week=current_week)
+
+
+def _compute_game_overview_rows(current_year: int, current_week: int) -> list:
+    """Shared by the Game Overview page and its CSV export."""
     ph = _ph()
     weather_rows = db_fetchall(f"""
         SELECT away_team, home_team, game_date, status, temp_f, condition, wind_mph, wind_direction
@@ -4812,7 +4934,7 @@ def game_overview():
             "away_implied": away_implied, "home_implied": home_implied,
         })
 
-    return render_template("game_overview.html", games=games, year=current_year, week=current_week)
+    return games
 
 
 @app.route("/weather")
@@ -4918,6 +5040,45 @@ def gameinfo():
                            available_weeks_by_year=available_weeks_by_year)
 
 
+def _with_name_key(rows, source_field="name"):
+    """
+    Ensure every row carries name_normalized, derived from
+    `source_field` when the underlying table doesn't store one.
+
+    This is the documented join key between datasets: raw display names
+    differ between sources ("A.J. Brown" vs "AJ Brown", "Patrick
+    Mahomes II" vs "Patrick Mahomes"), while the normalized form
+    matches for the large majority of players. Every player-grain
+    export carries it so a merge doesn't have to rely on display names.
+    """
+    out = []
+    for r in rows:
+        d = dict(r)
+        if not d.get("name_normalized"):
+            d["name_normalized"] = normalize_name(str(d.get(source_field) or ""))
+        out.append(d)
+    return out
+
+
+def _prepend_keys(rows, **keys):
+    """
+    Force every exported row to START with the same join-key columns,
+    filling in any the underlying query didn't supply itself.
+
+    csv.DictWriter takes its column order from the first row's keys, so
+    this is what makes every download open with year / week / team /
+    name_normalized in a predictable place rather than wherever that
+    particular SELECT happened to put them. A key already present on
+    the row keeps its own value and is simply moved to the front.
+    """
+    out = []
+    for r in rows:
+        d = dict(r)
+        head = {k: d.pop(k, v) for k, v in keys.items()}
+        out.append({**head, **d})
+    return out
+
+
 @app.route("/download/<data_type>")
 def download_csv(data_type):
     """
@@ -4945,6 +5106,8 @@ def download_csv(data_type):
             SELECT week, year, name, position, team, opponent, salary, projected_pts, ownership_pct
             FROM players WHERE week = ? AND year = ?
         """, (week, year))
+        rows = _prepend_keys(_with_name_key(rows), year=year, week=week,
+                             team=None, name=None, name_normalized=None)
         filename = f"slate_week{week}_{year}.csv"
 
     elif data_type == "history":
@@ -4961,6 +5124,8 @@ def download_csv(data_type):
                     ON hp.year = s.year AND hp.week = s.week AND hp.name_normalized = s.name_normalized
                 WHERE s.year = {_ph()} AND s.week = {_ph()}
             """, (year, week))
+            rows = _prepend_keys(_with_name_key(rows), year=year, week=week,
+                                 team=None, name=None, name_normalized=None)
             filename = f"history_week{week}_{year}.csv"
         else:
             # No filter given — full dataset across every year/week we have.
@@ -4976,6 +5141,8 @@ def download_csv(data_type):
                     ON hp.year = s.year AND hp.week = s.week AND hp.name_normalized = s.name_normalized
                 ORDER BY s.year, s.week
             """)
+            rows = _prepend_keys(_with_name_key(rows), year=None, week=None,
+                                 team=None, name=None, name_normalized=None)
             filename = "history_all.csv"
 
     elif data_type == "weather":
@@ -5069,7 +5236,7 @@ def download_csv(data_type):
         if not pfr_id:
             return jsonify(error="Missing pfr_id"), 400
         rows = db_fetchall(f"""
-            SELECT hp.year, hp.week, hp.team, hp.opponent,
+            SELECT hp.year, hp.week, hp.team, hp.name, hp.name_normalized, hp.opponent,
                    hp.dk_pts, hp.dk_pts_pfr_reported,
                    hp.pass_cmp, hp.pass_att, hp.pass_yds, hp.pass_td, hp.pass_int,
                    hp.rush_att, hp.rush_yds, hp.rush_td,
@@ -5081,6 +5248,8 @@ def download_csv(data_type):
             WHERE hp.pfr_id = {_ph()}
             ORDER BY hp.year DESC, hp.week DESC
         """, (pfr_id,))
+        rows = _prepend_keys(rows, year=None, week=None, team=None,
+                             name=None, name_normalized=None)
         filename = f"player_{pfr_id}.csv"
 
     elif data_type == "schedule":
@@ -5090,6 +5259,7 @@ def download_csv(data_type):
             WHERE year = {_ph()} AND home_away = 'h'
             ORDER BY week, kickoff
         """, (year,))
+        rows = _prepend_keys(rows, year=year, week=None)
         filename = f"schedule_{year}.csv"
 
     elif data_type == "fantasy-points-against":
@@ -5143,6 +5313,8 @@ def download_csv(data_type):
     elif data_type == "best-matchups":
         position = request.args.get("position", "ALL")
         rows = _compute_best_matchups(year, week, position)
+        rows = _prepend_keys(_with_name_key(rows), year=year, week=week,
+                             team=None, name=None, name_normalized=None)
         filename = f"best_matchups_week{week}_{year}.csv"
 
     elif data_type == "depth-charts":
@@ -5162,9 +5334,19 @@ def download_csv(data_type):
                 ORDER BY team, pos, string_rank
             """)
             filename = "depth_charts_all.csv"
+        # depth_charts is a full-replace snapshot with no week column of
+        # its own (see replace_depth_charts), so stamp the CURRENT NFL
+        # week onto every row — otherwise there's no key to merge this
+        # against any of the week-grained exports.
+        dc_year, dc_week = _get_current_nfl_week()
+        rows = _prepend_keys(_with_name_key(rows, "player_name"),
+                             year=dc_year, week=dc_week, team=None,
+                             name_normalized=None)
 
     elif data_type == "implied-points":
         rows = _compute_implied_points_table(year, week)
+        rows = _prepend_keys(_with_name_key(rows), year=year, week=week,
+                             team=None, name=None, name_normalized=None)
         filename = f"implied_points_week{week}_{year}.csv"
 
     elif data_type == "props":
@@ -5195,7 +5377,153 @@ def download_csv(data_type):
                     "line": p["line"], "actual": outcome.get("actual"),
                     "result": outcome.get("result"),
                 })
+            rows = _prepend_keys(_with_name_key(rows, "player_name"),
+                                 year=cur_year, week=cur_week, name_normalized=None)
             filename = f"props_week{cur_week}_{cur_year}.csv"
+
+    elif data_type == "usage":
+        position = request.args.get("position", "ALL")
+        sel_year = year
+        if sel_year is None:
+            r = db_fetchone("SELECT MAX(year) AS y FROM hist_player_stats")
+            sel_year = r["y"] if r else None
+        rows = _compute_usage_rows(sel_year, position) if sel_year else []
+        # Season-grain, so no week column — merge these on (year, team)
+        # or (year, name_normalized).
+        rows = _prepend_keys(_with_name_key(rows), year=sel_year,
+                             team=None, name=None, name_normalized=None)
+        filename = f"usage_{sel_year}.csv"
+
+    elif data_type == "implied-team-points":
+        # game_odds is a live full-replace table with no year/week of
+        # its own, so stamp the current NFL week on for merging.
+        itp_year, itp_week = _get_current_nfl_week()
+        rows = _prepend_keys(_compute_implied_team_points_rows(),
+                             year=itp_year, week=itp_week, team=None)
+        filename = f"implied_team_points_week{itp_week}_{itp_year}.csv"
+
+    elif data_type == "game-overview":
+        go_year, go_week = _get_current_nfl_week()
+        rows = _compute_game_overview_rows(go_year, go_week) if go_year else []
+        # Game-grain (one row per matchup), same shape as Weather —
+        # see the merge-key table for why that needs a different join
+        # than the per-team exports.
+        rows = _prepend_keys(rows, year=go_year, week=go_week)
+        filename = f"game_overview_week{go_week}_{go_year}.csv"
+
+    elif data_type == "standings":
+        # Long format — one row per submitter per week, rather than the
+        # page's wide Wk1/Wk2/... layout, so it merges directly and
+        # carries both challenges side by side.
+        sel_year = year
+        if sel_year is None:
+            r = db_fetchone("SELECT MAX(year) AS y FROM lineups")
+            sel_year = r["y"] if r and r["y"] else None
+        if sel_year is None:
+            r = db_fetchone("SELECT MAX(year) AS y FROM prop_picks")
+            sel_year = r["y"] if r else None
+
+        rows = []
+        if sel_year is not None:
+            by_submitter, lineup_weeks = _score_lineups_for_year(sel_year)
+            dropped = {}
+            for sub, wk_scores in by_submitter.items():
+                scored = {w: s for w, s in wk_scores.items() if s is not None}
+                dropped[sub] = min(scored, key=lambda w: scored[w]) if scored else None
+
+            prop_weeks = sorted(r["week"] for r in db_fetchall(
+                f"SELECT DISTINCT week FROM prop_picks WHERE year = {_ph()}", (sel_year,)))
+            prop_tally = {}
+            for w in prop_weeks:
+                wk_scores = _score_props_for_week(sel_year, w)
+                for p in db_fetchall(
+                    f"SELECT submitter, prop_bet_id, pick FROM prop_picks "
+                    f"WHERE year = {_ph()} AND week = {_ph()}", (sel_year, w)
+                ):
+                    t = prop_tally.setdefault((p["submitter"], w),
+                                              {"correct": 0, "scored": 0, "pending": 0})
+                    outcome = wk_scores.get(p["prop_bet_id"], {}).get("result")
+                    if outcome is None:
+                        t["pending"] += 1
+                    elif outcome != "push":
+                        t["scored"] += 1
+                        if outcome == p["pick"]:
+                            t["correct"] += 1
+
+            submitters = set(by_submitter) | {s for s, _ in prop_tally}
+            for sub in sorted(submitters):
+                sub_weeks = by_submitter.get(sub, {})
+                for w in sorted(set(lineup_weeks) | set(prop_weeks)):
+                    tally = prop_tally.get((sub, w))
+                    if w not in sub_weeks and tally is None:
+                        continue   # this submitter did nothing at all that week
+                    pts = sub_weeks.get(w)
+                    rows.append({
+                        "year": sel_year, "week": w, "submitter": sub,
+                        "lineup_points": pts,
+                        "lineup_status": ("scored" if pts is not None
+                                          else "pending" if w in sub_weeks else "no entry"),
+                        "is_dropped_week": dropped.get(sub) == w,
+                        "props_correct": tally["correct"] if tally else None,
+                        "props_scored": tally["scored"] if tally else None,
+                        "props_pending": tally["pending"] if tally else None,
+                    })
+        filename = f"standings_{sel_year}.csv"
+
+    elif data_type == "my-lineups":
+        submitter = request.args.get("submitter")
+        sel_year = year
+        if sel_year is None:
+            r = db_fetchone("SELECT MAX(year) AS y FROM lineups")
+            sel_year = r["y"] if r else None
+        rows = _lineup_player_rows(sel_year, week, submitter) if sel_year else []
+        if week is not None and submitter:
+            filename = f"lineup_{submitter}_week{week}_{sel_year}.csv"
+        else:
+            filename = f"lineups_{sel_year}_all.csv"
+
+    elif data_type == "my-props":
+        submitter = request.args.get("submitter")
+        sel_year = year
+        if sel_year is None:
+            r = db_fetchone("SELECT MAX(year) AS y FROM prop_picks")
+            sel_year = r["y"] if r else None
+
+        rows = []
+        if sel_year is not None:
+            scope_weeks = [week] if week is not None else sorted(
+                r["week"] for r in db_fetchall(
+                    f"SELECT DISTINCT week FROM prop_picks WHERE year = {_ph()}", (sel_year,)))
+            for w in scope_weeks:
+                wk_scores = _score_props_for_week(sel_year, w)
+                clause, params = "", [sel_year, w]
+                if submitter:
+                    clause = f" AND pp.submitter = {_ph()}"
+                    params.append(submitter)
+                for p in db_fetchall(f"""
+                    SELECT pp.submitter, pp.pick, pb.id, pb.player_name,
+                           pb.player_name_normalized, pb.stat_field, pb.line
+                    FROM prop_picks pp
+                    JOIN prop_bets pb ON pb.id = pp.prop_bet_id
+                    WHERE pp.year = {_ph()} AND pp.week = {_ph()}{clause}
+                    ORDER BY pp.submitter, pb.player_name
+                """, tuple(params)):
+                    outcome = wk_scores.get(p["id"], {})
+                    result = outcome.get("result")
+                    rows.append({
+                        "year": sel_year, "week": w, "submitter": p["submitter"],
+                        "player_name": p["player_name"],
+                        "name_normalized": p["player_name_normalized"],
+                        "stat_field": p["stat_field"], "line": p["line"],
+                        "pick": p["pick"], "actual": outcome.get("actual"),
+                        "result": result,
+                        "is_correct": (None if result is None or result == "push"
+                                       else result == p["pick"]),
+                    })
+        if week is not None and submitter:
+            filename = f"props_{submitter}_week{week}_{sel_year}.csv"
+        else:
+            filename = f"props_picks_{sel_year}_all.csv"
 
     else:
         return jsonify(error="Unknown data type"), 404
@@ -5251,82 +5579,10 @@ def standings():
 
     sel_year = years[0]
 
-    lineup_rows = db_fetchall(f"""
-        SELECT submitter, week, lineup_json
-        FROM lineups
-        WHERE year = {ph}
-        ORDER BY submitter, week
-    """, (sel_year,))
-
-    # Collect every distinct name we need to score, split by whether it's
-    # a DST pick (matched by team abbreviation) or an offensive player
-    # (matched by normalized name) — DST names come in wildly different
-    # formats depending on which salary source was used ("HOU DST",
-    # "Seahawks", "SEA", ...), so they need team_mapping's normalizer
-    # rather than the plain name join offense players use.
-    all_names = set()
-    all_teams = set()
-    parsed_lineups = []   # (submitter, week, [player dicts])
-    for row in lineup_rows:
-        players = json.loads(row["lineup_json"])
-        parsed_lineups.append((row["submitter"], row["week"], players))
-        for p in players:
-            if (p.get("slot") or "").upper() == "DST":
-                team = normalize_team(p["name"])
-                if team:
-                    all_teams.add(team)
-            else:
-                all_names.add(normalize_name(p["name"]))
-
-    # Pull actual scores for every (week, name_normalized) this season
-    # in one query, then look them up in memory below.
-    scores_by_week_name = {}   # (week, name_normalized) -> actual dk_pts
-    if all_names:
-        stats_rows = db_fetchall(f"""
-            SELECT week, name_normalized, COALESCE(dk_pts_pfr_reported, dk_pts) AS actual_pts
-            FROM hist_player_stats
-            WHERE year = {ph}
-        """, (sel_year,))
-        for r in stats_rows:
-            scores_by_week_name[(r["week"], r["name_normalized"])] = r["actual_pts"]
-
-    # Same for DST picks, keyed by (week, team) instead of name
-    scores_by_week_team = {}   # (week, team) -> dk_pts
-    if all_teams:
-        dst_rows = db_fetchall(f"""
-            SELECT week, team, dk_pts
-            FROM hist_dst_stats
-            WHERE year = {ph}
-        """, (sel_year,))
-        for r in dst_rows:
-            scores_by_week_team[(r["week"], r["team"])] = r["dk_pts"]
-
-    # Score every lineup; a week only counts if all 9 players matched
-    by_submitter = {}   # submitter -> {week: score}
-    weeks_seen = set()
-    for submitter, week, players in parsed_lineups:
-        weeks_seen.add(week)
-        total = 0.0
-        matched = 0
-        for p in players:
-            if (p.get("slot") or "").upper() == "DST":
-                team = normalize_team(p["name"])
-                pts  = scores_by_week_team.get((week, team)) if team else None
-            else:
-                key = (week, normalize_name(p["name"]))
-                pts = scores_by_week_name.get(key)
-
-            if pts is not None:
-                total += pts
-                matched += 1
-
-        by_submitter.setdefault(submitter, {})
-        if matched == 9:
-            by_submitter[submitter][week] = round(total, 2)
-        else:
-            by_submitter[submitter][week] = None   # pending / incomplete
-
-    weeks = sorted(weeks_seen)
+    # Scoring lives in _score_lineups_for_year() so the Standings page
+    # and the standings CSV export can't drift apart — same reason
+    # _score_props_for_week() is shared by Props, My Props and here.
+    by_submitter, weeks = _score_lineups_for_year(sel_year)
 
     # Build the leaderboard: drop each participant's single lowest
     # *fully-scored* week, sum the rest, rank descending.

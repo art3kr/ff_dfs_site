@@ -1,3 +1,4 @@
+{% import '_download_buttons.html' as dl %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -79,6 +80,10 @@
                 </select>
             </label>
         </form>
+        {{ dl.bar([
+            {'href': url_for('download_csv', data_type='my-props', year=year, week=week, submitter=submitter), 'label': 'These Picks'},
+            {'href': url_for('download_csv', data_type='my-props', year=year), 'label': 'All Picks', 'secondary': True, 'title': 'Every prop pick from every participant, for every week of this season'},
+        ]) }}
     </div>
 
     {% if rows %}

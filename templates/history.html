@@ -1,3 +1,4 @@
+{% import '_download_buttons.html' as dl %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,10 +69,10 @@
                 </select>
             </label>
         </form>
-        <div class="download-actions">
-            <a href="{{ url_for('download_csv', data_type='history', year=year, week=week) }}" class="download-btn">⬇ Download This Week</a>
-            <a href="{{ url_for('download_csv', data_type='history') }}" class="download-btn download-btn-all">⬇ Download All Data</a>
-        </div>
+        {{ dl.bar([
+            {'href': url_for('download_csv', data_type='history', year=year, week=week), 'label': 'This Week'},
+            {'href': url_for('download_csv', data_type='history'), 'label': 'All Data', 'secondary': True},
+        ]) }}
     </div>
 
     <div class="filter-bar">

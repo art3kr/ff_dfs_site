@@ -1,3 +1,4 @@
+{% import '_download_buttons.html' as dl %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,6 +52,13 @@
 {% if not years %}
     <p class="empty-state">No lineups have been submitted yet — standings will appear once the season gets underway.</p>
 {% else %}
+
+    <div class="page-controls">
+        <span></span>
+        {{ dl.bar([
+            {'href': url_for('download_csv', data_type='standings', year=year), 'label': 'This Season'},
+        ]) }}
+    </div>
 
     {% if standings %}
     <h2 class="standings-section-title">Season Standings — Lowest Week Dropped</h2>

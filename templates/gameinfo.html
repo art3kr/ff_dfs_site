@@ -1,3 +1,4 @@
+{% import '_download_buttons.html' as dl %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,11 +69,11 @@
                 </select>
             </label>
         </form>
-        <div class="download-actions">
-            <a href="{{ url_for('download_csv', data_type='gameinfo', year=year, week=week) }}" class="download-btn">⬇ Download This Week</a>
-            <a href="{{ url_for('download_csv', data_type='gameinfo') }}" class="download-btn download-btn-all">⬇ Download All Data</a>
-            <a href="{{ url_for('download_csv', data_type='gameinfo-by-team', year=year, week=week) }}" class="download-btn" title="One row per team instead of one per game — makes merging with History a direct match on year/week/team">⬇ Download for Merging with History</a>
-        </div>
+        {{ dl.bar([
+            {'href': url_for('download_csv', data_type='gameinfo', year=year, week=week), 'label': 'This Week'},
+            {'href': url_for('download_csv', data_type='gameinfo'), 'label': 'All Data', 'secondary': True},
+            {'href': url_for('download_csv', data_type='gameinfo-by-team', year=year, week=week), 'label': 'Merge-Friendly', 'title': 'One row per team instead of one per game - lets you merge on year/week/team like every other export, instead of checking both away_team and home_team'},
+        ]) }}
     </div>
 
     {% if games %}

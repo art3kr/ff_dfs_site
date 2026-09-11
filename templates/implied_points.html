@@ -1,3 +1,4 @@
+{% import '_download_buttons.html' as dl %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,9 +55,9 @@
 
     <div class="page-controls">
         <span></span>
-        <div class="download-actions">
-            <a href="{{ url_for('download_csv', data_type='implied-points', year=year, week=week) }}" class="download-btn">⬇ Download</a>
-        </div>
+        {{ dl.bar([
+            {'href': url_for('download_csv', data_type='implied-points', year=year, week=week), 'label': 'This Week'},
+        ]) }}
     </div>
 
     <p class="standings-note">

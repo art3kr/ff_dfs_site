@@ -1,3 +1,4 @@
+{% import '_download_buttons.html' as dl %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -108,7 +109,9 @@
     {% if games %}
     <div class="page-controls">
         <span></span>
-        <a href="{{ url_for('download_csv', data_type='player', pfr_id=pfr_id) }}" class="download-btn">⬇ Download CSV</a>
+        {{ dl.bar([
+            {'href': url_for('download_csv', data_type='player', pfr_id=pfr_id), 'label': 'All Data'},
+        ]) }}
     </div>
     <div class="table-wrapper">
         <table id="history-table">

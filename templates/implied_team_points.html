@@ -1,3 +1,4 @@
+{% import '_download_buttons.html' as dl %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,6 +54,13 @@
         favored, which raises the implied total; a positive spread lowers it. Both teams' implied
         totals always add up to the game's O/U.
     </p>
+
+    <div class="page-controls">
+        <span></span>
+        {{ dl.bar([
+            {'href': url_for('download_csv', data_type='implied-team-points'), 'label': 'This Week'},
+        ]) }}
+    </div>
 
     <div class="table-wrapper">
         <table id="history-table">

@@ -226,14 +226,85 @@
             </details>
 
             <details>
+                <summary>Downloading data — every tab has a button</summary>
+                <p>Every tab downloads as CSV, using the same set of labels everywhere:</p>
+                <ul class="info-list">
+                    <li><strong>This Week</strong> / <strong>This Season</strong> /
+                        <strong>This Team</strong> — exactly what's on screen right now,
+                        matching whatever year, week, position or team you've selected.</li>
+                    <li><strong>All Data</strong> — every year and week we hold, not just
+                        the current view. This is the one to grab for season-long analysis.</li>
+                    <li><strong>Merge-Friendly</strong> — only on Weather and Game Info.
+                        See the next section for why those two need it.</li>
+                </ul>
+            </details>
+
+            <details>
                 <summary>Merging downloaded data across tabs</summary>
-                <p>Most downloads already share the same <code>year</code>, <code>week</code>,
-                and <code>team</code> columns, so combining two of them in Excel/Sheets is a
-                direct match on those columns (e.g. a VLOOKUP/XLOOKUP on <code>team</code>).
-                Weather and Game Info are the exception — they're stored one row per game
-                rather than per team. Use the <strong>"Download for Merging with History"</strong>
-                button on those two pages instead of their regular download to get a
-                per-team version that matches everyone else's format.</p>
+                <p>Every download now starts with the same join-key columns, so combining
+                two of them is a direct match. What you join on depends on the file's
+                <em>grain</em> — what one row actually represents:</p>
+
+                <table class="info-table">
+                    <thead>
+                        <tr><th>One row is…</th><th>Join on</th><th>Tabs</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>a player in a week</td>
+                            <td><code>year</code> + <code>week</code> + <code>name_normalized</code></td>
+                            <td>Slate, History, Best Matchups, Implied Player Points,
+                                Props, My Props, My Lineups, a player's career page</td>
+                        </tr>
+                        <tr>
+                            <td>a player in a season</td>
+                            <td><code>year</code> + <code>name_normalized</code></td>
+                            <td>Usage</td>
+                        </tr>
+                        <tr>
+                            <td>a team in a week</td>
+                            <td><code>year</code> + <code>week</code> + <code>team</code></td>
+                            <td>Team Points, Implied Team Points, Depth Charts,
+                                Weather and Game Info (merge-friendly button only)</td>
+                        </tr>
+                        <tr>
+                            <td>a team in a season</td>
+                            <td><code>year</code> + <code>team</code> (+ <code>position</code>)</td>
+                            <td>Fantasy Pts Against</td>
+                        </tr>
+                        <tr>
+                            <td>a single game</td>
+                            <td><code>year</code> + <code>week</code> + <code>home_team</code>/<code>away_team</code></td>
+                            <td>Weather, Game Info, Game Overview, Schedule</td>
+                        </tr>
+                        <tr>
+                            <td>a participant in a week</td>
+                            <td><code>year</code> + <code>week</code> + <code>submitter</code></td>
+                            <td>Standings</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p><strong>Always join players on <code>name_normalized</code>, not the
+                display name.</strong> Sources spell names differently ("A.J. Brown" vs
+                "AJ Brown", "Patrick Mahomes II" vs "Patrick Mahomes"), so a match on
+                <code>name</code> will silently miss rows. <code>name_normalized</code> is
+                lowercase with punctuation stripped, and is on every player-level download
+                for exactly this reason.</p>
+
+                <p><strong>The game-grain exception.</strong> Weather, Game Info, Game
+                Overview and Schedule store one row per <em>matchup</em>, with separate
+                <code>home_team</code> and <code>away_team</code> columns — so matching them
+                against a per-player or per-team file would need an "either column" lookup,
+                which VLOOKUP and XLOOKUP can't do. Weather and Game Info therefore have a
+                <strong>Merge-Friendly</strong> button that reshapes each game into two rows
+                (one per team) with a plain <code>team</code> column. Use that one whenever
+                you're combining them with anything else.</p>
+
+                <p><strong>Joining on more than one column.</strong> Neither VLOOKUP nor
+                XLOOKUP matches on multiple columns natively. Build a helper column in both
+                sheets first — e.g. <code>=A2&amp;"-"&amp;B2&amp;"-"&amp;C2</code> to glue
+                year, week and name_normalized together — then look up against that.</p>
             </details>
 
         </div>
@@ -337,6 +408,40 @@
         font-size: 0.85rem;
         line-height: 1.5;
         color: var(--text-muted, #ccc);
+    }
+    .info-modal-body .info-list {
+        margin: 8px 0 2px 0;
+        padding-left: 20px;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: var(--text-muted, #ccc);
+    }
+    .info-modal-body .info-list li { margin-bottom: 5px; }
+
+    /* Merge-key reference. Scrolls horizontally on a phone rather than
+       squashing the Tabs column into unreadable slivers. */
+    .info-modal-body .info-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+        font-size: 0.78rem;
+        color: var(--text-muted, #ccc);
+    }
+    .info-modal-body .info-table th,
+    .info-modal-body .info-table td {
+        border: 1px solid var(--border, #333);
+        padding: 5px 7px;
+        text-align: left;
+        vertical-align: top;
+    }
+    .info-modal-body .info-table th {
+        color: var(--accent);
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .info-modal-body .info-table code {
+        font-size: 0.95em;
+        white-space: nowrap;
     }
 </style>
 

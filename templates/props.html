@@ -1,3 +1,4 @@
+{% import '_download_buttons.html' as dl %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,9 +56,9 @@
     {% if prop_rows %}
     <div class="page-controls">
         <span></span>
-        <div class="download-actions">
-            <a href="{{ url_for('download_csv', data_type='props') }}" class="download-btn">⬇ Download</a>
-        </div>
+        {{ dl.bar([
+            {'href': url_for('download_csv', data_type='props'), 'label': 'This Week'},
+        ]) }}
     </div>
 
     {% if current_user.is_authenticated %}
