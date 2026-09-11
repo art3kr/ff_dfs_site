@@ -234,8 +234,10 @@
                         matching whatever year, week, position or team you've selected.</li>
                     <li><strong>All Data</strong> — every year and week we hold, not just
                         the current view. This is the one to grab for season-long analysis.</li>
-                    <li><strong>Merge-Friendly</strong> — only on Weather and Game Info.
-                        See the next section for why those two need it.</li>
+                    <li><strong>Merge-Friendly: This Week</strong> /
+                        <strong>Merge-Friendly: All Data</strong> — only on Weather and
+                        Game Info, and available at both scopes just like the regular
+                        buttons. See the next section for why those two tabs need it.</li>
                 </ul>
             </details>
 
@@ -296,10 +298,17 @@
                 Overview and Schedule store one row per <em>matchup</em>, with separate
                 <code>home_team</code> and <code>away_team</code> columns — so matching them
                 against a per-player or per-team file would need an "either column" lookup,
-                which VLOOKUP and XLOOKUP can't do. Weather and Game Info therefore have a
-                <strong>Merge-Friendly</strong> button that reshapes each game into two rows
-                (one per team) with a plain <code>team</code> column. Use that one whenever
-                you're combining them with anything else.</p>
+                which VLOOKUP and XLOOKUP can't do. Weather and Game Info therefore have
+                <strong>Merge-Friendly</strong> buttons that reshape each game into two rows
+                (one per team) with a plain <code>team</code> column — at both scopes, so
+                you can pull a single week or every week ever recorded. Use these whenever
+                you're combining either tab with anything else.</p>
+
+                <p>On the merge-friendly Weather export specifically, the score columns
+                follow the row rather than the game: <code>score</code> is that row's own
+                team's score and <code>opponent_score</code> is the other side's, instead of
+                the fixed <code>home_score</code>/<code>away_score</code> pair you get from
+                the per-game download.</p>
 
                 <p><strong>Joining on more than one column.</strong> Neither VLOOKUP nor
                 XLOOKUP matches on multiple columns natively. Build a helper column in both

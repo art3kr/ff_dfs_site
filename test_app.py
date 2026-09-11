@@ -128,6 +128,23 @@ def seed():
                         "player_name_normalized) VALUES (?,?,?,?,?)",
                         (team, pos, rank, name, flaskapp.normalize_name(name)))
 
+    # Per-GAME tables, so the merge-friendly reshape has something to
+    # reshape. Two weeks, so "All Data" is provably broader than the
+    # week-scoped export rather than coincidentally equal.
+    for wk, (away, home, ascore, hscore) in [(1, ("den", "kan", 17, 24)),
+                                             (2, ("mia", "buf", 20, 13))]:
+        cur.execute(
+            "INSERT INTO hist_weather (year, week, game_date, status, away_team, "
+            "home_team, away_score, home_score, temp_f, condition, wind_mph, "
+            "wind_direction) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+            (YEAR, wk, "2026-09-1%d" % wk, "Final", away, home, ascore, hscore,
+             72, "Clear", 5, "SW"))
+        cur.execute(
+            "INSERT INTO hist_game_info (boxscore_url, year, week, team_home, "
+            "team_away, date, roof, surface) VALUES (?,?,?,?,?,?,?,?)",
+            ("/boxscores/2026%02d.htm" % wk, YEAR, wk, home, away,
+             "2026-09-1%d" % wk, "outdoors", "grass"))
+
     # Two scored weeks of one submitted lineup, so standings can be
     # checked as real arithmetic (including the drop-lowest-week rule).
     import json as _json
@@ -319,10 +336,13 @@ DOWNLOADS = [
     ("slate",                   "?year=2026&week=1", ["year", "week", "team", "name", "name_normalized"]),
     ("history",                 "?year=2026&week=1", None),
     ("history",                 "",                  None),
-    ("weather",                 "?year=2026&week=1", None),
-    ("weather-by-team",         "?year=2026&week=1", None),
-    ("gameinfo",                "?year=2026&week=1", None),
-    ("gameinfo-by-team",        "?year=2026&week=1", None),
+    ("weather",                 "?year=2026&week=1", ["year", "week"]),
+    ("weather",                 "",                  ["year", "week"]),
+    ("weather-by-team",         "?year=2026&week=1", ["year", "week", "team"]),
+    ("weather-by-team",         "",                  ["year", "week", "team"]),
+    ("gameinfo",                "?year=2026&week=1", ["year", "week"]),
+    ("gameinfo-by-team",        "?year=2026&week=1", ["year", "week", "team"]),
+    ("gameinfo-by-team",        "",                  ["year", "week", "team"]),
     ("player",                  "?pfr_id=nobody",    None),
     ("schedule",                "?year=2026",        None),
     ("fantasy-points-against",  "?year=2026",        None),
@@ -363,6 +383,49 @@ def test_downloads():
 
     r = client.get("/download/not-a-real-type")
     check("unknown data type returns 404", r.status_code == 404)
+
+
+def _read_csv(path):
+    import csv as _csv
+    body = client.get(path).get_data(as_text=True)
+    return list(_csv.DictReader(body.splitlines())) if body.strip() else []
+
+
+def test_merge_friendly_reshape():
+    section("merge-friendly (per-team) exports, both scopes")
+    for dt in ("weather-by-team", "gameinfo-by-team"):
+        wk_rows = _read_csv("/download/%s?year=2026&week=1" % dt)
+        all_rows = _read_csv("/download/%s" % dt)
+
+        check("%-18s week scope: 2 rows per game" % dt, len(wk_rows) == 2)
+        # The whole point of the "All Data" button: it must reach weeks
+        # other than the one currently on screen.
+        check("%-18s all scope covers both weeks" % dt,
+              {r["week"] for r in all_rows} == {"1", "2"})
+        check("%-18s all scope is broader than week scope" % dt,
+              len(all_rows) > len(wk_rows))
+        check("%-18s one plain `team` column, no home/away split" % dt,
+              bool(wk_rows) and "team" in wk_rows[0]
+              and not {"home_team", "away_team", "team_home", "team_away"}
+              & set(wk_rows[0]))
+        check("%-18s home and away sides both present" % dt,
+              {r["home_away"] for r in wk_rows} == {"h", "a"})
+        # team/opponent must actually be each other's mirror.
+        if len(wk_rows) == 2:
+            a, h = sorted(wk_rows, key=lambda r: r["home_away"])
+            check("%-18s team/opponent mirror correctly" % dt,
+                  a["team"] == h["opponent"] and a["opponent"] == h["team"])
+
+    # Scores are per-side, so they must flip with the row rather than
+    # staying as away_score/home_score (they were dropped entirely
+    # before this change).
+    rows = _read_csv("/download/weather-by-team?year=2026&week=1")
+    away = [r for r in rows if r["home_away"] == "a"][0]
+    home = [r for r in rows if r["home_away"] == "h"][0]
+    check("weather-by-team carries a per-side score",
+          away.get("score") == "17" and home.get("score") == "24")
+    check("weather-by-team opponent_score is the mirror",
+          away.get("opponent_score") == "24" and home.get("opponent_score") == "17")
 
 
 def test_every_tab_has_a_download():
@@ -434,6 +497,7 @@ if __name__ == "__main__":
     test_props_page()
     test_slate_filter_attributes()
     test_downloads()
+    test_merge_friendly_reshape()
     test_every_tab_has_a_download()
     test_routes_smoke()
     test_standings_scoring()         # mutates hist_player_stats at the end

@@ -311,8 +311,16 @@ see the table taxonomy in `CLAUDE.md`).
 Schedule are one row per matchup, with separate `home_team`/`away_team`
 (or `team_home`/`team_away`) columns. Matching those against a per-team
 file needs an OR-condition that VLOOKUP/XLOOKUP can't express, so
-Weather and Game Info each have a **Merge-Friendly** button that
-reshapes every game into two rows with a plain `team` column.
+Weather and Game Info each have **Merge-Friendly** buttons that reshape
+every game into two rows with a plain `team` column — at both scopes
+(`Merge-Friendly: This Week` and `Merge-Friendly: All Data`), so a
+multi-season join doesn't mean downloading a week at a time.
+
+On the merge-friendly Weather export the scores follow the row rather
+than the game: `score` is that row's own team's score and
+`opponent_score` the other side's, replacing the fixed
+`home_score`/`away_score` pair. (The reshape used to drop both
+entirely.)
 
 ### Example: adding Weather conditions to a History export in Excel
 

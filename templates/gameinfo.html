@@ -72,7 +72,8 @@
         {{ dl.bar([
             {'href': url_for('download_csv', data_type='gameinfo', year=year, week=week), 'label': 'This Week'},
             {'href': url_for('download_csv', data_type='gameinfo'), 'label': 'All Data', 'secondary': True},
-            {'href': url_for('download_csv', data_type='gameinfo-by-team', year=year, week=week), 'label': 'Merge-Friendly', 'title': 'One row per team instead of one per game - lets you merge on year/week/team like every other export, instead of checking both away_team and home_team'},
+            {'href': url_for('download_csv', data_type='gameinfo-by-team', year=year, week=week), 'label': 'Merge-Friendly: This Week', 'title': 'One row per team instead of one per game - lets you merge on year/week/team like every other export, instead of checking both team_away and team_home'},
+            {'href': url_for('download_csv', data_type='gameinfo-by-team'), 'label': 'Merge-Friendly: All Data', 'secondary': True, 'title': 'The same one-row-per-team reshape, but for every week of every season at once'},
         ]) }}
     </div>
 

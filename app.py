@@ -5184,8 +5184,17 @@ def download_csv(data_type):
         for g in game_rows:
             shared = {k: g[k] for k in ('year', 'week', 'game_date', 'status',
                                         'temp_f', 'condition', 'wind_mph', 'wind_direction')}
-            rows.append({**shared, 'team': g['away_team'], 'opponent': g['home_team'], 'home_away': 'a'})
-            rows.append({**shared, 'team': g['home_team'], 'opponent': g['away_team'], 'home_away': 'h'})
+            # score/opponent_score are per-SIDE, so they flip with the
+            # row — the per-game export's away_score/home_score can't
+            # carry over unchanged. They were being dropped entirely
+            # before, even though the query already fetches them.
+            rows.append({**shared, 'team': g['away_team'], 'opponent': g['home_team'],
+                         'home_away': 'a', 'score': g['away_score'],
+                         'opponent_score': g['home_score']})
+            rows.append({**shared, 'team': g['home_team'], 'opponent': g['away_team'],
+                         'home_away': 'h', 'score': g['home_score'],
+                         'opponent_score': g['away_score']})
+        rows = _prepend_keys(rows, year=None, week=None, team=None)
 
     elif data_type == "gameinfo":
         if year is not None and week is not None:
@@ -5230,6 +5239,7 @@ def download_csv(data_type):
                                         'vegas_line', 'over_under', 'temp', 'humidity', 'wind')}
             rows.append({**shared, 'team': g['team_away'], 'opponent': g['team_home'], 'home_away': 'a'})
             rows.append({**shared, 'team': g['team_home'], 'opponent': g['team_away'], 'home_away': 'h'})
+        rows = _prepend_keys(rows, year=None, week=None, team=None)
 
     elif data_type == "player":
         pfr_id = request.args.get("pfr_id", "")
