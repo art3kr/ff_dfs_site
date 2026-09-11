@@ -13,3 +13,5 @@ EmilyS
 SebastianC
 ChrisL
 SethB
+ChrisR
+SpencerR
