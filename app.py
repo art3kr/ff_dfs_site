@@ -3232,7 +3232,6 @@ def usage():
         FROM hist_player_stats
         WHERE year = {ph} AND position IN ('RB', 'WR', 'TE') {position_filter}
         GROUP BY name, position, team
-        HAVING games > 0
     """, params)
 
     rows = []
