@@ -33,6 +33,11 @@ document.addEventListener("DOMContentLoaded", function () {
     grid.addEventListener("click", function (e) {
         const btn = e.target.closest(".prop-pick-btn");
         if (!btn) return;
+        // Locked props render their buttons disabled, which already
+        // suppresses the click in every current browser — this is just
+        // belt-and-braces so the selection map can't drift out of sync
+        // with what submit_props() will actually accept.
+        if (btn.disabled) return;
 
         const card = btn.closest(".prop-card");
         const propId = card.dataset.propId;

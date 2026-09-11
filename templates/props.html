@@ -81,15 +81,20 @@
         {% for p in prop_rows %}
         {% set score = scores.get(p['id']) %}
         {% set existing_pick = existing_picks.get(p['id']) %}
-        <div class="prop-card" data-prop-id="{{ p['id'] }}">
+        {% set is_locked = p['id'] in locked_prop_ids %}
+        <div class="prop-card{% if is_locked %} prop-locked{% endif %}" data-prop-id="{{ p['id'] }}"
+             data-locked="{{ 'true' if is_locked else 'false' }}">
             <div class="prop-card-header">
-                <span class="player-name">{{ p['player_name'] }}</span>
+                <span class="player-name">
+                    {{ p['player_name'] }}
+                    {% if is_locked %}<span class="locked-badge">LOCKED</span>{% endif %}
+                </span>
                 <span class="prop-line">{{ p['stat_field'] | replace('_', ' ') | title }}: {{ p['line'] }}</span>
             </div>
             {% if current_user.is_authenticated %}
             <div class="prop-pick-buttons">
-                <button class="prop-pick-btn {% if existing_pick == 'over' %}selected{% endif %}" data-pick="over">Over</button>
-                <button class="prop-pick-btn {% if existing_pick == 'under' %}selected{% endif %}" data-pick="under">Under</button>
+                <button class="prop-pick-btn {% if existing_pick == 'over' %}selected{% endif %}" data-pick="over" {% if is_locked %}disabled title="This game has already started"{% endif %}>Over</button>
+                <button class="prop-pick-btn {% if existing_pick == 'under' %}selected{% endif %}" data-pick="under" {% if is_locked %}disabled title="This game has already started"{% endif %}>Under</button>
             </div>
             {% else %}
             <div class="prop-pick-buttons">

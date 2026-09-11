@@ -163,7 +163,44 @@
     // ------------------------------------------------------------------
     const searchInput  = document.getElementById("player-search");
     const hide3rdBox   = document.getElementById("hide-3rd-string");
+    const dayHeaders   = Array.from(tbody.querySelectorAll("tr.day-header-row"));
     let activePosition = "ALL";
+    let isSorted       = false;
+
+    // Day separators are just sibling <tr>s, so they don't disappear on
+    // their own when a filter empties the group beneath them (searching
+    // one player's name would otherwise leave every day header on
+    // screen above a single row), and they don't travel with the rows
+    // when a column sort reorders them.
+    function updateDayHeaderVisibility() {
+        if (!dayHeaders.length) return;
+
+        // A sort is global across the whole slate, so the day grouping
+        // no longer describes what's actually on screen — hide the
+        // separators entirely rather than leave them stranded at the
+        // top. The Kickoff column still carries each player's day.
+        if (isSorted) {
+            dayHeaders.forEach(h => h.classList.add("hidden-row"));
+            return;
+        }
+
+        let currentHeader = null;
+        let hasVisiblePlayer = false;
+        Array.from(tbody.children).forEach(function (row) {
+            if (row.classList.contains("day-header-row")) {
+                if (currentHeader) {
+                    currentHeader.classList.toggle("hidden-row", !hasVisiblePlayer);
+                }
+                currentHeader = row;
+                hasVisiblePlayer = false;
+            } else if (row.classList.contains("player-row")) {
+                if (!row.classList.contains("hidden-row")) hasVisiblePlayer = true;
+            }
+        });
+        if (currentHeader) {
+            currentHeader.classList.toggle("hidden-row", !hasVisiblePlayer);
+        }
+    }
 
     function applyFilters() {
         const searchTerm = (searchInput ? searchInput.value : "").trim().toLowerCase();
@@ -180,6 +217,8 @@
 
             row.classList.toggle("hidden-row", !(positionMatches && searchMatches && stringMatches));
         });
+
+        updateDayHeaderVisibility();
     }
 
     document.querySelectorAll(".filter-btn").forEach(function (btn) {
@@ -218,6 +257,12 @@
                 const r  = (!isNaN(an) && !isNaN(bn)) ? an - bn : at.localeCompare(bt);
                 return sortAsc ? r : -r;
             }).forEach(r => tbody.appendChild(r));
+
+            // Re-appending only the player rows leaves the day headers
+            // stranded wherever they were, so the grouping is gone the
+            // moment anything is sorted — hide them from here on.
+            isSorted = true;
+            updateDayHeaderVisibility();
         });
     });
 

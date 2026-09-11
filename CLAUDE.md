@@ -109,6 +109,18 @@ until production.** Two confirmed incidents:
    Postgres for anything even slightly unusual. When in doubt, search
    for confirmation of Postgres's actual behavior rather than assume.
 
+3. **The divergence also runs the OTHER way — Postgres forgiving,
+   SQLite wrong.** A timestamp comparison built with `.isoformat()`
+   produces a `T` separator (`2026-09-11T15:04:05`), but kickoffs are
+   stored by `load-schedule` as `'%Y-%m-%d %H:%M:%S'` with a space.
+   Postgres casts the string to a real timestamp and compares
+   correctly; SQLite compares TEXT lexicographically, where `' '`
+   (0x20) sorts *below* `'T'` (0x54) — so any kickoff on the same
+   calendar date as the cutoff compared backwards. This was live in
+   `_get_current_nfl_week()` and invisible precisely because prod is
+   Postgres. Any string compared against a TIMESTAMP column must be
+   formatted with `strftime('%Y-%m-%d %H:%M:%S')`, never `.isoformat()`.
+
 **Plain `INSERT` into a table with a `UNIQUE` constraint will
 eventually crash on a duplicate key from messy source data.** This
 has happened twice with real scraped data (a "field"/generic betting
@@ -170,6 +182,12 @@ comments/docs rather than presenting a guess as fact.
 
 - `_get_current_nfl_week()`, `_get_locked_teams(year, week)` — current
   week / per-team lock status, from real `game_schedule` kickoffs.
+- `_get_player_teams(year, week, names)` — normalized player name ->
+  team, tried against `players`, then `scoresandodds_props`, then
+  `hist_player_stats`. Exists because `prop_bets` has no team column,
+  so prop lock checks have nothing to join on directly. Used by both
+  `props()` (for the LOCKED badge) and `submit_props()` (to enforce
+  it), so display and enforcement can't disagree.
 - `_compute_implied_points_table()`, `_compute_implied_points()` —
   shared by Slate, Best Matchups, and Implied Player Points.
 - `_compute_implied_team_total(spread, over_under)` — shared by
@@ -204,18 +222,24 @@ since new scrapers/pages get added over time.
 
 ## Known open items (confirmed, not yet resolved)
 
-- **Prop picks have no server-side lock enforcement.** My Props shows
-  a "LOCKED" badge once a player's game has started (display only,
-  via `_get_locked_teams()`), but `submit_props()` itself doesn't
-  check this — a participant can currently still change a pick after
-  that player's game has already kicked off. Lineups *do* enforce
-  this server-side (see `submit_lineup()`'s own locked-team check);
-  props would need the equivalent.
-- **`static/slate_day_header_addition.js` was never integrated.**
-  Confirmed still sitting unused — `updateDayHeaderVisibility()`
-  doesn't appear anywhere in the actual `slate.js`. If Slate's
-  day-of-week filtering still needs this, it has to be manually wired
-  into `slate.js`'s existing filter-button handler.
+- **`CHANGELOG.md` is stale.** It stops at "[Step 4a] — Historical
+  data scrapers" and predates props, standings, best matchups,
+  implied points, depth charts, injuries, and most of the current
+  site. `README.md` and this file are current; `CHANGELOG.md` is not,
+  so don't use it to reason about what exists.
+
+### Recently closed (kept as context, not as work)
+
+- **Prop picks now DO have server-side lock enforcement.**
+  `submit_props()` rejects adding a locked prop, flipping over/under
+  on one, *and* dropping one already picked (that last case matters —
+  without it a losing pick could just be swapped out). Team resolution
+  goes through `_get_player_teams()`, since `prop_bets` has no team
+  column of its own.
+- **The day-header script is integrated and its scaffolding deleted.**
+  `updateDayHeaderVisibility()` now lives in `slate.js` proper and its
+  CSS in `style.css`; `static/slate_day_header_addition.js` and
+  `static/style_day_header_addition.css` are gone.
 
 ## Quick orientation for a fresh session
 

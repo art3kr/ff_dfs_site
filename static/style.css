@@ -1280,3 +1280,35 @@ header {
 .hide-3rd-toggle input[type="checkbox"] {
     cursor: pointer;
 }
+
+/* -----------------------------------------------------------------------
+   Slate — day separator rows (Thursday / Sunday / Monday groups)
+   ----------------------------------------------------------------------- */
+
+.day-header-row {
+    background: var(--bg-surface);
+}
+
+.day-header-cell {
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+/* -----------------------------------------------------------------------
+   Props — a prop whose game has already kicked off. Dimmed rather than
+   hidden, so an existing pick on it stays visible and legible; the
+   buttons themselves are rendered disabled server-side.
+   ----------------------------------------------------------------------- */
+
+.prop-card.prop-locked {
+    opacity: 0.65;
+}
+.prop-card.prop-locked .prop-pick-btn[disabled] {
+    cursor: not-allowed;
+}

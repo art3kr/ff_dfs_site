@@ -1376,13 +1376,23 @@ def add_props_command(csv_path, year, week):
     ~20 props participants pick 5 of. Expected columns: player_name,
     stat_field, line (e.g. "Bijan Robinson, rec, 5.5").
 
-    stat_field must be a real hist_player_stats column name (see
-    VALID_PROP_STAT_FIELDS) — props auto-score once that week's real
-    results are loaded via load-history, by comparing the actual value
-    in that column against the line. No separate manual result entry
-    needed. Composite prop types (e.g. "anytime TD" combining rush_td
-    + rec_td) aren't supported yet — every prop must map to exactly
-    one existing stat column.
+    stat_field must be one of VALID_PROP_STAT_FIELDS — props auto-score
+    once that week's real results are loaded via load-history, by
+    comparing the actual value against the line. No separate manual
+    result entry needed.
+
+    That set is two things combined:
+      - real hist_player_stats column names (pass_yds, rec, rush_td, ...)
+      - the composite fields in COMPOSITE_PROP_STAT_FIELDS, which sum
+        several columns instead of reading one: pass_rush_yds,
+        rush_rec_yds, and any_td (pass_td + rush_td + rec_td, scored
+        against an implicit 0.5 line, since the source prices anytime-TD
+        as yes/no odds rather than an explicit line)
+
+    Note that convert_scoresandodds_to_props_csv.py does NOT currently
+    emit any_td — it reports "touchdowns" as unconvertible. So any_td
+    props have to be added by hand if you want them; the scoring side
+    supports them either way.
 
     Safe to re-run for the same week (upserts on player+stat_field),
     e.g. to fix a typo in a line before anyone's picked yet.
@@ -2875,7 +2885,6 @@ def slate():
 
     existing_lineup = None
     if current_user.is_authenticated and current_week:
-        ph  = _ph(3)
         row2 = db_fetchone(
             f"SELECT lineup_json, total_salary, submitted_at FROM lineups "
             f"WHERE week = {_ph()} AND year = {_ph()} AND submitter = {_ph()}",
@@ -3011,14 +3020,6 @@ def history():
         return render_template("history.html",
                                players=[], year=None, week=None,
                                available_years=[], available_weeks_by_year={})
-
-    req_year = request.args.get("year", type=int)
-    req_week = request.args.get("week", type=int)
-
-    if req_year is None or req_week is None or (req_year, req_week) not in available:
-        sel_year, sel_week = available[0]   # most recent by default
-    else:
-        sel_year, sel_week = req_year, req_week
 
     available_years = sorted({y for y, w in available}, reverse=True)
     available_weeks_by_year = {}
@@ -3319,14 +3320,6 @@ def team_points():
                                available_years=[], available_weeks_by_year={},
                                team_colors=TEAM_ROW_COLORS)
 
-    req_year = request.args.get("year", type=int)
-    req_week = request.args.get("week", type=int)
-
-    if req_year is None or req_week is None or (req_year, req_week) not in available:
-        sel_year, sel_week = available[0]
-    else:
-        sel_year, sel_week = req_year, req_week
-
     available_years = sorted({y for y, w in available}, reverse=True)
     available_weeks_by_year = {}
     for y, w in available:
@@ -3506,6 +3499,64 @@ def _get_locked_teams(year: int, week: int) -> set:
     return locked
 
 
+def _get_player_teams(year: int, week: int, names_normalized: set) -> dict:
+    """
+    Resolve normalized player names to their canonical team abbreviation
+    for a given week — needed for prop lock enforcement, since prop_bets
+    has no team column of its own (unlike lineups, where submit_lineup()
+    can read team straight off the live `players` slate).
+
+    Three sources, in priority order:
+      1. `players` — the live DK slate for that week. Authoritative
+         while a week is current, which is exactly when locking matters.
+         Stores raw names, so it's normalized here in Python.
+      2. `scoresandodds_props` — the live prop table. Covers prop
+         players who aren't on the DK salary slate at all. Already
+         normalize_team()'d at scrape time, so it matches
+         game_schedule.team directly, same as the other two.
+      3. `hist_player_stats` — only populated after a game is played,
+         so this is the fallback for weeks already in the past.
+
+    Earlier sources win; later ones only fill gaps. A name that resolves
+    nowhere is simply absent from the result, and callers treat that as
+    "unknown team, don't lock" rather than blocking a legitimate
+    submission on a lookup miss.
+
+    Returns {name_normalized: team}.
+    """
+    if not names_normalized:
+        return {}
+
+    ph = _ph()
+    teams = {}
+
+    def _fill(pairs):
+        for name_norm, team in pairs:
+            if team and name_norm in names_normalized and name_norm not in teams:
+                teams[name_norm] = team
+
+    slate_rows = db_fetchall(
+        f"SELECT name, team FROM players WHERE year = {ph} AND week = {ph}",
+        (year, week)
+    )
+    _fill((normalize_name(r["name"]), r["team"]) for r in slate_rows)
+
+    placeholders = ", ".join([ph] * len(names_normalized))
+    prop_rows = db_fetchall(f"""
+        SELECT DISTINCT player_name_normalized, team FROM scoresandodds_props
+        WHERE player_name_normalized IN ({placeholders})
+    """, tuple(names_normalized))
+    _fill((r["player_name_normalized"], r["team"]) for r in prop_rows)
+
+    hist_rows = db_fetchall(f"""
+        SELECT DISTINCT name_normalized, team FROM hist_player_stats
+        WHERE year = {ph} AND week = {ph} AND name_normalized IN ({placeholders})
+    """, (year, week) + tuple(names_normalized))
+    _fill((r["name_normalized"], r["team"]) for r in hist_rows)
+
+    return teams
+
+
 def _get_current_nfl_week():
     """
     The actual current NFL week, derived from game_schedule's real
@@ -3534,13 +3585,24 @@ def _get_current_nfl_week():
 
     Returns (year, week) or (None, None) if game_schedule is empty.
     """
-    # .replace(tzinfo=None) keeps this a naive ISO string matching how
-    # kickoff values are actually stored (no timezone suffix) — using
-    # the recommended now(UTC) without stripping tzinfo would produce
-    # a "+00:00"-suffixed string that could compare incorrectly
-    # against the naive values already in the database.
-    buffer_cutoff_iso = (datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
-                         - datetime.timedelta(hours=24)).isoformat()
+    # This string must match EXACTLY how load-schedule stores kickoff:
+    # naive UTC, '%Y-%m-%d %H:%M:%S'. Two separate reasons, both real:
+    #
+    #   - .replace(tzinfo=None) keeps it naive. now(UTC) without that
+    #     produces a "+00:00" suffix that compares incorrectly against
+    #     the naive values already in the database.
+    #   - strftime rather than .isoformat(). isoformat uses a 'T'
+    #     separator, and on SQLite (where kickoff is TEXT) this
+    #     comparison is lexicographic — ' ' (0x20) sorts BELOW 'T'
+    #     (0x54). So a kickoff on the SAME calendar date as the cutoff
+    #     compared backwards: '2026-09-11 20:00:00' read as earlier
+    #     than '2026-09-11T15:04:05', silently dropping that week from
+    #     consideration. Postgres casts the string to a real timestamp
+    #     and was never affected, which is exactly why this one stayed
+    #     invisible in production — the reverse of the usual direction,
+    #     where SQLite is the permissive one hiding a Postgres bug.
+    buffer_cutoff = (datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+                     - datetime.timedelta(hours=24)).strftime('%Y-%m-%d %H:%M:%S')
     ph = _ph()
 
     row = db_fetchone(f"""
@@ -3549,7 +3611,7 @@ def _get_current_nfl_week():
         HAVING MAX(kickoff) >= {ph}
         ORDER BY year ASC, week ASC
         LIMIT 1
-    """, (buffer_cutoff_iso,))
+    """, (buffer_cutoff,))
     if row:
         return row["year"], row["week"]
 
@@ -4436,11 +4498,10 @@ def props():
     "live" for picking at a time). Past weeks' picks live on the new
     My Props page instead, same relationship as Slate vs. My Lineups.
 
-    NOTE — no lock mechanism yet: picks can be changed anytime,
-    including after games have started. Lineups have per-game locking
-    (see game_schedule); props don't yet. Worth adding the same
-    protection here if this becomes a real fairness concern in
-    practice.
+    Per-game locking matches lineups: once a prop player's game has
+    kicked off, that prop can't be newly picked, flipped, or dropped.
+    locked_prop_ids drives the display here; submit_props() re-checks
+    it server-side, which is the part that actually enforces it.
     """
     row = db_fetchone(
         "SELECT year, week FROM prop_bets ORDER BY year DESC, week DESC LIMIT 1"
@@ -4448,7 +4509,8 @@ def props():
 
     if row is None:
         return render_template("props.html", prop_rows=[], year=None, week=None,
-                               existing_picks={}, scores={}, props_submitted_at=None)
+                               existing_picks={}, scores={}, props_submitted_at=None,
+                               locked_prop_ids=[])
 
     sel_year, sel_week = row["year"], row["week"]
 
@@ -4461,6 +4523,20 @@ def props():
     """, (sel_year, sel_week))
 
     scores = _score_props_for_week(sel_year, sel_week)
+
+    # Which of this week's props belong to a game that's already kicked
+    # off — same resolution path submit_props() uses for enforcement, so
+    # the badge shown here and the rule applied there can't disagree.
+    locked_teams = _get_locked_teams(sel_year, sel_week)
+    locked_prop_ids = []
+    if locked_teams and prop_rows:
+        team_by_name = _get_player_teams(
+            sel_year, sel_week, {normalize_name(p["player_name"]) for p in prop_rows}
+        )
+        locked_prop_ids = [
+            p["id"] for p in prop_rows
+            if team_by_name.get(normalize_name(p["player_name"])) in locked_teams
+        ]
 
     existing_picks = {}
     props_submitted_at = None
@@ -4486,7 +4562,8 @@ def props():
     return render_template("props.html",
                            prop_rows=prop_rows, year=sel_year, week=sel_week,
                            existing_picks=existing_picks, scores=scores,
-                           props_submitted_at=props_submitted_at)
+                           props_submitted_at=props_submitted_at,
+                           locked_prop_ids=locked_prop_ids)
 
 
 @app.route("/submit-props", methods=["POST"])
@@ -4509,14 +4586,59 @@ def submit_props():
             return jsonify(error="Each pick must be 'over' or 'under'."), 400
 
     ph = _ph()
-    placeholders = ", ".join([ph] * len(prop_bet_ids))
-    valid_rows = db_fetchall(f"""
-        SELECT id FROM prop_bets
-        WHERE year = {ph} AND week = {ph} AND id IN ({placeholders})
-    """, (year, week) + tuple(prop_bet_ids))
-    valid_ids = {r["id"] for r in valid_rows}
-    if len(valid_ids) != 5:
+    week_props = db_fetchall(f"""
+        SELECT id, player_name, player_name_normalized FROM prop_bets
+        WHERE year = {ph} AND week = {ph}
+    """, (year, week))
+    prop_by_id = {r["id"]: r for r in week_props}
+    if not set(prop_bet_ids).issubset(prop_by_id.keys()):
         return jsonify(error="One or more selected props are invalid for this week."), 400
+
+    # --- Per-game lock enforcement (the real boundary — same reasoning
+    # as submit_lineup()'s own check: anything the page does client-side
+    # is a UX convenience that could be bypassed by calling this
+    # endpoint directly, so it's re-verified from scratch here). ---
+    locked_teams = _get_locked_teams(year, week)
+    if locked_teams:
+        team_by_name = _get_player_teams(
+            year, week, {r["player_name_normalized"] for r in week_props}
+        )
+        existing = {
+            r["prop_bet_id"]: r["pick"]
+            for r in db_fetchall(
+                f"SELECT prop_bet_id, pick FROM prop_picks "
+                f"WHERE year = {ph} AND week = {ph} AND submitter = {ph}",
+                (year, week, current_user.username)
+            )
+        }
+        submitted = {p["prop_bet_id"]: p["pick"] for p in picks}
+
+        def _is_locked(prop_bet_id):
+            row = prop_by_id.get(prop_bet_id)
+            team = team_by_name.get(row["player_name_normalized"]) if row else None
+            return bool(team and team in locked_teams)
+
+        # Adding a locked prop, or flipping over/under on one already
+        # picked, both mean betting on a game whose result is already
+        # partly known. An UNCHANGED pick passes through untouched —
+        # same grandfathering rule lineups use for a player who was
+        # already in the lineup before their game started.
+        for prop_bet_id, pick in submitted.items():
+            if _is_locked(prop_bet_id) and existing.get(prop_bet_id) != pick:
+                return jsonify(error=(
+                    f"{prop_by_id[prop_bet_id]['player_name']}'s game has already "
+                    f"started — you can't add or change a pick on a game that's "
+                    f"already kicked off."
+                )), 400
+
+        # Dropping a locked pick has to be blocked too, or a losing pick
+        # could simply be swapped out for a prop that hasn't started yet.
+        for prop_bet_id in existing:
+            if prop_bet_id not in submitted and _is_locked(prop_bet_id):
+                return jsonify(error=(
+                    f"{prop_by_id[prop_bet_id]['player_name']}'s game has already "
+                    f"started — you can't remove a pick you already made on it."
+                )), 400
 
     conn = get_db()
     cur = conn.cursor()
@@ -4527,7 +4649,14 @@ def submit_props():
     # below — the frontend needs this to show the "Picks submitted"
     # confirmation banner immediately, since this endpoint doesn't
     # trigger a page reload.
-    submitted_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat()
+    #
+    # strftime, not .isoformat(): isoformat's 'T' separator would make
+    # the banner read "2026-09-11T15:30" right after submitting but
+    # "2026-09-11 15:30" after a reload (Postgres hands back a real
+    # datetime, which str()s with a space). Same format the DB-side
+    # default produces, so the two paths now agree.
+    submitted_at = (datetime.datetime.now(datetime.timezone.utc)
+                    .replace(tzinfo=None).strftime('%Y-%m-%d %H:%M:%S'))
     for p in picks:
         cur.execute(f"""
             INSERT INTO prop_picks (year, week, submitter, prop_bet_id, pick, submitted_at)
