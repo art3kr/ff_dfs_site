@@ -1267,18 +1267,30 @@ header {
     border-color: var(--accent);
 }
 
-.hide-3rd-toggle {
+/* The toggles sit together as one group so they read as a set of
+   related narrowing options, separate from the position buttons. */
+.slate-toggle-group {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-left: 10px;
+}
+
+.slate-toggle {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    margin-left: 10px;
     font-size: 0.8rem;
     color: var(--text-muted);
     cursor: pointer;
     user-select: none;
 }
-.hide-3rd-toggle input[type="checkbox"] {
+.slate-toggle input[type="checkbox"] {
     cursor: pointer;
+}
+.slate-toggle:hover {
+    color: var(--text);
 }
 
 /* -----------------------------------------------------------------------

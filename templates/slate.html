@@ -79,10 +79,20 @@
                 <button class="filter-btn pos-te-btn"  data-pos="TE">TE</button>
                 <button class="filter-btn pos-dst-btn" data-pos="DST">DST</button>
                 <input type="text" id="player-search" class="player-search-input" placeholder="Search players…">
-                <label class="hide-3rd-toggle">
-                    <input type="checkbox" id="hide-3rd-string">
-                    Hide 3rd string
-                </label>
+                <span class="slate-toggle-group">
+                    <label class="slate-toggle" title="Hide players whose game has already kicked off">
+                        <input type="checkbox" id="hide-locked">
+                        Hide locked
+                    </label>
+                    <label class="slate-toggle">
+                        <input type="checkbox" id="hide-2nd-string">
+                        Hide 2nd string
+                    </label>
+                    <label class="slate-toggle">
+                        <input type="checkbox" id="hide-3rd-string">
+                        Hide 3rd string
+                    </label>
+                </span>
             </div>
             {% if week %}
             <a href="{{ url_for('download_csv', data_type='slate', year=year, week=week) }}" class="download-btn">⬇ Download CSV</a>

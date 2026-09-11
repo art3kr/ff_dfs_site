@@ -151,7 +151,7 @@ happens to work in dev will break in production.
 
 **Test everything end-to-end before considering it done — not just
 "looks right on inspection."** The established pattern throughout:
-verify syntax first (`python3 -m py_compile`, and a Jinja2
+verify syntax first (`python -m py_compile`, and a Jinja2
 `Environment.get_template()` load for any touched template), then
 actually exercise the code with Flask's `test_client()` against a
 real (if minimal) SQLite database, asserting on the actual rendered
@@ -159,6 +159,21 @@ output or actual computed values — not just that it didn't crash.
 Several real bugs in this project were only caught this way (wrong
 math, a crash that only appears in Postgres, a template variable that
 was never actually wired to its route).
+
+`test_app.py` is that harness, made permanent — run it with
+`venv\Scripts\python.exe test_app.py` (no pytest). **Read its header
+before adding to it.** The important part isn't the assertions, it's
+the first three lines of setup: `.env` points DATABASE_URL at the
+production Postgres and `app.py` calls `load_dotenv()` at import, so
+importing app.py carelessly runs `_auto_init()` against **production**.
+The file overrides DATABASE_URL to a temp SQLite path *before* the
+import (python-dotenv defaults to `override=False`, so the already-set
+value wins) and then asserts `not _is_postgres()`. Nothing may import
+app above those lines. Reuse that harness rather than rebuilding it.
+
+Testing on SQLite is also deliberate, not just safety: it's the only
+engine that reproduces the timestamp-comparison bug class in gotcha 3
+above, since Postgres silently casts the string and hides it.
 
 **Never build a new scraper without a diagnostic run against the real
 target page first.** Every scraper in this project was built only

@@ -161,9 +161,11 @@
     // .hidden-row (which would make the last-clicked filter silently
     // override any others already active).
     // ------------------------------------------------------------------
-    const searchInput  = document.getElementById("player-search");
-    const hide3rdBox   = document.getElementById("hide-3rd-string");
-    const dayHeaders   = Array.from(tbody.querySelectorAll("tr.day-header-row"));
+    const searchInput   = document.getElementById("player-search");
+    const hide3rdBox    = document.getElementById("hide-3rd-string");
+    const hide2ndBox    = document.getElementById("hide-2nd-string");
+    const hideLockedBox = document.getElementById("hide-locked");
+    const dayHeaders    = Array.from(tbody.querySelectorAll("tr.day-header-row"));
     let activePosition = "ALL";
     let isSorted       = false;
 
@@ -205,17 +207,32 @@
     function applyFilters() {
         const searchTerm = (searchInput ? searchInput.value : "").trim().toLowerCase();
         const hide3rd    = hide3rdBox ? hide3rdBox.checked : false;
+        const hide2nd    = hide2ndBox ? hide2ndBox.checked : false;
+        const hideLocked = hideLockedBox ? hideLockedBox.checked : false;
 
         rows.forEach(function (row) {
-            const rp     = row.dataset.position.toUpperCase();
-            const name   = (row.dataset.name || "").toLowerCase();
-            const string = row.dataset.string || "";
+            const rp       = row.dataset.position.toUpperCase();
+            const name     = (row.dataset.name || "").toLowerCase();
+            const string   = row.dataset.string || "";
+            const isLocked = row.dataset.locked === "true";
 
             const positionMatches = activePosition === "ALL" || rp === activePosition;
             const searchMatches   = searchTerm === "" || name.includes(searchTerm);
-            const stringMatches   = !hide3rd || string !== "3rd";
+            // Depth filters are independent rather than a single
+            // threshold, so "hide 3rd" alone still behaves exactly as
+            // it did. Players with no depth-chart entry at all carry
+            // "—" and are never caught by either — they're unknown,
+            // not known-to-be-deep.
+            const stringMatches   = (!hide3rd || string !== "3rd")
+                                 && (!hide2nd || string !== "2nd");
+            // A locked player already in the lineup stays in the
+            // sidebar either way; this only clears them off the table.
+            const lockMatches     = !hideLocked || !isLocked;
 
-            row.classList.toggle("hidden-row", !(positionMatches && searchMatches && stringMatches));
+            row.classList.toggle(
+                "hidden-row",
+                !(positionMatches && searchMatches && stringMatches && lockMatches)
+            );
         });
 
         updateDayHeaderVisibility();
@@ -233,9 +250,9 @@
     if (searchInput) {
         searchInput.addEventListener("input", applyFilters);
     }
-    if (hide3rdBox) {
-        hide3rdBox.addEventListener("change", applyFilters);
-    }
+    [hide3rdBox, hide2ndBox, hideLockedBox].forEach(function (box) {
+        if (box) box.addEventListener("change", applyFilters);
+    });
 
     // ------------------------------------------------------------------
     // Column sorting

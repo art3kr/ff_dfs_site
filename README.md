@@ -205,6 +205,24 @@ skip straight to that workflow's Step 2.
 
 ---
 
+## Tests
+
+```cmd
+venv\Scripts\python.exe test_app.py
+```
+
+No pytest, no runner — one file, run it directly. Exits non-zero on
+failure, so it works as a pre-push check. Covers the prop lock rules,
+`_get_current_nfl_week`'s timestamp handling, the Slate filter row
+attributes, and a 200-check on every GET route.
+
+It builds a throwaway SQLite database in your temp folder and never
+touches Render. That safety depends on it overriding `DATABASE_URL`
+*before* importing `app` — read the header comment before adding to
+it, since getting that wrong means running tests against production.
+
+---
+
 ## Future Ideas — Not Yet Implemented
 
 Notes on data sources worth revisiting later, not committed to yet.
