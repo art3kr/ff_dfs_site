@@ -1247,3 +1247,36 @@ header {
     color: var(--text-muted);
 }
 .prop-signin-prompt a { color: var(--accent); }
+
+/* -----------------------------------------------------------------------
+   Slate — player search box and hide-3rd-string toggle
+   ----------------------------------------------------------------------- */
+
+.player-search-input {
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text);
+    font-size: 0.8rem;
+    min-width: 160px;
+    margin-left: 8px;
+}
+.player-search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.hide-3rd-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 10px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+}
+.hide-3rd-toggle input[type="checkbox"] {
+    cursor: pointer;
+}

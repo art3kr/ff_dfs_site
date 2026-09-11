@@ -78,6 +78,11 @@
                 <button class="filter-btn pos-wr-btn"  data-pos="WR">WR</button>
                 <button class="filter-btn pos-te-btn"  data-pos="TE">TE</button>
                 <button class="filter-btn pos-dst-btn" data-pos="DST">DST</button>
+                <input type="text" id="player-search" class="player-search-input" placeholder="Search players…">
+                <label class="hide-3rd-toggle">
+                    <input type="checkbox" id="hide-3rd-string">
+                    Hide 3rd string
+                </label>
             </div>
             {% if week %}
             <a href="{{ url_for('download_csv', data_type='slate', year=year, week=week) }}" class="download-btn">⬇ Download CSV</a>
@@ -114,6 +119,7 @@
                         data-salary="{{ p['salary'] }}"
                         data-proj="{{ p['projected_pts'] }}"
                         data-team="{{ p['team'] }}"
+                        data-string="{{ depth_chart_strings.get(p['name'], '') }}"
                         data-locked="{{ 'true' if is_locked else 'false' }}">
 
                         <td class="pos-badge">{{ p['position'] }}</td>

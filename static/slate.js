@@ -156,19 +156,47 @@
     }
 
     // ------------------------------------------------------------------
-    // Position filter buttons
+    // Combined filtering — position + search + hide-3rd-string all
+    // apply together, rather than each independently toggling
+    // .hidden-row (which would make the last-clicked filter silently
+    // override any others already active).
     // ------------------------------------------------------------------
+    const searchInput  = document.getElementById("player-search");
+    const hide3rdBox   = document.getElementById("hide-3rd-string");
+    let activePosition = "ALL";
+
+    function applyFilters() {
+        const searchTerm = (searchInput ? searchInput.value : "").trim().toLowerCase();
+        const hide3rd    = hide3rdBox ? hide3rdBox.checked : false;
+
+        rows.forEach(function (row) {
+            const rp     = row.dataset.position.toUpperCase();
+            const name   = (row.dataset.name || "").toLowerCase();
+            const string = row.dataset.string || "";
+
+            const positionMatches = activePosition === "ALL" || rp === activePosition;
+            const searchMatches   = searchTerm === "" || name.includes(searchTerm);
+            const stringMatches   = !hide3rd || string !== "3rd";
+
+            row.classList.toggle("hidden-row", !(positionMatches && searchMatches && stringMatches));
+        });
+    }
+
     document.querySelectorAll(".filter-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
             document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
-            const pos = btn.dataset.pos;
-            rows.forEach(function (row) {
-                const rp = row.dataset.position.toUpperCase();
-                row.classList.toggle("hidden-row", pos !== "ALL" && rp !== pos);
-            });
+            activePosition = btn.dataset.pos;
+            applyFilters();
         });
     });
+
+    if (searchInput) {
+        searchInput.addEventListener("input", applyFilters);
+    }
+    if (hide3rdBox) {
+        hide3rdBox.addEventListener("change", applyFilters);
+    }
 
     // ------------------------------------------------------------------
     // Column sorting
