@@ -151,6 +151,19 @@ sitting on disk can silently re-introduce old codes on a future
 a real, confirmed bug — the fix has to be at the ingestion boundary,
 not just the source.
 
+**Name keys drop generational suffixes, and loaders must build them
+with `_name_key()`.** Sources disagree on Jr./Sr./II–V in both
+directions (FantasyPros "James Cook III" vs PFR "James Cook"; PFR
+"Kenneth Walker III"), which left those players pending in Standings
+until 2026-09-15. `normalize_name()` now drops a trailing suffix. Any
+loader writing a `name_normalized`/`player_name_normalized` column must
+go through `_name_key(stored_key, display_name)`, never copy the CSV's
+key as-is and never rebuild from the display name alone: RotoGuru's
+display names are "Manning, Peyton" (key "peyton manning"), so
+rebuilding from the name would break ~51k historical rows. If
+`normalize_name()` ever changes again, run `flask renormalize-names
+--dry-run`, then without the flag, to rewrite keys already stored.
+
 **Always use `_ph()` / `_ph(n)` for query placeholders, never a
 hardcoded `?` or `%s`.** This is what makes every query dual-dialect
 (SQLite uses `?`, Postgres uses `%s`). A hardcoded placeholder that

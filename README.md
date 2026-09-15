@@ -101,7 +101,9 @@ PFR uses a slug (e.g., `McCAC00`).
 
 The `name_normalized` column (lowercase, no punctuation, first + last) is
 the join key between the two datasets. It works for ~95% of players.
-Edge cases (Jr./Sr., name changes, DST teams) are handled at query time.
+Generational suffixes (Jr., Sr., II–V) are dropped from the key, since
+sources disagree on them ("James Cook III" vs "James Cook"). DST teams
+are matched by team code instead. Name changes aren't handled.
 
 ---
 

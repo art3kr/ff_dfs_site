@@ -331,6 +331,99 @@ def test_standings_scoring():
           by_submitter["tester"].get(2) is None)
 
 
+def test_name_suffixes():
+    section("name suffixes (Jr./Sr./II-V) don't break the join key")
+    n = flaskapp.normalize_name
+    for raw, want in [("James Cook III", "james cook"), ("Brian Thomas Jr.", "brian thomas"),
+                      ("Patrick Mahomes II", "patrick mahomes"), ("Stetson Bennett IV", "stetson bennett"),
+                      ("Deebo Samuel Sr.", "deebo samuel"), ("Kenneth  Walker III", "kenneth walker"),
+                      ("Josh Allen", "josh allen"), ("Tre V", "tre v")]:
+        check("normalize_name(%r) == %r (got %r)" % (raw, want, n(raw)), n(raw) == want)
+
+    k = flaskapp._name_key
+    check("_name_key keeps a stored key over a 'Last, First' display name",
+          k("peyton manning", "Manning, Peyton") == "peyton manning")
+    check("_name_key drops a suffix from a stored key",
+          k("robert griffin iii", "Griffin III, Robert") == "robert griffin")
+    check("_name_key falls back to the name when the stored key is NaN",
+          k(float("nan"), "James Cook III") == "james cook")
+
+    # Salary-style names in the lineup vs PFR-style names in the stats,
+    # suffixes mismatched in both directions. All 9 must match to score.
+    import json as _json
+    wk, total = 3, 72.0
+    pairs = [("QB",   "Patrick Mahomes II", "Patrick Mahomes",     20.0),
+             ("RB",   "James Cook III",     "James Cook",          10.0),
+             ("RB",   "Kenneth Walker",     "Kenneth Walker III",   9.0),
+             ("WR",   "Brian Thomas Jr.",   "Brian Thomas",         8.0),
+             ("WR",   "Marvin Harrison",    "Marvin Harrison Jr.",  7.0),
+             ("WR",   "Deebo Samuel Sr.",   "Deebo Samuel",         6.0),
+             ("TE",   "Harold Fannin Jr.",  "Harold Fannin",        5.0),
+             ("FLEX", "Luther Burden III",  "Luther Burden",        4.0)]
+    conn = flaskapp._connect()
+    lineup = [{"slot": s, "name": ln, "position": s, "salary": 5000} for s, ln, _, _ in pairs]
+    lineup.append({"slot": "DST", "name": "Buffalo Bills", "position": "DST", "salary": 3000})
+    conn.execute("INSERT INTO lineups (week, year, submitter, lineup_json, total_salary) "
+                 "VALUES (?,?,?,?,?)", (wk, YEAR, "suffixes", _json.dumps(lineup), 43000))
+    for i, (_, _, stats_name, pts) in enumerate(pairs):
+        pfr_key = stats_name.lower().replace(".", "")      # the key as PFR's CSV carries it
+        conn.execute("INSERT INTO hist_player_stats (pfr_id, name, name_normalized, year, week, "
+                     "team, dk_pts) VALUES (?,?,?,?,?,?,?)",
+                     ("SUFX%02d" % i, stats_name, k(pfr_key, stats_name), YEAR, wk, "buf", pts))
+    conn.execute("INSERT INTO hist_dst_stats (year, week, team, dk_pts) VALUES (?,?,?,?)",
+                 (YEAR, wk, "buf", 3.0))
+    conn.commit()
+    conn.close()
+    with flaskapp.app.app_context():
+        by_submitter, _ = flaskapp._score_lineups_for_year(YEAR)
+    got = by_submitter.get("suffixes", {}).get(wk)
+    check("lineup with mismatched suffixes fully scores %.1f (got %s)" % (total, got), got == total)
+
+    # renormalize-names rewrites old keys, skips a UNIQUE collision, and
+    # a dry run writes nothing.
+    conn = flaskapp._connect()
+    conn.executemany("INSERT INTO hist_dfs_salaries (week, year, name, name_normalized, source) "
+                     "VALUES (?,?,?,?,?)",
+                     [(9, YEAR, "James Cook III", "james cook iii", "t"),
+                      (9, YEAR, "Foo Bar Jr.", "foo bar jr", "t"),
+                      (9, YEAR, "Foo Bar", "foo bar", "t")])
+    conn.execute("INSERT INTO prop_bets (year, week, player_name, player_name_normalized, "
+                 "stat_field, line) VALUES (?,?,?,?,?,?)",
+                 (YEAR, 9, "Brian Thomas Jr.", "brian thomas jr", "rec_yds", 55.5))
+    conn.commit()
+    conn.close()
+
+    def keys():
+        c = flaskapp._connect()
+        sal = [r[0] for r in c.execute(
+            "SELECT name_normalized FROM hist_dfs_salaries WHERE week = 9 ORDER BY id")]
+        prop = c.execute("SELECT player_name_normalized FROM prop_bets WHERE week = 9").fetchone()[0]
+        c.close()
+        return sal, prop
+
+    runner = flaskapp.app.test_cli_runner()
+    dry = runner.invoke(args=["renormalize-names", "--dry-run"])
+    check("renormalize-names --dry-run exits cleanly", dry.exit_code == 0)
+    check("dry run writes nothing",
+          keys() == (["james cook iii", "foo bar jr", "foo bar"], "brian thomas jr"))
+    real = runner.invoke(args=["renormalize-names"])
+    sal, prop = keys()
+    check("renormalize-names exits cleanly", real.exit_code == 0)
+    check("salary key loses its suffix (got %r)" % sal[0], sal[0] == "james cook")
+    check("colliding key left alone and reported",
+          sal[1] == "foo bar jr" and "already exists" in real.output)
+    check("prop_bets key loses its suffix (got %r)" % prop, prop == "brian thomas")
+
+    conn = flaskapp._connect()
+    conn.execute("DELETE FROM lineups WHERE submitter = 'suffixes'")
+    conn.execute("DELETE FROM hist_player_stats WHERE week = ?", (wk,))
+    conn.execute("DELETE FROM hist_dst_stats WHERE week = ?", (wk,))
+    conn.execute("DELETE FROM hist_dfs_salaries WHERE week = 9")
+    conn.execute("DELETE FROM prop_bets WHERE week = 9")
+    conn.commit()
+    conn.close()
+
+
 # (data_type, querystring, expected leading key columns)
 DOWNLOADS = [
     ("slate",                   "?year=2026&week=1", ["year", "week", "team", "name", "name_normalized"]),
@@ -501,6 +594,7 @@ if __name__ == "__main__":
     test_every_tab_has_a_download()
     test_routes_smoke()
     test_standings_scoring()         # mutates hist_player_stats at the end
+    test_name_suffixes()             # after standings: adds (then removes) a week 3
     test_timestamp_format()          # must stay last; rewrites game_schedule
 
     print()

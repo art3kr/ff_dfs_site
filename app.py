@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import random
 import datetime
@@ -67,15 +68,46 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-in-prod")
 SALARY_CAP = 50_000
 
 
+_NAME_SUFFIX_RE = re.compile(r"\s+(jr|sr|ii|iii|iv|v)$")
+
+
 def normalize_name(name: str) -> str:
     """
-    Matches the exact normalization used by the scrapers (scrape_pfr.py,
-    scrape_rotoguru.py, etc.) so names in a submitted lineup_json can be
-    joined against hist_player_stats the same way History/Player pages
-    already do.
+    The name_normalized join key: lowercase, punctuation stripped, and a
+    trailing generational suffix (Jr., Sr., II–V) dropped.
+
+    Sources disagree on suffixes in both directions: FantasyPros salaries
+    say "James Cook III" and "Brian Thomas Jr." where PFR says "James
+    Cook" and "Brian Thomas", while PFR keeps "Kenneth Walker III". Keying
+    on the suffix left those players pending in Standings forever
+    (confirmed 2026-09-15). The suffix is only dropped when at least two
+    words remain, so a one-word remainder never becomes the key.
+
+    Loaders recompute this at insert time rather than trusting a CSV's
+    own name_normalized column, and `flask renormalize-names` rewrites
+    keys already in the database whenever this function changes.
     """
-    import re
-    return re.sub(r"[^a-z0-9 ]", "", name.lower().strip())
+    key = re.sub(r"[^a-z0-9 ]", "", name.lower().strip())
+    key = re.sub(r"\s+", " ", key)
+    stripped = _NAME_SUFFIX_RE.sub("", key).strip()
+    return stripped if " " in stripped else key
+
+
+def _name_key(stored, name) -> str:
+    """
+    normalize_name() as applied by the loaders. Re-normalizes the source
+    file's own name_normalized when it has one, and only falls back to the
+    display name when it doesn't, because display names aren't always
+    "First Last": RotoGuru's are "Manning, Peyton" with the key already
+    "peyton manning". Re-normalizing a stored key only drops a suffix.
+    """
+    for v in (stored, name):
+        if v is None or (isinstance(v, float) and v != v):   # None or NaN
+            continue
+        v = str(v).strip()
+        if v:
+            return normalize_name(v)
+    return ""
 
 
 # DST names in submitted lineups can be in wildly different formats
@@ -1061,6 +1093,68 @@ def export_critical_data_command(output_dir):
                f"anywhere that survives independently of the database.")
 
 
+# Every stored name key, with the other columns in that key's UNIQUE
+# constraint (() = the key is unique on its own, None = not in any
+# UNIQUE constraint). renormalize-names checks these before updating.
+_NAME_KEY_TABLES = [
+    ("hist_player_stats",         "name_normalized",        None),
+    ("hist_dfs_salaries",         "name_normalized",        ("week", "year", "source")),
+    ("prop_bets",                 "player_name_normalized", ("year", "week", "stat_field")),
+    ("depth_charts",              "player_name_normalized", None),
+    ("scoresandodds_props",       "player_name_normalized", ("category",)),
+    ("player_injuries",           "player_name_normalized", ()),
+    ("firstdown_studio_rankings", "player_name_normalized", ()),
+]
+
+
+@app.cli.command("renormalize-names")
+@click.option("--dry-run", is_flag=True, help="Report what would change without writing anything.")
+def renormalize_names_command(dry_run):
+    """
+    Re-applies normalize_name() to every name key already in the database.
+
+    Run once whenever normalize_name() changes (it started dropping
+    Jr./Sr./II–V suffixes on 2026-09-15). load-history fixes the rows it
+    reloads, but user-entered prop_bets and anything not in a current
+    CSV would otherwise keep the old keys. Re-normalizes the stored key
+    itself, not the display name, for the same reason as _name_key().
+
+    A row whose new key would collide with another row under a UNIQUE
+    constraint is left unchanged and listed, rather than failing the run.
+    Back up first: `flask export-critical-data` covers prop_bets.
+    """
+    for table, key_col, unique_with in _NAME_KEY_TABLES:
+        extra = list(unique_with or ())
+        rows = db_fetchall(f"SELECT {', '.join(['id', key_col] + extra)} FROM {table}")
+        slot = lambda r, k: tuple(r[c] for c in extra) + (k,)
+        taken = {slot(r, r[key_col]) for r in rows} if unique_with is not None else None
+
+        changes, skipped = [], []
+        for r in rows:
+            old_key = r[key_col]
+            new_key = normalize_name(str(old_key or ""))
+            if not new_key or new_key == old_key:
+                continue
+            if taken is not None:
+                if slot(r, new_key) in taken:
+                    skipped.append((r["id"], old_key, new_key))
+                    continue
+                taken.discard(slot(r, old_key))
+                taken.add(slot(r, new_key))
+            changes.append((new_key, r["id"]))
+
+        if changes and not dry_run:
+            conn = get_db()
+            cur = _cursor(conn)
+            cur.executemany(f"UPDATE {table} SET {key_col} = {_ph()} WHERE id = {_ph()}", changes)
+            conn.commit()
+
+        verb = "would change" if dry_run else "updated"
+        click.echo(f"{table}: {len(changes)} key(s) {verb}, {len(skipped)} skipped as collisions")
+        for row_id, old_key, new_key in skipped[:20]:
+            click.echo(f"    id {row_id}: '{old_key}' -> '{new_key}' already exists")
+
+
 @app.cli.command("create-users-batch")
 @click.argument("usernames_file", type=click.Path(exists=True))
 @click.option("--output", default=None,
@@ -1821,7 +1915,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         for _, r in df.iterrows():
             batch.append((
                 int(r.get('week')), int(r.get('year')),
-                str(r.get('name', '')), str(r.get('name_normalized', '')),
+                str(r.get('name', '')), _name_key(r.get('name_normalized'), r.get('name')),
                 _none_if_nan(r.get('position')), _none_if_nan(r.get('team')),
                 _none_if_nan(r.get('opponent')), _none_if_nan(r.get('home_away')),
                 _int_or_none(r.get('dk_salary')), _float_or_none(r.get('dk_pts_scored')),
@@ -1924,7 +2018,8 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         batch = []
         for _, r in df.iterrows():
             batch.append((
-                str(r.get('pfr_id', '')), str(r.get('name', '')), str(r.get('name_normalized', '')),
+                str(r.get('pfr_id', '')), str(r.get('name', '')),
+                _name_key(r.get('name_normalized'), r.get('name')),
                 int(r.get('year')), int(r.get('week')), _none_if_nan(r.get('game_date')),
                 # normalize_team() applied HERE, not just at scrape time —
                 # confirmed real: a stale CSV on disk (scraped before the
@@ -2326,7 +2421,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         for _, r in df.iterrows():
             name = str(r.get('player_name', ''))
             batch.append((
-                name, str(r.get('player_name_normalized', normalize_name(name))),
+                name, _name_key(r.get('player_name_normalized'), name),
                 _none_if_nan(r.get('position')), _none_if_nan(r.get('team')),
                 str(r.get('status', '')),
             ))
@@ -2377,7 +2472,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         for _, r in df.iterrows():
             name = str(r.get('player_name', ''))
             batch.append((
-                name, str(r.get('player_name_normalized', normalize_name(name))),
+                name, _name_key(r.get('player_name_normalized'), name),
                 _none_if_nan(r.get('position')), _none_if_nan(r.get('team')),
                 str(r.get('status', '')),
             ))
@@ -2437,7 +2532,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         for _, r in df.iterrows():
             name = str(r.get('player_name', ''))
             batch.append((
-                name, str(r.get('player_name_normalized', normalize_name(name))),
+                name, _name_key(r.get('player_name_normalized'), name),
                 _none_if_nan(r.get('team')), _none_if_nan(r.get('position')),
                 _float_or_none(r.get('pts')),
             ))
