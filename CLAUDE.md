@@ -416,6 +416,13 @@ Not yet done:
   can miss MNF; the fix is a later re-run of `scrape_pfr.py`,
   `scrape_team_points.py`, `combine_dst_scoring.py`,
   `scrape_fantasy_points_against.py`, then `flask load-history`.
+- **Ask before any PFR request.** The site owner runs another app
+  (GridIronGuesser, `scrape_historical_stats.py`) that also scrapes PFR,
+  and two scrapers hitting PFR at once trigger 429 rate limits / 403s.
+  Before running `scrape_pfr.py`, `scrape_team_points.py`,
+  `scrape_fantasy_points_against.py`, or even a one-off test request,
+  ask whether another PFR scrape is running. Non-PFR scrapers
+  (ScoresAndOdds, FantasyPros, Ourlads, etc.) don't need this.
 - **PFR cookies lasted ~6 hours on 9/15** (refreshed ~3 AM, 403 at
   10:58 AM). Expect a refresh before each Tuesday run and possibly
   mid-day.
