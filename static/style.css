@@ -1182,6 +1182,7 @@ header {
 .prop-result-over    { background: rgba(76, 175, 80, 0.15);  color: #4caf50; }
 .prop-result-under   { background: rgba(244, 67, 54, 0.15);  color: #f44336; }
 .prop-result-push    { background: rgba(158, 158, 158, 0.15); color: var(--text-muted); }
+.prop-result-void    { background: rgba(158, 158, 158, 0.15); color: var(--text-muted); }
 .prop-result-pending { background: var(--bg-row-alt); color: var(--text-muted); }
 
 /* -----------------------------------------------------------------------

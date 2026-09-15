@@ -4355,8 +4355,13 @@ def _score_props_for_week(year: int, week: int) -> dict:
     hist_player_stats column (enforced at add-props time).
 
     Returns {prop_bet_id: {'actual': float_or_None, 'result':
-    'over'/'under'/'push'/None}}. actual/result are None when that
+    'over'/'under'/'push'/'void'/None}}. actual/result are None when that
     week's real stats for that player haven't loaded yet (pending).
+
+    'void' means the player has no stats row but his team's result for
+    that week is loaded, so he didn't play (inactive, injured). Like a
+    sportsbook, the pick counts neither for nor against: callers treat
+    everything in PROP_UNGRADED_RESULTS the same way.
     """
     ph = _ph()
     props = db_fetchall(f"""
@@ -4404,7 +4409,22 @@ def _score_props_for_week(year: int, week: int) -> dict:
             else:
                 result[p["id"]] = {"actual": actual, "result": "push"}   # rare with .5 lines
 
+    # Still-pending props whose player's team has a final result: void.
+    pending = [p for p in props if result.get(p["id"], {}).get("result") is None
+               and p["stat_field"] in VALID_PROP_STAT_FIELDS]
+    if pending:
+        teams = _get_player_teams(year, week, {p["player_name_normalized"] for p in pending})
+        results_in = {r["team"] for r in db_fetchall(
+            f"SELECT team FROM hist_team_points WHERE year = {ph} AND week = {ph}", (year, week))}
+        for p in pending:
+            if teams.get(p["player_name_normalized"]) in results_in:
+                result[p["id"]] = {"actual": None, "result": "void"}
+
     return result
+
+
+# Prop results that count neither for nor against a pick.
+PROP_UNGRADED_RESULTS = ("push", "void")
 
 
 def _lineup_player_rows(year: int, week: int = None, submitter: str = None) -> list:
@@ -4689,13 +4709,13 @@ def my_props():
         actual = outcome.get("actual")
 
         is_correct = None
-        if result is not None and result != "push":
+        if result is not None and result not in PROP_UNGRADED_RESULTS:
             matched_count += 1
             is_correct = (result == p["pick"])
             if is_correct:
                 total_correct += 1
-        elif result == "push":
-            matched_count += 1   # scored (as a push), just doesn't count for/against
+        elif result in PROP_UNGRADED_RESULTS:
+            matched_count += 1   # scored (push or void), just doesn't count for/against
 
         team = team_by_name.get(normalize_name(p["player_name"]))
 
@@ -5565,7 +5585,7 @@ def download_csv(data_type):
                     outcome = wk_scores.get(p["prop_bet_id"], {}).get("result")
                     if outcome is None:
                         t["pending"] += 1
-                    elif outcome != "push":
+                    elif outcome not in PROP_UNGRADED_RESULTS:
                         t["scored"] += 1
                         if outcome == p["pick"]:
                             t["correct"] += 1
@@ -5638,7 +5658,7 @@ def download_csv(data_type):
                         "stat_field": p["stat_field"], "line": p["line"],
                         "pick": p["pick"], "actual": outcome.get("actual"),
                         "result": result,
-                        "is_correct": (None if result is None or result == "push"
+                        "is_correct": (None if result is None or result in PROP_UNGRADED_RESULTS
                                        else result == p["pick"]),
                     })
         if week is not None and submitter:
@@ -5803,8 +5823,8 @@ def standings():
             if outcome is None:
                 tally["has_pending"] = True
                 continue
-            if outcome == "push":
-                continue   # pending or push — not counted either way
+            if outcome in PROP_UNGRADED_RESULTS:
+                continue   # push or void — not counted either way
 
             tally["total"] += 1
             if outcome == p["pick"]:

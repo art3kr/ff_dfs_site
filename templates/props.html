@@ -104,7 +104,9 @@
             </div>
             <p class="prop-signin-prompt"><a href="{{ url_for('login') }}">Sign in</a> to make a pick</p>
             {% endif %}
-            {% if score and score['result'] %}
+            {% if score and score['result'] == 'void' %}
+            <div class="prop-result prop-result-void">Void: player didn't play</div>
+            {% elif score and score['result'] %}
             <div class="prop-result prop-result-{{ score['result'] }}">
                 Result: {{ score['result'] | upper }} (actual: {{ score['actual'] }})
             </div>

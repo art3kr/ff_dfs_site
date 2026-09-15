@@ -115,6 +115,8 @@
                             <span class="pending-week" title="Not yet scored">pending</span>
                         {% elif r['result'] == 'push' %}
                             <span title="Line landed exactly on the result">push</span>
+                        {% elif r['result'] == 'void' %}
+                            <span title="Player didn't play, so this pick doesn't count">void (DNP)</span>
                         {% elif r['is_correct'] %}
                             <strong style="color: #4caf50;">Correct</strong>
                         {% else %}

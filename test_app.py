@@ -539,6 +539,54 @@ def test_dnp_and_year_scope():
     check("loader builds the key via _name_key (suffix dropped)", loaded.get("YEAR26") == "new guy")
 
 
+def test_prop_void():
+    section("prop for a player who didn't play is void")
+    import csv as _csv
+    import io as _io
+    wk = 6
+    conn = flaskapp._connect()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO prop_bets (year, week, player_name, player_name_normalized, stat_field, "
+                "line) VALUES (?,?,?,?,?,?)", (YEAR, wk, "Lew Nichols", "lew nichols", "rush_yds", 20.5))
+    bet_id = cur.lastrowid
+    # Team resolves from that week's slate, where he's listed with a suffix.
+    cur.execute("INSERT INTO players (week, year, name, position, team, opponent, salary) "
+                "VALUES (?,?,?,?,?,?,?)", (wk, YEAR, "Lew Nichols III", "RB", "pit", "nwe", 4000))
+    cur.execute("INSERT INTO prop_picks (year, week, submitter, prop_bet_id, pick) VALUES (?,?,?,?,?)",
+                (YEAR, wk, "tester", bet_id, "under"))
+    conn.commit()
+    conn.close()
+
+    def result():
+        with flaskapp.app.app_context():
+            return flaskapp._score_props_for_week(YEAR, wk).get(bet_id, {}).get("result")
+
+    check("pending until his team's result is in", result() is None)
+    conn = flaskapp._connect()
+    conn.execute("INSERT INTO hist_team_points (year, week, team, opponent, points_scored, "
+                 "points_allowed) VALUES (?,?,?,?,?,?)", (YEAR, wk, "pit", "nwe", 17, 20))
+    conn.commit()
+    conn.close()
+    check("void once his team's result is in (got %r)" % result(), result() == "void")
+
+    html = client.get("/my-props?year=%d&week=%d&submitter=tester" % (YEAR, wk)).get_data(as_text=True)
+    check("My Props labels it void (DNP)", "void (DNP)" in html)
+    check("My Props week is fully scored with 0 correct", "0 / 1" in html)
+    rows = list(_csv.DictReader(_io.StringIO(
+        client.get("/download/standings?year=%d" % YEAR).get_data(as_text=True))))
+    row = next((r for r in rows if r["submitter"] == "tester" and r["week"] == str(wk)), {})
+    check("standings CSV counts the void as neither scored nor pending",
+          row.get("props_scored") == "0" and row.get("props_pending") == "0")
+
+    conn = flaskapp._connect()
+    conn.execute("DELETE FROM prop_picks WHERE week = ?", (wk,))
+    conn.execute("DELETE FROM prop_bets WHERE week = ?", (wk,))
+    conn.execute("DELETE FROM players WHERE week = ?", (wk,))
+    conn.execute("DELETE FROM hist_team_points WHERE year = ? AND week = ?", (YEAR, wk))
+    conn.commit()
+    conn.close()
+
+
 # (data_type, querystring, expected leading key columns)
 DOWNLOADS = [
     ("slate",                   "?year=2026&week=1", ["year", "week", "team", "name", "name_normalized"]),
@@ -712,6 +760,7 @@ if __name__ == "__main__":
     test_standings_scoring()         # mutates hist_player_stats at the end
     test_name_suffixes()             # after standings: adds (then removes) a week 3
     test_dnp_and_year_scope()        # adds (then removes) a week 5 and two 2025/2026 rows
+    test_prop_void()                 # adds (then removes) a week 6 prop and pick
     test_timestamp_format()          # must stay last; rewrites game_schedule
 
     print()

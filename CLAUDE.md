@@ -253,7 +253,11 @@ comments/docs rather than presenting a guess as fact.
 - `_compute_implied_team_total(spread, over_under)` — shared by
   Implied Team Points, Best Matchups, and Game Overview.
 - `_score_props_for_week(year, week)` — shared by Props, My Props,
-  and Standings' prop section.
+  and Standings' prop section. A prop whose player has no stats row
+  once his team's `hist_team_points` row is in is `void` (didn't play),
+  and every caller treats `PROP_UNGRADED_RESULTS` (push, void) as
+  counting neither for nor against. Lineups use 0 for the same case
+  instead (see DNP below); the owner chose sportsbook-style void for props.
 - `_lineup_player_rows(year, week, submitter)` — every submitted
   lineup's players with their real scored result, the per-player grain
   under both Standings and the My Lineups export.
