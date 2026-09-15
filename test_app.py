@@ -679,19 +679,21 @@ def test_usage():
     check("season Snap %% falls back to PFR for a week nflverse missed, 70.0%% (got %r)"
           % kyren.get("Snap %"), kyren.get("Snap %") == "70.0%")
     check("season aDOT 150/15 = 10.0 (got %r)" % puka.get("aDOT"), puka.get("aDOT") == "10.0")
-    check("season Air Yds %% 150/162 = 92.6%% (got %r)" % puka.get("Air Yds %"),
-          puka.get("Air Yds %") == "92.6%")
+    check("season Air Yds %% 150/162 = 92.6%% (got %r)" % puka.get("Air %"),
+          puka.get("Air %") == "92.6%")
     check("season WOPR 1.5*15/21 + 0.7*150/162 = 1.72 (got %r)" % puka.get("WOPR"),
           puka.get("WOPR") == "1.72")
     check("season RZ Tgt sums to 3 (got %r)" % puka.get("RZ Tgt"), puka.get("RZ Tgt") == "3")
-    check("season 3rd-Down Tgt sums to 4", puka.get("3rd-Down Tgt") == "4")
-    check("season RZ Car / Inside-10 / Inside-5 = 8 / 4 / 2",
-          (kyren.get("RZ Car"), kyren.get("Inside-10 Car"), kyren.get("Inside-5 Car")) == ("8", "4", "2"))
+    check("season 3D Tgt sums to 4", puka.get("3D Tgt") == "4")
+    check("season RZ Car / I10 / I5 = 8 / 4 / 2",
+          (kyren.get("RZ Car"), kyren.get("I10 Car"), kyren.get("I5 Car")) == ("8", "4", "2"))
+    check("usage table uses the compact layout", 'id="history-table" class="compact-table"' in html)
+    check("All Data download offered", "All Data" in html)
     check("season G is 2 and Tgt %% of Team 15/24 = 62.5%%",
-          puka.get("G") == "2" and puka.get("Tgt % of Team") == "62.5%")
+          puka.get("G") == "2" and puka.get("Tgt %") == "62.5%")
     check("player with no usage row shows '-' (got %r)" % tutu,
           bool(tutu) and all(tutu.get(c) == "-" for c in
-                             ("Snap %", "aDOT", "Air Yds %", "WOPR", "RZ Tgt", "3rd-Down Tgt")))
+                             ("Snap %", "aDOT", "Air %", "WOPR", "RZ Tgt", "3D Tgt")))
     check("default sort is target share, highest first",
           list(t).index("Puka Nacua") < list(t).index("Kyren Williams"))
 
@@ -702,10 +704,10 @@ def test_usage():
     check("week view: Snap %% 95.0%% (got %r)" % puka.get("Snap %"), puka.get("Snap %") == "95.0%")
     check("week view: PFR snap fallback 71.9%% (got %r)" % kyren.get("Snap %"), kyren.get("Snap %") == "71.9%")
     check("week view: aDOT 10.0, RZ Tgt 2, Air Yds %% 60.0%%, WOPR 0.9",
-          (puka.get("aDOT"), puka.get("RZ Tgt"), puka.get("Air Yds %"), puka.get("WOPR"))
+          (puka.get("aDOT"), puka.get("RZ Tgt"), puka.get("Air %"), puka.get("WOPR"))
           == ("10.0", "2", "60.0%", "0.9"))
     check("week view: G 1 and Tgt %% of Team 10/17 = 58.8%%",
-          puka.get("G") == "1" and puka.get("Tgt % of Team") == "58.8%")
+          puka.get("G") == "1" and puka.get("Tgt %") == "58.8%")
     check("week view: position links keep the week", "week=11&position=RB" in html)
     check("week view: This Week and This Season downloads",
           "This Week" in html and "This Season" in html)
@@ -720,6 +722,15 @@ def test_usage():
           (p.get("snap_pct"), p.get("adot"), p.get("rz_targets")) == ("90.0", "10.0", "3"))
     check("season CSV blank for a player with no usage row",
           rows.get("tutu atwell", {}).get("adot") == "")
+
+    body = client.get("/download/usage").get_data(as_text=True)
+    header = body.splitlines()[0].split(",")
+    all_rows = list(_csv.DictReader(_io.StringIO(body)))
+    check("All Data CSV leads with year, team, name, name_normalized and has no week",
+          header[:4] == ["year", "team", "name", "name_normalized"] and "week" not in header)
+    check("All Data CSV includes this season's usage values",
+          any(r["name_normalized"] == "puka nacua" and r["year"] == str(YEAR) and r["adot"] == "10.0"
+              for r in all_rows))
 
     body = client.get("/download/usage?year=%d&week=11" % YEAR).get_data(as_text=True)
     header = body.splitlines()[0].split(",")
@@ -759,6 +770,7 @@ DOWNLOADS = [
     ("implied-points",          "?year=2026&week=1", ["year", "week", "team", "name", "name_normalized"]),
     ("props",                   "",                  ["year", "week", "name_normalized"]),
     ("usage",                   "?year=2026",        ["year", "team", "name", "name_normalized"]),
+    ("usage",                   "",                  ["year", "team", "name", "name_normalized"]),
     ("usage",                   "?year=2026&week=1", ["year", "week", "team", "name", "name_normalized"]),
     ("implied-team-points",     "",                  None),
     ("game-overview",           "",                  None),

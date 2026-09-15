@@ -153,7 +153,9 @@ def main(year: int):
     df['year'] = year
     # nflverse calls the Rams "LA", which normalize_team() doesn't know
     # (and bare "LA" is ambiguous anywhere else, so it isn't a global alias).
-    df['team'] = df['team'].replace({'LA': 'LAR'})
+    # Older seasons also use "SD" for the Chargers, which normalize_team()
+    # doesn't know either ("OAK" and "STL" it already maps).
+    df['team'] = df['team'].replace({'LA': 'LAR', 'SD': 'LAC'})
     df['team'] = df['team'].map(lambda t: normalize_team(t) or None if pd.notna(t) else None)
     df['name_normalized'] = df['name'].map(normalize_name)
     df = df[df['name'].notna()]
@@ -183,7 +185,28 @@ def main(year: int):
     print(f"  {len(out):,} rows, weeks {sorted(out['week'].unique().tolist())} -> {path}")
 
 
+def parse_years(s: str) -> list[int]:
+    """'2012-2025', '2024,2025' or '2026'."""
+    if '-' in s:
+        start, end = s.split('-')
+        return list(range(int(start), int(end) + 1))
+    return [int(y) for y in s.split(',')]
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('--year', type=int, default=2026)
-    main(ap.parse_args().year)
+    ap.add_argument('--year', type=int, default=None, help='One season, e.g. 2026')
+    ap.add_argument('--years', default=None,
+                    help='Several seasons, e.g. 2012-2025 (snap counts start in 2012)')
+    args = ap.parse_args()
+    years = parse_years(args.years) if args.years else [args.year or 2026]
+    failed = []
+    for y in years:
+        try:
+            main(y)
+        except Exception as e:   # one missing season shouldn't stop a backfill
+            print(f"  ERROR for {y}: {e}")
+            failed.append(y)
+    if failed:
+        print(f"Failed seasons: {failed}")
+        sys.exit(1)

@@ -6042,20 +6042,29 @@ def download_csv(data_type):
 
     elif data_type == "usage":
         position = request.args.get("position", "ALL")
-        sel_year = year
-        if sel_year is None:
-            r = db_fetchone("SELECT MAX(year) AS y FROM hist_player_stats")
-            sel_year = r["y"] if r else None
-        rows = _compute_usage_rows(sel_year, position, week) if sel_year else []
-        if week is None:
-            # Season grain, no week column: merge on (year, name_normalized).
-            rows = _prepend_keys(_with_name_key(rows), year=sel_year,
-                                 team=None, name=None, name_normalized=None)
-            filename = f"usage_{sel_year}.csv"
+        if year is None and week is None:
+            # All Data: every season's player-season rows, stacked. Same math
+            # as the page. Season grain, so merge on (year, name_normalized).
+            rows = []
+            for r in db_fetchall("SELECT DISTINCT year FROM hist_player_stats ORDER BY year"):
+                rows += _prepend_keys(_with_name_key(_compute_usage_rows(r["year"], position)),
+                                      year=r["year"], team=None, name=None, name_normalized=None)
+            filename = "usage_all.csv"
         else:
-            rows = _prepend_keys(_with_name_key(rows), year=sel_year, week=week,
-                                 team=None, name=None, name_normalized=None)
-            filename = f"usage_week{week}_{sel_year}.csv"
+            sel_year = year
+            if sel_year is None:
+                r = db_fetchone("SELECT MAX(year) AS y FROM hist_player_stats")
+                sel_year = r["y"] if r else None
+            rows = _compute_usage_rows(sel_year, position, week) if sel_year else []
+            if week is None:
+                # Season grain, no week column: merge on (year, name_normalized).
+                rows = _prepend_keys(_with_name_key(rows), year=sel_year,
+                                     team=None, name=None, name_normalized=None)
+                filename = f"usage_{sel_year}.csv"
+            else:
+                rows = _prepend_keys(_with_name_key(rows), year=sel_year, week=week,
+                                     team=None, name=None, name_normalized=None)
+                filename = f"usage_week{week}_{sel_year}.csv"
 
     elif data_type == "implied-team-points":
         # game_odds is a live full-replace table with no year/week of

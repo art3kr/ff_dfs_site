@@ -84,10 +84,12 @@
         {{ dl.bar([
             {'href': url_for('download_csv', data_type='usage', year=year, week=week, position=position), 'label': 'This Week'},
             {'href': url_for('download_csv', data_type='usage', year=year, position=position), 'label': 'This Season'},
+            {'href': url_for('download_csv', data_type='usage', position=position), 'label': 'All Data', 'secondary': True, 'title': 'Season totals for every season we have'},
         ]) }}
         {% else %}
         {{ dl.bar([
             {'href': url_for('download_csv', data_type='usage', year=year, position=position), 'label': 'This Season'},
+            {'href': url_for('download_csv', data_type='usage', position=position), 'label': 'All Data', 'secondary': True, 'title': 'Season totals for every season we have'},
         ]) }}
         {% endif %}
     </div>
@@ -104,26 +106,26 @@
     {% if rows %}
     {% set span = 'that week' if week else 'this season' %}
     <div class="table-wrapper">
-        <table id="history-table">
+        <table id="history-table" class="compact-table">
             <thead>
                 <tr>
                     <th>Pos</th>
                     <th>Player</th>
                     <th>Team</th>
                     <th class="right" title="Games played">G</th>
-                    <th class="right">Tgt/G</th>
-                    <th class="right">Touch/G</th>
-                    <th class="right" title="Player's targets divided by their team's total targets {{ span }}">Tgt % of Team</th>
-                    <th class="right" title="Player's touches (rush att + rec) divided by their team's total touches {{ span }}">Touch % of Team</th>
+                    <th class="right" title="Targets per game">Tgt/G</th>
+                    <th class="right" title="Touches (rush att + rec) per game">Touch/G</th>
+                    <th class="right" title="Player's targets divided by their team's total targets {{ span }}">Tgt %</th>
+                    <th class="right" title="Player's touches (rush att + rec) divided by their team's total touches {{ span }}">Touch %</th>
                     <th class="right" title="Share of the team's offensive snaps. Season: average of weekly values">Snap %</th>
                     <th class="right" title="Average depth of target: air yards per target">aDOT</th>
-                    <th class="right" title="Player's share of the team's air yards">Air Yds %</th>
+                    <th class="right" title="Player's share of the team's air yards">Air %</th>
                     <th class="right" title="Weighted opportunity: 1.5 x target share + 0.7 x air yards share">WOPR</th>
                     <th class="right" title="Targets inside the opponent's 20">RZ Tgt</th>
                     <th class="right" title="Carries inside the opponent's 20">RZ Car</th>
-                    <th class="right" title="Carries inside the opponent's 10">Inside-10 Car</th>
-                    <th class="right" title="Carries inside the opponent's 5">Inside-5 Car</th>
-                    <th class="right" title="Targets on third down">3rd-Down Tgt</th>
+                    <th class="right" title="Carries inside the opponent's 10">I10 Car</th>
+                    <th class="right" title="Carries inside the opponent's 5">I5 Car</th>
+                    <th class="right" title="Targets on third down">3D Tgt</th>
                 </tr>
             </thead>
             <tbody>
@@ -156,9 +158,9 @@
         </table>
     </div>
     <p class="standings-note">
-        "% of Team" is the player's share of the team's targets or touches {{ span }}.
-        Snap % is the share of the team's offensive snaps. Red zone means inside the
-        opponent's 20. Sorted by target share, highest first.
+        Tgt % and Touch % are the player's share of the team's targets or touches {{ span }}.
+        Snap % is the share of offensive snaps. RZ is inside the opponent's 20; I10 and I5
+        are inside the 10 and 5. Hover a column header for details. Sorted by target share.
     </p>
     <p class="standings-note">Snap, air yards and red zone data: nflverse.</p>
     {% else %}
