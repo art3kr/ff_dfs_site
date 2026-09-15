@@ -886,44 +886,86 @@ def _scrape_schedule_from_pfr(year: int) -> pd.DataFrame:
 # Main orchestration
 # ---------------------------------------------------------------------------
 
+def _regular_season_game_dates(year: int) -> pd.DataFrame:
+    """
+    (week, date) for every regular-season game in the local schedule.
+    Empty if there's no schedule file.
+    """
+    path = os.path.join(SCHEDULES_DIR, f'{year}_schedule_df.csv')
+    if not os.path.exists(path):
+        return pd.DataFrame(columns=['week', 'date'])
+    df = pd.read_csv(path)
+    df = df[df['team_2'] != 'BYE']
+    df = df[df['week'].apply(lambda w: str(w).isdigit())]
+    df = df.assign(week=df['week'].astype(int))
+    df = df[df['week'] <= 18]
+    # Per-value parse: date formats differ between years' files (see
+    # load_date_to_week), and a whole-column parse warns about that.
+    df = df.assign(date=df['date'].apply(lambda d: pd.to_datetime(d, errors='coerce')))
+    return df[['week', 'date']]
+
+
 def _season_finished(year: int) -> bool:
     """
     True once the last regular-season game in the local schedule is in
     the past. No schedule file, or no parseable dates, counts as not
     finished, so the scraper errs toward re-fetching.
     """
-    path = os.path.join(SCHEDULES_DIR, f'{year}_schedule_df.csv')
-    if not os.path.exists(path):
-        return False
-    df = pd.read_csv(path)
-    df = df[df['team_2'] != 'BYE']
-    df = df[df['week'].apply(lambda w: str(w).isdigit())]
-    df = df[df['week'].astype(int) <= 18]
-    # Per-value parse: date formats differ between years' files (see
-    # load_date_to_week), and a whole-column parse warns about that.
-    last = df['date'].apply(lambda d: pd.to_datetime(d, errors='coerce')).max()
+    last = _regular_season_game_dates(year)['date'].max()
     return pd.notna(last) and last.date() < date.today()
 
 
-def scrape_player_stats(years: list[int]):
+def _latest_completed_week(year: int) -> int:
+    """
+    The highest week whose games are all dated before today, or 0 if none
+    are. A game dated today doesn't count, since it may not be posted yet.
+    """
+    games = _regular_season_game_dates(year).dropna(subset=['date'])
+    if games.empty:
+        return 0
+    last_by_week = games.groupby('week')['date'].max()
+    done = [w for w, d in last_by_week.items() if d.date() < date.today()]
+    return max(done) if done else 0
+
+
+def scrape_player_stats(years: list[int], full_refetch: bool = False):
     """Scrape player stats for all given years using each player's career
-    gamelog page — one request per unique player, not one per player-year."""
+    gamelog page — one request per unique player, not one per player-year.
+
+    For a season still in progress, players who already have a row for
+    the latest completed week are skipped, so a run interrupted by a PFR
+    block resumes where it left off. full_refetch=True re-fetches every
+    player in that season anyway, which also picks up PFR stat
+    corrections to earlier weeks."""
     os.makedirs(DATA_DIR, exist_ok=True)
 
     # Load existing output
     if os.path.exists(PLAYERS_OUT):
         existing = pd.read_csv(PLAYERS_OUT)
-        # A (pfr_id, year) pair only counts as done once that season is
-        # over. Mid-season, a player with Week 1 rows still needs Week 2+,
-        # so treating the pair as done skipped every returning player
-        # from Week 2 on (caught 2026-09-15, before it cost a week).
+        # A (pfr_id, year) pair only counts as done for good once that
+        # season is over. Mid-season, a player with Week 1 rows still needs
+        # Week 2+, so treating the pair as done skipped every returning
+        # player from Week 2 on (caught 2026-09-15, before it cost a week).
         in_progress = {y for y in years if not _season_finished(y)}
         done_pairs = {(pid, y) for pid, y in zip(existing['pfr_id'], existing['year'])
                       if y not in in_progress}
         print(f"Loaded {len(existing):,} existing player-week rows")
         print(f"  {len(done_pairs)} (pfr_id, year) pairs from finished seasons already scraped")
-        if in_progress:
-            print(f"  Season(s) still in progress, re-fetching every player: {sorted(in_progress)}")
+
+        # In-progress seasons: done means "already has the latest completed
+        # week". A player who sat that week out (bye, injury) gets re-fetched
+        # each run, which is cheap and harmless.
+        for y in sorted(in_progress):
+            latest = _latest_completed_week(y)
+            if full_refetch or not latest:
+                reason = "--full-refetch" if full_refetch else "no completed week yet"
+                print(f"  {y} in progress ({reason}): re-fetching every player")
+                continue
+            have_latest = set(existing.loc[(existing['year'] == y) &
+                                           (existing['week'] == latest), 'pfr_id'])
+            done_pairs |= {(pid, y) for pid in have_latest}
+            print(f"  {y} in progress: skipping {len(have_latest)} players who already "
+                  f"have Week {latest} (--full-refetch to re-fetch everyone)")
     else:
         existing   = pd.DataFrame(columns=PLAYER_COLUMNS)
         done_pairs = set()
@@ -1224,6 +1266,10 @@ if __name__ == '__main__':
                         help='Skip player stats scrape (only scrape game info)')
     parser.add_argument('--skip-games', action='store_true',
                         help='Skip game info scrape (only scrape player stats)')
+    parser.add_argument('--full-refetch', action='store_true',
+                        help='For a season in progress, re-fetch every player instead of '
+                             'skipping those who already have the latest completed week '
+                             '(picks up PFR stat corrections to earlier weeks)')
     args = parser.parse_args()
 
     years = parse_years(args.years)
@@ -1237,7 +1283,7 @@ if __name__ == '__main__':
 
     if not args.skip_players:
         print("=== SCRAPING PLAYER STATS ===")
-        scrape_player_stats(years)
+        scrape_player_stats(years, full_refetch=args.full_refetch)
 
     if not args.skip_games:
         print("\n=== SCRAPING GAME INFO ===")

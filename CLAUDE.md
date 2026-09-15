@@ -336,34 +336,41 @@ Done:
   had any row for that year, so from Week 2 on every returning player
   would have been skipped. Now a season only counts as done once its
   last scheduled regular-season game is past (`_season_finished()`);
-  until then every player is re-fetched (~35 min per run), and
-  re-fetched rows replace older ones, which picks up PFR stat
-  corrections.
+  until then, players who already have the latest completed week
+  (`_latest_completed_week()`) are skipped and everyone else is
+  fetched, so a run interrupted by a PFR block resumes cheaply.
+  `--full-refetch` re-fetches every player in the season (~35 min);
+  re-fetched rows replace older ones, so that also picks up PFR stat
+  corrections to earlier weeks.
+- DEN @ KC (MNF) re-run ~10:20–11:05 AM once PFR posted it: all 32
+  teams now in player stats, team points, DST scoring, game info, and
+  fantasy points against for Week 1.
 - Week 1 team points, DST stats, DST scoring, final weather, fantasy
   points against. Then `flask export-critical-data` (backups/
   `*_20260915_084224.csv`), `flask load-schedule --year 2026`,
   `flask load-weekly-salary ... week2` (800 players; Slate shows Week 2).
 
 Not yet done:
-- `flask load-history` was started ~4:43 AM (slow: it re-loads every
-  file row by row against Render Postgres). **Check that it finished
-  before assuming Week 1 scores are live.**
 - Week 2 props not published (see open items).
+- `flask load-history` finished cleanly at ~5:21 AM (took ~38 min; it
+  re-loads every historical file on each run). A second full load with
+  the DEN @ KC data was started ~11:05 AM. **Check it finished before
+  assuming all 16 Week 1 games are scored.** Loaded as-is and worth knowing: game odds and
+  `scoresandodds_props_all` are still Week 1 lines, Ourlads injuries
+  loaded 0 rows (Draftedge gap-filled 440), and
+  `firstdown_studio_rankings` re-loaded last week's file since this
+  week's scrape wrote nothing.
 
 ### Open items (confirmed, not yet resolved)
 
-- **Week 1 DEN @ KC (Monday night 9/14) not on PFR yet** as of 4:40 AM
-  9/15: no player stats, no score, empty game info. The other 15 Week 1
-  games are complete. Until it's in, lineups with a DEN/KC player show
-  pending and DEN/KC DST aren't scored (`combine_dst_scoring.py` drops
-  them). Re-run later on 9/15, once PFR has posted it:
-  `scrape_pfr.py --years 2026` (re-fetches all players, and retries the
-  empty game-info row) → `scrape_team_points.py --years 2026` →
-  `combine_dst_scoring.py --year 2026` →
-  `scrape_fantasy_points_against.py --year 2026 --position all` →
-  `flask load-history`. Test one PFR request first; cookies expire.
-  General lesson: PFR can lag Monday night results by hours, so a very
-  early Tuesday run may miss MNF.
+- **PFR can post Monday night results hours late.** On 9/15 DEN @ KC
+  wasn't on PFR at 4:40 AM but was by ~10 AM. A very early Tuesday run
+  can miss MNF; the fix is a later re-run of `scrape_pfr.py`,
+  `scrape_team_points.py`, `combine_dst_scoring.py`,
+  `scrape_fantasy_points_against.py`, then `flask load-history`.
+- **PFR cookies lasted ~6 hours on 9/15** (refreshed ~3 AM, 403 at
+  10:58 AM). Expect a refresh before each Tuesday run and possibly
+  mid-day.
 
 - **Week 2 props and game odds are really Week 1 data.** Scraped
   Tuesday morning, ScoresAndOdds still showed Week 1 matchups (CIN–TAM,
@@ -377,10 +384,14 @@ Not yet done:
   had neither a line nor a price; the auto-selected slate included
   junk lines (Jerry Jeudy rush yds 0.5, Sione Vaki rush yds 0.5) and
   a blank team (Matthew Stafford). Review before publishing.
-- **FirstDown Studio rankings scraper broken:** "no `<table>` found"
-  for QB/RB/WR/TE on 2026-09-15. Page changed or now renders client
-  side; unknown which. Per convention, run/write a diagnostic before
-  touching the scraper. FDS Pts column is stale until fixed.
+- **FirstDown Studio rankings: no Week 2 table yet.** "no `<table>`
+  found" for QB/RB/WR/TE on 2026-09-15; the site owner confirmed
+  FirstDown hadn't posted Week 2 rankings, so this is most likely
+  timing, not a broken scraper. Re-run `scrape_firstdown_studio_rankings.py`
+  + `flask load-history --firstdown-only` once they're up. If it still
+  finds no table then, write a diagnostic before touching the scraper.
+  Note the scraper writes nothing when it finds no table, so
+  load-history silently re-loads the previous week's file.
 - **Ourlads injuries came back empty** (header-only CSV) on
   2026-09-15. Could be real or a changed `lc_red` marker; unverified.
   Draftedge still supplied statuses.

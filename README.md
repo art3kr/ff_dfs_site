@@ -187,7 +187,11 @@ re-scrape from.
 ### End of week (after all games have played)
 
 ```bash
-# 1. Player stats — the real results
+# 1. Player stats — the real results. Skips players who already have
+#    the latest completed week, so a rerun after a PFR block (or to
+#    catch a late-posted Monday night game) only fetches what's missing.
+#    Add --full-refetch to re-fetch every player, e.g. to pick up PFR
+#    stat corrections to earlier weeks.
 python scrapers/scrape_pfr.py --years 2026
 
 # 2. Team points scored/allowed (needed for DST scoring)
