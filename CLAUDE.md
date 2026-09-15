@@ -354,8 +354,8 @@ Not yet done:
 - Week 2 props not published (see open items).
 - `flask load-history` finished cleanly at ~5:21 AM (took ~38 min; it
   re-loads every historical file on each run). A second full load with
-  the DEN @ KC data was started ~11:05 AM. **Check it finished before
-  assuming all 16 Week 1 games are scored.** Loaded as-is and worth knowing: game odds and
+  the DEN @ KC data finished cleanly at 11:42 AM, so all 16 Week 1
+  games are scored. Loaded as-is and worth knowing: game odds and
   `scoresandodds_props_all` are still Week 1 lines, Ourlads injuries
   loaded 0 rows (Draftedge gap-filled 440), and
   `firstdown_studio_rankings` re-loaded last week's file since this
