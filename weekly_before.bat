@@ -117,7 +117,9 @@ python scrapers\select_top_props_by_category.py --input data\props_candidates_we
 
 echo.
 echo [11/11] Persisting everything to the database...
-flask load-history
+REM --year keeps this to the current season's rows; earlier seasons never
+REM change, and re-loading them all took ~40 minutes.
+flask load-history --year %YEAR%
 
 echo.
 echo ============================================================

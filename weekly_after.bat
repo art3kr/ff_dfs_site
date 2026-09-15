@@ -89,7 +89,9 @@ if %errorlevel% neq 0 (
 
 echo.
 echo [8/8] Persisting everything to the database...
-flask load-history
+REM --year keeps this to the current season's rows; earlier seasons never
+REM change, and re-loading them all took ~40 minutes.
+flask load-history --year %YEAR%
 
 echo.
 echo ============================================================

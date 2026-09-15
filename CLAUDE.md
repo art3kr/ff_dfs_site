@@ -259,7 +259,13 @@ comments/docs rather than presenting a guess as fact.
   under both Standings and the My Lineups export.
   `_score_lineups_for_year(year)` rolls it up to
   `{submitter: {week: total or None}}`, applying the all-9-must-match
-  rule. Standings and its CSV both go through it.
+  rule. Standings, its CSV, and the My Lineups page all go through it
+  (My Lineups used to carry its own copy of the matching logic).
+  **DNP rule:** a player with no stats row counts as 0 (`dnp: True`)
+  once their team has a `hist_team_points` row for that week, since
+  inactive/injured players never get a PFR row; before that they stay
+  pending. Lineups store no team, so it comes from that week's
+  `hist_dfs_salaries`/`players`.
 - `_compute_usage_rows()`, `_compute_game_overview_rows()`,
   `_compute_implied_team_points_rows()` — page/CSV pairs, same
   one-source-of-truth reason as the above.
@@ -358,6 +364,25 @@ Done:
 - DEN @ KC (MNF) re-run ~10:20–11:05 AM once PFR posted it: all 32
   teams now in player stats, team points, DST scoring, game info, and
   fantasy points against for Week 1.
+- **Name suffixes fixed** (Jr./Sr./II–V dropped from name keys;
+  `flask renormalize-names` rewrote 2,003 stored keys in prod, 0
+  collisions). Brian Thomas Jr. and James Cook III now score.
+- **Players with 0 DK points are no longer skipped mid-season.**
+  `scrape_pfr.py` only applies its `dk_pts_season > 0` filter to
+  finished seasons; 6 Week 1 players (Pitts, Doubs, Loveland, Jennings,
+  Stribling, Gilliam) had real games with targets/snaps but no row, so
+  their lineups sat pending. Re-scraped ~12:00 PM.
+- **DNP = 0** for players with no stats once their team's result is in
+  (Bowers, Devontez Walker, DePaola: injured). See `_lineup_player_rows`.
+- **load-history is faster:** loaders write through `_executemany()`
+  (psycopg2 `execute_batch` on Postgres instead of one round trip per
+  row), and `--year 2026` limits the historical files to one season.
+  The weekly `.bat` scripts now pass `--year %YEAR%`. Measured against
+  Render on 9/15: `--year 2026 --stats-only` 3.7 s; all 90,507 stats
+  rows 236 s (vs ~20 min with executemany).
+- After both fixes, all 7 Week 1 lineups score (no pending); DNP:
+  Brock Bowers, Devontez Walker, Andrew DePaola. The DNP badge on My
+  Lineups needs the deploy to show on the live site.
 - Week 1 team points, DST stats, DST scoring, final weather, fantasy
   points against. Then `flask export-critical-data` (backups/
   `*_20260915_084224.csv`), `flask load-schedule --year 2026`,

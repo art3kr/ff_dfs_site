@@ -982,6 +982,22 @@ def db_execute(query, params=()):
     return cur
 
 
+def _executemany(cur, sql, rows):
+    """
+    Bulk write for the loaders. psycopg2's executemany() makes one round
+    trip per row, which is most of why a full load-history took ~40
+    minutes against Render. execute_batch() sends 500 statements per round
+    trip with the same per-row semantics, so a duplicate key later in a
+    batch still just upserts (a multi-row VALUES insert would error on
+    that instead). SQLite's executemany() is local and already fast.
+    """
+    if _is_postgres():
+        from psycopg2.extras import execute_batch
+        execute_batch(cur, sql, rows, page_size=500)
+    else:
+        cur.executemany(sql, rows)
+
+
 @app.teardown_appcontext
 def close_db(exc=None):
     db = g.pop("db", None)
@@ -1834,7 +1850,12 @@ def load_schedule_command(year):
                    "for frequent re-runs as lines move through the week, without "
                    "waiting on the much slower full load.")
 @click.option("--batch-size", default=1000, type=int, help="Rows per bulk-insert batch.")
-def load_history_command(data_dir, salaries_only, stats_only, weather_only, props_only, injuries_only, firstdown_only, depth_charts_only, game_odds_only, batch_size):
+@click.option("--year", default=None, type=int,
+              help="Only load rows for this season from the historical files (salaries, "
+                   "stats, weather, game info, DST, fantasy points against, team points). "
+                   "Live full-replace files always load in full. Use it for weekly loads, "
+                   "e.g. --year 2026, instead of re-loading every season since 2014.")
+def load_history_command(data_dir, salaries_only, stats_only, weather_only, props_only, injuries_only, firstdown_only, depth_charts_only, game_odds_only, batch_size, year):
     """
     Load the historical .csv.gz files produced by the scrapers into
     hist_dfs_salaries and hist_player_stats.
@@ -1871,6 +1892,15 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
     # narrows to just its own section(s).
     run_all = not (salaries_only or stats_only or weather_only or props_only or injuries_only
                   or firstdown_only or depth_charts_only or game_odds_only)
+
+    def _scope(df: pd.DataFrame) -> pd.DataFrame:
+        """Apply --year to a historical file. Upserts, so skipped years are untouched."""
+        if year is None or 'year' not in df.columns:
+            return df
+        return df[pd.to_numeric(df['year'], errors='coerce') == year]
+
+    if year is not None:
+        click.echo(f"Scoped to {year}: historical files load only that season's rows.")
 
     conn = _connect()
     cur  = _cursor(conn)
@@ -1923,13 +1953,13 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 source_label,
             ))
             if len(batch) >= batch_size:
-                cur.executemany(sql, batch)
+                _executemany(cur, sql, batch)
                 conn.commit()
                 inserted += len(batch)
                 click.echo(f"    ...{inserted:,} rows loaded")
                 batch = []
         if batch:
-            cur.executemany(sql, batch)
+            _executemany(cur, sql, batch)
             conn.commit()
             inserted += len(batch)
         return inserted
@@ -2050,13 +2080,13 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 _float_or_none(r.get('snap_pct')),
             ))
             if len(batch) >= batch_size:
-                cur.executemany(sql, batch)
+                _executemany(cur, sql, batch)
                 conn.commit()
                 inserted += len(batch)
                 click.echo(f"    ...{inserted:,} rows loaded")
                 batch = []
         if batch:
-            cur.executemany(sql, batch)
+            _executemany(cur, sql, batch)
             conn.commit()
             inserted += len(batch)
         return inserted
@@ -2115,13 +2145,13 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 _int_or_none(r.get('special_teams_td')),
             ))
             if len(batch) >= batch_size:
-                cur.executemany(sql, batch)
+                _executemany(cur, sql, batch)
                 conn.commit()
                 inserted += len(batch)
                 click.echo(f"    ...{inserted:,} rows loaded")
                 batch = []
         if batch:
-            cur.executemany(sql, batch)
+            _executemany(cur, sql, batch)
             conn.commit()
             inserted += len(batch)
         return inserted
@@ -2171,13 +2201,13 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 _float_or_none(r.get('fd_pts_per_game')),
             ))
             if len(batch) >= batch_size:
-                cur.executemany(sql, batch)
+                _executemany(cur, sql, batch)
                 conn.commit()
                 inserted += len(batch)
                 click.echo(f"    ...{inserted:,} rows loaded")
                 batch = []
         if batch:
-            cur.executemany(sql, batch)
+            _executemany(cur, sql, batch)
             conn.commit()
             inserted += len(batch)
         return inserted
@@ -2223,13 +2253,13 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 _int_or_none(r.get('points_scored')), _int_or_none(r.get('points_allowed')),
             ))
             if len(batch) >= batch_size:
-                cur.executemany(sql, batch)
+                _executemany(cur, sql, batch)
                 conn.commit()
                 inserted += len(batch)
                 click.echo(f"    ...{inserted:,} rows loaded")
                 batch = []
         if batch:
-            cur.executemany(sql, batch)
+            _executemany(cur, sql, batch)
             conn.commit()
             inserted += len(batch)
         return inserted
@@ -2259,12 +2289,12 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 name, normalize_name(name), _none_if_nan(r.get('ourlads_player_id')),
             ))
             if len(batch) >= batch_size:
-                cur.executemany(sql, batch)
+                _executemany(cur, sql, batch)
                 conn.commit()
                 inserted += len(batch)
                 batch = []
         if batch:
-            cur.executemany(sql, batch)
+            _executemany(cur, sql, batch)
             conn.commit()
             inserted += len(batch)
         return inserted
@@ -2292,12 +2322,12 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 _none_if_nan(r.get('over_under')), _none_if_nan(r.get('favorite')),
             ))
             if len(batch) >= batch_size:
-                cur.executemany(sql, batch)
+                _executemany(cur, sql, batch)
                 conn.commit()
                 inserted += len(batch)
                 batch = []
         if batch:
-            cur.executemany(sql, batch)
+            _executemany(cur, sql, batch)
             conn.commit()
             inserted += len(batch)
         return inserted
@@ -2366,12 +2396,12 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 _none_if_nan(r.get('moneyline_odds')),
             ))
             if len(batch) >= batch_size:
-                cur.executemany(sql, batch)
+                _executemany(cur, sql, batch)
                 conn.commit()
                 inserted += len(batch)
                 batch = []
         if batch:
-            cur.executemany(sql, batch)
+            _executemany(cur, sql, batch)
             conn.commit()
             inserted += len(batch)
         return inserted
@@ -2426,12 +2456,12 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 str(r.get('status', '')),
             ))
             if len(batch) >= batch_size:
-                cur.executemany(sql, batch)
+                _executemany(cur, sql, batch)
                 conn.commit()
                 inserted += len(batch)
                 batch = []
         if batch:
-            cur.executemany(sql, batch)
+            _executemany(cur, sql, batch)
             conn.commit()
             inserted += len(batch)
         return inserted
@@ -2477,12 +2507,12 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 str(r.get('status', '')),
             ))
             if len(batch) >= batch_size:
-                cur.executemany(sql, batch)
+                _executemany(cur, sql, batch)
                 conn.commit()
                 inserted += len(batch)
                 batch = []
         if batch:
-            cur.executemany(sql, batch)
+            _executemany(cur, sql, batch)
             conn.commit()
             inserted += len(batch)
         return inserted
@@ -2537,12 +2567,12 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 _float_or_none(r.get('pts')),
             ))
             if len(batch) >= batch_size:
-                cur.executemany(sql, batch)
+                _executemany(cur, sql, batch)
                 conn.commit()
                 inserted += len(batch)
                 batch = []
         if batch:
-            cur.executemany(sql, batch)
+            _executemany(cur, sql, batch)
             conn.commit()
             inserted += len(batch)
         return inserted
@@ -2593,13 +2623,13 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 _int_or_none(r.get('wind_mph')), _none_if_nan(r.get('wind_direction')),
             ))
             if len(batch) >= batch_size:
-                cur.executemany(sql, batch)
+                _executemany(cur, sql, batch)
                 conn.commit()
                 inserted += len(batch)
                 click.echo(f"    ...{inserted:,} rows loaded")
                 batch = []
         if batch:
-            cur.executemany(sql, batch)
+            _executemany(cur, sql, batch)
             conn.commit()
             inserted += len(batch)
         return inserted
@@ -2674,13 +2704,13 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 _none_if_nan(r.get('temp')), _none_if_nan(r.get('humidity')), _none_if_nan(r.get('wind')),
             ))
             if len(batch) >= batch_size:
-                cur.executemany(sql, batch)
+                _executemany(cur, sql, batch)
                 conn.commit()
                 inserted += len(batch)
                 click.echo(f"    ...{inserted:,} rows loaded")
                 batch = []
         if batch:
-            cur.executemany(sql, batch)
+            _executemany(cur, sql, batch)
             conn.commit()
             inserted += len(batch)
         return inserted
@@ -2695,7 +2725,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             click.echo(f"Loading {path} ...")
             df = pd.read_csv(path)
             source_label = filename.replace('.csv.gz', '')
-            count = upsert_salaries(df, source_label)
+            count = upsert_salaries(_scope(df), source_label)
             click.echo(f"  Done: {count:,} rows from {filename}")
 
         # FantasyPros weekly salary scrapes — one file per week
@@ -2710,7 +2740,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         for path in fp_salary_files:
             click.echo(f"Loading {path} ...")
             df = pd.read_csv(path)
-            count = upsert_salaries(df, 'fantasypros_dk_salary')
+            count = upsert_salaries(_scope(df), 'fantasypros_dk_salary')
             click.echo(f"  Done: {count:,} rows from {os.path.basename(path)}")
 
     # --- Load player stats file ---
@@ -2721,7 +2751,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         else:
             click.echo(f"Loading {path} ...")
             df = pd.read_csv(path)
-            count = upsert_stats(df)
+            count = upsert_stats(_scope(df))
             click.echo(f"  Done: {count:,} rows from {STATS_FILE}")
 
     # --- Load weather file ---
@@ -2732,7 +2762,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         else:
             click.echo(f"Loading {path} ...")
             df = pd.read_csv(path)
-            count = upsert_weather(df)
+            count = upsert_weather(_scope(df))
             click.echo(f"  Done: {count:,} rows from {WEATHER_FILE}")
 
     # --- Load game info file ---
@@ -2743,7 +2773,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         else:
             click.echo(f"Loading {path} ...")
             df = pd.read_csv(path)
-            count = upsert_game_info(df)
+            count = upsert_game_info(_scope(df))
             click.echo(f"  Done: {count:,} rows from {GAME_INFO_FILE}")
 
     # --- Load DST (team defense) stats file ---
@@ -2754,7 +2784,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         else:
             click.echo(f"Loading {path} ...")
             df = pd.read_csv(path)
-            count = upsert_dst_stats(df)
+            count = upsert_dst_stats(_scope(df))
             click.echo(f"  Done: {count:,} rows from {DST_FILE}")
 
     # --- Load fantasy-points-against files (one per year) ---
@@ -2765,7 +2795,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         for path in fpa_files:
             click.echo(f"Loading {path} ...")
             df = pd.read_csv(path)
-            count = upsert_fantasy_points_against(df)
+            count = upsert_fantasy_points_against(_scope(df))
             click.echo(f"  Done: {count:,} rows from {os.path.basename(path)}")
 
     # --- Load team points file (single file, all years combined) ---
@@ -2776,7 +2806,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         else:
             click.echo(f"Loading {team_points_path} ...")
             df = pd.read_csv(team_points_path)
-            count = upsert_team_points(df)
+            count = upsert_team_points(_scope(df))
             click.echo(f"  Done: {count:,} rows from {os.path.basename(team_points_path)}")
 
     # --- Load depth charts (single file, always reflects the latest
@@ -4420,23 +4450,43 @@ def _lineup_player_rows(year: int, week: int = None, submitter: str = None) -> l
             f"SELECT week, team, dk_pts FROM hist_dst_stats WHERE year = {ph}", (year,))
     }
 
+    # DNP: a player with no stats row once their team's result for that
+    # week is loaded didn't play (inactive, injured), and DraftKings scores
+    # that as 0. Before the result is in they stay pending. Lineups don't
+    # store a team, so it comes from that week's salary data or slate.
+    results_in = {(r["week"], r["team"]) for r in db_fetchall(
+        f"SELECT week, team FROM hist_team_points WHERE year = {ph}", (year,))}
+    slate_team = {}
+    for r in db_fetchall(
+        f"SELECT week, name_normalized, team FROM hist_dfs_salaries WHERE year = {ph}", (year,)
+    ):
+        if r["team"]:
+            slate_team.setdefault((r["week"], r["name_normalized"]), normalize_team(r["team"]))
+    for r in db_fetchall(f"SELECT week, name, team FROM players WHERE year = {ph}", (year,)):
+        if r["team"]:
+            slate_team[(r["week"], normalize_name(r["name"]))] = normalize_team(r["team"])
+
     rows = []
     for lr in lineup_rows:
         for p in json.loads(lr["lineup_json"]):
             name_norm = normalize_name(p["name"])
+            dnp = False
             if (p.get("slot") or "").upper() == "DST":
                 team = normalize_team(p["name"])
                 actual = scores_by_week_team.get((lr["week"], team)) if team else None
             else:
                 actual = scores_by_week_name.get((lr["week"], name_norm))
-                team = team_by_week_name.get((lr["week"], name_norm))
+                team = (team_by_week_name.get((lr["week"], name_norm))
+                        or slate_team.get((lr["week"], name_norm)))
+                if actual is None and team and (lr["week"], team) in results_in:
+                    actual, dnp = 0.0, True
             rows.append({
                 "year": year, "week": lr["week"], "submitter": lr["submitter"],
                 "slot": p.get("slot"), "name": p.get("name"),
                 "name_normalized": name_norm, "position": p.get("position"),
                 "team": team, "salary": p.get("salary"),
                 "projected_pts": p.get("projected_pts"), "actual_pts": actual,
-                "lineup_total_salary": lr["total_salary"],
+                "dnp": dnp, "lineup_total_salary": lr["total_salary"],
             })
     return rows
 
@@ -4471,11 +4521,9 @@ def my_lineups():
     """
     Lets anyone browse a past week's submitted lineup, player by
     player, with each player's actual result — not just the single
-    total number standings shows. Reuses the exact same matching rules
-    as standings() (DST by team via team_mapping, offense by
-    normalized name), rebuilt here independently rather than
-    refactored out of standings() to avoid touching that already-
-    tested code path.
+    total number standings shows. Goes through _lineup_player_rows(),
+    the same function Standings scores from, so a player can't be
+    pending here and scored there (it used to be a separate copy).
 
     Defaults to the logged-in user's own most recent submission, but
     anyone's lineup for a past week can be viewed — standings already
@@ -4524,62 +4572,20 @@ def my_lineups():
         WHERE year = {ph} AND week = {ph} AND submitter = {ph}
     """, (sel_year, sel_week, sel_submitter))
 
-    players = json.loads(lineup_row["lineup_json"])
-
-    # Same matching approach as standings(), scoped to just this one
-    # lineup's 9 players rather than every lineup for the season.
-    names = {normalize_name(p["name"]) for p in players if (p.get("slot") or "").upper() != "DST"}
-    teams = {normalize_team(p["name"]) for p in players if (p.get("slot") or "").upper() == "DST"}
-    teams.discard('')
-
-    scores_by_name = {}
-    team_by_name = {}
-    if names:
-        placeholders = ", ".join([ph] * len(names))
-        stat_rows = db_fetchall(f"""
-            SELECT name_normalized, team, COALESCE(dk_pts_pfr_reported, dk_pts) AS actual_pts
-            FROM hist_player_stats
-            WHERE year = {ph} AND week = {ph} AND name_normalized IN ({placeholders})
-        """, (sel_year, sel_week) + tuple(names))
-        scores_by_name = {r["name_normalized"]: r["actual_pts"] for r in stat_rows}
-        # Historical team for THIS specific past week — not the live
-        # `players` table (which only has the current/latest week and
-        # would be wrong for any earlier week being viewed here).
-        team_by_name = {r["name_normalized"]: r["team"] for r in stat_rows}
-
-    scores_by_team = {}
-    if teams:
-        placeholders = ", ".join([ph] * len(teams))
-        dst_rows = db_fetchall(f"""
-            SELECT team, dk_pts FROM hist_dst_stats
-            WHERE year = {ph} AND week = {ph} AND team IN ({placeholders})
-        """, (sel_year, sel_week) + tuple(teams))
-        scores_by_team = {r["team"]: r["dk_pts"] for r in dst_rows}
-
     locked_teams = _get_locked_teams(sel_year, sel_week)
 
     rows = []
     total = 0.0
     matched_count = 0
-    for p in players:
-        is_dst = (p.get("slot") or "").upper() == "DST"
-        if is_dst:
-            team = normalize_team(p["name"])
-            actual = scores_by_team.get(team)
-        else:
-            name_norm = normalize_name(p["name"])
-            actual = scores_by_name.get(name_norm)
-            team = team_by_name.get(name_norm)
-
-        if actual is not None:
-            total += actual
+    for p in _lineup_player_rows(sel_year, sel_week, sel_submitter):
+        if p["actual_pts"] is not None:
+            total += p["actual_pts"]
             matched_count += 1
-
         rows.append({
-            "slot": p.get("slot"), "name": p["name"], "position": p.get("position"),
-            "salary": p.get("salary"), "projected_pts": p.get("projected_pts"),
-            "actual_pts": actual,
-            "is_locked": bool(team and team in locked_teams),
+            "slot": p["slot"], "name": p["name"], "position": p["position"],
+            "salary": p["salary"], "projected_pts": p["projected_pts"],
+            "actual_pts": p["actual_pts"], "dnp": p["dnp"],
+            "is_locked": bool(p["team"] and p["team"] in locked_teams),
         })
 
     all_matched = (matched_count == 9)

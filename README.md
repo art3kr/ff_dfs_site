@@ -177,8 +177,10 @@ python scrapers/select_top_props_by_category.py --input data/props_candidates_we
 # --- review data/props_weekN_2026.csv before the next line ---
 flask add-props data/props_weekN_2026.csv --year 2026 --week N
 
-# 10. Persist everything into the database
-flask load-history
+# 10. Persist everything into the database. --year limits the big
+#     historical files to this season; drop it only to reload every
+#     season since 2014 (e.g. after a scraper fix to old data).
+flask load-history --year 2026
 ```
 
 `weekly_before.bat` also runs `flask export-critical-data` as its very
@@ -215,8 +217,10 @@ python scrapers/scrape_weekly_weather.py --year 2026 --weeks N
 python scrapers/scrape_fantasy_points_against.py --year 2026 --position all
 
 # 7. Persist everything — Standings, History, and My Lineups all
-#    auto-recompute once this is loaded; prop picks auto-score too
-flask load-history
+#    auto-recompute once this is loaded; prop picks auto-score too.
+#    For a small fix, a section flag is faster still, e.g.
+#    flask load-history --year 2026 --stats-only
+flask load-history --year 2026
 ```
 
 Step 1 covers game info too (roof, surface, actual weather, Vegas

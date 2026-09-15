@@ -111,7 +111,9 @@
                     <td class="right">${{ "{:,}".format(r['salary']) if r['salary'] else '-' }}</td>
                     <td class="right">{{ "%.1f"|format(r['projected_pts']) if r['projected_pts'] else '-' }}</td>
                     <td class="right">
-                        {% if r['actual_pts'] is not none %}
+                        {% if r['dnp'] %}
+                            <strong>0.0</strong> <span class="dnp-badge" title="No stats this week (inactive or injured), scored as 0">DNP</span>
+                        {% elif r['actual_pts'] is not none %}
                             <strong>{{ "%.1f"|format(r['actual_pts']) }}</strong>
                         {% else %}
                             <span class="pending-week" title="Not yet fully scored">pending</span>

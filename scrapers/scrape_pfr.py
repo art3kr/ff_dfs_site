@@ -1001,12 +1001,18 @@ def scrape_player_stats(years: list[int], full_refetch: bool = False):
             # request cost. Players with 0 points (inactive squad
             # players, long snappers, etc.) are never going to matter
             # for a DFS site, so skip fetching their detail page.
-            before = len(players_df)
-            players_df = players_df[players_df['dk_pts_season'] > 0].reset_index(drop=True)
-            skipped = before - len(players_df)
-            if skipped:
-                print(f"  Skipping {skipped} players with 0 season DK points "
-                      f"(inactive/irrelevant) — {len(players_df)} remain")
+            #
+            # Finished seasons only. Mid-season, 0 DK points can still mean
+            # a real game with targets, snaps and routes (6 players in 2026
+            # Week 1, incl. Kyle Pitts and Romeo Doubs), and a lineup with
+            # that player stayed pending because their row never existed.
+            if _season_finished(year):
+                before = len(players_df)
+                players_df = players_df[players_df['dk_pts_season'] > 0].reset_index(drop=True)
+                skipped = before - len(players_df)
+                if skipped:
+                    print(f"  Skipping {skipped} players with 0 season DK points "
+                          f"(inactive/irrelevant) — {len(players_df)} remain")
 
             for _, row in players_df.iterrows():
                 pfr_id = row['pfr_id']

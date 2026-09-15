@@ -424,6 +424,82 @@ def test_name_suffixes():
     conn.close()
 
 
+def test_dnp_and_year_scope():
+    section("DNP scoring and load-history --year")
+    import json as _json
+    wk = 5
+    scored = [("QB", "Josh Allen", 20.0), ("RB", "James Cook", 10.0), ("RB", "Raheem Mostert", 9.0),
+              ("WR", "Stefon Diggs", 8.0), ("WR", "Tyreek Hill", 7.0), ("WR", "Jaylen Waddle", 6.0),
+              ("TE", "Dalton Kincaid", 5.0)]
+    lineup = [{"slot": s, "name": n, "position": s, "salary": 5000} for s, n, _ in scored]
+    lineup += [{"slot": "FLEX", "name": "Brock Bowers", "position": "TE", "salary": 5000},
+               {"slot": "DST", "name": "Buffalo Bills", "position": "DST", "salary": 3000}]
+    conn = flaskapp._connect()
+    conn.execute("INSERT INTO lineups (week, year, submitter, lineup_json, total_salary) "
+                 "VALUES (?,?,?,?,?)", (wk, YEAR, "dnptest", _json.dumps(lineup), 43000))
+    for i, (_, name, pts) in enumerate(scored):
+        conn.execute("INSERT INTO hist_player_stats (pfr_id, name, name_normalized, year, week, "
+                     "team, dk_pts) VALUES (?,?,?,?,?,?,?)",
+                     ("DNP%02d" % i, name, flaskapp.normalize_name(name), YEAR, wk, "buf", pts))
+    conn.execute("INSERT INTO hist_dst_stats (year, week, team, dk_pts) VALUES (?,?,?,?)",
+                 (YEAR, wk, "buf", 4.0))
+    # Brock Bowers has no stats row; his team comes from that week's salaries.
+    conn.execute("INSERT INTO hist_dfs_salaries (week, year, name, name_normalized, team, source) "
+                 "VALUES (?,?,?,?,?,?)", (wk, YEAR, "Brock Bowers", "brock bowers", "lvr", "t"))
+    conn.commit()
+    conn.close()
+
+    def week_total():
+        with flaskapp.app.app_context():
+            by_submitter, _ = flaskapp._score_lineups_for_year(YEAR)
+        return by_submitter.get("dnptest", {}).get(wk)
+
+    check("missing player stays pending before his team's result is in", week_total() is None)
+
+    conn = flaskapp._connect()
+    conn.execute("INSERT INTO hist_team_points (year, week, team, opponent, points_scored, "
+                 "points_allowed) VALUES (?,?,?,?,?,?)", (YEAR, wk, "lvr", "kan", 10, 31))
+    conn.commit()
+    conn.close()
+    got = week_total()
+    check("DNP scores 0 once his team's result is in (got %s, want 69.0)" % got, got == 69.0)
+    with flaskapp.app.app_context():
+        bowers = [r for r in flaskapp._lineup_player_rows(YEAR, wk, "dnptest") if r["name"] == "Brock Bowers"]
+    check("row is flagged dnp with 0.0", bool(bowers) and bowers[0]["dnp"] and bowers[0]["actual_pts"] == 0.0)
+    html = client.get("/my-lineups?year=%d&week=%d&submitter=dnptest" % (YEAR, wk)).get_data(as_text=True)
+    check("My Lineups shows the DNP badge", "dnp-badge" in html)
+    check("My Lineups shows the week total 69.0", "69.0" in html)
+
+    conn = flaskapp._connect()
+    conn.execute("DELETE FROM lineups WHERE submitter = 'dnptest'")
+    for table in ("hist_player_stats", "hist_dst_stats", "hist_dfs_salaries", "hist_team_points"):
+        conn.execute("DELETE FROM %s WHERE year = ? AND week = ?" % table, (YEAR, wk))
+    conn.commit()
+    conn.close()
+
+    # --year only loads that season's rows from a historical file.
+    import pandas as pd
+    data_dir = tempfile.mkdtemp(prefix="ffdfs_load_")
+    pd.DataFrame([
+        {"pfr_id": "YEAR25", "name": "Old Guy", "name_normalized": "old guy", "year": 2025, "week": 7,
+         "team": "buf", "opponent": "mia", "position": "WR", "dk_pts": 1.0},
+        {"pfr_id": "YEAR26", "name": "New Guy Jr.", "name_normalized": "new guy jr", "year": 2026, "week": 7,
+         "team": "buf", "opponent": "mia", "position": "WR", "dk_pts": 2.0},
+    ]).to_csv(os.path.join(data_dir, "pfr_player_stats_2014_2025.csv.gz"), index=False, compression="gzip")
+    result = flaskapp.app.test_cli_runner().invoke(
+        args=["load-history", "--stats-only", "--year", "2026", "--data-dir", data_dir])
+    conn = flaskapp._connect()
+    loaded = {r[0]: r[1] for r in conn.execute(
+        "SELECT pfr_id, name_normalized FROM hist_player_stats WHERE pfr_id IN ('YEAR25', 'YEAR26')")}
+    conn.execute("DELETE FROM hist_player_stats WHERE pfr_id IN ('YEAR25', 'YEAR26')")
+    conn.commit()
+    conn.close()
+    check("load-history --year exits cleanly", result.exit_code == 0)
+    check("--year 2026 loads the 2026 row", "YEAR26" in loaded)
+    check("--year 2026 skips the 2025 row", "YEAR25" not in loaded)
+    check("loader builds the key via _name_key (suffix dropped)", loaded.get("YEAR26") == "new guy")
+
+
 # (data_type, querystring, expected leading key columns)
 DOWNLOADS = [
     ("slate",                   "?year=2026&week=1", ["year", "week", "team", "name", "name_normalized"]),
@@ -595,6 +671,7 @@ if __name__ == "__main__":
     test_routes_smoke()
     test_standings_scoring()         # mutates hist_player_stats at the end
     test_name_suffixes()             # after standings: adds (then removes) a week 3
+    test_dnp_and_year_scope()        # adds (then removes) a week 5 and two 2025/2026 rows
     test_timestamp_format()          # must stay last; rewrites game_schedule
 
     print()
