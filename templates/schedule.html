@@ -79,13 +79,14 @@
 
     <div class="week-jump">
         {% for w in weeks %}
-        <a href="#week-{{ w }}" class="week-jump-link">Wk{{ w }}</a>
+        <a href="#week-{{ w }}" class="week-jump-link{% if w == current_week %} current{% endif %}"
+           {% if w == current_week %}title="This week"{% endif %}>Wk{{ w }}</a>
         {% endfor %}
     </div>
 
     {% for w in weeks %}
-    <section class="schedule-week" id="week-{{ w }}">
-        <h3 class="schedule-week-title">Week {{ w }}</h3>
+    <section class="schedule-week{% if w == current_week %} current-week{% endif %}" id="week-{{ w }}">
+        <h3 class="schedule-week-title">Week {{ w }}{% if w == current_week %}<span class="this-week-badge">This week</span>{% endif %}</h3>
 
         {% for day_name, games in games_by_week[w].items() %}
         <div class="schedule-day">
@@ -120,6 +121,17 @@
 {% endif %}
 
 </main>
+
+{% if current_week %}
+<script>
+    // Open on the current week. A #week-N link in the URL wins, so an
+    // explicit jump (or a shared link) still lands where it should.
+    if (!window.location.hash) {
+        const section = document.getElementById("week-{{ current_week }}");
+        if (section) section.scrollIntoView({ block: "start" });
+    }
+</script>
+{% endif %}
 
 {% include '_info_modal.html' %}
 </body>

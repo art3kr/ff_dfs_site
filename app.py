@@ -5642,7 +5642,7 @@ def schedule():
 
     if not available_years:
         return render_template("schedule.html", games_by_week={}, weeks=[],
-                               year=None, available_years=[])
+                               year=None, available_years=[], current_week=None)
 
     req_year = request.args.get("year", type=int)
     sel_year = req_year if req_year in available_years else available_years[0]
@@ -5694,9 +5694,15 @@ def schedule():
 
     weeks = sorted(games_by_week.keys())
 
+    # The page highlights and scrolls to the current week, but only while
+    # it's showing this season — nothing is "current" on a past season.
+    cur_year, cur_week = _get_current_nfl_week()
+    current_week = cur_week if cur_year == sel_year else None
+
     return render_template("schedule.html",
                            games_by_week=games_by_week, weeks=weeks,
-                           year=sel_year, available_years=available_years)
+                           year=sel_year, available_years=available_years,
+                           current_week=current_week)
 
 
 @app.route("/game-overview")

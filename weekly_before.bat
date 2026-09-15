@@ -116,7 +116,16 @@ python scrapers\select_top_props_by_category.py --input data\props_candidates_we
 :skip_props
 
 echo.
-echo [11/11] Persisting everything to the database...
+echo [11/11] Checking scraper output, then persisting to the database...
+REM A scraper can exit 0 and still have written nothing useful: Ourlads'
+REM injury file was header-only for a week after their markup changed,
+REM and FirstDown's team column was blank on every row. This makes that
+REM visible before the load instead of weeks later.
+python scrapers\check_scraper_output.py --year %YEAR% --week %WEEK%
+if %errorlevel% neq 0 (
+    echo WARNING: see the check above — a scraper may have written an empty or blank-column file.
+    echo          Loading anyway; fix that scraper, re-run it, then re-run load-history.
+)
 REM --year keeps this to the current season's rows; earlier seasons never
 REM change, and re-loading them all took ~40 minutes.
 flask load-history --year %YEAR%

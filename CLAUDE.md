@@ -466,6 +466,20 @@ Evening (Week 2 prep, all loaded to prod):
   Weather already did this and needed no change — it looked stuck on
   Week 1 only because the current week flips 24h after the last kickoff
   (Mon 8:15 PM ET + 24h = Tue 8:15 PM ET).
+- **Schedule highlights and scrolls to the current week.** `schedule()`
+  passes `current_week` (only when the page is showing the current
+  season), the template marks that week's section and jump link and adds
+  a "This week" badge, and a small script scrolls to it unless the URL
+  already carries a `#week-N` hash, so shared links still win.
+- **`scrapers/check_scraper_output.py` runs before each load.** A
+  scraper can exit 0 having written nothing useful, which is how the
+  Ourlads injury file stayed header-only for a week and FirstDown's
+  `team` column stayed blank on every row. The check verifies each
+  expected file exists, clears a minimum row count, has no all-blank key
+  column, and (for live files) was actually rewritten recently. Both
+  weekly `.bat` scripts run it as the first half of their final step and
+  warn without blocking the load. Add new scraper outputs to its
+  `CHECKS` list.
 
 - **Week 2 props published** (72 props, 12 categories, 15 games) at
   ~7:24 PM. All 39 distinct players resolve through

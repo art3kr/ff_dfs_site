@@ -689,6 +689,27 @@ def test_current_week_default():
             conn.close()
 
 
+def test_schedule_current_week():
+    section("Schedule highlights and scrolls to the current week")
+    # The fixture's only scheduled week is week 1, so that's "current".
+    html = client.get("/schedule").get_data(as_text=True)
+    check("current week's section is marked", 'class="schedule-week current-week"' in html)
+    check("current week's jump link is marked", "week-jump-link current" in html)
+    check("current week carries a This week badge", "This week</span>" in html)
+    check("page scrolls to the current week on load",
+          'getElementById("week-1")' in html and "scrollIntoView" in html)
+    check("an explicit #week link still wins", "window.location.hash" in html)
+
+    saved = flaskapp._get_current_nfl_week
+    flaskapp._get_current_nfl_week = lambda: (YEAR + 1, 5)   # viewing a season that isn't current
+    try:
+        html = client.get("/schedule?year=%d" % YEAR).get_data(as_text=True)
+        check("no highlight when the shown season isn't the current one",
+              "current-week" not in html and "scrollIntoView" not in html)
+    finally:
+        flaskapp._get_current_nfl_week = saved
+
+
 def _usage_table(html):
     """{player name: {header: cell text}} from the Usage page's table."""
     import re
@@ -1170,6 +1191,7 @@ if __name__ == "__main__":
     test_prop_void()                 # adds (then removes) a week 6 prop and pick
     test_scoring_breakdown()         # adds (then removes) a week 7 lineup
     test_current_week_default()      # patches _get_current_nfl_week to an empty week
+    test_schedule_current_week()
     test_usage()                     # after data_as_of_empty; adds (then removes) weeks 11-12
     test_game_odds_week()            # needs the fixture schedule; adds (then removes) odds
     test_timestamp_format()          # must stay last; rewrites game_schedule
