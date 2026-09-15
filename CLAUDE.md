@@ -5,6 +5,15 @@ Context for working on this codebase. This complements `README.md`
 the weekly workflow) rather than duplicating it — read that too for
 anything workflow-related.
 
+**Keep this file current — that's part of the job, not optional.**
+Whenever a session changes something this file describes (a new page,
+a fixed bug, a new gotcha) or moves the season forward (a week scored,
+a week prepped), update the relevant section before finishing,
+especially **Project status** near the bottom. Date every status
+entry with the real calendar date. What belongs where: *how* to run
+things goes in `README.md`; *where things stand* and *what to watch
+out for* goes here.
+
 ## What this is
 
 A season-long NFL DFS (daily fantasy sports) challenge site for a
@@ -269,8 +278,104 @@ This list reflects what existed as of this file's writing — `ls` the
 real directories rather than trusting this to stay perfectly current,
 since new scrapers/pages get added over time.
 
-## Known open items (confirmed, not yet resolved)
+## Project status
 
+*Last updated: Tuesday 2026-09-15, ~4:00 AM local.* Update this
+section whenever the season moves forward or an item opens/closes.
+
+### Where the season is
+
+- **2026 season. Week 1 is over** (Thu 9/10 – Mon 9/14); **Week 2 is
+  current** (Thu 9/17 – Mon 9/21). `_get_current_nfl_week()` is the
+  source of truth; this line is just orientation.
+- Weekly rhythm: Tuesday morning = score the finished week
+  (`weekly_after.bat`) + prep the next one (`weekly_before.bat`).
+  Props usually can't be finalized Tuesday; see open items.
+
+### Accomplished overall (as of 2026-09-15)
+
+Built between 2026-08-19 and 2026-09-11 (see `git log` for detail):
+- Core: Flask app, login auth with bootstrap users via env vars,
+  auto-init DB, dual SQLite/Postgres, deployed on Render.
+- Weekly DK salary-cap lineup builder (Slate), with per-player game
+  lock, player search, hide-3rd-string/2nd-string/locked filters.
+- Pick-5 props challenge with server-side lock enforcement.
+- Standings (lineups + props), History, player career pages, My
+  Lineups, My Props.
+- Research tabs: Best Matchups, Implied Player Points (+ FDS Pts
+  comparison), Implied Team Points, Game Overview, Team Points,
+  Fantasy Points Against, Usage, Weather/Game Info, Depth Charts +
+  injuries (Ourlads, then Draftedge gap-fill), Schedule.
+- Historical data 2014–2025 loaded (PFR stats + game info, RotoGuru
+  salaries, DST scoring, team points).
+- Every tab downloads, with consistent join keys and Merge-Friendly
+  variants; on-site info modal; `test_app.py` harness; weekly `.bat`
+  scripts with a critical-data backup as step 1.
+- Week 1 (2026) run end to end: salaries, props published, lineups
+  and picks submitted.
+
+### This week: 2026-09-15 (score Week 1, prep Week 2)
+
+Done:
+- Week 2 prep scrapes: schedule, DK salaries
+  (`fp_dk_salaries_week2_2026.csv.gz`), weather forecasts, Ourlads
+  depth charts, Draftedge injuries, FDS season projections, props
+  candidates.
+- Week 1 PFR player stats (after refreshing the PFR cookies) and game
+  info for all 16 Week 1 games.
+- **Fixed `scrape_pfr.py` saving unplayed games.** Game-info scraping
+  now skips games dated today or later, won't save a boxscore page
+  with no game info, and retries empty rows left by older runs. Before
+  the fix, a run saved 4 empty Week 2 rows, which would have marked
+  those games done forever. The rows were removed by hand; a
+  pre-cleanup copy is at
+  `data/pfr_game_info_2014_2025_backup_20260915.csv.gz` (safe to
+  delete once Week 2 game info scrapes cleanly).
+
+Not yet done (run paused ~4:00 AM on the PFR rate limit, not failed):
+- Week 1 team points → DST stats → DST scoring → final weather →
+  fantasy points against. None of these ran; `team_points_by_week.csv.gz`
+  is still from 9/3. Resume with those five scrapers in order once PFR's
+  429 block has lifted (it was set to clear ~4:39 AM on 9/15). Player
+  stats and game info don't need re-running.
+- DB steps, in order: `flask export-critical-data`,
+  `flask load-schedule --year 2026`,
+  `flask load-weekly-salary data\fp_dk_salaries_week2_2026.csv.gz --year 2026`,
+  `flask load-history`. **Check whether these ran before assuming
+  Week 1 scores or Week 2 salaries are live.**
+- Week 2 props not published (see open items).
+
+### Open items (confirmed, not yet resolved)
+
+- **Week 2 props and game odds are really Week 1 data.** Scraped
+  Tuesday morning, ScoresAndOdds still showed Week 1 matchups (CIN–TAM,
+  DET–NOR…). `data/props_week2_2026.csv` must NOT be published as-is.
+  Re-run `scrape_scoresandodds_game_odds.py` and the three props steps
+  once Week 2 lines are posted (likely Tue afternoon–Wed), review, then
+  `flask add-props ... --week 2`. Consider moving the odds/props steps
+  out of Tuesday-morning `weekly_before.bat` or adding a matchup-week
+  sanity check.
+- **Props scrape data quality:** about 80 rows across several categories
+  had neither a line nor a price; the auto-selected slate included
+  junk lines (Jerry Jeudy rush yds 0.5, Sione Vaki rush yds 0.5) and
+  a blank team (Matthew Stafford). Review before publishing.
+- **FirstDown Studio rankings scraper broken:** "no `<table>` found"
+  for QB/RB/WR/TE on 2026-09-15. Page changed or now renders client
+  side; unknown which. Per convention, run/write a diagnostic before
+  touching the scraper. FDS Pts column is stale until fixed.
+- **Ourlads injuries came back empty** (header-only CSV) on
+  2026-09-15. Could be real or a changed `lc_red` marker; unverified.
+  Draftedge still supplied statuses.
+- **PFR rate limiting stalls the weekly run.** After ~265 player pages
+  + game pages, PFR returned 429 with `Retry-After: 2884` (~48 min).
+  `pfr_get()` honors it silently, and its prints aren't flushed when
+  output is redirected, so the run looks hung. `weekly_after.bat` then
+  hits PFR again right away (team points, fantasy points against). Worth
+  a visible "waiting N s until HH:MM" message and/or a pause between
+  PFR-heavy steps.
+- **PFR cookies expire within hours.** Expect to refresh
+  `PFR_CF_CLEARANCE`/`PFR_CF_BM`/`PFR_USER_AGENT` in `.env` before most
+  Tuesday runs; a 403 on the first request means refresh.
 - **`CHANGELOG.md` is stale.** It stops at "[Step 4a] — Historical
   data scrapers" and predates props, standings, best matchups,
   implied points, depth charts, injuries, and most of the current
@@ -278,6 +383,9 @@ since new scrapers/pages get added over time.
   so don't use it to reason about what exists.
 
 ### Recently closed (kept as context, not as work)
+
+- **2026-09-15: `scrape_pfr.py` no longer saves unplayed games** (see
+  "This week" above).
 
 - **Prop picks now DO have server-side lock enforcement.**
   `submit_props()` rejects adding a locked prop, flipping over/under
@@ -292,6 +400,9 @@ since new scrapers/pages get added over time.
 
 ## Quick orientation for a fresh session
 
+0. Read **Project status** above — what week it is, what's done, and
+   what's open. If it's stale relative to today's date, say so and
+   update it as you learn the real state.
 1. Read `README.md` for the current weekly workflow and known future
    ideas.
 2. `grep -n "CREATE TABLE" app.py` for the current schema — don't

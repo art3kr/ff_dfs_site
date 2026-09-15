@@ -90,6 +90,7 @@ import sys
 import time
 import random
 import argparse
+from datetime import date
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup, Comment
@@ -1040,14 +1041,47 @@ def _flush_player_rows(existing: pd.DataFrame, new_rows: list, final: bool = Fal
         print(f"  [FINAL] Saved {len(final_df):,} rows → {PLAYERS_OUT}")
 
 
+# Everything get_game_info() scrapes off the boxscore page, as opposed to
+# the schedule fields it just passes through. A row with none of these is
+# a placeholder, not a finished game.
+GAME_DATA_COLUMNS = [c for c in GAME_COLUMNS if c not in
+                     ('boxscore_url', 'year', 'week', 'team_home', 'team_away',
+                      'date', 'time', 'location')]
+
+
+def _has_game_data(row) -> bool:
+    return any(pd.notna(row.get(c)) and str(row.get(c)).strip() != ''
+               for c in GAME_DATA_COLUMNS)
+
+
+def _game_not_played_yet(game_date) -> bool:
+    """
+    True if the schedule says this game is today or later. PFR's schedule
+    links a boxscore URL for every game, played or not, and an unplayed
+    game's page has no game_info table — saving that as an empty row used
+    to mark the game done forever, so its real weather/Vegas/roof data was
+    never fetched once it was actually played (confirmed 2026-09-15: a
+    Week 1 run saved four empty Week 2 rows). Today counts as unplayed,
+    since a game in progress or just finished may not be posted yet.
+    An unparseable or missing date isn't treated as unplayed — the
+    empty-result check in scrape_game_info() still catches those.
+    """
+    parsed = pd.to_datetime(game_date, errors='coerce')
+    return pd.notna(parsed) and parsed.date() >= date.today()
+
+
 def scrape_game_info(years: list[int]):
     """Scrape boxscore game info (weather, Vegas, etc.) for all given years."""
     os.makedirs(DATA_DIR, exist_ok=True)
 
     if os.path.exists(GAMES_OUT):
         existing   = pd.read_csv(GAMES_OUT)
-        done_urls  = set(existing['boxscore_url'])
-        print(f"Loaded {len(existing):,} existing game rows")
+        # Empty placeholder rows from older runs don't count as done, so
+        # they get re-fetched and replaced once the game has been played.
+        has_data   = existing.apply(_has_game_data, axis=1)
+        done_urls  = set(existing.loc[has_data, 'boxscore_url'])
+        print(f"Loaded {len(existing):,} existing game rows"
+              f"{f' ({(~has_data).sum()} empty, will retry)' if (~has_data).any() else ''}")
     else:
         existing  = pd.DataFrame(columns=GAME_COLUMNS)
         done_urls = set()
@@ -1059,7 +1093,9 @@ def scrape_game_info(years: list[int]):
             return
         new_df   = pd.DataFrame(all_new, columns=GAME_COLUMNS)
         final_df = pd.concat([existing, new_df], ignore_index=True)
-        final_df = final_df.drop_duplicates(subset=['boxscore_url'])
+        # keep='last' so a freshly scraped row replaces an old empty
+        # placeholder for the same game instead of being dropped.
+        final_df = final_df.drop_duplicates(subset=['boxscore_url'], keep='last')
         final_df = final_df.sort_values(['year','week'])
         final_df.to_csv(GAMES_OUT, index=False, compression='gzip')
 
@@ -1075,9 +1111,13 @@ def scrape_game_info(years: list[int]):
                 print(f"  No schedule for {year}")
                 continue
 
+            not_played = 0
             for _, game in schedule.iterrows():
                 url = game['boxscore_url']
                 if url in done_urls:
+                    continue
+                if _game_not_played_yet(game.get('date', '')):
+                    not_played += 1
                     continue
 
                 print(f"  W{game['week']:02d} {game['team_away']} @ {game['team_home']}", end='', flush=True)
@@ -1105,6 +1145,14 @@ def scrape_game_info(years: list[int]):
 
                 consecutive_failures = 0
                 info.pop('_request_failed', None)
+
+                # The page loaded but had no game_info — not posted yet.
+                # Don't save it or mark it done, so the next run retries.
+                if not _has_game_data(info):
+                    print(" → no game info posted yet, will retry next run")
+                    time.sleep(SLEEP_BOXSCORE)
+                    continue
+
                 all_new.append(info)
                 done_urls.add(url)
 
@@ -1113,6 +1161,9 @@ def scrape_game_info(years: list[int]):
                 print(f" ✓ [saved to {os.path.basename(GAMES_OUT)}]")
 
                 time.sleep(SLEEP_BOXSCORE)
+
+            if not_played:
+                print(f"  Skipped {not_played} games not played yet (scheduled today or later)")
 
     if all_new:
         final_df = pd.read_csv(GAMES_OUT)
