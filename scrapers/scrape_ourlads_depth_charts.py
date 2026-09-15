@@ -26,20 +26,19 @@ Structure confirmed via live diagnostic (Sept 2026):
     WR list — preserved as-is rather than artificially collapsed,
     since it's more useful this way (shows who starts at each specific
     WR spot) — flagged as a design choice, not assumed silently
-  - Injury status: confirmed real via a targeted check against Brock
-    Bowers (TE, LV — confirmed currently injured) — his player <a> tag
-    carries class="lc_red", while healthy players nearby have
-    class="". This is a BINARY flag only — Ourlads' HTML doesn't
-    distinguish Questionable/Doubtful/Out/IR anywhere we can see, just
-    "flagged red" or not. Treated as "out" specifically per the
-    original report of what this means, but that's an assumption
-    based on what was described, not something independently confirmed
-    from the page itself — if it turns out to mean something broader
-    (e.g. "banged up" generally), this mapping should be revisited.
-    Two other color classes were seen on an unrelated page (lc_gold,
-    lc_purple) that turned out to mean a recent trade and a rookie
-    draft class respectively, NOT injury status — only lc_red is
-    treated as injury-related here, nothing else.
+  - Injury status: read from the status badge in the player's own cell,
+    e.g. <span class="badge badge-danger bad-ps">O</span> after the
+    name, with the codes defined by the page's own status key legend
+    (D/Q/O/IR/PUP/GTD/SUS/IA and practice codes like FP/LP/DNP).
+    Confirmed live 2026-09-15 on Buffalo's page (Ty Johnson and T.J.
+    Sanders both carried "O").
+    This replaced an earlier class="lc_red" check, which silently
+    stopped matching: that class is gone from the page entirely, so
+    every scrape produced an empty injury file for at least a week
+    before anyone noticed. Unlike the old binary flag, the badge gives
+    the real status, so Out/Doubtful/Questionable/IR are now
+    distinguished. lc_gold and lc_purple, still on the page, mark a
+    recent acquisition and a draft class, NOT injury status.
 
 Team list (all 32 URL slugs) taken directly from ourlads' own
 navigation sidebar, confirmed via live fetch — not guessed. Two of
@@ -52,8 +51,8 @@ Output:
   data/ourlads_injuries.csv.gz
     Columns: player_name, player_name_normalized, team, position, status
     (same shape as draftedge_injuries.csv.gz, so both can load into
-    the same player_injuries table) — only injured (lc_red) players
-    appear here at all, one row per team's Offense table only (same
+    the same player_injuries table) — only players carrying a status
+    badge appear here at all, one row per team's Offense table only (same
     positions as the depth chart itself; Ourlads' injury marking on
     Defense/Special Teams isn't captured since this scraper doesn't
     read those tables)
@@ -104,9 +103,23 @@ OURLADS_TEAMS = [
 # table. WR is 3 distinct slots there, not one generic list.
 WANTED_POSITIONS = {'QB', 'RB', 'TE', 'LWR', 'RWR', 'SWR'}
 
-# Confirmed real via a targeted check against Brock Bowers (see module
-# docstring) — only this class is treated as injury-related.
-INJURY_CLASS = 'lc_red'
+# Ourlads shows a player's status as a badge in his own cell, e.g.
+# <span class="badge badge-danger bad-ps">O</span> next to the name.
+# The codes come from the page's own status key legend (confirmed live
+# 2026-09-15). Only availability codes are captured; the practice-report
+# ones (FP/LP/DNP/REST/NIR, and P for Probable) are skipped, matching
+# scrape_draftedge_injuries.py's choice to ignore probable/day-to-day.
+INJURY_STATUS_CODES = {
+    'O':   'out',
+    'D':   'doubtful',
+    'Q':   'questionable',
+    'GTD': 'questionable',   # game time decision
+    'IR':  'ir',
+    'PUP': 'pup',
+    'NFI': 'nfi',
+    'SUS': 'suspended',
+    'IA':  'inactive',
+}
 
 OUT_COLUMNS = ['team', 'pos', 'string_rank', 'player_name', 'ourlads_player_id']
 INJURY_COLUMNS = ['player_name', 'player_name_normalized', 'team', 'position', 'status']
@@ -218,14 +231,18 @@ def scrape_team(ourlads_slug: str) -> tuple:
                 'ourlads_player_id': player_id,
             })
 
-            link_classes = link.get('class') or []
-            if INJURY_CLASS in link_classes:
+            status = None
+            for badge in cells[cell_idx].find_all('span'):
+                status = INJURY_STATUS_CODES.get(badge.get_text(strip=True).upper())
+                if status:
+                    break
+            if status:
                 injury_records.append({
                     'player_name': player_name,
                     'player_name_normalized': normalize_name(player_name),
                     'team': team,
                     'position': pos,
-                    'status': 'out',
+                    'status': status,
                 })
 
     print(f"    {len(records)} depth chart entries parsed, {len(injury_records)} flagged injured")

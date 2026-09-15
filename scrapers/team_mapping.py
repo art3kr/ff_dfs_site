@@ -24,6 +24,12 @@ EXTRA_ALIASES = {
     # from every other source encountered so far (ESPN/PFR use ARI/LAR).
     'arz': 'ari',
     'ram': 'lar',
+    # ScoresAndOdds (and nflverse) write the Rams as bare "LA", which our
+    # mapping CSV doesn't carry. Confirmed 2026-09-15: "LA" was the only
+    # unmapped code on the props page, and it left every Rams player with
+    # no team, so their props never locked at kickoff. Both sources use
+    # "LAC" for the Chargers, so "LA" is unambiguous here.
+    'la': 'lar',
     # Short PFR-style codes for these same relocated franchises,
     # confirmed present in hist_player_stats for 2010-2019 rows —
     # different from the full-name aliases above (those cover "Oakland

@@ -3,8 +3,15 @@ scrapers/select_top_props_by_category.py
 ---------------------------------------------
 Takes the first 6 rows per category from convert_scoresandodds_to_props_csv.py's
 output, preserving the site's own original order within each category
-(no re-sorting) — automates what was previously a manual "trim this
-down to ~20-25" step.
+— automates what was previously a manual "trim this down to ~20-25" step.
+
+Exception: anytime-touchdown props are ranked by the site's own
+projection instead. ScoresAndOdds orders that category long-shots-first,
+so taking its first 6 produced dead picks nobody would ever take the
+Over on — the 2026 Week 2 slate led with Tanner Koziol (+2300) and Tyler
+Badie (+3500), both projected at 0.000 TDs. Ranking by projection gives
+the actual TD threats (Henry, McCaffrey, Gibbs). Every other category's
+own order is already sensible, so only this one is re-ranked.
 
 With 10 convertible categories x 6 each, this produces up to 60 props
 total — more than the original manual ~20-25 target. That's
@@ -22,6 +29,12 @@ import argparse
 import pandas as pd
 
 
+# Categories whose own page order buries the props anyone would actually
+# pick, so they get ranked by the site's projection instead. See the
+# module docstring for the anytime-TD evidence.
+RANK_BY_PROJECTION = {'touchdowns'}
+
+
 def main(input_path: str, output_path: str, top_n: int):
     df = pd.read_csv(input_path)
 
@@ -33,10 +46,16 @@ def main(input_path: str, output_path: str, top_n: int):
     print(f"Loaded {len(df)} candidate props across "
           f"{df['category_original'].nunique()} categories")
 
-    # sort=False preserves each category's original position (first
-    # appearance order), and .head(n) within a groupby preserves each
-    # group's own original row order — no re-sorting happens anywhere.
-    selected = df.groupby('category_original', sort=False).head(top_n)
+    # Category order and within-category row order both stay as the site
+    # had them, EXCEPT for RANK_BY_PROJECTION categories (see above).
+    df['_proj'] = pd.to_numeric(df.get('site_projection'), errors='coerce')
+    frames = []
+    for cat in df['category_original'].unique():
+        group = df[df['category_original'] == cat]
+        if cat in RANK_BY_PROJECTION:
+            group = group.sort_values('_proj', ascending=False)
+        frames.append(group.head(top_n))
+    selected = pd.concat(frames).drop(columns='_proj')
 
     print(f"\nSelected {len(selected)} props (up to {top_n} per category):")
     for cat, count in selected['category_original'].value_counts().reindex(

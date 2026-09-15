@@ -76,11 +76,15 @@ each table is:**
   `prop_picks`, `prop_bets`.
 
 **Injury data has a two-source priority order, not a single source.**
-Ourlads (scraped as part of the depth-chart pull, injury status
-inferred from a `class="lc_red"` marker — confirmed real via a
-targeted check, but note it's a *binary* flag with no
-Questionable/Doubtful/Out distinction visible in their HTML) loads
-first as a full replace. Draftedge loads second, but only fills gaps
+Ourlads (scraped as part of the depth-chart pull, status read from the
+badge in the player's own cell, e.g.
+`<span class="badge badge-danger bad-ps">O</span>`, mapped through
+`INJURY_STATUS_CODES` to out/doubtful/questionable/ir/etc. per the
+page's own status key legend) loads first as a full replace. It used to
+look for a `class="lc_red"` marker; that class disappeared from the
+page and the scrape silently produced an empty injury file for at least
+a week (found 2026-09-15). If Ourlads ever loads 0 rows again, suspect
+the markup, not a quiet injury week. Draftedge loads second, but only fills gaps
 (`ON CONFLICT DO NOTHING`) — it never overwrites a status Ourlads
 already provided. If you need to touch injury loading, both
 `replace_player_injuries()` and `fill_gap_player_injuries()` need to
@@ -442,16 +446,30 @@ Done:
   `*_20260915_084224.csv`), `flask load-schedule --year 2026`,
   `flask load-weekly-salary ... week2` (800 players; Slate shows Week 2).
 
+Evening (Week 2 prep, all loaded to prod):
+- Week 2 game odds, props market (1,752 rows), FirstDown rankings (187),
+  depth charts (454), injuries (318: Ourlads 18 + Draftedge gap-fill).
+- **Fixed: Rams props were invisible.** ScoresAndOdds writes the Rams as
+  bare "LA", which `normalize_team()` didn't map, so every Rams player
+  had no team and their props would never have locked at kickoff. Added
+  `'la': 'lar'` to `team_mapping.EXTRA_ALIASES` (both that site and
+  nflverse use "LAC" for the Chargers, so "LA" is unambiguous). Also
+  fixed FirstDown's team column and Ourlads' injury badge; see the two
+  RESOLVED entries below.
+
 Not yet done:
-- Week 2 props not published (see open items).
+- Week 2 props not published. `data/props_week2_2026.csv` is generated
+  (72 props, 12 categories, 15 games) but the `touchdowns` six are dead
+  picks: `select_top_props_by_category.py` takes the site's first 6 per
+  category with no ranking, and ScoresAndOdds orders anytime-TD props
+  long-shots-first (Tanner Koziol +2300 at 0.000 projected TDs).
+  Ranking that category by `site_projection` gives Henry/McCaffrey/
+  Gibbs/Robinson instead. Decide before `flask add-props`; Thursday
+  kickoff is 9/17 8:15 PM ET.
 - `flask load-history` finished cleanly at ~5:21 AM (took ~38 min; it
   re-loads every historical file on each run). A second full load with
   the DEN @ KC data finished cleanly at 11:42 AM, so all 16 Week 1
-  games are scored. Loaded as-is and worth knowing: game odds and
-  `scoresandodds_props_all` are still Week 1 lines, Ourlads injuries
-  loaded 0 rows (Draftedge gap-filled 440), and
-  `firstdown_studio_rankings` re-loaded last week's file since this
-  week's scrape wrote nothing.
+  games are scored.
 
 ### Open items (confirmed, not yet resolved)
 
@@ -483,17 +501,22 @@ Not yet done:
   had neither a line nor a price; the auto-selected slate included
   junk lines (Jerry Jeudy rush yds 0.5, Sione Vaki rush yds 0.5) and
   a blank team (Matthew Stafford). Review before publishing.
-- **FirstDown Studio rankings: no Week 2 table yet.** "no `<table>`
-  found" for QB/RB/WR/TE on 2026-09-15; the site owner confirmed
-  FirstDown hadn't posted Week 2 rankings, so this is most likely
-  timing, not a broken scraper. Re-run `scrape_firstdown_studio_rankings.py`
-  + `flask load-history --firstdown-only` once they're up. If it still
-  finds no table then, write a diagnostic before touching the scraper.
-  Note the scraper writes nothing when it finds no table, so
+- **RESOLVED 2026-09-15 (evening): FirstDown Studio rankings.** The
+  morning's "no `<table>` found" was just timing (Week 2 wasn't posted);
+  187 rows scraped and loaded that evening. A separate real bug turned
+  up while checking it: the scraper read the avatar span (the player's
+  initials, "JA" for Josh Allen) as the team, so `team` was empty on
+  nearly every row. It now reads the matchup span ("BUF vs DET") via
+  `MATCHUP_RE`. Nothing on the site joined on that column (FDS Pts
+  matches on `player_name_normalized`), so no page was wrong.
+  Still true: the scraper writes nothing when it finds no table, so
   load-history silently re-loads the previous week's file.
-- **Ourlads injuries came back empty** (header-only CSV) on
-  2026-09-15. Could be real or a changed `lc_red` marker; unverified.
-  Draftedge still supplied statuses.
+- **RESOLVED 2026-09-15 (evening): Ourlads injuries.** Not a quiet
+  injury week: the `lc_red` class is gone from their page entirely. Now
+  read from the status badge (see the injury-priority note above), which
+  is strictly better than the old binary flag since it carries the real
+  code. First run after the fix: 18 rows (16 out, 1 inactive, 1
+  questionable) across 13 teams, incl. Brock Bowers, vs 0 before.
 - **PFR rate limiting stalls the weekly run.** After ~265 player pages
   + game pages, PFR returned 429 with `Retry-After: 2884` (~48 min).
   `pfr_get()` honors it silently, and its prints aren't flushed when

@@ -51,6 +51,8 @@ from bs4 import BeautifulSoup
 sys.path.insert(0, os.path.dirname(__file__))
 from team_mapping import normalize_team
 
+MATCHUP_RE  = re.compile(r'^([A-Z]{2,3})\s+(?:vs\.?|@)\s+([A-Z]{2,3})$')
+
 DATA_DIR    = os.path.join(os.path.dirname(__file__), '..', 'data')
 OUTPUT_FILE = os.path.join(DATA_DIR, 'firstdown_studio_rankings.csv.gz')
 
@@ -97,13 +99,24 @@ def scrape_position(position: str, url: str) -> pd.DataFrame:
             continue
 
         name_tag = cells[1].find('span', title=True)
-        team_tag = cells[1].find('span', class_='font-semibold')
-        if not name_tag or not team_tag:
+        if not name_tag:
             continue
 
         player_name = name_tag['title'].strip()
-        team_raw = team_tag.get_text(strip=True)
-        team = normalize_team(team_raw) if team_raw else None
+
+        # The team lives in its own span as the matchup ("BUF vs DET",
+        # "DAL @ PHI"). The obvious-looking 'font-semibold' span is the
+        # avatar's initials ("JA" for Josh Allen), which normalize_team()
+        # turned into an empty team on nearly every row (confirmed
+        # 2026-09-15 against the real page).
+        team = None
+        for span in cells[1].find_all('span'):
+            # Separator matters: the matchup's own nested spans make
+            # get_text(strip=True) return "BUFvsDET" with no spaces.
+            m = MATCHUP_RE.match(span.get_text(' ', strip=True))
+            if m:
+                team = normalize_team(m.group(1))
+                break
         pts_text = cells[2].get_text(strip=True)
 
         try:
