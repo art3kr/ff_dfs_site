@@ -67,6 +67,15 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-in-prod")
 
 SALARY_CAP = 50_000
 
+# Weeks that show on Standings but count toward no season total, in
+# either challenge: not the lineup totals, not the dropped-week pick, not
+# prop correct/accuracy. 2026 Week 1 was a practice week. {year: {week}}
+NON_COUNTING_WEEKS = {2026: {1}}
+
+
+def _counts_toward_season(year, week) -> bool:
+    return week not in NON_COUNTING_WEEKS.get(year, set())
+
 
 _NAME_SUFFIX_RE = re.compile(r"\s+(jr|sr|ii|iii|iv|v)$")
 
@@ -5538,8 +5547,9 @@ def download_csv(data_type):
             by_submitter, lineup_weeks = _score_lineups_for_year(sel_year)
             dropped = {}
             for sub, wk_scores in by_submitter.items():
-                scored = {w: s for w, s in wk_scores.items() if s is not None}
-                dropped[sub] = min(scored, key=lambda w: scored[w]) if scored else None
+                scored = {w: s for w, s in wk_scores.items()
+                          if s is not None and _counts_toward_season(sel_year, w)}
+                dropped[sub] = min(scored, key=lambda w: scored[w]) if len(scored) >= 2 else None
 
             prop_weeks = sorted(r["week"] for r in db_fetchall(
                 f"SELECT DISTINCT week FROM prop_picks WHERE year = {_ph()}", (sel_year,)))
@@ -5574,6 +5584,7 @@ def download_csv(data_type):
                         "lineup_status": ("scored" if pts is not None
                                           else "pending" if w in sub_weeks else "no entry"),
                         "is_dropped_week": dropped.get(sub) == w,
+                        "counts_toward_season": _counts_toward_season(sel_year, w),
                         "props_correct": tally["correct"] if tally else None,
                         "props_scored": tally["scored"] if tally else None,
                         "props_pending": tally["pending"] if tally else None,
@@ -5685,7 +5696,7 @@ def standings():
         return render_template("standings.html", year=None, years=[],
                                standings=[], weeks=[],
                                standings_no_drop=[], weekly_top_scorers=[],
-                               prop_standings=[], prop_weeks=[])
+                               prop_standings=[], prop_weeks=[], non_counting_weeks=set())
 
     sel_year = years[0]
 
@@ -5698,8 +5709,13 @@ def standings():
     # *fully-scored* week, sum the rest, rank descending.
     leaderboard = []
     for submitter, week_scores in by_submitter.items():
-        scored_weeks = {w: s for w, s in week_scores.items() if s is not None}
-        if scored_weeks:
+        # A NON_COUNTING_WEEKS week stays in week_scores for display, but
+        # can't be the dropped week or add to the total.
+        scored_weeks = {w: s for w, s in week_scores.items()
+                        if s is not None and _counts_toward_season(sel_year, w)}
+        # Only drop once there are 2+ counting weeks; dropping someone's
+        # only week would zero out their whole season.
+        if len(scored_weeks) >= 2:
             dropped_week = min(scored_weeks, key=lambda w: scored_weeks[w])
         else:
             dropped_week = None
@@ -5723,7 +5739,8 @@ def standings():
     # no drop than someone who has one huge week and one terrible one).
     leaderboard_no_drop = []
     for submitter, week_scores in by_submitter.items():
-        scored_weeks = {w: s for w, s in week_scores.items() if s is not None}
+        scored_weeks = {w: s for w, s in week_scores.items()
+                        if s is not None and _counts_toward_season(sel_year, w)}
         total_no_drop = sum(scored_weeks.values())
         leaderboard_no_drop.append({
             "submitter":    submitter,
@@ -5746,11 +5763,13 @@ def standings():
             if week_scores.get(w) is not None
         }
         if not scores_this_week:
-            weekly_top_scorers.append({"week": w, "top_score": None, "winners": []})
+            weekly_top_scorers.append({"week": w, "top_score": None, "winners": [],
+                                       "counts": _counts_toward_season(sel_year, w)})
             continue
         top_score = max(scores_this_week.values())
         winners = sorted([s for s, pts in scores_this_week.items() if pts == top_score])
-        weekly_top_scorers.append({"week": w, "top_score": top_score, "winners": winners})
+        weekly_top_scorers.append({"week": w, "top_score": top_score, "winners": winners,
+                                   "counts": _counts_toward_season(sel_year, w)})
 
     # Prop Bet Challenge standings — season-long, ranked by total
     # correct picks (not accuracy %), matching "pick as many correct
@@ -5787,12 +5806,15 @@ def standings():
             if outcome == "push":
                 continue   # pending or push — not counted either way
 
-            entry = prop_standings_by_submitter.setdefault(p["submitter"], {"correct": 0, "total_scored": 0})
-            entry["total_scored"] += 1
             tally["total"] += 1
             if outcome == p["pick"]:
-                entry["correct"] += 1
                 tally["correct"] += 1
+            if not _counts_toward_season(sel_year, w):
+                continue   # shown in the week column, left out of season totals
+            entry = prop_standings_by_submitter.setdefault(p["submitter"], {"correct": 0, "total_scored": 0})
+            entry["total_scored"] += 1
+            if outcome == p["pick"]:
+                entry["correct"] += 1
 
         for submitter, tally in week_tally.items():
             prop_week_by_submitter.setdefault(submitter, {})
@@ -5829,7 +5851,8 @@ def standings():
                            standings=leaderboard, weeks=weeks,
                            standings_no_drop=leaderboard_no_drop,
                            weekly_top_scorers=weekly_top_scorers,
-                           prop_standings=prop_standings, prop_weeks=prop_weeks)
+                           prop_standings=prop_standings, prop_weeks=prop_weeks,
+                           non_counting_weeks=NON_COUNTING_WEEKS.get(sel_year, set()))
 
 
 @app.route("/submit-lineup", methods=["POST"])

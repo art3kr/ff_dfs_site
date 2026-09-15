@@ -69,7 +69,11 @@
                     <th>Rank</th>
                     <th>Participant</th>
                     {% for w in weeks %}
+                    {% if w in non_counting_weeks %}
+                    <th class="right not-counted-week" title="Shown, not counted in season totals">Wk{{ w }}*</th>
+                    {% else %}
                     <th class="right">Wk{{ w }}</th>
+                    {% endif %}
                     {% endfor %}
                     <th class="right">Total</th>
                 </tr>
@@ -82,7 +86,7 @@
                     {% for w in weeks %}
                         {% set score = row['week_scores'].get(w) %}
                         {% set is_dropped = (w == row['dropped_week']) %}
-                        <td class="right {% if is_dropped %}dropped-week{% endif %}">
+                        <td class="right {% if is_dropped %}dropped-week{% endif %} {% if w in non_counting_weeks %}not-counted-week{% endif %}">
                             {% if score is none %}
                                 <span class="pending-week" title="Not yet fully scored">pending</span>
                             {% else %}
@@ -97,8 +101,13 @@
         </table>
     </div>
     <p class="standings-note">
-        Struck-through score = each participant's dropped (lowest) week.
+        Struck-through score = each participant's dropped (lowest) week, once they have 2 or more
+        counting weeks.
         "pending" = results for that week aren't in yet.
+        {% if non_counting_weeks %}
+        * Week {{ non_counting_weeks|sort|join(', ') }} is shown for reference and doesn't count
+        toward season totals or the dropped week.
+        {% endif %}
     </p>
 
     <h2 class="standings-section-title">Season Standings (No Drop)</h2>
@@ -138,7 +147,7 @@
             <tbody>
                 {% for w in weekly_top_scorers %}
                 <tr>
-                    <td>Week {{ w['week'] }}</td>
+                    <td>Week {{ w['week'] }}{% if not w['counts'] %}<span class="not-counted-note">not counted</span>{% endif %}</td>
                     <td class="right">
                         {% if w['top_score'] is none %}
                             <span class="pending-week" title="No fully-scored lineups yet">pending</span>
@@ -171,7 +180,11 @@
                     <th>Rank</th>
                     <th>Participant</th>
                     {% for w in prop_weeks %}
+                    {% if w in non_counting_weeks %}
+                    <th class="right not-counted-week" title="Shown, not counted in season totals">Wk{{ w }}*</th>
+                    {% else %}
                     <th class="right">Wk{{ w }}</th>
+                    {% endif %}
                     {% endfor %}
                     <th class="right">Correct</th>
                     <th class="right">Total Scored</th>
@@ -185,7 +198,7 @@
                     <td class="player-name">{{ row['submitter'] }}</td>
                     {% for w in prop_weeks %}
                         {% set week_result = row['week_scores'].get(w) %}
-                        <td class="right">
+                        <td class="right {% if w in non_counting_weeks %}not-counted-week{% endif %}">
                             {% if week_result is none %}
                                 {% if w in row['week_scores'] %}
                                 <span class="pending-week" title="Not yet fully scored">pending</span>
@@ -207,6 +220,10 @@
         Ranked by total correct picks for the season (not accuracy %). "pending" means results
         for that week aren't in yet. A dash means no picks that week. Pending and push results
         don't count toward season totals.
+        {% if non_counting_weeks %}
+        * Week {{ non_counting_weeks|sort|join(', ') }} is shown for reference and doesn't count
+        toward Correct, Total Scored, or Accuracy.
+        {% endif %}
     </p>
     {% else %}
     <p class="empty-state">No prop picks scored yet for {{ year }}.</p>

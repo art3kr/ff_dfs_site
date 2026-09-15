@@ -666,6 +666,19 @@ header {
     font-size: 0.78rem;
 }
 
+/* A week shown on Standings but left out of season totals */
+.not-counted-week {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.not-counted-note {
+    margin-left: 6px;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-style: italic;
+}
+
 .total-col {
     font-weight: 700;
     color: var(--accent);

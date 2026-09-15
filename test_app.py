@@ -303,8 +303,47 @@ def test_slate_filter_attributes():
           ('colspan="%d"' % ncols) in html)
 
 
+def test_non_counting_week():
+    section("non-counting week: shown, left out of season totals")
+    import csv as _csv
+    import io as _io
+    saved_weeks, saved_scorer = flaskapp.NON_COUNTING_WEEKS, flaskapp._score_props_for_week
+    flaskapp.NON_COUNTING_WEEKS = {YEAR: {1}}
+    # One correct week-1 prop pick, so the prop table has something to leave out.
+    seed_existing_picks([("Josh Allen", "over")])
+    flaskapp._score_props_for_week = lambda y, w: {prop_ids["Josh Allen"]: {"result": "over"}} if w == 1 else {}
+    try:
+        html = client.get("/standings").get_data(as_text=True)
+        no_drop = html.split('id="standings-no-drop-table"', 1)[1].split("</table>", 1)[0]
+        props = html.split('id="prop-standings-table"', 1)[1].split("</table>", 1)[0]
+        check("week 1 score still shown (%.1f)" % WEEK1_TOTAL, "%.1f" % WEEK1_TOTAL in html)
+        check("week 1 header marked with *", "Wk1*" in html)
+        check("no-drop total is week 2 only (%.1f)" % WEEK2_TOTAL,
+              "%.1f" % WEEK2_TOTAL in no_drop and "%.1f" % (WEEK1_TOTAL + WEEK2_TOTAL) not in no_drop)
+        check("weekly high scorer still lists week 1, marked not counted", "not counted" in html)
+        check("week 1 prop result still shown (1/1)", "1/1" in props)
+        check("week 1 prop left out of season Correct", "<strong>0</strong>" in props)
+
+        rows = list(_csv.DictReader(_io.StringIO(
+            client.get("/download/standings?year=%d" % YEAR).get_data(as_text=True))))
+        wk = {r["week"]: r for r in rows if r["submitter"] == "tester"}
+        check("CSV marks week 1 counts_toward_season False",
+              wk.get("1", {}).get("counts_toward_season") == "False")
+        check("CSV never drops the non-counting week",
+              wk.get("1", {}).get("is_dropped_week") == "False")
+        check("only one counting week, so nothing is dropped",
+              wk.get("2", {}).get("is_dropped_week") == "False")
+        drop_table = html.split('id="standings-table"', 1)[1].split("</table>", 1)[0]
+        check("drop-lowest total keeps the lone counting week (%.1f, not 0.0)" % WEEK2_TOTAL,
+              'total-col">%.1f' % WEEK2_TOTAL in drop_table)
+    finally:
+        flaskapp.NON_COUNTING_WEEKS, flaskapp._score_props_for_week = saved_weeks, saved_scorer
+        seed_existing_picks([])
+
+
 def test_standings_scoring():
     section("standings scoring (_score_lineups_for_year)")
+    flaskapp.NON_COUNTING_WEEKS = {}   # plain season math; the rule has its own test
     with flaskapp.app.app_context():
         by_submitter, weeks = flaskapp._score_lineups_for_year(YEAR)
     check("both weeks present", weeks == [1, 2])
@@ -669,6 +708,7 @@ if __name__ == "__main__":
     test_merge_friendly_reshape()
     test_every_tab_has_a_download()
     test_routes_smoke()
+    test_non_counting_week()         # before standings: needs week 2 fully scored
     test_standings_scoring()         # mutates hist_player_stats at the end
     test_name_suffixes()             # after standings: adds (then removes) a week 3
     test_dnp_and_year_scope()        # adds (then removes) a week 5 and two 2025/2026 rows

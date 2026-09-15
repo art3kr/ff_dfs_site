@@ -261,6 +261,12 @@ comments/docs rather than presenting a guess as fact.
   `{submitter: {week: total or None}}`, applying the all-9-must-match
   rule. Standings, its CSV, and the My Lineups page all go through it
   (My Lineups used to carry its own copy of the matching logic).
+  **Non-counting weeks:** `NON_COUNTING_WEEKS` (`{2026: {1}}`) weeks
+  show everywhere but are left out of every season total: both lineup
+  rankings, the dropped-week pick, and prop Correct/Accuracy. Check
+  `_counts_toward_season(year, week)` in any new season-level math.
+  The lowest week is only dropped once a participant has 2+ counting
+  weeks (page and CSV both), so a lone week isn't zeroed out.
   **DNP rule:** a player with no stats row counts as 0 (`dnp: True`)
   once their team has a `hist_team_points` row for that week, since
   inactive/injured players never get a PFR row; before that they stay
