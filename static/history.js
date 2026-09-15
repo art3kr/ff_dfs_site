@@ -62,6 +62,10 @@
     // ------------------------------------------------------------------
     let sortCol = null, sortAsc = true;
 
+    // Tables with expandable detail rows (My Lineups) opt out: sorting would
+    // separate each detail row from the row it belongs to.
+    if (table.hasAttribute("data-no-sort")) return;
+
     table.querySelectorAll("thead th").forEach(function (th, i) {
         th.addEventListener("click", function () {
             sortAsc = sortCol === i ? !sortAsc : true;

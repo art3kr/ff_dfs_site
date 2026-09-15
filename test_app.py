@@ -587,6 +587,67 @@ def test_prop_void():
     conn.close()
 
 
+def test_scoring_breakdown():
+    section("My Lineups scoring breakdown")
+    import json as _json
+    import scrape_pfr            # scrapers/ is on sys.path via app.py
+    import combine_dst_scoring
+
+    # The breakdown's rules must match the functions that produce stored points.
+    check("points-allowed tiers match combine_dst_scoring for 0-50",
+          all(flaskapp._points_allowed_bonus(pa) == combine_dst_scoring.points_allowed_bonus(pa)
+              for pa in range(51)))
+    sample = dict(pass_yds=305, pass_td=2, pass_int=1, rush_yds=104, rush_td=1, rec=6, rec_yds=101,
+                  rec_td=1, fumbles_lost=1, kick_ret_td=1, punt_ret_td=1, fumbles_rec_td=1)
+    check("offense lines sum to scrape_pfr.calculate_dk_points",
+          flaskapp._offense_breakdown(sample, None)["total"] == scrape_pfr.calculate_dk_points(**sample))
+    check("_fmt_pts formats +11.2, -1, +0",
+          (flaskapp._fmt_pts(11.2), flaskapp._fmt_pts(-1), flaskapp._fmt_pts(0)) == ("+11.2", "-1", "+0"))
+
+    wk = 7
+    lineup = [{"slot": "QB", "name": "Joe Burrow", "position": "QB", "salary": 6000},
+              {"slot": "WR", "name": "Ja'Marr Chase", "position": "WR", "salary": 8000},
+              {"slot": "RB", "name": "Chase Brown", "position": "RB", "salary": 6500},
+              {"slot": "DST", "name": "Cincinnati Bengals", "position": "DST", "salary": 3000}]
+    # (pfr_id, name, stats, stored dk_pts, PFR-reported dk_pts)
+    stats = [("BD01", "Joe Burrow", dict(pass_yds=320, pass_td=2, pass_int=1, rush_yds=12), 24.0, None),
+             ("BD02", "Ja'Marr Chase", dict(rec=7, rec_yds=112, rec_td=1, fumbles_lost=1), 26.2, None),
+             # PFR's official total is 2 higher than our stats explain (a 2-pt conversion).
+             ("BD03", "Chase Brown", dict(rush_yds=60, rush_td=1, rec=2, rec_yds=10), 15.0, 17.0)]
+    conn = flaskapp._connect()
+    conn.execute("INSERT INTO lineups (week, year, submitter, lineup_json, total_salary) VALUES (?,?,?,?,?)",
+                 (wk, YEAR, "bdtest", _json.dumps(lineup), 23500))
+    for pfr_id, name, s, dk, reported in stats:
+        cols = ["pfr_id", "name", "name_normalized", "year", "week", "team", "dk_pts", "dk_pts_pfr_reported"] + list(s)
+        conn.execute("INSERT INTO hist_player_stats (%s) VALUES (%s)" % (", ".join(cols), ",".join("?" * len(cols))),
+                     [pfr_id, name, flaskapp.normalize_name(name), YEAR, wk, "cin", dk, reported] + list(s.values()))
+    conn.execute("INSERT INTO hist_dst_stats (year, week, team, points_allowed, dk_pts, sack, interception, "
+                 "fumble_rec, def_td, safety, special_teams_td) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                 (YEAR, wk, "cin", 17, 6.0, 3, 1, 0, 0, 0, 0))
+    conn.commit()
+    conn.close()
+
+    html = client.get("/my-lineups?year=%d&week=%d&submitter=bdtest" % (YEAR, wk)).get_data(as_text=True)
+    check("table opts out of sorting", "data-no-sort" in html)
+    check("all 4 players are expandable (got %d)" % html.count('role="button"'), html.count('role="button"') == 4)
+    check("QB lines: 320 x 0.04 = +12.8 and the 300+ bonus",
+          "320 × 0.04" in html and "+12.8" in html and "300+ passing yards bonus" in html)
+    check("WR lines: 112 x 0.1 = +11.2, 100+ bonus, fumble lost -1",
+          "112 × 0.1" in html and "+11.2" in html and "100+ receiving yards bonus" in html and "Fumble lost" in html)
+    check("Other line makes the RB add up to his official 17.00",
+          "e.g. 2-pt conversions" in html and "17.00" in html)
+    check("DST lines: sacks, interception, 17 allowed", "Sack" in html and "17 allowed" in html)
+    check("totals shown: 24.00, 26.20, 6.00", all(t in html for t in ("24.00", "26.20", "6.00")))
+    check("no Other line when stats explain the total", html.count("breakdown-other") == 1)
+
+    conn = flaskapp._connect()
+    conn.execute("DELETE FROM lineups WHERE submitter = 'bdtest'")
+    conn.execute("DELETE FROM hist_player_stats WHERE year = ? AND week = ?", (YEAR, wk))
+    conn.execute("DELETE FROM hist_dst_stats WHERE year = ? AND week = ?", (YEAR, wk))
+    conn.commit()
+    conn.close()
+
+
 def _usage_table(html):
     """{player name: {header: cell text}} from the Usage page's table."""
     import re
@@ -1066,6 +1127,7 @@ if __name__ == "__main__":
     test_name_suffixes()             # after standings: adds (then removes) a week 3
     test_dnp_and_year_scope()        # adds (then removes) a week 5 and two 2025/2026 rows
     test_prop_void()                 # adds (then removes) a week 6 prop and pick
+    test_scoring_breakdown()         # adds (then removes) a week 7 lineup
     test_usage()                     # after data_as_of_empty; adds (then removes) weeks 11-12
     test_game_odds_week()            # needs the fixture schedule; adds (then removes) odds
     test_timestamp_format()          # must stay last; rewrites game_schedule

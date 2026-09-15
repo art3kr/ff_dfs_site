@@ -89,7 +89,7 @@
 
     {% if rows %}
     <div class="table-wrapper">
-        <table id="history-table">
+        <table id="history-table" data-no-sort>
             <thead>
                 <tr>
                     <th>Slot</th>
@@ -102,9 +102,12 @@
             </thead>
             <tbody>
                 {% for r in rows %}
-                <tr {% if r['is_locked'] %}class="locked-row"{% endif %}>
+                {% set bd = r['breakdown'] %}
+                <tr class="{% if r['is_locked'] %}locked-row{% endif %}{% if bd %} breakdown-toggle{% endif %}"
+                    {% if bd %}tabindex="0" role="button" aria-expanded="false" title="Show how these points add up"{% endif %}>
                     <td class="pos-badge">{{ r['slot'] }}</td>
                     <td class="player-name">
+                        {% if bd %}<span class="expand-caret" aria-hidden="true">▸</span>{% endif %}
                         {{ r['name'] }}
                         {% if r['is_locked'] %}<span class="locked-badge">LOCKED</span>{% endif %}
                     </td>
@@ -121,6 +124,27 @@
                         {% endif %}
                     </td>
                 </tr>
+                {% if bd %}
+                <tr class="breakdown-row" hidden>
+                    <td colspan="6">
+                        <div class="breakdown">
+                            {% if bd['note'] %}<div class="breakdown-note">{{ bd['note'] }}</div>{% endif %}
+                            {% for l in bd['lines'] %}
+                            <div class="breakdown-line{% if l['other'] %} breakdown-other{% endif %}">
+                                <span class="breakdown-label">{{ l['label'] }}</span>
+                                <span class="breakdown-detail">{{ l['detail'] }}</span>
+                                <span class="breakdown-pts">{{ l['pts_display'] }}</span>
+                            </div>
+                            {% endfor %}
+                            <div class="breakdown-line breakdown-total">
+                                <span class="breakdown-label">Total</span>
+                                <span class="breakdown-detail"></span>
+                                <span class="breakdown-pts">{{ bd['total_display'] }}</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
                 {% endfor %}
             </tbody>
             <tfoot>
@@ -139,6 +163,7 @@
             </tfoot>
         </table>
     </div>
+    <p class="standings-note">Click a player to see how their points add up.</p>
     {% if not all_matched %}
     <p class="standings-note">
         This week isn't fully scored yet. Some games may not be finished or results aren't
@@ -157,6 +182,21 @@
     window.HISTORY_WEEKS_BY_YEAR = {{ available_weeks_by_year | tojson }};
 </script>
 <script src="{{ url_for('static', filename='history.js') }}"></script>
+<script>
+    // Click (or Enter/Space) a player's row to show their scoring breakdown.
+    document.querySelectorAll("tr.breakdown-toggle").forEach(function (row) {
+        function toggle() {
+            const detail = row.nextElementSibling;
+            if (!detail || !detail.classList.contains("breakdown-row")) return;
+            detail.hidden = !detail.hidden;
+            row.setAttribute("aria-expanded", String(!detail.hidden));
+        }
+        row.addEventListener("click", toggle);
+        row.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+        });
+    });
+</script>
 {% include '_info_modal.html' %}
 </body>
 </html>

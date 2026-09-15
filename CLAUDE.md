@@ -260,6 +260,14 @@ comments/docs rather than presenting a guess as fact.
   shared by Slate, Best Matchups, and Implied Player Points.
 - `_compute_implied_team_total(spread, over_under)` — shared by
   Implied Team Points, Best Matchups, and Game Overview.
+- `DK_OFFENSE_LINES`, `DK_OFFENSE_BONUSES`, `DK_DST_LINES`,
+  `DK_POINTS_ALLOWED_TIERS`, `_offense_breakdown()`, `_dst_breakdown()` —
+  the per-stat scoring breakdown shown when a player row is clicked on My
+  Lineups. They restate the rules in `scrape_pfr.calculate_dk_points()`
+  and `combine_dst_scoring.calculate_dst_dk_points()`; change all three
+  together (`test_scoring_breakdown` compares them). Any gap between the
+  lines and the stored total (usually a 2-pt conversion, which our stats
+  don't carry) becomes an "Other" line, so the breakdown always adds up.
 - `_score_props_for_week(year, week)` — shared by Props, My Props,
   and Standings' prop section. A prop whose player has no stats row
   once his team's `hist_team_points` row is in is `void` (didn't play),

@@ -77,6 +77,95 @@ def _counts_toward_season(year, week) -> bool:
     return week not in NON_COUNTING_WEEKS.get(year, set())
 
 
+# DraftKings scoring, line by line, for the My Lineups breakdown. Must match
+# the rules that produce the stored points: scrape_pfr.calculate_dk_points()
+# for offense and combine_dst_scoring.calculate_dst_dk_points() for DST.
+DK_OFFENSE_LINES = [   # (stat column, label, points per unit)
+    ("pass_yds",       "Passing yards",      0.04),
+    ("pass_td",        "Passing TD",         4),
+    ("pass_int",       "Interception",       -1),
+    ("rush_yds",       "Rushing yards",      0.1),
+    ("rush_td",        "Rushing TD",         6),
+    ("rec",            "Receptions",         1),
+    ("rec_yds",        "Receiving yards",    0.1),
+    ("rec_td",         "Receiving TD",       6),
+    ("fumbles_lost",   "Fumble lost",        -1),
+    ("kick_ret_td",    "Kick return TD",     6),
+    ("punt_ret_td",    "Punt return TD",     6),
+    ("fumbles_rec_td", "Fumble recovery TD", 6),
+]
+DK_OFFENSE_BONUSES = [  # (stat column, threshold, label)
+    ("pass_yds", 300, "300+ passing yards bonus"),
+    ("rush_yds", 100, "100+ rushing yards bonus"),
+    ("rec_yds",  100, "100+ receiving yards bonus"),
+]
+DK_DST_LINES = [
+    ("sack",             "Sack",             1),
+    ("interception",     "Interception",     2),
+    ("fumble_rec",       "Fumble recovery",  2),
+    ("def_td",           "Defensive TD",     6),
+    ("special_teams_td", "Special teams TD", 6),
+    ("safety",           "Safety",           2),
+]
+DK_POINTS_ALLOWED_TIERS = [(0, 10), (6, 7), (13, 4), (20, 1), (27, 0), (34, -1)]   # (max allowed, pts); 35+ = -4
+
+
+def _points_allowed_bonus(points_allowed: int) -> int:
+    for max_allowed, pts in DK_POINTS_ALLOWED_TIERS:
+        if points_allowed <= max_allowed:
+            return pts
+    return -4
+
+
+def _fmt_pts(pts: float) -> str:
+    """+11.2, -1, +0 style, up to 2 decimals."""
+    text = f"{pts:+.2f}".rstrip("0").rstrip(".")
+    return "+0" if text in ("+", "-", "-0") else text
+
+
+def _breakdown(lines: list, actual) -> dict:
+    """Adds an Other line for any gap to the official total, so lines always sum to it."""
+    total = round(sum(l["pts"] for l in lines), 2)
+    if actual is not None and abs(actual - total) >= 0.01:
+        lines.append({"label": "Other", "detail": "e.g. 2-pt conversions",
+                      "pts": round(actual - total, 2), "other": True})
+    for l in lines:
+        l["pts_display"] = _fmt_pts(l["pts"])
+    shown = actual if actual is not None else total
+    return {"lines": lines, "total": round(shown, 2), "total_display": f"{shown:.2f}"}
+
+
+def _offense_breakdown(stats, actual) -> dict:
+    """stats: a hist_player_stats row (or dict) with the DK_OFFENSE_LINES columns."""
+    def val(col):
+        v = stats[col]
+        return v or 0
+    lines = []
+    for col, label, rate in DK_OFFENSE_LINES:
+        count = val(col)
+        if count:
+            lines.append({"label": label, "detail": f"{count:g} × {rate:g}",
+                          "pts": round(count * rate, 2)})
+    for col, threshold, label in DK_OFFENSE_BONUSES:
+        if val(col) >= threshold:
+            lines.append({"label": label, "detail": f"{val(col):g} yards", "pts": 3})
+    return _breakdown(lines, actual)
+
+
+def _dst_breakdown(dst, actual) -> dict:
+    """dst: a hist_dst_stats row (or dict)."""
+    lines = []
+    for col, label, rate in DK_DST_LINES:
+        count = dst[col] or 0
+        if count:
+            lines.append({"label": label, "detail": f"{count:g} × {rate:g}", "pts": count * rate})
+    if dst["points_allowed"] is not None:
+        allowed = int(dst["points_allowed"])
+        lines.append({"label": "Points allowed", "detail": f"{allowed} allowed",
+                      "pts": _points_allowed_bonus(allowed)})
+    return _breakdown(lines, actual)
+
+
 _NAME_SUFFIX_RE = re.compile(r"\s+(jr|sr|ii|iii|iv|v)$")
 
 
@@ -5156,18 +5245,47 @@ def my_lineups():
     """, (sel_year, sel_week, sel_submitter))
 
     locked_teams = _get_locked_teams(sel_year, sel_week)
+    players = _lineup_player_rows(sel_year, sel_week, sel_submitter)
+
+    # Per-stat scoring breakdown, shown when a player's row is clicked.
+    is_dst = lambda p: (p["slot"] or "").upper() == "DST"
+    names = {p["name_normalized"] for p in players if not is_dst(p)}
+    teams = {p["team"] for p in players if is_dst(p) and p["team"]}
+    stats_by_name, dst_by_team = {}, {}
+    if names:
+        cols = ", ".join(c for c, _, _ in DK_OFFENSE_LINES)
+        for r in db_fetchall(f"""
+            SELECT name_normalized, {cols} FROM hist_player_stats
+            WHERE year = {ph} AND week = {ph} AND name_normalized IN ({", ".join([ph] * len(names))})
+        """, (sel_year, sel_week) + tuple(names)):
+            stats_by_name[r["name_normalized"]] = r
+    if teams:
+        for r in db_fetchall(f"""
+            SELECT * FROM hist_dst_stats
+            WHERE year = {ph} AND week = {ph} AND team IN ({", ".join([ph] * len(teams))})
+        """, (sel_year, sel_week) + tuple(teams)):
+            dst_by_team[r["team"]] = r
 
     rows = []
     total = 0.0
     matched_count = 0
-    for p in _lineup_player_rows(sel_year, sel_week, sel_submitter):
+    for p in players:
         if p["actual_pts"] is not None:
             total += p["actual_pts"]
             matched_count += 1
+        breakdown = None
+        if p["dnp"]:
+            breakdown = {"lines": [], "note": "Didn't play (inactive or injured), so 0 points.",
+                         "total": 0.0, "total_display": "0.00"}
+        elif p["actual_pts"] is not None:
+            if is_dst(p) and p["team"] in dst_by_team:
+                breakdown = _dst_breakdown(dst_by_team[p["team"]], p["actual_pts"])
+            elif not is_dst(p) and p["name_normalized"] in stats_by_name:
+                breakdown = _offense_breakdown(stats_by_name[p["name_normalized"]], p["actual_pts"])
         rows.append({
             "slot": p["slot"], "name": p["name"], "position": p["position"],
             "salary": p["salary"], "projected_pts": p["projected_pts"],
-            "actual_pts": p["actual_pts"], "dnp": p["dnp"],
+            "actual_pts": p["actual_pts"], "dnp": p["dnp"], "breakdown": breakdown,
             "is_locked": bool(p["team"] and p["team"] in locked_teams),
         })
 

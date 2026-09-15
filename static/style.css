@@ -971,6 +971,43 @@ header {
 #history-table tbody td { padding: 8px 12px; }
 
 /* -----------------------------------------------------------------------
+   My Lineups — click a player row to show the scoring breakdown. The
+   hidden detail rows would throw off nth-child striping, so this table
+   drops striping and relies on row borders.
+   ----------------------------------------------------------------------- */
+
+#history-table[data-no-sort] tbody tr:nth-child(even) { background: none; }
+#history-table tbody tr.breakdown-toggle { cursor: pointer; }
+#history-table tbody tr.breakdown-toggle:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
+
+.expand-caret {
+    display: inline-block;
+    width: 12px;
+    margin-right: 4px;
+    color: var(--text-muted);
+    transition: transform 0.15s;
+}
+tr.breakdown-toggle[aria-expanded="true"] .expand-caret { transform: rotate(90deg); }
+
+#history-table tbody tr.breakdown-row,
+#history-table tbody tr.breakdown-row:hover { background: var(--bg-surface); }
+#history-table tbody tr.breakdown-row td { padding: 4px 12px 10px 44px; }
+
+.breakdown {
+    display: grid;
+    grid-template-columns: max-content max-content max-content;
+    column-gap: 20px;
+    row-gap: 2px;
+    font-size: 0.8rem;
+}
+.breakdown-line { display: contents; }
+.breakdown-detail { color: var(--text-muted); }
+.breakdown-pts { text-align: right; font-variant-numeric: tabular-nums; }
+.breakdown-other span { color: var(--text-muted); font-style: italic; }
+.breakdown-total span { font-weight: 700; padding-top: 4px; border-top: 1px solid var(--border); }
+.breakdown-note { grid-column: 1 / -1; color: var(--text-muted); }
+
+/* -----------------------------------------------------------------------
    Best Matchups — team-tinted rows so all players from the same team
    are visually grouped at a glance. Applied as an inline background
    per row (color computed server-side from a canonical team-color
