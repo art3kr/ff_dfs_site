@@ -54,7 +54,7 @@ OUT_COLUMNS = [
     'year', 'week', 'pfr_id', 'gsis_id', 'name', 'name_normalized', 'team', 'position',
     'offense_snaps', 'offense_pct',
     'targets', 'target_share', 'air_yards', 'air_yards_share', 'adot', 'wopr',
-    'carries',
+    'carries', 'receptions',
     'rz_targets', 'rz_carries', 'i10_targets', 'i10_carries', 'i5_targets', 'i5_carries',
     'third_down_targets',
 ]
@@ -117,7 +117,7 @@ def main(year: int):
     stats = stats[(stats['season_type'] == 'REG') & stats['position'].isin(POSITIONS)]
     base = stats.rename(columns={'player_id': 'gsis_id', 'player_display_name': 'name',
                                  'receiving_air_yards': 'air_yards'})[
-        ['gsis_id', 'week', 'name', 'team', 'position', 'targets', 'carries',
+        ['gsis_id', 'week', 'name', 'team', 'position', 'targets', 'carries', 'receptions',
          'target_share', 'air_yards', 'air_yards_share', 'wopr']]
     base = base.merge(xwalk[['gsis_id', 'pfr_id']], on='gsis_id', how='left')
 
@@ -142,7 +142,7 @@ def main(year: int):
 
     df = df.merge(pbp_counts(pbp), on=['gsis_id', 'week'], how='left')
 
-    count_cols = ['targets', 'carries', 'rz_targets', 'rz_carries', 'i10_targets', 'i10_carries',
+    count_cols = ['targets', 'carries', 'receptions', 'rz_targets', 'rz_carries', 'i10_targets', 'i10_carries',
                   'i5_targets', 'i5_carries', 'third_down_targets', 'offense_snaps']
     df[count_cols] = df[count_cols].fillna(0).astype(int)
     for col in ['offense_pct', 'target_share', 'air_yards_share']:

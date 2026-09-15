@@ -227,6 +227,11 @@ GAME_ODDS_MIGRATIONS = [
     ("kickoff", "TIMESTAMP"),
 ]
 
+# receptions lets Touch % use nflverse totals (carries + receptions).
+HIST_PLAYER_USAGE_MIGRATIONS = [
+    ("receptions", "INTEGER"),
+]
+
 
 def _migrate_table_pg(cur, table_name, migrations):
     """Add any missing columns to `table_name` on Postgres."""
@@ -543,6 +548,7 @@ def _auto_init():
                 adot               REAL,
                 wopr               REAL,
                 carries            INTEGER,
+                receptions         INTEGER,
                 rz_targets         INTEGER,
                 rz_carries         INTEGER,
                 i10_targets        INTEGER,
@@ -606,6 +612,7 @@ def _auto_init():
             )
         """)
         _migrate_table_pg(cur, "game_odds", GAME_ODDS_MIGRATIONS)
+        _migrate_table_pg(cur, "hist_player_usage", HIST_PLAYER_USAGE_MIGRATIONS)
         cur.execute("""
             CREATE TABLE IF NOT EXISTS data_loads (
                 source            TEXT PRIMARY KEY,
@@ -890,6 +897,7 @@ def _auto_init():
                 adot               REAL,
                 wopr               REAL,
                 carries            INTEGER,
+                receptions         INTEGER,
                 rz_targets         INTEGER,
                 rz_carries         INTEGER,
                 i10_targets        INTEGER,
@@ -988,6 +996,7 @@ def _auto_init():
         _migrate_hist_player_stats_sqlite(conn)
         _migrate_table_sqlite(conn, "game_schedule", GAME_SCHEDULE_MIGRATIONS)
         _migrate_table_sqlite(conn, "game_odds", GAME_ODDS_MIGRATIONS)
+        _migrate_table_sqlite(conn, "hist_player_usage", HIST_PLAYER_USAGE_MIGRATIONS)
 
     conn.commit()
 
@@ -2232,7 +2241,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
 
     USAGE_COLUMNS = ["year", "week", "pfr_id", "name", "name_normalized", "team", "position",
                      "offense_snaps", "offense_pct", "targets", "target_share", "air_yards",
-                     "air_yards_share", "adot", "wopr", "carries", "rz_targets", "rz_carries",
+                     "air_yards_share", "adot", "wopr", "carries", "receptions", "rz_targets", "rz_carries",
                      "i10_targets", "i10_carries", "i5_targets", "i5_carries",
                      "third_down_targets"]
     USAGE_FLOATS = {"offense_pct", "target_share", "air_yards", "air_yards_share", "adot", "wopr"}
@@ -3618,13 +3627,19 @@ def _compute_usage_rows(sel_year: int, sel_position: str, sel_week: int = None) 
                        sums (or the week's values).
     Players with no usage row get None for all of these except snap_pct,
     which can still come from PFR.
+
+    target_share / touch_share use nflverse counts (hist_player_usage
+    targets, carries + receptions) for both the player and the team
+    whenever the team has usage rows in scope, and PFR's only otherwise.
+    Our older PFR seasons are missing players (2012 has about a third fewer
+    rows), so PFR team totals ran low and shares ran high: Brandon Marshall
+    showed 53% for 2012. G, Tgt/G and Touch/G stay on PFR.
     """
     ph = _ph()
     week_filter = "" if sel_week is None else f"AND week = {ph}"
     base_params = (sel_year,) if sel_week is None else (sel_year, sel_week)
 
-    # Team totals - the shared denominator every player's own share
-    # gets divided by.
+    # PFR team totals: the fallback denominator for a team with no usage rows.
     team_totals_rows = db_fetchall(f"""
         SELECT team,
                SUM(COALESCE(rec_tgt, 0)) AS team_targets,
@@ -3662,15 +3677,19 @@ def _compute_usage_rows(sel_year: int, sel_position: str, sel_week: int = None) 
     team_usage = {}
     for r in db_fetchall(f"""
         SELECT week, name_normalized, team, offense_snaps, offense_pct, targets,
-               air_yards, air_yards_share, wopr, rz_targets, rz_carries,
-               i10_carries, i5_carries, third_down_targets
+               carries, receptions, air_yards, air_yards_share, wopr, rz_targets,
+               rz_carries, i10_carries, i5_carries, third_down_targets
         FROM hist_player_usage
         WHERE year = {ph} {week_filter}
     """, base_params):
         usage_by_player.setdefault((r["name_normalized"], r["team"]), []).append(r)
-        t = team_usage.setdefault(r["team"], {"targets": 0, "air_yards": 0.0})
+        t = team_usage.setdefault(r["team"], {"targets": 0, "air_yards": 0.0, "touches": 0,
+                                              "has_receptions": True})
         t["targets"] += r["targets"] or 0
         t["air_yards"] += r["air_yards"] or 0
+        t["touches"] += (r["carries"] or 0) + (r["receptions"] or 0)
+        if r["receptions"] is None:
+            t["has_receptions"] = False   # loaded before receptions existed
 
     def _snap_pct(key):
         weekly = dict(pfr_snaps.get(key, {}))
@@ -3708,15 +3727,34 @@ def _compute_usage_rows(sel_year: int, sel_position: str, sel_week: int = None) 
             out[c] = total(c)
         return out
 
+    def _shares(p):
+        """(target_share, touch_share) in percent; nflverse when the team has it."""
+        team_u = team_usage.get(p["team"])
+        weeks = usage_by_player.get((p["name_normalized"], p["team"]), [])
+        # A DB row, not a dict: sqlite3.Row has no .get().
+        pfr_team = team_totals.get(p["team"])
+
+        if team_u and team_u["targets"]:
+            player_tgt = sum(u["targets"] or 0 for u in weeks) if weeks else p["targets"]
+            target_share = round(100 * player_tgt / team_u["targets"], 1)
+        elif pfr_team and pfr_team["team_targets"]:
+            target_share = round(100 * p["targets"] / pfr_team["team_targets"], 1)
+        else:
+            target_share = None
+
+        if team_u and team_u["has_receptions"] and team_u["touches"]:
+            player_tch = (sum((u["carries"] or 0) + (u["receptions"] or 0) for u in weeks)
+                          if weeks else p["touches"])
+            touch_share = round(100 * player_tch / team_u["touches"], 1)
+        elif pfr_team and pfr_team["team_touches"]:
+            touch_share = round(100 * p["touches"] / pfr_team["team_touches"], 1)
+        else:
+            touch_share = None
+        return target_share, touch_share
+
     rows = []
     for p in player_rows:
-        team_total = team_totals.get(p["team"])
-        target_share = None
-        touch_share = None
-        if team_total and team_total["team_targets"]:
-            target_share = round(100 * p["targets"] / team_total["team_targets"], 1)
-        if team_total and team_total["team_touches"]:
-            touch_share = round(100 * p["touches"] / team_total["team_touches"], 1)
+        target_share, touch_share = _shares(p)
 
         rows.append({
             "name": p["name"], "name_normalized": p["name_normalized"],

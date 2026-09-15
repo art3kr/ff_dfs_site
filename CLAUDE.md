@@ -288,9 +288,13 @@ comments/docs rather than presenting a guess as fact.
   `_compute_implied_team_points_rows()` — page/CSV pairs, same
   one-source-of-truth reason as the above.
   `_compute_usage_rows(year, position, week=None)` joins
-  `hist_player_stats` (G, target/touch share) to `hist_player_usage`
+  `hist_player_stats` (G, Tgt/G, Touch/G) to `hist_player_usage`
   (snap %, aDOT, air yards share, WOPR, red zone) on
   (name_normalized, team); its docstring has each column's season math.
+  Tgt % and Touch % use nflverse counts (targets; carries + receptions)
+  for player and team whenever the team has usage rows, PFR otherwise:
+  our older PFR seasons are missing players, so PFR team totals ran low
+  and shares high (Brandon Marshall 2012: 53.2% on PFR, 40.2% on nflverse).
   `hist_player_usage` comes from `scrape_nflverse_usage.py` (nflverse
   GitHub releases, CC-BY, credited on the page; not PFR), loaded by
   `flask load-history --usage-only`. nflverse snap counts can miss a

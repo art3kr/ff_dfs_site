@@ -612,12 +612,13 @@ def test_usage():
     import pandas as pd
 
     def urow(year, week, name, key, team, pos, snaps, pct, tgt, air, air_share, wopr,
-             carries=0, rz_t=0, rz_c=0, i10_c=0, i5_c=0, third=0):
+             carries=0, rz_t=0, rz_c=0, i10_c=0, i5_c=0, third=0, rec=0):
         return {"year": year, "week": week, "pfr_id": "X", "gsis_id": "00-X", "name": name,
                 "name_normalized": key, "team": team, "position": pos,
                 "offense_snaps": snaps, "offense_pct": pct, "targets": tgt, "target_share": 0.0,
                 "air_yards": air, "air_yards_share": air_share,
                 "adot": (air / tgt) if tgt else None, "wopr": wopr, "carries": carries,
+                "receptions": rec,
                 "rz_targets": rz_t, "rz_carries": rz_c, "i10_targets": 0, "i10_carries": i10_c,
                 "i5_targets": 0, "i5_carries": i5_c, "third_down_targets": third}
 
@@ -625,14 +626,14 @@ def test_usage():
     pd.DataFrame([
         # Suffixed name and a legacy team code, both fixed at ingestion.
         urow(2026, 11, "Puka Nacua Jr.", "puka nacua jr", "stl", "WR", 60, 95.0, 10, 100.0, 60.0, 0.9,
-             rz_t=2, third=3),
+             rz_t=2, third=3, rec=7),
         urow(2026, 12, "Puka Nacua Jr.", "puka nacua jr", "lar", "WR", 55, 85.0, 5, 50.0, 55.0, 0.8,
-             rz_t=1, third=1),
+             rz_t=1, third=1, rec=4),
         # Week 11: nflverse missed his snaps, so PFR's 71.9 is used.
         urow(2026, 11, "Kyren Williams", "kyren williams", "lar", "RB", 0, None, 4, 5.0, 3.0, 0.3,
-             carries=20, rz_c=5, i10_c=3, i5_c=2),
+             carries=20, rz_c=5, i10_c=3, i5_c=2, rec=3),
         urow(2026, 12, "Kyren Williams", "kyren williams", "lar", "RB", 50, 68.1, 2, 7.0, 4.0, 0.2,
-             carries=15, rz_c=3, i10_c=1),
+             carries=15, rz_c=3, i10_c=1, rec=2),
         urow(2025, 11, "Old Usage", "old usage", "lar", "WR", 10, 20.0, 1, 1.0, 1.0, 0.1),
     ]).to_csv(os.path.join(data_dir, "nflverse_usage_2026.csv.gz"), index=False, compression="gzip")
 
@@ -689,8 +690,14 @@ def test_usage():
           (kyren.get("RZ Car"), kyren.get("I10 Car"), kyren.get("I5 Car")) == ("8", "4", "2"))
     check("usage table uses the compact layout", 'id="history-table" class="compact-table"' in html)
     check("All Data download offered", "All Data" in html)
-    check("season G is 2 and Tgt %% of Team 15/24 = 62.5%%",
-          puka.get("G") == "2" and puka.get("Tgt %") == "62.5%")
+    # Shares use nflverse counts for player and team when the team has usage
+    # rows: team targets 10+5+4+2 = 21 (PFR's 24 includes Tutu Atwell's 3).
+    check("season G is 2 (PFR) and Tgt %% uses nflverse, 15/21 = 71.4%% (got %r)" % puka.get("Tgt %"),
+          puka.get("G") == "2" and puka.get("Tgt %") == "71.4%")
+    check("season Touch %% uses nflverse carries + receptions, 11/51 = 21.6%% (got %r)"
+          % puka.get("Touch %"), puka.get("Touch %") == "21.6%")
+    check("player with no usage row: PFR targets over the nflverse team total, 3/21 = 14.3%% (got %r)"
+          % tutu.get("Tgt %"), tutu.get("Tgt %") == "14.3%")
     check("player with no usage row shows '-' (got %r)" % tutu,
           bool(tutu) and all(tutu.get(c) == "-" for c in
                              ("Snap %", "aDOT", "Air %", "WOPR", "RZ Tgt", "3D Tgt")))
@@ -706,8 +713,10 @@ def test_usage():
     check("week view: aDOT 10.0, RZ Tgt 2, Air Yds %% 60.0%%, WOPR 0.9",
           (puka.get("aDOT"), puka.get("RZ Tgt"), puka.get("Air %"), puka.get("WOPR"))
           == ("10.0", "2", "60.0%", "0.9"))
-    check("week view: G 1 and Tgt %% of Team 10/17 = 58.8%%",
-          puka.get("G") == "1" and puka.get("Tgt %") == "58.8%")
+    check("week view: G 1 and Tgt %% from nflverse 10/14 = 71.4%% (got %r)" % puka.get("Tgt %"),
+          puka.get("G") == "1" and puka.get("Tgt %") == "71.4%")
+    check("week view: Touch %% 7/30 = 23.3%% (got %r)" % puka.get("Touch %"),
+          puka.get("Touch %") == "23.3%")
     check("week view: position links keep the week", "week=11&position=RB" in html)
     check("week view: This Week and This Season downloads",
           "This Week" in html and "This Season" in html)
