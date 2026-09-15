@@ -331,21 +331,39 @@ Done:
   pre-cleanup copy is at
   `data/pfr_game_info_2014_2025_backup_20260915.csv.gz` (safe to
   delete once Week 2 game info scrapes cleanly).
+- **Fixed `scrape_pfr.py` skipping returning players mid-season.**
+  Player stats used to mark `(pfr_id, year)` done as soon as a player
+  had any row for that year, so from Week 2 on every returning player
+  would have been skipped. Now a season only counts as done once its
+  last scheduled regular-season game is past (`_season_finished()`);
+  until then every player is re-fetched (~35 min per run), and
+  re-fetched rows replace older ones, which picks up PFR stat
+  corrections.
+- Week 1 team points, DST stats, DST scoring, final weather, fantasy
+  points against. Then `flask export-critical-data` (backups/
+  `*_20260915_084224.csv`), `flask load-schedule --year 2026`,
+  `flask load-weekly-salary ... week2` (800 players; Slate shows Week 2).
 
-Not yet done (run paused ~4:00 AM on the PFR rate limit, not failed):
-- Week 1 team points → DST stats → DST scoring → final weather →
-  fantasy points against. None of these ran; `team_points_by_week.csv.gz`
-  is still from 9/3. Resume with those five scrapers in order once PFR's
-  429 block has lifted (it was set to clear ~4:39 AM on 9/15). Player
-  stats and game info don't need re-running.
-- DB steps, in order: `flask export-critical-data`,
-  `flask load-schedule --year 2026`,
-  `flask load-weekly-salary data\fp_dk_salaries_week2_2026.csv.gz --year 2026`,
-  `flask load-history`. **Check whether these ran before assuming
-  Week 1 scores or Week 2 salaries are live.**
+Not yet done:
+- `flask load-history` was started ~4:43 AM (slow: it re-loads every
+  file row by row against Render Postgres). **Check that it finished
+  before assuming Week 1 scores are live.**
 - Week 2 props not published (see open items).
 
 ### Open items (confirmed, not yet resolved)
+
+- **Week 1 DEN @ KC (Monday night 9/14) not on PFR yet** as of 4:40 AM
+  9/15: no player stats, no score, empty game info. The other 15 Week 1
+  games are complete. Until it's in, lineups with a DEN/KC player show
+  pending and DEN/KC DST aren't scored (`combine_dst_scoring.py` drops
+  them). Re-run later on 9/15, once PFR has posted it:
+  `scrape_pfr.py --years 2026` (re-fetches all players, and retries the
+  empty game-info row) → `scrape_team_points.py --years 2026` →
+  `combine_dst_scoring.py --year 2026` →
+  `scrape_fantasy_points_against.py --year 2026 --position all` →
+  `flask load-history`. Test one PFR request first; cookies expire.
+  General lesson: PFR can lag Monday night results by hours, so a very
+  early Tuesday run may miss MNF.
 
 - **Week 2 props and game odds are really Week 1 data.** Scraped
   Tuesday morning, ScoresAndOdds still showed Week 1 matchups (CIN–TAM,
@@ -384,7 +402,8 @@ Not yet done (run paused ~4:00 AM on the PFR rate limit, not failed):
 
 ### Recently closed (kept as context, not as work)
 
-- **2026-09-15: `scrape_pfr.py` no longer saves unplayed games** (see
+- **2026-09-15: `scrape_pfr.py` no longer saves unplayed games, and
+  re-fetches every player while a season is in progress** (see
   "This week" above).
 
 - **Prop picks now DO have server-side lock enforcement.**

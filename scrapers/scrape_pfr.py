@@ -886,6 +886,25 @@ def _scrape_schedule_from_pfr(year: int) -> pd.DataFrame:
 # Main orchestration
 # ---------------------------------------------------------------------------
 
+def _season_finished(year: int) -> bool:
+    """
+    True once the last regular-season game in the local schedule is in
+    the past. No schedule file, or no parseable dates, counts as not
+    finished, so the scraper errs toward re-fetching.
+    """
+    path = os.path.join(SCHEDULES_DIR, f'{year}_schedule_df.csv')
+    if not os.path.exists(path):
+        return False
+    df = pd.read_csv(path)
+    df = df[df['team_2'] != 'BYE']
+    df = df[df['week'].apply(lambda w: str(w).isdigit())]
+    df = df[df['week'].astype(int) <= 18]
+    # Per-value parse: date formats differ between years' files (see
+    # load_date_to_week), and a whole-column parse warns about that.
+    last = df['date'].apply(lambda d: pd.to_datetime(d, errors='coerce')).max()
+    return pd.notna(last) and last.date() < date.today()
+
+
 def scrape_player_stats(years: list[int]):
     """Scrape player stats for all given years using each player's career
     gamelog page — one request per unique player, not one per player-year."""
@@ -894,9 +913,17 @@ def scrape_player_stats(years: list[int]):
     # Load existing output
     if os.path.exists(PLAYERS_OUT):
         existing = pd.read_csv(PLAYERS_OUT)
-        done_pairs = set(zip(existing['pfr_id'], existing['year']))
+        # A (pfr_id, year) pair only counts as done once that season is
+        # over. Mid-season, a player with Week 1 rows still needs Week 2+,
+        # so treating the pair as done skipped every returning player
+        # from Week 2 on (caught 2026-09-15, before it cost a week).
+        in_progress = {y for y in years if not _season_finished(y)}
+        done_pairs = {(pid, y) for pid, y in zip(existing['pfr_id'], existing['year'])
+                      if y not in in_progress}
         print(f"Loaded {len(existing):,} existing player-week rows")
-        print(f"  {len(done_pairs)} (pfr_id, year) pairs already scraped")
+        print(f"  {len(done_pairs)} (pfr_id, year) pairs from finished seasons already scraped")
+        if in_progress:
+            print(f"  Season(s) still in progress, re-fetching every player: {sorted(in_progress)}")
     else:
         existing   = pd.DataFrame(columns=PLAYER_COLUMNS)
         done_pairs = set()
@@ -1034,7 +1061,9 @@ def _flush_player_rows(existing: pd.DataFrame, new_rows: list, final: bool = Fal
         return
     new_df   = pd.DataFrame(new_rows, columns=PLAYER_COLUMNS)
     final_df = pd.concat([existing, new_df], ignore_index=True)
-    final_df = final_df.drop_duplicates(subset=['pfr_id','year','week'])
+    # keep='last' so a re-fetched row (e.g. a PFR stat correction during
+    # the current season) replaces the older copy instead of being dropped.
+    final_df = final_df.drop_duplicates(subset=['pfr_id','year','week'], keep='last')
     final_df = final_df.sort_values(['year','week','position'])
     final_df.to_csv(PLAYERS_OUT, index=False, compression='gzip')
     if final:
