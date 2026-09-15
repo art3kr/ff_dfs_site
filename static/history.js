@@ -74,6 +74,8 @@
                 const bt = b.cells[i] ? b.cells[i].textContent.trim() : "";
                 const an = parseFloat(at.replace(/[^0-9.\-]/g, ""));
                 const bn = parseFloat(bt.replace(/[^0-9.\-]/g, ""));
+                // A blank ("-") cell in a numeric column always sorts last.
+                if (isNaN(an) !== isNaN(bn) && /\d/.test(at + bt)) return isNaN(an) ? 1 : -1;
                 const r  = (!isNaN(an) && !isNaN(bn)) ? an - bn : at.localeCompare(bt);
                 return sortAsc ? r : -r;
             }).forEach(r => tbody.appendChild(r));

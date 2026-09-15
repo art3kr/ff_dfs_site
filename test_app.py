@@ -587,6 +587,157 @@ def test_prop_void():
     conn.close()
 
 
+def _usage_table(html):
+    """{player name: {header: cell text}} from the Usage page's table."""
+    import re
+    import html as _html
+
+    def text(s):
+        return _html.unescape(re.sub(r"<[^>]+>", "", s)).strip()
+    if 'id="history-table"' not in html:
+        return {}
+    table = html.split('id="history-table"', 1)[1].split("</table>", 1)[0]
+    heads = [text(h) for h in re.findall(r"<th[^>]*>(.*?)</th>", table, re.S)]
+    out = {}
+    for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", table.split("<tbody>", 1)[1], re.S):
+        row = dict(zip(heads, [text(c) for c in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)]))
+        out[row.get("Player")] = row
+    return out
+
+
+def test_usage():
+    section("usage: nflverse loader, page (season and week), CSV")
+    import csv as _csv
+    import io as _io
+    import pandas as pd
+
+    def urow(year, week, name, key, team, pos, snaps, pct, tgt, air, air_share, wopr,
+             carries=0, rz_t=0, rz_c=0, i10_c=0, i5_c=0, third=0):
+        return {"year": year, "week": week, "pfr_id": "X", "gsis_id": "00-X", "name": name,
+                "name_normalized": key, "team": team, "position": pos,
+                "offense_snaps": snaps, "offense_pct": pct, "targets": tgt, "target_share": 0.0,
+                "air_yards": air, "air_yards_share": air_share,
+                "adot": (air / tgt) if tgt else None, "wopr": wopr, "carries": carries,
+                "rz_targets": rz_t, "rz_carries": rz_c, "i10_targets": 0, "i10_carries": i10_c,
+                "i5_targets": 0, "i5_carries": i5_c, "third_down_targets": third}
+
+    data_dir = tempfile.mkdtemp(prefix="ffdfs_usage_")
+    pd.DataFrame([
+        # Suffixed name and a legacy team code, both fixed at ingestion.
+        urow(2026, 11, "Puka Nacua Jr.", "puka nacua jr", "stl", "WR", 60, 95.0, 10, 100.0, 60.0, 0.9,
+             rz_t=2, third=3),
+        urow(2026, 12, "Puka Nacua Jr.", "puka nacua jr", "lar", "WR", 55, 85.0, 5, 50.0, 55.0, 0.8,
+             rz_t=1, third=1),
+        # Week 11: nflverse missed his snaps, so PFR's 71.9 is used.
+        urow(2026, 11, "Kyren Williams", "kyren williams", "lar", "RB", 0, None, 4, 5.0, 3.0, 0.3,
+             carries=20, rz_c=5, i10_c=3, i5_c=2),
+        urow(2026, 12, "Kyren Williams", "kyren williams", "lar", "RB", 50, 68.1, 2, 7.0, 4.0, 0.2,
+             carries=15, rz_c=3, i10_c=1),
+        urow(2025, 11, "Old Usage", "old usage", "lar", "WR", 10, 20.0, 1, 1.0, 1.0, 0.1),
+    ]).to_csv(os.path.join(data_dir, "nflverse_usage_2026.csv.gz"), index=False, compression="gzip")
+
+    result = flaskapp.app.test_cli_runner().invoke(
+        args=["load-history", "--usage-only", "--year", "2026", "--data-dir", data_dir])
+    check("load-history --usage-only exits cleanly", result.exit_code == 0)
+    conn = flaskapp._connect()
+    loaded = conn.execute("SELECT year, week, name_normalized, team, offense_pct "
+                          "FROM hist_player_usage ORDER BY name_normalized, week").fetchall()
+    load_row = conn.execute("SELECT row_count FROM data_loads WHERE source = 'usage'").fetchone()
+    conn.close()
+    check("4 rows loaded, 2025 row skipped by --year (got %d)" % len(loaded),
+          len(loaded) == 4 and all(r[0] == 2026 for r in loaded))
+    check("suffix dropped from the name key",
+          {r[2] for r in loaded} == {"puka nacua", "kyren williams"})
+    check("legacy team code normalized (stl -> lar)", {r[3] for r in loaded} == {"lar"})
+    check("empty offense_pct stored as NULL", loaded[0][4] is None)
+    check("data_loads has a usage row with 4 rows", load_row is not None and load_row[0] == 4)
+
+    # Matching PFR stats rows. Tutu Atwell has no usage row.
+    stats = [("USG1", "Puka Nacua", "WR", 11, 10, 7, 0, 90.0),
+             ("USG1", "Puka Nacua", "WR", 12, 5, 4, 0, 80.0),
+             ("USG2", "Kyren Williams", "RB", 11, 4, 3, 20, 71.9),
+             ("USG2", "Kyren Williams", "RB", 12, 2, 2, 15, 60.0),
+             ("USG3", "Tutu Atwell", "WR", 11, 3, 2, 0, None)]
+    conn = flaskapp._connect()
+    for pfr_id, name, pos, wk, tgt, rec, rush, snap in stats:
+        conn.execute("INSERT INTO hist_player_stats (pfr_id, name, name_normalized, year, week, team, "
+                     "position, rec_tgt, rec, rush_att, snap_pct) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                     (pfr_id, name, flaskapp.normalize_name(name), YEAR, wk, "lar", pos, tgt, rec, rush, snap))
+    conn.commit()
+    conn.close()
+
+    html = client.get("/usage?year=%d" % YEAR).get_data(as_text=True)
+    t = _usage_table(html)
+    puka, kyren, tutu = t.get("Puka Nacua", {}), t.get("Kyren Williams", {}), t.get("Tutu Atwell", {})
+    check("season subtitle says Season", "%d Season:" % YEAR in html)
+    check("week selector lists weeks 11 and 12",
+          '<option value="11"' in html and '<option value="12"' in html)
+    check("nflverse credit line shown", "Snap, air yards and red zone data: nflverse" in html)
+    check("old 'no snap counts' note is gone", "snap counts yet" not in html)
+    check("season Snap %% averages nflverse weeks, 90.0%% (got %r)" % puka.get("Snap %"),
+          puka.get("Snap %") == "90.0%")
+    check("season Snap %% falls back to PFR for a week nflverse missed, 70.0%% (got %r)"
+          % kyren.get("Snap %"), kyren.get("Snap %") == "70.0%")
+    check("season aDOT 150/15 = 10.0 (got %r)" % puka.get("aDOT"), puka.get("aDOT") == "10.0")
+    check("season Air Yds %% 150/162 = 92.6%% (got %r)" % puka.get("Air Yds %"),
+          puka.get("Air Yds %") == "92.6%")
+    check("season WOPR 1.5*15/21 + 0.7*150/162 = 1.72 (got %r)" % puka.get("WOPR"),
+          puka.get("WOPR") == "1.72")
+    check("season RZ Tgt sums to 3 (got %r)" % puka.get("RZ Tgt"), puka.get("RZ Tgt") == "3")
+    check("season 3rd-Down Tgt sums to 4", puka.get("3rd-Down Tgt") == "4")
+    check("season RZ Car / Inside-10 / Inside-5 = 8 / 4 / 2",
+          (kyren.get("RZ Car"), kyren.get("Inside-10 Car"), kyren.get("Inside-5 Car")) == ("8", "4", "2"))
+    check("season G is 2 and Tgt %% of Team 15/24 = 62.5%%",
+          puka.get("G") == "2" and puka.get("Tgt % of Team") == "62.5%")
+    check("player with no usage row shows '-' (got %r)" % tutu,
+          bool(tutu) and all(tutu.get(c) == "-" for c in
+                             ("Snap %", "aDOT", "Air Yds %", "WOPR", "RZ Tgt", "3rd-Down Tgt")))
+    check("default sort is target share, highest first",
+          list(t).index("Puka Nacua") < list(t).index("Kyren Williams"))
+
+    html = client.get("/usage?year=%d&week=11&position=ALL" % YEAR).get_data(as_text=True)
+    t = _usage_table(html)
+    puka, kyren = t.get("Puka Nacua", {}), t.get("Kyren Williams", {})
+    check("week subtitle says Week 11", "Week 11, %d:" % YEAR in html)
+    check("week view: Snap %% 95.0%% (got %r)" % puka.get("Snap %"), puka.get("Snap %") == "95.0%")
+    check("week view: PFR snap fallback 71.9%% (got %r)" % kyren.get("Snap %"), kyren.get("Snap %") == "71.9%")
+    check("week view: aDOT 10.0, RZ Tgt 2, Air Yds %% 60.0%%, WOPR 0.9",
+          (puka.get("aDOT"), puka.get("RZ Tgt"), puka.get("Air Yds %"), puka.get("WOPR"))
+          == ("10.0", "2", "60.0%", "0.9"))
+    check("week view: G 1 and Tgt %% of Team 10/17 = 58.8%%",
+          puka.get("G") == "1" and puka.get("Tgt % of Team") == "58.8%")
+    check("week view: position links keep the week", "week=11&position=RB" in html)
+    check("week view: This Week and This Season downloads",
+          "This Week" in html and "This Season" in html)
+
+    body = client.get("/download/usage?year=%d" % YEAR).get_data(as_text=True)
+    header = body.splitlines()[0].split(",")
+    rows = {r["name_normalized"]: r for r in _csv.DictReader(_io.StringIO(body))}
+    check("season CSV leads with year, team, name, name_normalized and has no week",
+          header[:4] == ["year", "team", "name", "name_normalized"] and "week" not in header)
+    p = rows.get("puka nacua", {})
+    check("season CSV carries the new columns (snap_pct 90.0, adot 10.0, rz_targets 3)",
+          (p.get("snap_pct"), p.get("adot"), p.get("rz_targets")) == ("90.0", "10.0", "3"))
+    check("season CSV blank for a player with no usage row",
+          rows.get("tutu atwell", {}).get("adot") == "")
+
+    body = client.get("/download/usage?year=%d&week=11" % YEAR).get_data(as_text=True)
+    header = body.splitlines()[0].split(",")
+    rows = {r["name_normalized"]: r for r in _csv.DictReader(_io.StringIO(body))}
+    p = rows.get("puka nacua", {})
+    check("week CSV leads with year, week, team, name, name_normalized",
+          header[:5] == ["year", "week", "team", "name", "name_normalized"])
+    check("week CSV is week 11 values (week 11, snap_pct 95.0, rz_targets 2)",
+          (p.get("week"), p.get("snap_pct"), p.get("rz_targets")) == ("11", "95.0", "2"))
+
+    conn = flaskapp._connect()
+    conn.execute("DELETE FROM hist_player_usage")
+    conn.execute("DELETE FROM hist_player_stats WHERE pfr_id IN ('USG1', 'USG2', 'USG3')")
+    conn.execute("DELETE FROM data_loads WHERE source = 'usage'")
+    conn.commit()
+    conn.close()
+
+
 # (data_type, querystring, expected leading key columns)
 DOWNLOADS = [
     ("slate",                   "?year=2026&week=1", ["year", "week", "team", "name", "name_normalized"]),
@@ -607,7 +758,8 @@ DOWNLOADS = [
     ("depth-charts",            "",                  ["year", "week", "team", "name_normalized"]),
     ("implied-points",          "?year=2026&week=1", ["year", "week", "team", "name", "name_normalized"]),
     ("props",                   "",                  ["year", "week", "name_normalized"]),
-    ("usage",                   "?year=2026",        None),
+    ("usage",                   "?year=2026",        ["year", "team", "name", "name_normalized"]),
+    ("usage",                   "?year=2026&week=1", ["year", "week", "team", "name", "name_normalized"]),
     ("implied-team-points",     "",                  None),
     ("game-overview",           "",                  None),
     ("standings",               "?year=2026",        ["year", "week", "submitter"]),
@@ -719,6 +871,137 @@ def test_routes_smoke():
         check("GET %-26s" % path, client.get(path).status_code == 200)
 
 
+TAB_PATHS = ["/", "/history", "/team-points", "/usage", "/props", "/my-props",
+             "/my-lineups", "/standings", "/schedule", "/weather", "/gameinfo",
+             "/depth-charts", "/implied-points", "/implied-team-points",
+             "/best-matchups", "/game-overview", "/fantasy-points-against"]
+
+
+def test_data_as_of_empty():
+    """Runs before any loader has written to data_loads."""
+    section("data as of: nothing loaded yet")
+    conn = flaskapp._connect()
+    n = conn.execute("SELECT COUNT(*) FROM data_loads").fetchone()[0]
+    conn.close()
+    check("data_loads starts empty", n == 0)
+    for path in TAB_PATHS:
+        r = client.get(path)
+        # The help panel on every page says "Data as of" too, so look for
+        # the line's own class, not the words.
+        check("GET %-26s 200 with no data-as-of line" % path,
+              r.status_code == 200 and 'class="data-as-of"' not in r.get_data(as_text=True))
+    with flaskapp.app.test_request_context():
+        check("_data_as_of skips a source never loaded", flaskapp._data_as_of("game_odds", "nope") == [])
+    for endpoint in flaskapp.TAB_DATA_SOURCES:
+        src = open(os.path.join("templates", endpoint + ".html"), encoding="utf-8").read()
+        check("%-24s includes _data_as_of.html" % endpoint, "_data_as_of.html" in src)
+    # psycopg2 hands back a naive datetime, SQLite a string; same result.
+    fmt = flaskapp._format_eastern
+    check("datetime from Postgres formats in ET",
+          fmt(flaskapp._as_utc_datetime(datetime.datetime(2026, 9, 15, 17, 2))) == "Tue Sep 15, 1:02 PM ET")
+    check("string from SQLite formats in ET",
+          fmt(flaskapp._as_utc_datetime("2026-09-15 17:02:00")) == "Tue Sep 15, 1:02 PM ET")
+
+
+def test_game_odds_week():
+    """Before test_timestamp_format, which rewrites game_schedule."""
+    section("data_loads rows and the game odds week from kickoff")
+    import csv as _csv
+    import io as _io
+    import re
+    import pandas as pd
+    runner = flaskapp.app.test_cli_runner()
+    data_dir = tempfile.mkdtemp(prefix="ffdfs_odds_")
+
+    # The fixture's kan/den game is Week 1. Kickoff 5 minutes off the
+    # schedule, in the scraper's ISO-Z form, so the match isn't exact.
+    kick = (datetime.datetime.strptime(PAST, '%Y-%m-%d %H:%M:%S')
+            + datetime.timedelta(minutes=5)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    path = os.path.join(data_dir, "scoresandodds_game_odds.csv.gz")
+    pd.DataFrame([
+        {"event_id": "e1", "kickoff": kick, "team": "kan", "opponent": "den", "spread": -3.0,
+         "spread_odds": "-110", "over_under": "o42.5", "favorite": "kan"},
+        {"event_id": "e1", "kickoff": kick, "team": "den", "opponent": "kan", "spread": 3.0,
+         "spread_odds": "-110", "over_under": "o42.5", "favorite": "kan"},
+    ]).to_csv(path, index=False, compression="gzip")
+    scraped = datetime.datetime(2026, 9, 15, 17, 2, tzinfo=datetime.timezone.utc).timestamp()
+    os.utime(path, (scraped, scraped))
+
+    result = runner.invoke(args=["load-history", "--game-odds-only", "--data-dir", data_dir])
+    check("load-history --game-odds-only exits cleanly", result.exit_code == 0)
+    conn = flaskapp._connect()
+    row = conn.execute("SELECT file_modified_at, loaded_at, row_count FROM data_loads "
+                       "WHERE source = 'game_odds'").fetchone()
+    kickoffs = [r[0] for r in conn.execute("SELECT kickoff FROM game_odds")]
+    conn.close()
+    check("data_loads has a game_odds row", row is not None)
+    check("file_modified_at is the file's mtime in UTC (got %r)" % (row and row[0],),
+          bool(row) and row[0] == "2026-09-15 17:02:00")
+    check("loaded_at uses a space, not a 'T' (got %r)" % (row and row[1],),
+          bool(row) and re.match(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$", row[1] or "") is not None)
+    check("row_count is 2", bool(row) and row[2] == 2)
+    check("kickoff stored as '%%Y-%%m-%%d %%H:%%M:%%S' (got %r)" % kickoffs,
+          len(kickoffs) == 2 and all(k and "T" not in k and not k.endswith("Z") for k in kickoffs))
+
+    with flaskapp.app.app_context():
+        check("odds week derived from kickoff is Week 1",
+              flaskapp._get_game_odds_week() == (YEAR, 1))
+        check("odds are used for their own week",
+              len(flaskapp._game_odds_rows_for_week(YEAR, 1, "team")) == 2)
+        check("odds are not used for another week",
+              flaskapp._game_odds_rows_for_week(YEAR, 2, "team") == [])
+
+    html = client.get("/implied-team-points").get_data(as_text=True)
+    check("Implied Team Points subtitle says Week 1, %d" % YEAR,
+          "Week 1, %d: expected points" % YEAR in html)
+    check("Implied Team Points shows the data-as-of line",
+          'class="data-as-of"' in html and "Odds Tue Sep 15, 1:02 PM ET" in html)
+    check("no stale-week note when the odds are for the current week", "odds-week-note" not in html)
+
+    saved = flaskapp._get_current_nfl_week
+    flaskapp._get_current_nfl_week = lambda: (YEAR, 2)
+    try:
+        html = client.get("/implied-team-points").get_data(as_text=True)
+        check("subtitle keeps the odds' own week, not the current week",
+              "Week 1, %d: expected points" % YEAR in html and "Week 2, %d: expected" % YEAR not in html)
+        import html as _html   # the apostrophe in "aren't" is autoescaped
+        check("stale-week note shown",
+              "These are Week 1 lines. Week 2 lines aren't loaded yet." in _html.unescape(html))
+        rows = list(_csv.DictReader(_io.StringIO(
+            client.get("/download/implied-team-points").get_data(as_text=True))))
+        check("implied-team-points CSV stamps the odds' week (1)",
+              bool(rows) and {r["week"] for r in rows} == {"1"})
+        html = client.get("/game-overview").get_data(as_text=True)
+        check("Game Overview says its odds are blank for Week 2",
+              "Odds are blank: the loaded lines are for Week 1, not Week 2." in html)
+    finally:
+        flaskapp._get_current_nfl_week = saved
+
+    # Rows with no kickoff can't be placed in a week: omit it, don't guess.
+    conn = flaskapp._connect()
+    conn.execute("UPDATE game_odds SET kickoff = NULL")
+    conn.commit()
+    conn.close()
+    html = client.get("/implied-team-points").get_data(as_text=True)
+    check("unknown odds week: subtitle has no week",
+          "Expected points for each team" in html and "Week 1, %d: expected" % YEAR not in html)
+
+    # add-props records its CSV too.
+    props_csv = os.path.join(data_dir, "props.csv")
+    with open(props_csv, "w", encoding="utf-8") as f:
+        f.write("player_name,stat_field,line\nJosh Allen,pass_yds,250.5\n")
+    result = runner.invoke(args=["add-props", props_csv, "--year", str(YEAR), "--week", "8"])
+    conn = flaskapp._connect()
+    prop_row = conn.execute("SELECT row_count FROM data_loads WHERE source = 'prop_bets'").fetchone()
+    conn.execute("DELETE FROM prop_bets WHERE week = 8")
+    conn.execute("DELETE FROM game_odds")
+    conn.execute("DELETE FROM data_loads WHERE source IN ('game_odds', 'prop_bets')")
+    conn.commit()
+    conn.close()
+    check("add-props exits cleanly and records prop_bets",
+          result.exit_code == 0 and prop_row is not None and prop_row[0] == 1)
+
+
 def test_timestamp_format():
     """Runs LAST -- it rewrites game_schedule."""
     section("timestamp format vs SQLite lexicographic comparison")
@@ -756,11 +1039,14 @@ if __name__ == "__main__":
     test_merge_friendly_reshape()
     test_every_tab_has_a_download()
     test_routes_smoke()
-    test_non_counting_week()         # before standings: needs week 2 fully scored
+    test_data_as_of_empty()          # before any test runs a loader
+    test_non_counting_week()        # before standings: needs week 2 fully scored
     test_standings_scoring()         # mutates hist_player_stats at the end
     test_name_suffixes()             # after standings: adds (then removes) a week 3
     test_dnp_and_year_scope()        # adds (then removes) a week 5 and two 2025/2026 rows
     test_prop_void()                 # adds (then removes) a week 6 prop and pick
+    test_usage()                     # after data_as_of_empty; adds (then removes) weeks 11-12
+    test_game_odds_week()            # needs the fixture schedule; adds (then removes) odds
     test_timestamp_format()          # must stay last; rewrites game_schedule
 
     print()

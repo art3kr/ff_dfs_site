@@ -70,7 +70,8 @@ each table is:**
   not wasteful.
 - *Historical, accumulates forever, never wiped:* `hist_player_stats`,
   `hist_weather`, `hist_game_info`, `hist_dst_stats`,
-  `hist_fantasy_points_against`, `hist_team_points`, `game_schedule`.
+  `hist_fantasy_points_against`, `hist_team_points`, `game_schedule`,
+  `hist_player_usage`.
 - *User-submitted, append/upsert by natural key:* `lineups`,
   `prop_picks`, `prop_bets`.
 
@@ -168,6 +169,13 @@ rebuilding from the name would break ~51k historical rows. If
 hardcoded `?` or `%s`.** This is what makes every query dual-dialect
 (SQLite uses `?`, Postgres uses `%s`). A hardcoded placeholder that
 happens to work in dev will break in production.
+
+**Every loader records itself in `data_loads` via `_record_load(cur,
+source, path(s), row_count)`.** That row (source file mtime + load
+time, naive UTC) is what each tab's "Data as of" line reads. A new
+loader or `load-history` section that skips it leaves its tab silently
+showing an old time, or none. Add the source key to
+`DATA_SOURCE_LABELS`, and to `TAB_DATA_SOURCES` for each page it feeds.
 
 ## Conventions established through this project's development
 
@@ -279,8 +287,32 @@ comments/docs rather than presenting a guess as fact.
 - `_compute_usage_rows()`, `_compute_game_overview_rows()`,
   `_compute_implied_team_points_rows()` — page/CSV pairs, same
   one-source-of-truth reason as the above.
+  `_compute_usage_rows(year, position, week=None)` joins
+  `hist_player_stats` (G, target/touch share) to `hist_player_usage`
+  (snap %, aDOT, air yards share, WOPR, red zone) on
+  (name_normalized, team); its docstring has each column's season math.
+  `hist_player_usage` comes from `scrape_nflverse_usage.py` (nflverse
+  GitHub releases, CC-BY, credited on the page; not PFR), loaded by
+  `flask load-history --usage-only`. nflverse snap counts can miss a
+  player who has stats, so Snap % falls back to PFR's
+  `hist_player_stats.snap_pct` per player-week. Routes run can't be
+  added in-season: nflverse publishes route participation only after
+  the season.
 - `_prepend_keys()` / `_with_name_key()` — every CSV export runs
   through these. See the download conventions below.
+- `data_loads` table, `_record_load()`, `_data_as_of(*sources)` — one
+  row per source key (salaries, player_stats, weather, game_info, dst,
+  fantasy_points_against, team_points, depth_charts, injuries,
+  game_odds, props_market, prop_bets, firstdown, schedule, usage). The
+  `_inject_data_as_of` context processor maps `request.endpoint`
+  through `TAB_DATA_SOURCES` and `templates/_data_as_of.html` renders
+  the line under each tab's subtitle, in ET.
+- `_get_game_odds_week()` — the real (year, week) of the loaded
+  `game_odds`, by matching each row's team + `kickoff` to
+  `game_schedule` within a day (most common week wins). Never the
+  current week: odds can lag it. `_game_odds_rows_for_week()` returns
+  no odds for a page showing a different week (Game Overview, Best
+  Matchups), `_odds_week_note()` explains it on the page.
 - `TEAM_ROW_COLORS` — static per-team brand-color tint, used for the
   background tint on Best Matchups, Team Points, Fantasy Points
   Against, Implied Team Points, and the Depth Charts team buttons.

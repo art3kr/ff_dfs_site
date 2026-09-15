@@ -31,7 +31,12 @@
             <a href="{{ url_for('implied_points') }}" class="nav-link">Implied Player Points</a>
             <a href="{{ url_for('implied_team_points') }}" class="nav-link active">Implied Team Points</a>
         </nav>
-        <p class="subtitle">Expected points for each team, based on the spread and game total</p>
+        {% if week %}
+            <p class="subtitle">Week {{ week }}, {{ year }}: expected points for each team, based on the spread and game total</p>
+        {% else %}
+            <p class="subtitle">Expected points for each team, based on the spread and game total</p>
+        {% endif %}
+        {% include '_data_as_of.html' %}
     </div>
     <div class="header-right">
         {% if current_user.is_authenticated %}
@@ -48,6 +53,8 @@
 {% if not rows %}
     <p class="empty-state">No game odds loaded yet. Run scrape_scoresandodds_game_odds.py, then flask load-history.</p>
 {% else %}
+
+    {% if odds_note %}<p class="standings-note odds-week-note">{{ odds_note }}</p>{% endif %}
 
     <p class="standings-note">
         Implied total = (game O/U ÷ 2) − (spread ÷ 2). A negative spread (favorite) raises the

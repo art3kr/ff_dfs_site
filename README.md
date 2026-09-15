@@ -216,7 +216,11 @@ python scrapers/scrape_weekly_weather.py --year 2026 --weeks N
 #    changes once a week's games have actually been played
 python scrapers/scrape_fantasy_points_against.py --year 2026 --position all
 
-# 7. Persist everything — Standings, History, and My Lineups all
+# 7. Usage (snaps, air yards, red zone) from nflverse's GitHub releases,
+#    which update within a day of games. No PFR requests.
+python scrapers/scrape_nflverse_usage.py --year 2026
+
+# 8. Persist everything — Standings, History, and My Lineups all
 #    auto-recompute once this is loaded; prop picks auto-score too.
 #    For a small fix, a section flag is faster still, e.g.
 #    flask load-history --year 2026 --stats-only
@@ -279,6 +283,12 @@ so My Lineups/Standings know to show live vs. final data. Closer to a
 new subsystem than an added column. Revisit if live tracking becomes
 a real priority.
 
+### Routes run on the Usage page
+nflverse only publishes route participation after the season ends, so
+routes run (and target share per route) can't be shown in-season. The
+Usage page's snap, air yards and red zone columns come from
+`scrape_nflverse_usage.py`; revisit routes once a season's data is out.
+
 ### FantasyPros projections
 https://www.fantasypros.com/nfl/projections/qb.php (and the equivalent
 pages for RB/WR/TE/etc.) has its own weekly fantasy point projections
@@ -299,8 +309,8 @@ same order. What you join on depends on the file's grain:
 
 | One row is… | Join on | Tabs |
 |---|---|---|
-| a player in a week | `year` + `week` + `name_normalized` | Slate, History, Best Matchups, Implied Player Points, Props, My Props, My Lineups, player career |
-| a player in a season | `year` + `name_normalized` | Usage |
+| a player in a week | `year` + `week` + `name_normalized` | Slate, History, Best Matchups, Implied Player Points, Props, My Props, My Lineups, player career, Usage (This Week) |
+| a player in a season | `year` + `name_normalized` | Usage (This Season) |
 | a team in a week | `year` + `week` + `team` | Team Points, Implied Team Points, Depth Charts, Weather/Game Info (merge-friendly) |
 | a team in a season | `year` + `team` (+ `position`) | Fantasy Pts Against |
 | a single game | `year` + `week` + `home_team`/`away_team` | Weather, Game Info, Game Overview, Schedule |

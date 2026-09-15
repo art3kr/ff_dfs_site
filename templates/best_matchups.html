@@ -36,6 +36,7 @@
         {% else %}
             <p class="subtitle">No slate loaded yet.</p>
         {% endif %}
+        {% include '_data_as_of.html' %}
     </div>
     <div class="header-right">
         {% if current_user.is_authenticated %}
@@ -54,6 +55,8 @@
         No slate loaded yet. Run <code>flask load-weekly-salary</code> or <code>flask ingest-slate</code> for the current week.
     </p>
 {% else %}
+
+    {% if odds_note %}<p class="standings-note odds-week-note">{{ odds_note }}</p>{% endif %}
 
     <div class="page-controls">
         <form class="history-selector" id="history-selector" method="GET" action="{{ url_for('best_matchups') }}">

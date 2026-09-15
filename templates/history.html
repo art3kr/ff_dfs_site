@@ -32,10 +32,11 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if year %}
-            <p class="subtitle">Week {{ week }}, {{ year }}: Salary + Results</p>
+            <p class="subtitle">{% if week == 'season' %}{{ year }} Season{% else %}Week {{ week }}, {{ year }}{% endif %}: Salary + Results</p>
         {% else %}
             <p class="subtitle">No historical data loaded yet.</p>
         {% endif %}
+        {% include '_data_as_of.html' %}
     </div>
     <div class="header-right">
         {% if current_user.is_authenticated %}

@@ -221,6 +221,12 @@ GAME_SCHEDULE_MIGRATIONS = [
     ("home_away", "TEXT"),
 ]
 
+# kickoff lets the loaded odds be matched to a real (year, week) through
+# game_schedule. See _get_game_odds_week().
+GAME_ODDS_MIGRATIONS = [
+    ("kickoff", "TIMESTAMP"),
+]
+
 
 def _migrate_table_pg(cur, table_name, migrations):
     """Add any missing columns to `table_name` on Postgres."""
@@ -519,6 +525,39 @@ def _auto_init():
                 ON hist_fantasy_points_against (year, position)
         """)
         cur.execute("""
+            CREATE TABLE IF NOT EXISTS hist_player_usage (
+                id                 SERIAL PRIMARY KEY,
+                year               INTEGER NOT NULL,
+                week               INTEGER NOT NULL,
+                pfr_id             TEXT,
+                name               TEXT    NOT NULL,
+                name_normalized    TEXT    NOT NULL,
+                team               TEXT    NOT NULL,
+                position           TEXT,
+                offense_snaps      INTEGER,
+                offense_pct        REAL,
+                targets            INTEGER,
+                target_share       REAL,
+                air_yards          REAL,
+                air_yards_share    REAL,
+                adot               REAL,
+                wopr               REAL,
+                carries            INTEGER,
+                rz_targets         INTEGER,
+                rz_carries         INTEGER,
+                i10_targets        INTEGER,
+                i10_carries        INTEGER,
+                i5_targets         INTEGER,
+                i5_carries         INTEGER,
+                third_down_targets INTEGER,
+                UNIQUE(year, week, name_normalized, team)
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_hist_usage_lookup
+                ON hist_player_usage (year, week)
+        """)
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS hist_team_points (
                 id             SERIAL PRIMARY KEY,
                 year           INTEGER NOT NULL,
@@ -561,8 +600,18 @@ def _auto_init():
                 spread_odds  TEXT,
                 over_under   TEXT,
                 favorite     TEXT,
+                kickoff      TIMESTAMP,
                 updated_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(team)
+            )
+        """)
+        _migrate_table_pg(cur, "game_odds", GAME_ODDS_MIGRATIONS)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS data_loads (
+                source            TEXT PRIMARY KEY,
+                file_modified_at  TIMESTAMP,
+                loaded_at         TIMESTAMP,
+                row_count         INTEGER
             )
         """)
         cur.execute("""
@@ -823,6 +872,35 @@ def _auto_init():
             );
             CREATE INDEX IF NOT EXISTS idx_hist_fpa_lookup
                 ON hist_fantasy_points_against (year, position);
+            CREATE TABLE IF NOT EXISTS hist_player_usage (
+                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                year               INTEGER NOT NULL,
+                week               INTEGER NOT NULL,
+                pfr_id             TEXT,
+                name               TEXT    NOT NULL,
+                name_normalized    TEXT    NOT NULL,
+                team               TEXT    NOT NULL,
+                position           TEXT,
+                offense_snaps      INTEGER,
+                offense_pct        REAL,
+                targets            INTEGER,
+                target_share       REAL,
+                air_yards          REAL,
+                air_yards_share    REAL,
+                adot               REAL,
+                wopr               REAL,
+                carries            INTEGER,
+                rz_targets         INTEGER,
+                rz_carries         INTEGER,
+                i10_targets        INTEGER,
+                i10_carries        INTEGER,
+                i5_targets         INTEGER,
+                i5_carries         INTEGER,
+                third_down_targets INTEGER,
+                UNIQUE(year, week, name_normalized, team)
+            );
+            CREATE INDEX IF NOT EXISTS idx_hist_usage_lookup
+                ON hist_player_usage (year, week);
             CREATE TABLE IF NOT EXISTS hist_team_points (
                 id             INTEGER PRIMARY KEY AUTOINCREMENT,
                 year           INTEGER NOT NULL,
@@ -857,8 +935,15 @@ def _auto_init():
                 spread_odds  TEXT,
                 over_under   TEXT,
                 favorite     TEXT,
+                kickoff      TEXT,
                 updated_at   TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(team)
+            );
+            CREATE TABLE IF NOT EXISTS data_loads (
+                source            TEXT PRIMARY KEY,
+                file_modified_at  TEXT,
+                loaded_at         TEXT,
+                row_count         INTEGER
             );
             CREATE TABLE IF NOT EXISTS scoresandodds_props (
                 id                      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -902,6 +987,7 @@ def _auto_init():
         """)
         _migrate_hist_player_stats_sqlite(conn)
         _migrate_table_sqlite(conn, "game_schedule", GAME_SCHEDULE_MIGRATIONS)
+        _migrate_table_sqlite(conn, "game_odds", GAME_ODDS_MIGRATIONS)
 
     conn.commit()
 
@@ -1005,6 +1091,38 @@ def _executemany(cur, sql, rows):
         execute_batch(cur, sql, rows, page_size=500)
     else:
         cur.executemany(sql, rows)
+
+
+def _record_load(cur, source, paths, row_count):
+    """
+    Upsert one data_loads row for a loader section, so pages can say how
+    current their data is (see _data_as_of). Every loader must call this
+    once per section it loads; the caller commits.
+
+    file_modified_at is the source file's mtime, i.e. when the scraper
+    wrote it, which is what "data as of" means. loaded_at is now. Both are
+    naive UTC in '%Y-%m-%d %H:%M:%S' (never .isoformat(), see CLAUDE.md).
+    `paths` may be a list (a section built from several files); the newest
+    mtime wins. Missing files are ignored, and nothing is written if none
+    exist.
+    """
+    if isinstance(paths, (str, os.PathLike)):
+        paths = [paths]
+    mtimes = [os.path.getmtime(p) for p in paths if p and os.path.exists(p)]
+    if not mtimes:
+        return
+    fmt = '%Y-%m-%d %H:%M:%S'
+    utc = datetime.timezone.utc
+    modified = datetime.datetime.fromtimestamp(max(mtimes), utc).strftime(fmt)
+    loaded = datetime.datetime.now(utc).strftime(fmt)
+    cur.execute(f"""
+        INSERT INTO data_loads (source, file_modified_at, loaded_at, row_count)
+        VALUES ({_ph(4)})
+        ON CONFLICT (source) DO UPDATE SET
+            file_modified_at = excluded.file_modified_at,
+            loaded_at        = excluded.loaded_at,
+            row_count        = excluded.row_count
+    """, (source, modified, loaded, int(row_count or 0)))
 
 
 @app.teardown_appcontext
@@ -1560,6 +1678,7 @@ def add_props_command(csv_path, year, week):
         cur.execute(sql, (year, week, name, normalize_name(name), row['stat_field'], float(row['line'])))
         count += 1
 
+    _record_load(cur, "prop_bets", csv_path, count)
     conn.commit()
     cur.close()
     conn.close()
@@ -1699,6 +1818,7 @@ def load_weekly_salary_command(csv_path, year):
             click.echo(f"  Skipped {p.get('name', '?')}: {e}")
             skipped += 1
 
+    _record_load(cur, "salaries", csv_path, inserted)
     conn.commit()
     cur.close()
     conn.close()
@@ -1823,6 +1943,7 @@ def load_schedule_command(year):
             click.echo(f"  Skipped row ({row.get('team_1','?')} @ {row.get('team_2','?')}): {e}")
             skipped += 1
 
+    _record_load(cur, "schedule", path, inserted)
     conn.commit()
     cur.close()
     conn.close()
@@ -1858,13 +1979,17 @@ def load_schedule_command(year):
               help="Only load game-level spread/total/favorite, skip everything else — "
                    "for frequent re-runs as lines move through the week, without "
                    "waiting on the much slower full load.")
+@click.option("--usage-only", is_flag=True,
+              help="Only load nflverse usage (snaps, air yards, red zone), skip everything "
+                   "else. For a quick reload after scrape_nflverse_usage.py.")
 @click.option("--batch-size", default=1000, type=int, help="Rows per bulk-insert batch.")
 @click.option("--year", default=None, type=int,
               help="Only load rows for this season from the historical files (salaries, "
-                   "stats, weather, game info, DST, fantasy points against, team points). "
+                   "stats, weather, game info, DST, fantasy points against, team points, "
+                   "usage). "
                    "Live full-replace files always load in full. Use it for weekly loads, "
                    "e.g. --year 2026, instead of re-loading every season since 2014.")
-def load_history_command(data_dir, salaries_only, stats_only, weather_only, props_only, injuries_only, firstdown_only, depth_charts_only, game_odds_only, batch_size, year):
+def load_history_command(data_dir, salaries_only, stats_only, weather_only, props_only, injuries_only, firstdown_only, depth_charts_only, game_odds_only, usage_only, batch_size, year):
     """
     Load the historical .csv.gz files produced by the scrapers into
     hist_dfs_salaries and hist_player_stats.
@@ -1900,7 +2025,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
     # everything, same as before these flags existed. Any "-only" flag
     # narrows to just its own section(s).
     run_all = not (salaries_only or stats_only or weather_only or props_only or injuries_only
-                  or firstdown_only or depth_charts_only or game_odds_only)
+                  or firstdown_only or depth_charts_only or game_odds_only or usage_only)
 
     def _scope(df: pd.DataFrame) -> pd.DataFrame:
         """Apply --year to a historical file. Upserts, so skipped years are untouched."""
@@ -1913,6 +2038,11 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
 
     conn = _connect()
     cur  = _cursor(conn)
+
+    def _loaded(source, paths, count):
+        """Record this section in data_loads (see _record_load)."""
+        _record_load(cur, source, paths, count)
+        conn.commit()
 
     def upsert_salaries(df: pd.DataFrame, source_label: str):
         ph = _ph(13)
@@ -2093,6 +2223,54 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 conn.commit()
                 inserted += len(batch)
                 click.echo(f"    ...{inserted:,} rows loaded")
+                batch = []
+        if batch:
+            _executemany(cur, sql, batch)
+            conn.commit()
+            inserted += len(batch)
+        return inserted
+
+    USAGE_COLUMNS = ["year", "week", "pfr_id", "name", "name_normalized", "team", "position",
+                     "offense_snaps", "offense_pct", "targets", "target_share", "air_yards",
+                     "air_yards_share", "adot", "wopr", "carries", "rz_targets", "rz_carries",
+                     "i10_targets", "i10_carries", "i5_targets", "i5_carries",
+                     "third_down_targets"]
+    USAGE_FLOATS = {"offense_pct", "target_share", "air_yards", "air_yards_share", "adot", "wopr"}
+
+    def upsert_usage(df: pd.DataFrame):
+        """nflverse usage (scrape_nflverse_usage.py) -> hist_player_usage."""
+        # Lowercase `excluded` works in both SQLite and Postgres.
+        updates = ",\n                    ".join(
+            f"{c} = excluded.{c}" for c in USAGE_COLUMNS
+            if c not in ("year", "week", "name_normalized", "team"))
+        sql = f"""
+            INSERT INTO hist_player_usage ({", ".join(USAGE_COLUMNS)})
+            VALUES ({_ph(len(USAGE_COLUMNS))})
+            ON CONFLICT (year, week, name_normalized, team) DO UPDATE SET
+                    {updates}
+        """
+        inserted = 0
+        batch = []
+        for _, r in df.iterrows():
+            team_raw = r.get('team')
+            if pd.isna(team_raw) or pd.isna(r.get('year')) or pd.isna(r.get('week')):
+                continue
+            row = {
+                "year": int(r.get('year')), "week": int(r.get('week')),
+                "pfr_id": _none_if_nan(r.get('pfr_id')),
+                "name": str(r.get('name', '')),
+                "name_normalized": _name_key(r.get('name_normalized'), r.get('name')),
+                # normalize_team() at ingestion, same reason as upsert_stats.
+                "team": normalize_team(str(team_raw)),
+                "position": _none_if_nan(r.get('position')),
+            }
+            for c in USAGE_COLUMNS[7:]:
+                row[c] = _float_or_none(r.get(c)) if c in USAGE_FLOATS else _int_or_none(r.get(c))
+            batch.append(tuple(row[c] for c in USAGE_COLUMNS))
+            if len(batch) >= batch_size:
+                _executemany(cur, sql, batch)
+                conn.commit()
+                inserted += len(batch)
                 batch = []
         if batch:
             _executemany(cur, sql, batch)
@@ -2319,9 +2497,21 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
 
         sql = f"""
             INSERT INTO game_odds
-                (team, opponent, spread, spread_odds, over_under, favorite)
-            VALUES ({_ph(6)})
+                (team, opponent, spread, spread_odds, over_under, favorite, kickoff)
+            VALUES ({_ph(7)})
         """
+
+        def _kickoff_utc(v):
+            # The scraper writes ISO UTC ("2026-09-18T00:15:00Z"). Stored in
+            # the same naive-UTC '%Y-%m-%d %H:%M:%S' form as
+            # game_schedule.kickoff, so _get_game_odds_week() compares like
+            # with like. Unparseable or missing -> NULL, not a guess.
+            v = _none_if_nan(v)
+            if v is None:
+                return None
+            ts = pd.to_datetime(str(v), utc=True, errors='coerce')
+            return None if pd.isna(ts) else ts.strftime('%Y-%m-%d %H:%M:%S')
+
         inserted = 0
         batch = []
         for _, r in df.iterrows():
@@ -2329,6 +2519,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
                 str(r.get('team', '')), _none_if_nan(r.get('opponent')),
                 _none_if_nan(r.get('spread')), _none_if_nan(r.get('spread_odds')),
                 _none_if_nan(r.get('over_under')), _none_if_nan(r.get('favorite')),
+                _kickoff_utc(r.get('kickoff')),
             ))
             if len(batch) >= batch_size:
                 _executemany(cur, sql, batch)
@@ -2726,6 +2917,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
 
     # --- Load salary files ---
     if run_all or salaries_only:
+        salary_paths, salary_rows = [], 0
         for filename in SALARY_FILES:
             path = os.path.join(data_dir, filename)
             if not os.path.exists(path):
@@ -2735,6 +2927,8 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             df = pd.read_csv(path)
             source_label = filename.replace('.csv.gz', '')
             count = upsert_salaries(_scope(df), source_label)
+            salary_paths.append(path)
+            salary_rows += count
             click.echo(f"  Done: {count:,} rows from {filename}")
 
         # FantasyPros weekly salary scrapes — one file per week
@@ -2750,7 +2944,11 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             click.echo(f"Loading {path} ...")
             df = pd.read_csv(path)
             count = upsert_salaries(_scope(df), 'fantasypros_dk_salary')
+            salary_paths.append(path)
+            salary_rows += count
             click.echo(f"  Done: {count:,} rows from {os.path.basename(path)}")
+        if salary_paths:
+            _loaded("salaries", salary_paths, salary_rows)
 
     # --- Load player stats file ---
     if run_all or stats_only:
@@ -2761,6 +2959,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             click.echo(f"Loading {path} ...")
             df = pd.read_csv(path)
             count = upsert_stats(_scope(df))
+            _loaded("player_stats", path, count)
             click.echo(f"  Done: {count:,} rows from {STATS_FILE}")
 
     # --- Load weather file ---
@@ -2772,6 +2971,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             click.echo(f"Loading {path} ...")
             df = pd.read_csv(path)
             count = upsert_weather(_scope(df))
+            _loaded("weather", path, count)
             click.echo(f"  Done: {count:,} rows from {WEATHER_FILE}")
 
     # --- Load game info file ---
@@ -2783,6 +2983,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             click.echo(f"Loading {path} ...")
             df = pd.read_csv(path)
             count = upsert_game_info(_scope(df))
+            _loaded("game_info", path, count)
             click.echo(f"  Done: {count:,} rows from {GAME_INFO_FILE}")
 
     # --- Load DST (team defense) stats file ---
@@ -2794,6 +2995,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             click.echo(f"Loading {path} ...")
             df = pd.read_csv(path)
             count = upsert_dst_stats(_scope(df))
+            _loaded("dst", path, count)
             click.echo(f"  Done: {count:,} rows from {DST_FILE}")
 
     # --- Load fantasy-points-against files (one per year) ---
@@ -2801,11 +3003,32 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
         fpa_files = sorted(glob.glob(os.path.join(data_dir, "fantasy_points_against_*.csv.gz")))
         if not fpa_files:
             click.echo(f"Skip (not found): {os.path.join(data_dir, 'fantasy_points_against_*.csv.gz')}")
+        fpa_rows = 0
         for path in fpa_files:
             click.echo(f"Loading {path} ...")
             df = pd.read_csv(path)
             count = upsert_fantasy_points_against(_scope(df))
+            fpa_rows += count
             click.echo(f"  Done: {count:,} rows from {os.path.basename(path)}")
+        if fpa_files:
+            _loaded("fantasy_points_against", fpa_files, fpa_rows)
+
+    # --- Load nflverse usage files (one per year, from
+    # scrape_nflverse_usage.py; not PFR) ---
+    if run_all or usage_only:
+        import glob
+        usage_files = sorted(glob.glob(os.path.join(data_dir, "nflverse_usage_*.csv.gz")))
+        if not usage_files:
+            click.echo(f"Skip (not found): {os.path.join(data_dir, 'nflverse_usage_*.csv.gz')}")
+        usage_rows = 0
+        for path in usage_files:
+            click.echo(f"Loading {path} ...")
+            df = pd.read_csv(path)
+            count = upsert_usage(_scope(df))
+            usage_rows += count
+            click.echo(f"  Done: {count:,} rows from {os.path.basename(path)}")
+        if usage_files:
+            _loaded("usage", usage_files, usage_rows)
 
     # --- Load team points file (single file, all years combined) ---
     if run_all:
@@ -2816,6 +3039,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             click.echo(f"Loading {team_points_path} ...")
             df = pd.read_csv(team_points_path)
             count = upsert_team_points(_scope(df))
+            _loaded("team_points", team_points_path, count)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(team_points_path)}")
 
     # --- Load depth charts (single file, always reflects the latest
@@ -2828,6 +3052,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             click.echo(f"Loading {depth_charts_path} ...")
             df = pd.read_csv(depth_charts_path)
             count = replace_depth_charts(df)
+            _loaded("depth_charts", depth_charts_path, count)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(depth_charts_path)} (full replace)")
 
     # --- Load Ourlads' own injury flags (from the same depth chart
@@ -2845,6 +3070,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             click.echo(f"Loading {ourlads_injuries_path} ...")
             df = pd.read_csv(ourlads_injuries_path)
             count = replace_player_injuries(df)
+            _loaded("injuries", ourlads_injuries_path, count)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(ourlads_injuries_path)} (full replace)")
 
     # --- Load game-level odds (spread/total/favorite) — same
@@ -2858,6 +3084,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             click.echo(f"Loading {game_odds_path} ...")
             df = pd.read_csv(game_odds_path)
             count = replace_game_odds(df)
+            _loaded("game_odds", game_odds_path, count)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(game_odds_path)} (full replace)")
 
     # --- Load player props (used for implied fantasy points) — same
@@ -2870,6 +3097,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             click.echo(f"Loading {props_path} ...")
             df = pd.read_csv(props_path)
             count = replace_scoresandodds_props(df)
+            _loaded("props_market", props_path, count)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(props_path)} (full replace)")
 
     # --- Load draftedge's injury statuses — fills gaps ONLY, never
@@ -2883,6 +3111,9 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             click.echo(f"Loading {injuries_path} ...")
             df = pd.read_csv(injuries_path)
             count = fill_gap_player_injuries(df)
+            # Same key as Ourlads: pages show one "Injuries" time, and
+            # this runs after Ourlads whenever both load.
+            _loaded("injuries", injuries_path, count)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(injuries_path)} "
                       f"(gap-fill only — players Ourlads already flagged were left untouched)")
 
@@ -2897,6 +3128,7 @@ def load_history_command(data_dir, salaries_only, stats_only, weather_only, prop
             click.echo(f"Loading {fds_path} ...")
             df = pd.read_csv(fds_path)
             count = replace_firstdown_studio_rankings(df)
+            _loaded("firstdown", fds_path, count)
             click.echo(f"  Done: {count:,} rows from {os.path.basename(fds_path)} (full replace)")
 
     cur.close()
@@ -3330,6 +3562,10 @@ def usage():
     every position, not just RB/WR/TE — a QB's own rushes are still
     real team touches, and excluding them would overstate everyone
     else's actual share of the offense.
+
+    Snap %, air yards, WOPR and red zone columns come from
+    hist_player_usage (nflverse, see scrape_nflverse_usage.py). ?week=N
+    narrows every column to that one week; the default is the season.
     """
     ph = _ph()
 
@@ -3338,50 +3574,139 @@ def usage():
     )]
     if not available_years:
         return render_template("usage.html", rows=[], year=None, position="ALL",
+                               week=None, available_weeks=[],
                                available_years=[], team_colors=TEAM_ROW_COLORS)
 
     req_year = request.args.get("year", type=int)
     sel_year = req_year if req_year in available_years else available_years[0]
     sel_position = request.args.get("position", "ALL")
 
-    rows = _compute_usage_rows(sel_year, sel_position)
+    available_weeks = [r["week"] for r in db_fetchall(
+        f"SELECT DISTINCT week FROM hist_player_usage WHERE year = {ph} ORDER BY week",
+        (sel_year,))]
+    req_week = request.args.get("week", type=int)
+    sel_week = req_week if req_week in available_weeks else None
+
+    rows = _compute_usage_rows(sel_year, sel_position, sel_week)
 
     return render_template("usage.html", rows=rows, year=sel_year, position=sel_position,
+                           week=sel_week, available_weeks=available_weeks,
                            available_years=available_years, team_colors=TEAM_ROW_COLORS)
 
 
-def _compute_usage_rows(sel_year: int, sel_position: str) -> list:
+def _compute_usage_rows(sel_year: int, sel_position: str, sel_week: int = None) -> list:
     """
     Shared by the Usage page and its CSV export — see usage()'s own
     docstring for what target/touch share actually mean here (share of
-    the player's own TEAM's season total, not of snaps played).
+    the player's own TEAM's total, not of snaps played).
+
+    sel_week None = season to date, otherwise that week only (shares
+    then use the team's totals for that week).
+
+    Usage columns join hist_player_usage on (name_normalized, team):
+      snap_pct:        per week, nflverse offense_pct when offense_snaps > 0,
+                       else PFR's hist_player_stats.snap_pct (nflverse snap
+                       counts can miss a player who has stats). Season =
+                       average over the weeks that have a value.
+      adot:            sum air_yards / sum targets.
+      air_yards_share: season = player air yards / team air yards (both from
+                       hist_player_usage); week = nflverse air_yards_share.
+      wopr:            season = 1.5 x target share + 0.7 x air yards share,
+                       shares as fractions of the team's hist_player_usage
+                       totals; week = nflverse wopr.
+      rz_targets, rz_carries, i10_carries, i5_carries, third_down_targets:
+                       sums (or the week's values).
+    Players with no usage row get None for all of these except snap_pct,
+    which can still come from PFR.
     """
     ph = _ph()
+    week_filter = "" if sel_week is None else f"AND week = {ph}"
+    base_params = (sel_year,) if sel_week is None else (sel_year, sel_week)
 
-    # Team totals for the season - the shared denominator every
-    # player's own share gets divided by.
+    # Team totals - the shared denominator every player's own share
+    # gets divided by.
     team_totals_rows = db_fetchall(f"""
         SELECT team,
                SUM(COALESCE(rec_tgt, 0)) AS team_targets,
                SUM(COALESCE(rush_att, 0) + COALESCE(rec, 0)) AS team_touches
         FROM hist_player_stats
-        WHERE year = {ph}
+        WHERE year = {ph} {week_filter}
         GROUP BY team
-    """, (sel_year,))
+    """, base_params)
     team_totals = {r["team"]: r for r in team_totals_rows}
 
     position_filter = "" if sel_position == "ALL" else f"AND position = {ph}"
-    params = (sel_year,) if sel_position == "ALL" else (sel_year, sel_position)
+    params = base_params if sel_position == "ALL" else base_params + (sel_position,)
 
     player_rows = db_fetchall(f"""
-        SELECT name, position, team,
+        SELECT name, name_normalized, position, team,
                SUM(COALESCE(rec_tgt, 0)) AS targets,
                SUM(COALESCE(rush_att, 0) + COALESCE(rec, 0)) AS touches,
                COUNT(*) AS games
         FROM hist_player_stats
-        WHERE year = {ph} AND position IN ('RB', 'WR', 'TE') {position_filter}
-        GROUP BY name, position, team
+        WHERE year = {ph} {week_filter} AND position IN ('RB', 'WR', 'TE') {position_filter}
+        GROUP BY name, name_normalized, position, team
     """, params)
+
+    # Per player-week snap % from PFR, the fallback for missing nflverse snaps.
+    pfr_snaps = {}
+    for r in db_fetchall(f"""
+        SELECT name_normalized, team, week, snap_pct
+        FROM hist_player_stats
+        WHERE year = {ph} {week_filter} AND position IN ('RB', 'WR', 'TE')
+    """, base_params):
+        if r["snap_pct"] is not None:
+            pfr_snaps.setdefault((r["name_normalized"], r["team"]), {})[r["week"]] = r["snap_pct"]
+
+    usage_by_player = {}
+    team_usage = {}
+    for r in db_fetchall(f"""
+        SELECT week, name_normalized, team, offense_snaps, offense_pct, targets,
+               air_yards, air_yards_share, wopr, rz_targets, rz_carries,
+               i10_carries, i5_carries, third_down_targets
+        FROM hist_player_usage
+        WHERE year = {ph} {week_filter}
+    """, base_params):
+        usage_by_player.setdefault((r["name_normalized"], r["team"]), []).append(r)
+        t = team_usage.setdefault(r["team"], {"targets": 0, "air_yards": 0.0})
+        t["targets"] += r["targets"] or 0
+        t["air_yards"] += r["air_yards"] or 0
+
+    def _snap_pct(key):
+        weekly = dict(pfr_snaps.get(key, {}))
+        for u in usage_by_player.get(key, []):
+            if (u["offense_snaps"] or 0) > 0 and u["offense_pct"] is not None:
+                weekly[u["week"]] = u["offense_pct"]
+        return round(sum(weekly.values()) / len(weekly), 1) if weekly else None
+
+    def _usage_fields(key):
+        weeks = usage_by_player.get(key)
+        out = {"snap_pct": _snap_pct(key)}
+        cols = ("air_yards", "adot", "air_yards_share", "wopr", "rz_targets", "rz_carries",
+                "i10_carries", "i5_carries", "third_down_targets")
+        if not weeks:
+            return {**out, **{c: None for c in cols}}
+
+        def total(c):
+            return sum(u[c] or 0 for u in weeks)
+
+        targets, air = total("targets"), total("air_yards")
+        out["air_yards"] = round(air, 1)
+        out["adot"] = round(air / targets, 1) if targets else None
+        if sel_week is not None:
+            u = weeks[0]
+            out["air_yards_share"] = None if u["air_yards_share"] is None else round(u["air_yards_share"], 1)
+            out["wopr"] = None if u["wopr"] is None else round(u["wopr"], 2)
+        else:
+            team = team_usage.get(key[1], {})
+            tgt_share = targets / team["targets"] if team.get("targets") else None
+            air_share = air / team["air_yards"] if team.get("air_yards") else None
+            out["air_yards_share"] = None if air_share is None else round(100 * air_share, 1)
+            out["wopr"] = (round(1.5 * tgt_share + 0.7 * air_share, 2)
+                           if tgt_share is not None and air_share is not None else None)
+        for c in ("rz_targets", "rz_carries", "i10_carries", "i5_carries", "third_down_targets"):
+            out[c] = total(c)
+        return out
 
     rows = []
     for p in player_rows:
@@ -3394,11 +3719,13 @@ def _compute_usage_rows(sel_year: int, sel_position: str) -> list:
             touch_share = round(100 * p["touches"] / team_total["team_touches"], 1)
 
         rows.append({
-            "name": p["name"], "position": p["position"], "team": p["team"],
+            "name": p["name"], "name_normalized": p["name_normalized"],
+            "position": p["position"], "team": p["team"],
             "games": p["games"], "targets": p["targets"], "touches": p["touches"],
             "target_share": target_share, "touch_share": touch_share,
             "targets_per_game": round(p["targets"] / p["games"], 1),
             "touches_per_game": round(p["touches"] / p["games"], 1),
+            **_usage_fields((p["name_normalized"], p["team"])),
         })
 
     rows.sort(key=lambda r: r["target_share"] if r["target_share"] is not None else -1, reverse=True)
@@ -3772,6 +4099,187 @@ def _get_current_nfl_week():
     return (row["year"], row["week"]) if row else (None, None)
 
 
+def _as_utc_datetime(value):
+    """
+    A timestamp from the DB as an aware UTC datetime, or None. SQLite hands
+    back a '%Y-%m-%d %H:%M:%S' string, psycopg2 a naive datetime; both are
+    stored as UTC.
+    """
+    if value is None:
+        return None
+    if isinstance(value, str):
+        try:
+            value = datetime.datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    if not isinstance(value, datetime.datetime):
+        return None
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=datetime.timezone.utc)
+    return value.astimezone(datetime.timezone.utc)
+
+
+def _format_eastern(dt) -> str:
+    """Aware datetime -> "Tue Sep 15, 1:02 PM ET"."""
+    from zoneinfo import ZoneInfo
+    e = dt.astimezone(ZoneInfo("America/New_York"))
+    return f"{e:%a %b} {e.day}, {e.hour % 12 or 12}:{e:%M} {e:%p} ET"
+
+
+# data_loads source key -> the short name shown in the "Data as of" line.
+DATA_SOURCE_LABELS = {
+    "salaries":               "Salaries",
+    "player_stats":           "Stats",
+    "dst":                    "DST",
+    "team_points":            "Team points",
+    "weather":                "Weather",
+    "game_info":              "Game info",
+    "fantasy_points_against": "Points against",
+    "depth_charts":           "Depth charts",
+    "injuries":               "Injuries",
+    "game_odds":              "Odds",
+    "props_market":           "Prop lines",
+    "prop_bets":              "Props",
+    "firstdown":              "FDS",
+    "schedule":               "Schedule",
+    "usage":                  "Usage",
+}
+
+# Route endpoint -> the data_loads sources that feed that page, in display
+# order. A page not listed here gets no "Data as of" line.
+TAB_DATA_SOURCES = {
+    "slate":                  ["salaries", "depth_charts", "injuries"],
+    "props":                  ["prop_bets", "player_stats"],
+    "implied_points":         ["props_market", "firstdown", "salaries"],
+    "implied_team_points":    ["game_odds"],
+    "best_matchups":          ["salaries", "player_stats", "game_odds", "props_market", "depth_charts"],
+    "game_overview":          ["game_odds", "weather", "schedule"],
+    "weather":                ["weather"],
+    "gameinfo":               ["game_info"],
+    "team_points":            ["team_points"],
+    "history":                ["salaries", "player_stats"],
+    "depth_charts":           ["depth_charts", "injuries"],
+    "fantasy_points_against": ["fantasy_points_against"],
+    "usage":                  ["player_stats", "usage"],
+    "standings":              ["player_stats", "dst", "team_points"],
+    "my_lineups":             ["player_stats", "dst", "team_points"],
+    "my_props":               ["player_stats", "dst", "team_points"],
+    "schedule":               ["schedule"],
+}
+
+
+def _data_as_of(*sources) -> list:
+    """
+    [{"label": "Odds", "when": "Tue Sep 15, 1:02 PM ET"}, ...] for the given
+    data_loads source keys, in the order given. The time is the source
+    file's mtime (when it was scraped), falling back to the load time. A
+    source that has never been loaded is simply left out.
+    """
+    if not sources:
+        return []
+    ph = _ph()
+    rows = db_fetchall(
+        f"SELECT source, file_modified_at, loaded_at FROM data_loads "
+        f"WHERE source IN ({', '.join([ph] * len(sources))})",
+        tuple(sources)
+    )
+    by_source = {r["source"]: r for r in rows}
+    out = []
+    for s in sources:
+        r = by_source.get(s)
+        when = (_as_utc_datetime(r["file_modified_at"]) or _as_utc_datetime(r["loaded_at"])) if r else None
+        if when is not None:
+            out.append({"label": DATA_SOURCE_LABELS.get(s, s), "when": _format_eastern(when)})
+    return out
+
+
+@app.context_processor
+def _inject_data_as_of():
+    """Feeds templates/_data_as_of.html on every page in TAB_DATA_SOURCES."""
+    from flask import has_request_context
+    sources = TAB_DATA_SOURCES.get(request.endpoint) if has_request_context() else None
+    return {"data_as_of": _data_as_of(*sources) if sources else []}
+
+
+def _get_game_odds_week():
+    """
+    The real (year, week) of the lines currently in game_odds. That table
+    is a live full-replace with no week column, and it can lag the
+    schedule: on 2026-09-15 it still held Week 1 lines while
+    _get_current_nfl_week() was already 2. So this never falls back to
+    the current week.
+
+    Each odds row's team + kickoff is matched to the game_schedule row for
+    that team with the closest kickoff within a day, and the most common
+    (year, week) wins. Rows with no kickoff (loaded before that column
+    existed) can't vote. Returns (None, None) if nothing matches.
+    """
+    odds = [(r["team"], _as_utc_datetime(r["kickoff"]))
+            for r in db_fetchall("SELECT team, kickoff FROM game_odds WHERE kickoff IS NOT NULL")]
+    odds = [(team, k) for team, k in odds if team and k]
+    if not odds:
+        return None, None
+
+    # Same '%Y-%m-%d %H:%M:%S' string form load-schedule stores, so the
+    # range filter is correct on SQLite TEXT as well as Postgres.
+    fmt = '%Y-%m-%d %H:%M:%S'
+    day = datetime.timedelta(days=1)
+    lo = (min(k for _, k in odds) - day).strftime(fmt)
+    hi = (max(k for _, k in odds) + day).strftime(fmt)
+    ph = _ph()
+    by_team = {}
+    for r in db_fetchall(
+        f"SELECT year, week, team, kickoff FROM game_schedule WHERE kickoff >= {ph} AND kickoff <= {ph}",
+        (lo, hi)
+    ):
+        k = _as_utc_datetime(r["kickoff"])
+        if k:
+            by_team.setdefault(r["team"], []).append((k, r["year"], r["week"]))
+
+    from collections import Counter
+    votes = Counter()
+    for team, k in odds:
+        candidates = [(abs((sk - k).total_seconds()), y, w)
+                      for sk, y, w in by_team.get(team, [])
+                      if abs((sk - k).total_seconds()) <= day.total_seconds()]
+        if candidates:
+            _, y, w = min(candidates)
+            votes[(y, w)] += 1
+    if not votes:
+        return None, None
+    return votes.most_common(1)[0][0]
+
+
+def _game_odds_rows_for_week(year, week, columns):
+    """
+    game_odds rows, but only if the loaded lines are for (year, week).
+    Stale lines matched by team alone would pair a team with last week's
+    opponent and spread. When the odds' week can't be determined (no
+    kickoff yet), the rows are returned as before.
+    """
+    odds_year, odds_week = _get_game_odds_week()
+    if odds_week is not None and (odds_year, odds_week) != (year, week):
+        return []
+    return db_fetchall(f"SELECT {columns} FROM game_odds")
+
+
+def _odds_week_note(odds_year, odds_week, page_year, page_week, blanked=False):
+    """
+    Short note for when the loaded odds aren't for the week a page shows,
+    or None when they match or either week is unknown. `blanked` is for
+    pages that dropped the odds columns rather than show the other week.
+    """
+    if odds_week is None or page_week is None or (odds_year, odds_week) == (page_year, page_week):
+        return None
+    loaded = f"Week {odds_week}" if odds_year == page_year else f"Week {odds_week}, {odds_year}"
+    shown = f"Week {page_week}" if odds_year == page_year else f"Week {page_week}, {page_year}"
+    if blanked:
+        return f"Odds are blank: the loaded lines are for {loaded}, not {shown}."
+    if (odds_year, odds_week) < (page_year, page_week):
+        return f"These are {loaded} lines. {shown} lines aren't loaded yet."
+    return f"These are {loaded} lines. The current week is {shown}."
+
+
 def _get_depth_chart_lookup(names_normalized: set) -> dict:
     """
     Shared by the Slate page (show each player's string) and Best
@@ -3956,9 +4464,10 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
     home_away_by_team = {r["team"]: r["home_away"] for r in home_away_rows}
 
     # Pre-game spread/total/favorite — a live, full-replace table
-    # (see replace_game_odds), so this is just a straight lookup by
-    # team, no year/week filtering needed.
-    game_odds_rows = db_fetchall("SELECT team, spread, spread_odds, over_under, favorite FROM game_odds")
+    # (see replace_game_odds), looked up by team. Only used when the
+    # loaded lines are for this week (see _game_odds_rows_for_week).
+    game_odds_rows = _game_odds_rows_for_week(
+        sel_year, sel_week, "team, spread, spread_odds, over_under, favorite")
     game_odds_by_team = {r["team"]: r for r in game_odds_rows}
 
     # Reuses the same shared computation as the standalone Implied
@@ -4195,9 +4704,10 @@ def best_matchups():
         available_weeks_by_year[y].sort()
 
     rows = _compute_best_matchups(sel_year, sel_week, sel_position)
+    odds_note = _odds_week_note(*_get_game_odds_week(), sel_year, sel_week, blanked=True) if rows else None
 
     return render_template("best_matchups.html",
-                           rows=rows, year=sel_year, week=sel_week,
+                           rows=rows, year=sel_year, week=sel_week, odds_note=odds_note,
                            available_years=available_years,
                            available_weeks_by_year=available_weeks_by_year,
                            position=sel_position,
@@ -4254,7 +4764,13 @@ def implied_team_points():
     calculation and how it was verified.
     """
     rows = _compute_implied_team_points_rows()
-    return render_template("implied_team_points.html", rows=rows, team_colors=TEAM_ROW_COLORS)
+    # The week the lines are actually for, never the current week, so the
+    # subtitle can't claim Week 2 while Week 1 lines are still loaded.
+    odds_year, odds_week = _get_game_odds_week()
+    current_year, current_week = _get_current_nfl_week()
+    odds_note = _odds_week_note(odds_year, odds_week, current_year, current_week) if rows else None
+    return render_template("implied_team_points.html", rows=rows, team_colors=TEAM_ROW_COLORS,
+                           year=odds_year, week=odds_week, odds_note=odds_note)
 
 
 def _compute_implied_team_points_rows() -> list:
@@ -5011,7 +5527,10 @@ def game_overview():
         return render_template("game_overview.html", games=[], year=None, week=None)
 
     games = _compute_game_overview_rows(current_year, current_week)
-    return render_template("game_overview.html", games=games, year=current_year, week=current_week)
+    odds_note = (_odds_week_note(*_get_game_odds_week(), current_year, current_week, blanked=True)
+                 if games else None)
+    return render_template("game_overview.html", games=games, year=current_year, week=current_week,
+                           odds_note=odds_note)
 
 
 def _compute_game_overview_rows(current_year: int, current_week: int) -> list:
@@ -5024,7 +5543,8 @@ def _compute_game_overview_rows(current_year: int, current_week: int) -> list:
         ORDER BY game_date
     """, (current_year, current_week))
 
-    game_odds_rows = db_fetchall("SELECT team, opponent, spread, over_under, favorite FROM game_odds")
+    game_odds_rows = _game_odds_rows_for_week(
+        current_year, current_week, "team, opponent, spread, over_under, favorite")
     odds_by_team = {r["team"]: r for r in game_odds_rows}
 
     games = []
@@ -5526,17 +6046,25 @@ def download_csv(data_type):
         if sel_year is None:
             r = db_fetchone("SELECT MAX(year) AS y FROM hist_player_stats")
             sel_year = r["y"] if r else None
-        rows = _compute_usage_rows(sel_year, position) if sel_year else []
-        # Season-grain, so no week column — merge these on (year, team)
-        # or (year, name_normalized).
-        rows = _prepend_keys(_with_name_key(rows), year=sel_year,
-                             team=None, name=None, name_normalized=None)
-        filename = f"usage_{sel_year}.csv"
+        rows = _compute_usage_rows(sel_year, position, week) if sel_year else []
+        if week is None:
+            # Season grain, no week column: merge on (year, name_normalized).
+            rows = _prepend_keys(_with_name_key(rows), year=sel_year,
+                                 team=None, name=None, name_normalized=None)
+            filename = f"usage_{sel_year}.csv"
+        else:
+            rows = _prepend_keys(_with_name_key(rows), year=sel_year, week=week,
+                                 team=None, name=None, name_normalized=None)
+            filename = f"usage_week{week}_{sel_year}.csv"
 
     elif data_type == "implied-team-points":
         # game_odds is a live full-replace table with no year/week of
-        # its own, so stamp the current NFL week on for merging.
-        itp_year, itp_week = _get_current_nfl_week()
+        # its own. Stamp the week the lines are actually for (matched
+        # through kickoff), falling back to the current NFL week only
+        # when that can't be determined.
+        itp_year, itp_week = _get_game_odds_week()
+        if itp_week is None:
+            itp_year, itp_week = _get_current_nfl_week()
         rows = _prepend_keys(_compute_implied_team_points_rows(),
                              year=itp_year, week=itp_week, team=None)
         filename = f"implied_team_points_week{itp_week}_{itp_year}.csv"

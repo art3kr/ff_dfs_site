@@ -1,4 +1,5 @@
 {% import '_download_buttons.html' as dl %}
+{% macro val(x, suffix='') %}{{ '-' if x is none else x ~ suffix }}{% endmacro %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,10 +33,15 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if year %}
-            <p class="subtitle">{{ year }} Season: each player's share of their team's targets and touches</p>
+            {% if week %}
+            <p class="subtitle">Week {{ week }}, {{ year }}: each player's share of their team's targets, touches and snaps</p>
+            {% else %}
+            <p class="subtitle">{{ year }} Season: each player's share of their team's targets, touches and snaps</p>
+            {% endif %}
         {% else %}
             <p class="subtitle">No data loaded yet.</p>
         {% endif %}
+        {% include '_data_as_of.html' %}
     </div>
     <div class="header-right">
         {% if current_user.is_authenticated %}
@@ -63,22 +69,40 @@
                     {% endfor %}
                 </select>
             </label>
+            <label>
+                Week
+                <select name="week" onchange="this.form.submit()">
+                    <option value="" {% if not week %}selected{% endif %}>Season</option>
+                    {% for w in available_weeks %}
+                    <option value="{{ w }}" {% if w == week %}selected{% endif %}>Week {{ w }}</option>
+                    {% endfor %}
+                </select>
+            </label>
             <input type="hidden" name="position" value="{{ position }}">
         </form>
+        {% if week %}
+        {{ dl.bar([
+            {'href': url_for('download_csv', data_type='usage', year=year, week=week, position=position), 'label': 'This Week'},
+            {'href': url_for('download_csv', data_type='usage', year=year, position=position), 'label': 'This Season'},
+        ]) }}
+        {% else %}
         {{ dl.bar([
             {'href': url_for('download_csv', data_type='usage', year=year, position=position), 'label': 'This Season'},
         ]) }}
+        {% endif %}
     </div>
 
+    {% set wk = '&week=' ~ week if week else '' %}
     <div class="filter-bar">
         <span class="filter-label">Position:</span>
-        <a href="?year={{ year }}&position=ALL" class="filter-btn {% if position == 'ALL' %}active{% endif %}">All</a>
-        <a href="?year={{ year }}&position=RB" class="filter-btn {% if position == 'RB' %}active{% endif %}">RB</a>
-        <a href="?year={{ year }}&position=WR" class="filter-btn {% if position == 'WR' %}active{% endif %}">WR</a>
-        <a href="?year={{ year }}&position=TE" class="filter-btn {% if position == 'TE' %}active{% endif %}">TE</a>
+        <a href="?year={{ year }}{{ wk }}&position=ALL" class="filter-btn {% if position == 'ALL' %}active{% endif %}">All</a>
+        <a href="?year={{ year }}{{ wk }}&position=RB" class="filter-btn {% if position == 'RB' %}active{% endif %}">RB</a>
+        <a href="?year={{ year }}{{ wk }}&position=WR" class="filter-btn {% if position == 'WR' %}active{% endif %}">WR</a>
+        <a href="?year={{ year }}{{ wk }}&position=TE" class="filter-btn {% if position == 'TE' %}active{% endif %}">TE</a>
     </div>
 
     {% if rows %}
+    {% set span = 'that week' if week else 'this season' %}
     <div class="table-wrapper">
         <table id="history-table">
             <thead>
@@ -86,11 +110,20 @@
                     <th>Pos</th>
                     <th>Player</th>
                     <th>Team</th>
-                    <th class="right">G</th>
+                    <th class="right" title="Games played">G</th>
                     <th class="right">Tgt/G</th>
                     <th class="right">Touch/G</th>
-                    <th class="right" title="Player's targets divided by their team's total targets this season">Tgt % of Team</th>
-                    <th class="right" title="Player's touches (rush att + rec) divided by their team's total touches this season">Touch % of Team</th>
+                    <th class="right" title="Player's targets divided by their team's total targets {{ span }}">Tgt % of Team</th>
+                    <th class="right" title="Player's touches (rush att + rec) divided by their team's total touches {{ span }}">Touch % of Team</th>
+                    <th class="right" title="Share of the team's offensive snaps. Season: average of weekly values">Snap %</th>
+                    <th class="right" title="Average depth of target: air yards per target">aDOT</th>
+                    <th class="right" title="Player's share of the team's air yards">Air Yds %</th>
+                    <th class="right" title="Weighted opportunity: 1.5 x target share + 0.7 x air yards share">WOPR</th>
+                    <th class="right" title="Targets inside the opponent's 20">RZ Tgt</th>
+                    <th class="right" title="Carries inside the opponent's 20">RZ Car</th>
+                    <th class="right" title="Carries inside the opponent's 10">Inside-10 Car</th>
+                    <th class="right" title="Carries inside the opponent's 5">Inside-5 Car</th>
+                    <th class="right" title="Targets on third down">3rd-Down Tgt</th>
                 </tr>
             </thead>
             <tbody>
@@ -106,19 +139,30 @@
                     <td class="right">{{ r['games'] }}</td>
                     <td class="right">{{ r['targets_per_game'] }}</td>
                     <td class="right">{{ r['touches_per_game'] }}</td>
-                    <td class="right"><strong>{{ r['target_share'] if r['target_share'] is not none else '-' }}%</strong></td>
-                    <td class="right">{{ r['touch_share'] if r['touch_share'] is not none else '-' }}%</td>
+                    <td class="right"><strong>{{ val(r['target_share'], '%') }}</strong></td>
+                    <td class="right">{{ val(r['touch_share'], '%') }}</td>
+                    <td class="right">{{ val(r['snap_pct'], '%') }}</td>
+                    <td class="right">{{ val(r['adot']) }}</td>
+                    <td class="right">{{ val(r['air_yards_share'], '%') }}</td>
+                    <td class="right">{{ val(r['wopr']) }}</td>
+                    <td class="right">{{ val(r['rz_targets']) }}</td>
+                    <td class="right">{{ val(r['rz_carries']) }}</td>
+                    <td class="right">{{ val(r['i10_carries']) }}</td>
+                    <td class="right">{{ val(r['i5_carries']) }}</td>
+                    <td class="right">{{ val(r['third_down_targets']) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     <p class="standings-note">
-        "% of Team" is the player's share of their team's season total, not share of snaps
-        played (we don't have snap counts yet). Sorted by target share, highest first.
+        "% of Team" is the player's share of the team's targets or touches {{ span }}.
+        Snap % is the share of the team's offensive snaps. Red zone means inside the
+        opponent's 20. Sorted by target share, highest first.
     </p>
+    <p class="standings-note">Snap, air yards and red zone data: nflverse.</p>
     {% else %}
-    <p class="empty-state">No data found for {{ year }}{% if position != 'ALL' %} ({{ position }}){% endif %}.</p>
+    <p class="empty-state">No data found for {% if week %}Week {{ week }}, {% endif %}{{ year }}{% if position != 'ALL' %} ({{ position }}){% endif %}.</p>
     {% endif %}
 
 {% endif %}

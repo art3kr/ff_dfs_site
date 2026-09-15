@@ -1,0 +1,12 @@
+{# templates/_data_as_of.html
+   The "Data as of" line under each tab's subtitle, shared the same way
+   as _download_buttons.html. Include it right after the subtitle:
+
+       {% include '_data_as_of.html' %}
+
+   `data_as_of` is filled in by the _inject_data_as_of context processor
+   in app.py; TAB_DATA_SOURCES there decides which sources each page
+   lists. Renders nothing when no source has been loaded yet. #}
+{% if data_as_of %}
+<p class="data-as-of">Data as of: {% for d in data_as_of %}{{ d.label }} {{ d.when }}{% if not loop.last %} &middot; {% endif %}{% endfor %}</p>
+{% endif %}

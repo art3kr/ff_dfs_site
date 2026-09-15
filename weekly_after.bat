@@ -2,8 +2,8 @@
 REM ============================================================
 REM weekly_after.bat — everything to run AFTER a week's games
 REM finish: backup, player stats, team points, DST scoring, game
-REM info, final weather, fantasy points against, then persist and
-REM let Standings recompute.
+REM info, final weather, fantasy points against, nflverse usage,
+REM then persist and let Standings recompute.
 REM
 REM Usage:
 REM     weekly_after.bat 2026 3
@@ -27,7 +27,7 @@ echo AFTER-WEEK SCORING — Year %YEAR%, Week %WEEK%
 echo ============================================================
 
 echo.
-echo [1/8] Backing up lineups, prop_bets, and prop_picks...
+echo [1/9] Backing up lineups, prop_bets, and prop_picks...
 REM Runs first, before any other step writes to the database — and
 REM this is the most valuable backup point of the week, since every
 REM lineup and prop pick for the week is now in and final.
@@ -37,7 +37,7 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [2/8] Scraping player stats and game info...
+echo [2/9] Scraping player stats and game info...
 python scrapers\scrape_pfr.py --years %YEAR%
 if %errorlevel% neq 0 (
     echo ERROR: player stats scrape failed — Standings, History, and Props scoring will
@@ -47,7 +47,7 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [3/8] Scraping team points scored/allowed...
+echo [3/9] Scraping team points scored/allowed...
 python scrapers\scrape_team_points.py --years %YEAR%
 if %errorlevel% neq 0 (
     echo ERROR: team points scrape failed — DST scoring needs this. Stopping before
@@ -56,7 +56,7 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [4/8] Scraping DST fantasy stat categories...
+echo [4/9] Scraping DST fantasy stat categories...
 python scrapers\scrape_dst_fantasy_stats.py --year %YEAR% --weeks %WEEK%
 if %errorlevel% neq 0 (
     echo WARNING: DST stats scrape failed — combine_dst_scoring.py will fall back to the
@@ -64,21 +64,21 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [5/8] Combining DST scoring...
+echo [5/9] Combining DST scoring...
 python scrapers\combine_dst_scoring.py --year %YEAR%
 if %errorlevel% neq 0 (
     echo WARNING: DST scoring combine failed — DST picks won't score this week until fixed.
 )
 
 echo.
-echo [6/8] Re-scraping weather for final/actual conditions...
+echo [6/9] Re-scraping weather for final/actual conditions...
 python scrapers\scrape_weekly_weather.py --year %YEAR% --weeks %WEEK%
 if %errorlevel% neq 0 (
     echo WARNING: weather scrape failed — non-critical, continuing.
 )
 
 echo.
-echo [7/8] Scraping fantasy points against...
+echo [7/9] Scraping fantasy points against...
 REM Season-to-date totals, so this only changes once a week's games
 REM have actually been played — which is why it lives here rather
 REM than in weekly_before.bat.
@@ -88,7 +88,15 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [8/8] Persisting everything to the database...
+echo [8/9] Scraping nflverse usage (snaps, air yards, red zone; not PFR)...
+REM nflverse's GitHub releases update within a day of games. No PFR requests.
+python scrapers\scrape_nflverse_usage.py --year %YEAR%
+if %errorlevel% neq 0 (
+    echo WARNING: nflverse usage scrape failed — the Usage page's snap and red zone columns will be stale.
+)
+
+echo.
+echo [9/9] Persisting everything to the database...
 REM --year keeps this to the current season's rows; earlier seasons never
 REM change, and re-loading them all took ~40 minutes.
 flask load-history --year %YEAR%

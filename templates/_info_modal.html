@@ -134,12 +134,16 @@
 
             <details>
                 <summary>Usage: a player's share of the offense</summary>
-                <p>Season-to-date target share and touch share: a player's targets (or rush
-                attempts plus catches) as a percentage of the team's total. A high target
-                share means a player is getting looks even if the points haven't followed
-                yet.</p>
-                <p>Shares are out of the team's season total. Some sites use the same name
-                for snap share; we don't have snap counts.</p>
+                <p>Target share and touch share: a player's targets (or rush attempts plus
+                catches) as a percentage of the team's total, for the season or one week.
+                A high target share means a player is getting looks even if the points
+                haven't followed yet.</p>
+                <p>Snap % is the share of the team's offensive snaps (season: average of
+                weekly values). aDOT is air yards per target. WOPR combines target share
+                and air yards share (1.5 x target share + 0.7 x air yards share). RZ,
+                Inside-10 and Inside-5 count plays inside the opponent's 20, 10 and 5.
+                Snap, air yards and red zone data come from nflverse. Routes run aren't
+                available during the season.</p>
             </details>
 
             <details>
@@ -207,6 +211,12 @@
             </details>
 
             <details>
+                <summary>Data as of</summary>
+                <p>The line under a tab's title shows when each of its data sources was
+                last pulled, in Eastern time.</p>
+            </details>
+
+            <details>
                 <summary>Downloading data</summary>
                 <p>Every tab has CSV downloads with the same labels:</p>
                 <ul class="info-list">
@@ -235,12 +245,13 @@
                             <td>a player in a week</td>
                             <td><code>year</code> + <code>week</code> + <code>name_normalized</code></td>
                             <td>Slate, History, Best Matchups, Implied Player Points,
-                                Props, My Props, My Lineups, a player's career page</td>
+                                Props, My Props, My Lineups, a player's career page,
+                                Usage (This Week)</td>
                         </tr>
                         <tr>
                             <td>a player in a season</td>
                             <td><code>year</code> + <code>name_normalized</code></td>
-                            <td>Usage</td>
+                            <td>Usage (This Season)</td>
                         </tr>
                         <tr>
                             <td>a team in a week</td>

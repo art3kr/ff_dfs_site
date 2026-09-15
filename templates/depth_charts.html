@@ -39,6 +39,7 @@
         {% else %}
             <p class="subtitle">No depth chart data loaded yet.</p>
         {% endif %}
+        {% include '_data_as_of.html' %}
     </div>
     <div class="header-right">
         {% if current_user.is_authenticated %}

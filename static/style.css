@@ -444,6 +444,8 @@ header {
 .header-left {}
 .header-left h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.4px; }
 .header-left .subtitle { color: var(--text-muted); font-size: 0.82rem; margin-top: 1px; }
+/* templates/_data_as_of.html: quieter than the subtitle it sits under */
+.header-left .data-as-of { color: var(--text-muted); font-size: 0.72rem; margin-top: 2px; opacity: 0.8; }
 
 .header-right {
     display: flex;

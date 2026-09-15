@@ -36,6 +36,7 @@
         {% else %}
             <p class="subtitle">No games loaded yet for the current week.</p>
         {% endif %}
+        {% include '_data_as_of.html' %}
     </div>
     <div class="header-right">
         {% if current_user.is_authenticated %}
@@ -52,6 +53,8 @@
 {% if not games %}
     <p class="empty-state">No games loaded yet for the current week. Run the weather and game odds scrapers, then flask load-history.</p>
 {% else %}
+
+    {% if odds_note %}<p class="standings-note odds-week-note">{{ odds_note }}</p>{% endif %}
 
     <div class="page-controls">
         <span></span>
