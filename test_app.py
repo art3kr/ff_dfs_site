@@ -648,6 +648,47 @@ def test_scoring_breakdown():
     conn.close()
 
 
+def test_current_week_default():
+    section("My Lineups / My Props default to the current NFL week")
+    saved_week_fn = flaskapp._get_current_nfl_week
+    # Week 3: nobody has submitted a lineup or a pick for it.
+    flaskapp._get_current_nfl_week = lambda: (YEAR, 3)
+
+    # my_props needs at least one pick row to have a submitter list at all.
+    conn = flaskapp._connect()
+    had_picks = conn.execute("SELECT COUNT(*) FROM prop_picks").fetchone()[0]
+    if not had_picks:
+        conn.execute("INSERT INTO prop_picks (year, week, submitter, prop_bet_id, pick) "
+                     "VALUES (?,?,?,?,?)", (YEAR, WEEK, "tester", prop_ids["Josh Allen"], "over"))
+        conn.commit()
+    conn.close()
+
+    try:
+        html = client.get("/my-lineups").get_data(as_text=True)
+        check("My Lineups defaults to the current week", "Week 3, %d lineup" % YEAR in html)
+        check("My Lineups offers the current week in the dropdown", '<option value="3"' in html)
+        check("My Lineups shows its empty state for a week with no lineup",
+              "No lineup found" in html)
+
+        html = client.get("/my-props").get_data(as_text=True)
+        check("My Props defaults to the current week", "Week 3, %d prop picks" % YEAR in html)
+        check("My Props offers the current week in the dropdown", '<option value="3"' in html)
+        check("My Props shows its empty state for a week with no picks",
+              "No prop picks found" in html)
+
+        # An explicitly requested past week still wins over the default.
+        html = client.get("/my-lineups?year=%d&week=1&submitter=tester" % YEAR).get_data(as_text=True)
+        check("an explicitly requested past week still renders that lineup",
+              "Week 1, %d lineup" % YEAR in html and "No lineup found" not in html)
+    finally:
+        flaskapp._get_current_nfl_week = saved_week_fn
+        if not had_picks:
+            conn = flaskapp._connect()
+            conn.execute("DELETE FROM prop_picks")
+            conn.commit()
+            conn.close()
+
+
 def _usage_table(html):
     """{player name: {header: cell text}} from the Usage page's table."""
     import re
@@ -1128,6 +1169,7 @@ if __name__ == "__main__":
     test_dnp_and_year_scope()        # adds (then removes) a week 5 and two 2025/2026 rows
     test_prop_void()                 # adds (then removes) a week 6 prop and pick
     test_scoring_breakdown()         # adds (then removes) a week 7 lineup
+    test_current_week_default()      # patches _get_current_nfl_week to an empty week
     test_usage()                     # after data_as_of_empty; adds (then removes) weeks 11-12
     test_game_odds_week()            # needs the fixture schedule; adds (then removes) odds
     test_timestamp_format()          # must stay last; rewrites game_schedule

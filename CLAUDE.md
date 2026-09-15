@@ -456,6 +456,16 @@ Evening (Week 2 prep, all loaded to prod):
   nflverse use "LAC" for the Chargers, so "LA" is unambiguous). Also
   fixed FirstDown's team column and Ourlads' injury badge; see the two
   RESOLVED entries below.
+- **My Lineups and My Props now default to the current NFL week**, and
+  offer it in their week dropdowns, even before anyone has submitted for
+  it (they used to sit on the latest week that had submissions, which is
+  last week's lineup right when people come to check this week's). Both
+  inject `_get_current_nfl_week()` into `available_weeks_by_year` and
+  fall back to the most recent submission only when there's no schedule
+  to go on; the existing empty states cover a week with nothing in it.
+  Weather already did this and needed no change — it looked stuck on
+  Week 1 only because the current week flips 24h after the last kickoff
+  (Mon 8:15 PM ET + 24h = Tue 8:15 PM ET).
 
 - **Week 2 props published** (72 props, 12 categories, 15 games) at
   ~7:24 PM. All 39 distinct players resolve through

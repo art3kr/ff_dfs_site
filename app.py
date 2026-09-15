@@ -5230,14 +5230,33 @@ def my_lineups():
     if current_user.is_authenticated and current_user.username in available_submitters:
         default_submitter = current_user.username
 
-    valid_combo = (req_year, req_week, req_submitter) in {(r["year"], r["week"], r["submitter"]) for r in available}
-    if valid_combo:
+    # The current NFL week is always offered and defaulted to, even before
+    # anyone has submitted for it. Otherwise this page sits on last week
+    # until the first lineup of the week lands, which is exactly when
+    # people come to check what they picked.
+    cur_year, cur_week = _get_current_nfl_week()
+    if cur_year and cur_week:
+        weeks = available_weeks_by_year.setdefault(cur_year, [])
+        if cur_week not in weeks:
+            weeks.append(cur_week)
+            weeks.sort()
+        if cur_year not in available_years:
+            available_years = sorted(set(available_years) | {cur_year}, reverse=True)
+
+    selectable = {(r["year"], r["week"], r["submitter"]) for r in available}
+    if cur_year and cur_week:
+        selectable |= {(cur_year, cur_week, s) for s in available_submitters}
+
+    if (req_year, req_week, req_submitter) in selectable:
         sel_year, sel_week, sel_submitter = req_year, req_week, req_submitter
     else:
-        # Most recent (year, week) for the chosen/default submitter
         sub = req_submitter if req_submitter in available_submitters else default_submitter
-        sub_rows = [r for r in available if r["submitter"] == sub]
-        sel_year, sel_week, sel_submitter = sub_rows[0]["year"], sub_rows[0]["week"], sub
+        if cur_year and cur_week:
+            sel_year, sel_week, sel_submitter = cur_year, cur_week, sub
+        else:
+            # No schedule to go on: fall back to their most recent submission.
+            sub_rows = [r for r in available if r["submitter"] == sub]
+            sel_year, sel_week, sel_submitter = sub_rows[0]["year"], sub_rows[0]["week"], sub
 
     lineup_row = db_fetchone(f"""
         SELECT lineup_json, total_salary, submitted_at FROM lineups
@@ -5296,7 +5315,11 @@ def my_lineups():
                            available_years=available_years, available_weeks_by_year=available_weeks_by_year,
                            available_submitters=available_submitters,
                            total=round(total, 2) if all_matched else None,
-                           all_matched=all_matched, total_salary=lineup_row["total_salary"])
+                           all_matched=all_matched,
+                           # None when the selected week has no lineup from
+                           # this participant yet (the template shows its
+                           # own empty state in that case).
+                           total_salary=lineup_row["total_salary"] if lineup_row else None)
 
 
 @app.route("/my-props")
@@ -5339,13 +5362,31 @@ def my_props():
     if current_user.is_authenticated and current_user.username in available_submitters:
         default_submitter = current_user.username
 
-    valid_combo = (req_year, req_week, req_submitter) in {(r["year"], r["week"], r["submitter"]) for r in available}
-    if valid_combo:
+    # Same current-week default as my_lineups(): the current NFL week is
+    # always offered and defaulted to, even before anyone has picked for
+    # it, instead of sitting on last week until the first pick lands.
+    cur_year, cur_week = _get_current_nfl_week()
+    if cur_year and cur_week:
+        weeks = available_weeks_by_year.setdefault(cur_year, [])
+        if cur_week not in weeks:
+            weeks.append(cur_week)
+            weeks.sort()
+        if cur_year not in available_years:
+            available_years = sorted(set(available_years) | {cur_year}, reverse=True)
+
+    selectable = {(r["year"], r["week"], r["submitter"]) for r in available}
+    if cur_year and cur_week:
+        selectable |= {(cur_year, cur_week, s) for s in available_submitters}
+
+    if (req_year, req_week, req_submitter) in selectable:
         sel_year, sel_week, sel_submitter = req_year, req_week, req_submitter
     else:
         sub = req_submitter if req_submitter in available_submitters else default_submitter
-        sub_rows = [r for r in available if r["submitter"] == sub]
-        sel_year, sel_week, sel_submitter = sub_rows[0]["year"], sub_rows[0]["week"], sub
+        if cur_year and cur_week:
+            sel_year, sel_week, sel_submitter = cur_year, cur_week, sub
+        else:
+            sub_rows = [r for r in available if r["submitter"] == sub]
+            sel_year, sel_week, sel_submitter = sub_rows[0]["year"], sub_rows[0]["week"], sub
 
     pick_rows = db_fetchall(f"""
         SELECT pb.id, pb.player_name, pb.stat_field, pb.line, pp.pick
