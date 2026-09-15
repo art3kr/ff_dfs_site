@@ -457,15 +457,20 @@ Evening (Week 2 prep, all loaded to prod):
   fixed FirstDown's team column and Ourlads' injury badge; see the two
   RESOLVED entries below.
 
+- **Week 2 props published** (72 props, 12 categories, 15 games) at
+  ~7:24 PM. All 39 distinct players resolve through
+  `_get_player_teams()`, so every prop will lock at its own kickoff.
+  Fixed on the way: `select_top_props_by_category.py` took the site's
+  first 6 per category with no ranking, and ScoresAndOdds orders
+  anytime-TD props long-shots-first, so the slate led with Tanner
+  Koziol (+2300) and Tyler Badie (+3500), both projected at 0.000 TDs.
+  That category now ranks by `site_projection` (`RANK_BY_PROJECTION`),
+  giving Henry/McCaffrey/Gibbs/Robinson. Every other category's own
+  order was already sensible and is untouched.
+
 Not yet done:
-- Week 2 props not published. `data/props_week2_2026.csv` is generated
-  (72 props, 12 categories, 15 games) but the `touchdowns` six are dead
-  picks: `select_top_props_by_category.py` takes the site's first 6 per
-  category with no ranking, and ScoresAndOdds orders anytime-TD props
-  long-shots-first (Tanner Koziol +2300 at 0.000 projected TDs).
-  Ranking that category by `site_projection` gives Henry/McCaffrey/
-  Gibbs/Robinson instead. Decide before `flask add-props`; Thursday
-  kickoff is 9/17 8:15 PM ET.
+- Weather forecast refresh closer to kickoff, then
+  `flask load-history --weather-only`.
 - `flask load-history` finished cleanly at ~5:21 AM (took ~38 min; it
   re-loads every historical file on each run). A second full load with
   the DEN @ KC data finished cleanly at 11:42 AM, so all 16 Week 1
