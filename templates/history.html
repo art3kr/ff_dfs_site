@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — History{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge - History{% if week %} - Week {{ week }}, {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -32,7 +32,7 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if year %}
-            <p class="subtitle">Week {{ week }}, {{ year }} &mdash; Salary + Results</p>
+            <p class="subtitle">Week {{ week }}, {{ year }}: Salary + Results</p>
         {% else %}
             <p class="subtitle">No historical data loaded yet.</p>
         {% endif %}
@@ -119,24 +119,23 @@
                     </td>
                     <td>{{ p['team'] }}</td>
                     <td class="right">{{ p['games'] }}</td>
-                    <td class="right"><strong>{{ "%.1f"|format(p['total_dk_pts']) if p['total_dk_pts'] is not none else '—' }}</strong></td>
-                    <td class="right">{{ "%.1f"|format(p['avg_dk_pts']) if p['avg_dk_pts'] is not none else '—' }}</td>
-                    <td class="right">{{ p['pass_yds'] if p['pass_yds'] is not none else '—' }}</td>
-                    <td class="right">{{ p['pass_td']  if p['pass_td']  is not none else '—' }}</td>
-                    <td class="right">{{ p['rush_yds'] if p['rush_yds'] is not none else '—' }}</td>
-                    <td class="right">{{ p['rush_td']  if p['rush_td']  is not none else '—' }}</td>
-                    <td class="right">{{ p['rec']      if p['rec']      is not none else '—' }}</td>
-                    <td class="right">{{ p['rec_yds']  if p['rec_yds']  is not none else '—' }}</td>
-                    <td class="right">{{ p['rec_td']   if p['rec_td']   is not none else '—' }}</td>
+                    <td class="right"><strong>{{ "%.1f"|format(p['total_dk_pts']) if p['total_dk_pts'] is not none else '-' }}</strong></td>
+                    <td class="right">{{ "%.1f"|format(p['avg_dk_pts']) if p['avg_dk_pts'] is not none else '-' }}</td>
+                    <td class="right">{{ p['pass_yds'] if p['pass_yds'] is not none else '-' }}</td>
+                    <td class="right">{{ p['pass_td']  if p['pass_td']  is not none else '-' }}</td>
+                    <td class="right">{{ p['rush_yds'] if p['rush_yds'] is not none else '-' }}</td>
+                    <td class="right">{{ p['rush_td']  if p['rush_td']  is not none else '-' }}</td>
+                    <td class="right">{{ p['rec']      if p['rec']      is not none else '-' }}</td>
+                    <td class="right">{{ p['rec_yds']  if p['rec_yds']  is not none else '-' }}</td>
+                    <td class="right">{{ p['rec_td']   if p['rec_td']   is not none else '-' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     <p class="standings-note">
-        Season totals aggregated from our own weekly results data (already validated against PFR's
-        own DK point values) — not a separate scrape. Salary/projection columns don't apply at the
-        season level, so they're omitted here. A player traded mid-season shows one row per team.
+        Season totals are summed from each week's results. Salary and projections don't apply to a
+        full season, so they're left out. A player traded mid-season shows one row per team.
     </p>
     {% else %}
     <div class="table-wrapper">
@@ -174,21 +173,21 @@
                     </td>
                     <td>{{ p['team'] }}</td>
                     <td>{{ p['opponent'] }}</td>
-                    <td class="right">${{ "{:,}".format(p['dk_salary']) if p['dk_salary'] else '—' }}</td>
-                    <td class="right">{{ "%.1f"|format(p['projected_pts']) if p['projected_pts'] else '—' }}</td>
-                    <td class="right">{{ "%.1f"|format(actual) if actual is not none else '—' }}</td>
+                    <td class="right">${{ "{:,}".format(p['dk_salary']) if p['dk_salary'] else '-' }}</td>
+                    <td class="right">{{ "%.1f"|format(p['projected_pts']) if p['projected_pts'] else '-' }}</td>
+                    <td class="right">{{ "%.1f"|format(actual) if actual is not none else '-' }}</td>
                     <td class="right">
                         {% if p['dk_salary'] and actual is not none %}
                             {{ "%.2f"|format(actual / (p['dk_salary'] / 1000)) }}
-                        {% else %}—{% endif %}
+                        {% else %}-{% endif %}
                     </td>
-                    <td class="right">{{ p['pass_yds'] if p['pass_yds'] is not none else '—' }}</td>
-                    <td class="right">{{ p['pass_td']  if p['pass_td']  is not none else '—' }}</td>
-                    <td class="right">{{ p['rush_yds'] if p['rush_yds'] is not none else '—' }}</td>
-                    <td class="right">{{ p['rush_td']  if p['rush_td']  is not none else '—' }}</td>
-                    <td class="right">{{ p['rec']      if p['rec']      is not none else '—' }}</td>
-                    <td class="right">{{ p['rec_yds']  if p['rec_yds']  is not none else '—' }}</td>
-                    <td class="right">{{ p['rec_td']   if p['rec_td']   is not none else '—' }}</td>
+                    <td class="right">{{ p['pass_yds'] if p['pass_yds'] is not none else '-' }}</td>
+                    <td class="right">{{ p['pass_td']  if p['pass_td']  is not none else '-' }}</td>
+                    <td class="right">{{ p['rush_yds'] if p['rush_yds'] is not none else '-' }}</td>
+                    <td class="right">{{ p['rush_td']  if p['rush_td']  is not none else '-' }}</td>
+                    <td class="right">{{ p['rec']      if p['rec']      is not none else '-' }}</td>
+                    <td class="right">{{ p['rec_yds']  if p['rec_yds']  is not none else '-' }}</td>
+                    <td class="right">{{ p['rec_td']   if p['rec_td']   is not none else '-' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

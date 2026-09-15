@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Depth Charts{% if selected_team %} — {{ selected_team | upper }}{% endif %}</title>
+    <title>FF DFS Challenge - Depth Charts{% if selected_team %} - {{ selected_team | upper }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -33,8 +33,8 @@
         </nav>
         {% if selected_team %}
             <p class="subtitle">
-                {{ selected_team | upper }} &mdash; QB / RB / WR / TE, 1st-3rd string
-                {% if current_week %}&mdash; current as of Week {{ current_week }}, {{ current_year }}{% endif %}
+                {{ selected_team | upper }}: QB / RB / WR / TE, 1st-3rd string
+                {% if current_week %}(as of Week {{ current_week }}, {{ current_year }}){% endif %}
             </p>
         {% else %}
             <p class="subtitle">No depth chart data loaded yet.</p>
@@ -63,7 +63,7 @@
         <span></span>
         {{ dl.bar([
             {'href': url_for('download_csv', data_type='depth-charts', team=selected_team), 'label': 'This Team'},
-            {'href': url_for('download_csv', data_type='depth-charts'), 'label': 'All Teams', 'secondary': True},
+            {'href': url_for('download_csv', data_type='depth-charts'), 'label': 'All Data', 'secondary': True},
         ]) }}
     </div>
 

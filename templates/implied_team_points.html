@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Implied Team Points</title>
+    <title>FF DFS Challenge - Implied Team Points</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -31,7 +31,7 @@
             <a href="{{ url_for('implied_points') }}" class="nav-link">Implied Player Points</a>
             <a href="{{ url_for('implied_team_points') }}" class="nav-link active">Implied Team Points</a>
         </nav>
-        <p class="subtitle">How many points each team is expected to score, derived from the spread and game total</p>
+        <p class="subtitle">Expected points for each team, based on the spread and game total</p>
     </div>
     <div class="header-right">
         {% if current_user.is_authenticated %}
@@ -46,13 +46,12 @@
 <main class="history-main">
 
 {% if not rows %}
-    <p class="empty-state">No game odds loaded yet — run scrape_scoresandodds_game_odds.py then flask load-history.</p>
+    <p class="empty-state">No game odds loaded yet. Run scrape_scoresandodds_game_odds.py, then flask load-history.</p>
 {% else %}
 
     <p class="standings-note">
-        Standard formula: implied total = (game O/U ÷ 2) − (spread ÷ 2). A negative spread means
-        favored, which raises the implied total; a positive spread lowers it. Both teams' implied
-        totals always add up to the game's O/U.
+        Implied total = (game O/U ÷ 2) − (spread ÷ 2). A negative spread (favorite) raises the
+        total; a positive spread lowers it. The two teams' totals add up to the game's O/U.
     </p>
 
     <div class="page-controls">
@@ -81,13 +80,13 @@
                     data-team-color="1"
                     {% endif %}>
                     <td class="player-name">{{ r['team'] | upper }}</td>
-                    <td>{{ r['opponent'] | upper if r['opponent'] else '—' }}</td>
-                    <td class="right">{{ r['spread'] if r['spread'] is not none else '—' }}</td>
-                    <td class="right">{{ r['over_under'] if r['over_under'] is not none else '—' }}</td>
+                    <td>{{ r['opponent'] | upper if r['opponent'] else '-' }}</td>
+                    <td class="right">{{ r['spread'] if r['spread'] is not none else '-' }}</td>
+                    <td class="right">{{ r['over_under'] if r['over_under'] is not none else '-' }}</td>
                     <td class="right">
                         {% if r['implied_total'] is not none %}
                         <strong>{{ "%.1f"|format(r['implied_total']) }}</strong>
-                        {% else %}—{% endif %}
+                        {% else %}-{% endif %}
                     </td>
                 </tr>
                 {% endfor %}

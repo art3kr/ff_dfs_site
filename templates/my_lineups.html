@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — My Lineups{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge - My Lineups{% if week %} - Week {{ week }}, {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -82,7 +82,7 @@
         </form>
         {{ dl.bar([
             {'href': url_for('download_csv', data_type='my-lineups', year=year, week=week, submitter=submitter), 'label': 'This Lineup'},
-            {'href': url_for('download_csv', data_type='my-lineups', year=year), 'label': 'All Lineups', 'secondary': True, 'title': 'Every lineup from every participant, for every week of this season - one row per player'},
+            {'href': url_for('download_csv', data_type='my-lineups', year=year), 'label': 'All Lineups', 'secondary': True, 'title': 'All lineups from every participant this season, one row per player'},
         ]) }}
     </div>
 
@@ -108,8 +108,8 @@
                         {% if r['is_locked'] %}<span class="locked-badge">LOCKED</span>{% endif %}
                     </td>
                     <td>{{ r['position'] }}</td>
-                    <td class="right">${{ "{:,}".format(r['salary']) if r['salary'] else '—' }}</td>
-                    <td class="right">{{ "%.1f"|format(r['projected_pts']) if r['projected_pts'] else '—' }}</td>
+                    <td class="right">${{ "{:,}".format(r['salary']) if r['salary'] else '-' }}</td>
+                    <td class="right">{{ "%.1f"|format(r['projected_pts']) if r['projected_pts'] else '-' }}</td>
                     <td class="right">
                         {% if r['actual_pts'] is not none %}
                             <strong>{{ "%.1f"|format(r['actual_pts']) }}</strong>
@@ -123,7 +123,7 @@
             <tfoot>
                 <tr>
                     <td colspan="3"><strong>Total</strong></td>
-                    <td class="right"><strong>${{ "{:,}".format(total_salary) if total_salary else '—' }}</strong></td>
+                    <td class="right"><strong>${{ "{:,}".format(total_salary) if total_salary else '-' }}</strong></td>
                     <td></td>
                     <td class="right">
                         {% if all_matched %}
@@ -138,8 +138,8 @@
     </div>
     {% if not all_matched %}
     <p class="standings-note">
-        This week isn't fully scored yet — some games may not be finished, or the week's
-        results haven't been loaded. The total will appear once all 9 players have a result.
+        This week isn't fully scored yet. Some games may not be finished or results aren't
+        loaded. The total shows up once all 9 players have a result.
     </p>
     {% endif %}
     {% else %}

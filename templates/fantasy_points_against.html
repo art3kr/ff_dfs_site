@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Fantasy Points Against{% if year %} — {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge - Fantasy Points Against{% if year %} - {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -32,7 +32,7 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if year %}
-            <p class="subtitle">{{ year }} Season &mdash; How many fantasy points each team gives up to each position</p>
+            <p class="subtitle">{{ year }} Season: fantasy points each team gives up to each position</p>
         {% else %}
             <p class="subtitle">No data loaded yet.</p>
         {% endif %}
@@ -107,18 +107,18 @@
                     <td class="pos-badge">{{ r['position'] }}</td>
                     <td class="player-name">{{ r['team'] | upper }}</td>
                     <td class="right">{{ r['games'] }}</td>
-                    <td class="right"><strong>{{ "%.1f"|format(r['dk_pts_per_game']) if r['dk_pts_per_game'] is not none else '—' }}</strong></td>
-                    <td class="right">{{ "%.1f"|format(r['dk_pts']) if r['dk_pts'] is not none else '—' }}</td>
-                    <td class="right">{{ "%.1f"|format(r['fd_pts_per_game']) if r['fd_pts_per_game'] is not none else '—' }}</td>
-                    <td class="right">{{ "%.1f"|format(r['fantasy_pts_per_game']) if r['fantasy_pts_per_game'] is not none else '—' }}</td>
+                    <td class="right"><strong>{{ "%.1f"|format(r['dk_pts_per_game']) if r['dk_pts_per_game'] is not none else '-' }}</strong></td>
+                    <td class="right">{{ "%.1f"|format(r['dk_pts']) if r['dk_pts'] is not none else '-' }}</td>
+                    <td class="right">{{ "%.1f"|format(r['fd_pts_per_game']) if r['fd_pts_per_game'] is not none else '-' }}</td>
+                    <td class="right">{{ "%.1f"|format(r['fantasy_pts_per_game']) if r['fantasy_pts_per_game'] is not none else '-' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     <p class="standings-note">
-        Higher DK Pts/G allowed = softer matchup for that position against that defense.
-        Sorted by DK Pts/G allowed, highest (most exploitable) first.
+        Higher DK Pts/G allowed = softer matchup for that position.
+        Sorted by DK Pts/G allowed, highest first.
     </p>
     {% else %}
     <p class="empty-state">No data found for {{ year }}{% if position != 'ALL' %} ({{ position }}){% endif %}.</p>

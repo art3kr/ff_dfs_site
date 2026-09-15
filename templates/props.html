@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Props{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge - Props{% if week %} - Week {{ week }}, {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -32,7 +32,7 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if week %}
-            <p class="subtitle">Week {{ week }}, {{ year }} &mdash; Pick over/under on exactly 5 props</p>
+            <p class="subtitle">Week {{ week }}, {{ year }}: pick over/under on exactly 5 props</p>
         {% else %}
             <p class="subtitle">No props loaded yet.</p>
         {% endif %}
@@ -94,8 +94,8 @@
             </div>
             {% if current_user.is_authenticated %}
             <div class="prop-pick-buttons">
-                <button class="prop-pick-btn {% if existing_pick == 'over' %}selected{% endif %}" data-pick="over" {% if is_locked %}disabled title="This game has already started"{% endif %}>Over</button>
-                <button class="prop-pick-btn {% if existing_pick == 'under' %}selected{% endif %}" data-pick="under" {% if is_locked %}disabled title="This game has already started"{% endif %}>Under</button>
+                <button class="prop-pick-btn {% if existing_pick == 'over' %}selected{% endif %}" data-pick="over" {% if is_locked %}disabled title="This game has started"{% endif %}>Over</button>
+                <button class="prop-pick-btn {% if existing_pick == 'under' %}selected{% endif %}" data-pick="under" {% if is_locked %}disabled title="This game has started"{% endif %}>Under</button>
             </div>
             {% else %}
             <div class="prop-pick-buttons">

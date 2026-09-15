@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Schedule{% if year %} — {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge - Schedule{% if year %} - {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -32,7 +32,7 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if year %}
-            <p class="subtitle">{{ year }} Season &mdash; Full Schedule</p>
+            <p class="subtitle">{{ year }} Full Schedule</p>
         {% else %}
             <p class="subtitle">No schedule loaded yet.</p>
         {% endif %}

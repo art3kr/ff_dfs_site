@@ -221,7 +221,7 @@
             // Depth filters are independent rather than a single
             // threshold, so "hide 3rd" alone still behaves exactly as
             // it did. Players with no depth-chart entry at all carry
-            // "—" and are never caught by either — they're unknown,
+            // "-" and are never caught by either — they're unknown,
             // not known-to-be-deep.
             const stringMatches   = (!hide3rd || string !== "3rd")
                                  && (!hide2nd || string !== "2nd");
@@ -398,7 +398,7 @@
                 }
             })
             .catch(function () {
-                submitMsg.textContent = "Network error — try again.";
+                submitMsg.textContent = "Network error. Try again.";
                 submitMsg.className   = "submit-msg error";
                 submitBtn.disabled    = false;
             });

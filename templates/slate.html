@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge{% if week %} — Week {{ week }}{% endif %}</title>
+    <title>FF DFS Challenge{% if week %} - Week {{ week }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -32,7 +32,7 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if week %}
-            <p class="subtitle">Week {{ week }}, {{ year }} &mdash; DraftKings Thu-Mon Slate</p>
+            <p class="subtitle">Week {{ week }}, {{ year }}: DraftKings Thu-Mon Slate</p>
         {% else %}
             <p class="subtitle">No slate loaded yet.</p>
         {% endif %}
@@ -59,11 +59,11 @@
             <span class="lock-status-count">{{ locked_teams|length }}/{{ total_teams_scheduled }} teams locked</span>
             <span class="lock-status-detail">
                 {% if locked_teams|length == 0 %}
-                    — no games have started yet
+                    (no games have started)
                 {% elif locked_teams|length == total_teams_scheduled %}
-                    — all of this week's games have started
+                    (all games have started)
                 {% else %}
-                    — {{ total_teams_scheduled - locked_teams|length }} teams still to play
+                    ({{ total_teams_scheduled - locked_teams|length }} teams still to play)
                 {% endif %}
             </span>
             <a href="{{ url_for('schedule', year=year) }}#week-{{ week }}" class="lock-status-link">View Week {{ week }} schedule →</a>
@@ -142,12 +142,12 @@
                         </td>
                         <td>{{ p['team'] }}</td>
                         <td>{{ p['opponent'] }}</td>
-                        <td class="kickoff-cell">{{ kickoff_by_team.get(p['team'], '—') }}</td>
-                        <td>{{ depth_chart_strings.get(p['name'], '—') }}</td>
-                        <td class="right">${{ "{:,}".format(p['salary']) if p['salary'] else '—' }}</td>
+                        <td class="kickoff-cell">{{ kickoff_by_team.get(p['team'], '-') }}</td>
+                        <td>{{ depth_chart_strings.get(p['name'], '-') }}</td>
+                        <td class="right">${{ "{:,}".format(p['salary']) if p['salary'] else '-' }}</td>
                         <td class="right">
                             {% set implied = implied_points_by_name.get(p['name']) %}
-                            {{ "%.1f"|format(implied) if implied is not none else '—' }}
+                            {{ "%.1f"|format(implied) if implied is not none else '-' }}
                         </td>
                     </tr>
                     {% endfor %}

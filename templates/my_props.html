@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — My Props{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge - My Props{% if week %} - Week {{ week }}, {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -82,7 +82,7 @@
         </form>
         {{ dl.bar([
             {'href': url_for('download_csv', data_type='my-props', year=year, week=week, submitter=submitter), 'label': 'These Picks'},
-            {'href': url_for('download_csv', data_type='my-props', year=year), 'label': 'All Picks', 'secondary': True, 'title': 'Every prop pick from every participant, for every week of this season'},
+            {'href': url_for('download_csv', data_type='my-props', year=year), 'label': 'All Picks', 'secondary': True, 'title': 'All prop picks from every participant this season'},
         ]) }}
     </div>
 
@@ -109,7 +109,7 @@
                     <td>{{ r['stat_field'] }}</td>
                     <td class="right">{{ r['line'] }}</td>
                     <td>{{ r['pick'] | capitalize }}</td>
-                    <td class="right">{{ r['actual'] if r['actual'] is not none else '—' }}</td>
+                    <td class="right">{{ r['actual'] if r['actual'] is not none else '-' }}</td>
                     <td>
                         {% if r['result'] is none %}
                             <span class="pending-week" title="Not yet scored">pending</span>
@@ -140,8 +140,8 @@
     </div>
     {% if not all_matched %}
     <p class="standings-note">
-        This week isn't fully scored yet — some games may not be finished, or the week's
-        results haven't been loaded. The total will appear once every pick has a result.
+        This week isn't fully scored yet. Some games may not be finished or results aren't
+        loaded. The total shows up once every pick has a result.
     </p>
     {% endif %}
     {% else %}

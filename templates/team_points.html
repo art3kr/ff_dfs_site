@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Team Points{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge - Team Points{% if week %} - Week {{ week }}, {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -32,7 +32,7 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if year %}
-            <p class="subtitle">Week {{ week }}, {{ year }} &mdash; Points Scored / Allowed by Team</p>
+            <p class="subtitle">Week {{ week }}, {{ year }}: Points Scored / Allowed by Team</p>
         {% else %}
             <p class="subtitle">No data loaded yet.</p>
         {% endif %}
@@ -104,10 +104,10 @@
                     {% endif %}>
                     <td class="player-name">{{ r['team'] | upper }}</td>
                     <td class="right">{{ r['games'] }}</td>
-                    <td class="right"><strong>{{ "%.1f"|format(r['avg_scored']) if r['avg_scored'] is not none else '—' }}</strong></td>
-                    <td class="right">{{ "%.1f"|format(r['avg_allowed']) if r['avg_allowed'] is not none else '—' }}</td>
-                    <td class="right">{{ r['total_scored'] if r['total_scored'] is not none else '—' }}</td>
-                    <td class="right">{{ r['total_allowed'] if r['total_allowed'] is not none else '—' }}</td>
+                    <td class="right"><strong>{{ "%.1f"|format(r['avg_scored']) if r['avg_scored'] is not none else '-' }}</strong></td>
+                    <td class="right">{{ "%.1f"|format(r['avg_allowed']) if r['avg_allowed'] is not none else '-' }}</td>
+                    <td class="right">{{ r['total_scored'] if r['total_scored'] is not none else '-' }}</td>
+                    <td class="right">{{ r['total_allowed'] if r['total_allowed'] is not none else '-' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -135,8 +135,8 @@
                     <td class="player-name">{{ r['team'] | upper }}</td>
                     <td>{% if r['home_away'] == 'a' %}@{% endif %}{{ r['opponent'] | upper }}</td>
                     <td>{{ 'Away' if r['home_away'] == 'a' else 'Home' }}</td>
-                    <td class="right">{{ r['points_scored'] if r['points_scored'] is not none else '—' }}</td>
-                    <td class="right">{{ r['points_allowed'] if r['points_allowed'] is not none else '—' }}</td>
+                    <td class="right">{{ r['points_scored'] if r['points_scored'] is not none else '-' }}</td>
+                    <td class="right">{{ r['points_allowed'] if r['points_allowed'] is not none else '-' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

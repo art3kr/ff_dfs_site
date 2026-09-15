@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — {{ name if found else 'Player Not Found' }}</title>
+    <title>FF DFS Challenge - {{ name if found else 'Player Not Found' }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -32,7 +32,7 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if found %}
-            <p class="subtitle">{{ name }} &mdash; Career History</p>
+            <p class="subtitle">{{ name }}: Career History</p>
         {% else %}
             <p class="subtitle">No data found for player id "{{ pfr_id }}"</p>
         {% endif %}
@@ -62,11 +62,11 @@
             <span class="summary-label">Games</span>
         </div>
         <div class="summary-stat">
-            <span class="summary-value">{{ "%.1f"|format(career_totals['total_dk_pts']) if career_totals['total_dk_pts'] else '—' }}</span>
+            <span class="summary-value">{{ "%.1f"|format(career_totals['total_dk_pts']) if career_totals['total_dk_pts'] else '-' }}</span>
             <span class="summary-label">Total DK Pts</span>
         </div>
         <div class="summary-stat">
-            <span class="summary-value">{{ "%.1f"|format(career_totals['avg_dk_pts']) if career_totals['avg_dk_pts'] else '—' }}</span>
+            <span class="summary-value">{{ "%.1f"|format(career_totals['avg_dk_pts']) if career_totals['avg_dk_pts'] else '-' }}</span>
             <span class="summary-label">Avg DK Pts</span>
         </div>
         {% if career_totals['total_pass_yds'] %}
@@ -140,15 +140,15 @@
                     <td>{{ g['week'] }}</td>
                     <td>{{ g['team'] }}</td>
                     <td>{{ g['opponent'] }}</td>
-                    <td class="right">{{ "${:,}".format(g['dk_salary']) if g['dk_salary'] else '—' }}</td>
-                    <td class="right">{{ "%.1f"|format(actual) if actual is not none else '—' }}</td>
-                    <td class="right">{{ g['pass_yds'] if g['pass_yds'] else '—' }}</td>
-                    <td class="right">{{ g['pass_td']  if g['pass_td']  else '—' }}</td>
-                    <td class="right">{{ g['rush_yds'] if g['rush_yds'] else '—' }}</td>
-                    <td class="right">{{ g['rush_td']  if g['rush_td']  else '—' }}</td>
-                    <td class="right">{{ g['rec']      if g['rec']      else '—' }}</td>
-                    <td class="right">{{ g['rec_yds']  if g['rec_yds']  else '—' }}</td>
-                    <td class="right">{{ g['rec_td']   if g['rec_td']   else '—' }}</td>
+                    <td class="right">{{ "${:,}".format(g['dk_salary']) if g['dk_salary'] else '-' }}</td>
+                    <td class="right">{{ "%.1f"|format(actual) if actual is not none else '-' }}</td>
+                    <td class="right">{{ g['pass_yds'] if g['pass_yds'] else '-' }}</td>
+                    <td class="right">{{ g['pass_td']  if g['pass_td']  else '-' }}</td>
+                    <td class="right">{{ g['rush_yds'] if g['rush_yds'] else '-' }}</td>
+                    <td class="right">{{ g['rush_td']  if g['rush_td']  else '-' }}</td>
+                    <td class="right">{{ g['rec']      if g['rec']      else '-' }}</td>
+                    <td class="right">{{ g['rec_yds']  if g['rec_yds']  else '-' }}</td>
+                    <td class="right">{{ g['rec_td']   if g['rec_td']   else '-' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

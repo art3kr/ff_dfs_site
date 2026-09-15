@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
             card.querySelectorAll(".prop-pick-btn").forEach(b => b.classList.remove("selected"));
         } else {
             if (currentlySelected === undefined && selections.size >= 5) {
-                msgEl.textContent = "You can only pick 5 props — deselect one first.";
+                msgEl.textContent = "You can only pick 5. Deselect one first.";
                 msgEl.className = "props-submit-error";
                 return;
             }
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 updateCountAndButton();
             })
             .catch(function () {
-                msgEl.textContent = "Network error — please try again.";
+                msgEl.textContent = "Network error. Try again.";
                 msgEl.className = "props-submit-error";
                 updateCountAndButton();
             });

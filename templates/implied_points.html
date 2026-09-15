@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Implied Points{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge - Implied Points{% if week %} - Week {{ week }}, {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -32,7 +32,7 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if week %}
-            <p class="subtitle">Week {{ week }}, {{ year }} — fantasy points implied by the prop betting market</p>
+            <p class="subtitle">Week {{ week }}, {{ year }}: fantasy points implied by prop betting lines</p>
         {% else %}
             <p class="subtitle">No slate loaded yet.</p>
         {% endif %}
@@ -61,17 +61,12 @@
     </div>
 
     <p class="standings-note">
-        Derived from prop betting lines, not a traditional projection. <strong>Two known gaps</strong>:
-        anytime-touchdown props aren't included (they're priced as odds, not a line, and can't be
-        reliably converted without a "no" side price) and "passing &amp; rushing yards" combo props
-        are excluded entirely (that stat mixes two different scoring rates that can't be safely
-        split apart). Both mean these totals are real underestimates for players who score
-        touchdowns or have a lot of that combined prop specifically. A dash means no usable prop
-        data was found for that player at all. <strong>FDS Pts</strong> is FirstDown Studio's own
-        Vegas-derived estimate, shown as a comparison point — their number appears to include a
-        touchdown estimate ours doesn't, so a big gap between the two often shows up specifically
-        for touchdown-heavy players. It's a third-party, opaque calculation, not something we can
-        verify the internals of.
+        Built from prop betting lines. Two known gaps: anytime touchdown props aren't included
+        (they're priced as odds, not lines), and "passing &amp; rushing yards" combo props are left
+        out. So totals run low for players who score touchdowns or rely on that combo prop. A dash
+        means no usable prop data. <strong>FDS Pts</strong> is FirstDown Studio's own Vegas-based
+        estimate, shown for comparison. It seems to include touchdowns, so expect bigger gaps for
+        touchdown-heavy players. We can't see how it's calculated.
     </p>
 
     {% if rows %}
@@ -86,7 +81,7 @@
                     <th>Opp</th>
                     <th class="right">Salary</th>
                     <th class="right">Implied Pts</th>
-                    <th class="right" title="FirstDown Studio's own Vegas-derived estimate — a third-party comparison, not our own calculation">FDS Pts</th>
+                    <th class="right" title="FirstDown Studio's Vegas-based estimate, shown for comparison">FDS Pts</th>
                     <th class="right">Value</th>
                 </tr>
             </thead>
@@ -98,14 +93,14 @@
                     <td>{{ r['team'] | upper }}</td>
                     <td>{{ r['depth_chart_string'] }}</td>
                     <td>{{ r['opponent'] | upper }}</td>
-                    <td class="right">${{ "{:,}".format(r['salary']) if r['salary'] else '—' }}</td>
+                    <td class="right">${{ "{:,}".format(r['salary']) if r['salary'] else '-' }}</td>
                     <td class="right">
                         {% if r['implied_points'] is not none %}
                             <strong title="From: {{ r['categories_used'] | join(', ') }}">{{ "%.1f"|format(r['implied_points']) }}</strong>
-                        {% else %}—{% endif %}
+                        {% else %}-{% endif %}
                     </td>
-                    <td class="right">{{ "%.1f"|format(r['firstdown_studio_pts']) if r['firstdown_studio_pts'] is not none else '—' }}</td>
-                    <td class="right">{{ "%.2f"|format(r['value']) if r['value'] is not none else '—' }}</td>
+                    <td class="right">{{ "%.1f"|format(r['firstdown_studio_pts']) if r['firstdown_studio_pts'] is not none else '-' }}</td>
+                    <td class="right">{{ "%.2f"|format(r['value']) if r['value'] is not none else '-' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

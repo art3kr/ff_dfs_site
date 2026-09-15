@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Best Matchups{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge - Best Matchups{% if week %} - Week {{ week }}, {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -32,7 +32,7 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if year %}
-            <p class="subtitle">Week {{ week }}, {{ year }} &mdash; This week's slate vs. each opponent's season-long weakness by position</p>
+            <p class="subtitle">Week {{ week }}, {{ year }}: This week's slate vs. each opponent's weakness by position</p>
         {% else %}
             <p class="subtitle">No slate loaded yet.</p>
         {% endif %}
@@ -124,44 +124,44 @@
                     <td>{{ r['team'] | upper }}</td>
                     <td>{{ r['depth_chart_string'] }}</td>
                     <td>{{ r['opponent'] | upper }}</td>
-                    <td class="right">${{ "{:,}".format(r['salary']) if r['salary'] else '—' }}</td>
+                    <td class="right">${{ "{:,}".format(r['salary']) if r['salary'] else '-' }}</td>
                     <td class="right">
-                        <strong>{{ "%.1f"|format(r['opp_avg_pts_allowed']) if r['opp_avg_pts_allowed'] is not none else '—' }}</strong>
+                        <strong>{{ "%.1f"|format(r['opp_avg_pts_allowed']) if r['opp_avg_pts_allowed'] is not none else '-' }}</strong>
                         {% if r['opp_games_count'] %}<span class="games-suffix">({{ r['opp_games_count'] }}g)</span>{% endif %}
                     </td>
                     <td class="right">
                         {% if r['opp_rank'] %}
                         <span class="rank-circle" style="border-color: {{ r['opp_rank_color'] }}; color: {{ r['opp_rank_color'] }};">{{ r['opp_rank'] }}</span>
-                        {% else %}—{% endif %}
+                        {% else %}-{% endif %}
                     </td>
                     <td class="right">
-                        {{ "%.1f"|format(r['player_avg_dk_pts']) if r['player_avg_dk_pts'] is not none else '—' }}
+                        {{ "%.1f"|format(r['player_avg_dk_pts']) if r['player_avg_dk_pts'] is not none else '-' }}
                         {% if r['player_games_count'] %}<span class="games-suffix">({{ r['player_games_count'] }}g)</span>{% endif %}
                     </td>
                     <td class="right">
                         {% if r['player_rank'] %}
                         <span class="rank-circle" style="border-color: {{ r['player_rank_color'] }}; color: {{ r['player_rank_color'] }};">{{ r['player_rank'] }}</span>
-                        {% else %}—{% endif %}
+                        {% else %}-{% endif %}
                     </td>
                     <td>
                         {% if r['roof_type'] == 'dome' %}
                         <span class="roof-badge roof-dome">Dome</span>
                         {% elif r['roof_type'] == 'outdoor' %}
                         <span class="roof-badge roof-outdoor">Outdoor</span>
-                        {% else %}—{% endif %}
+                        {% else %}-{% endif %}
                     </td>
-                    <td class="right">{{ r['over_under'] if r['over_under'] else '—' }}</td>
-                    <td class="right">{{ r['spread'] if r['spread'] is not none else '—' }}</td>
-                    <td>{{ r['favorite'] | upper if r['favorite'] else '—' }}</td>
+                    <td class="right">{{ r['over_under'] if r['over_under'] else '-' }}</td>
+                    <td class="right">{{ r['spread'] if r['spread'] is not none else '-' }}</td>
+                    <td>{{ r['favorite'] | upper if r['favorite'] else '-' }}</td>
                     <td class="right">
                         {% if r['implied_points'] is not none %}
                         <strong style="color: {{ r['implied_points_color'] }};">{{ "%.1f"|format(r['implied_points']) }}</strong>
-                        {% else %}—{% endif %}
+                        {% else %}-{% endif %}
                     </td>
                     <td class="right">
                         {% if r['team_implied_total'] is not none %}
                         <strong style="color: {{ r['team_implied_total_color'] }};">{{ "%.1f"|format(r['team_implied_total']) }}</strong>
-                        {% else %}—{% endif %}
+                        {% else %}-{% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -169,13 +169,11 @@
         </table>
     </div>
     <p class="standings-note">
-        Only players currently on their team's depth chart (QB/RB/WR/TE, 1st-3rd string) are
-        shown here. Sorted by the opponent's average fantasy points allowed to this position over their last
-        10 games (highest first — the most exploitable matchups), then by the player's own average
-        over their last 10 games. Both trailing windows cross season boundaries when needed (e.g.
-        early in a new season, they pull from the end of the prior one) and average whatever games
-        are available if fewer than 10 exist — the "Games" columns show exactly how many games each
-        average is based on. "—" means we have no historical data for that team/player at all yet.
+        Shows players on their team's current depth chart (QB/RB/WR/TE, 1st-3rd string). Sorted by
+        the opponent's average fantasy points allowed to the position over their last 10 games
+        (highest first, the softest matchups), then by the player's own last-10 average. Early in a
+        season, averages reach back into the prior season. If fewer than 10 games exist, they use
+        what's there; the "(g)" count shows how many. "-" means no history yet for that team or player.
     </p>
     {% else %}
     <p class="empty-state">No players found for Week {{ week }}, {{ year }}{% if position != 'ALL' %} ({{ position }}){% endif %}.</p>

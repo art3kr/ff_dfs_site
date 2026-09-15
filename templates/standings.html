@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Standings{% if year %} — {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge - Standings{% if year %} - {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -32,7 +32,7 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if year %}
-            <p class="subtitle">{{ year }} Season &mdash; Lowest week dropped</p>
+            <p class="subtitle">{{ year }} Season (lowest week dropped)</p>
         {% else %}
             <p class="subtitle">No lineups submitted yet.</p>
         {% endif %}
@@ -50,7 +50,7 @@
 <main class="history-main">
 
 {% if not years %}
-    <p class="empty-state">No lineups have been submitted yet — standings will appear once the season gets underway.</p>
+    <p class="empty-state">No lineups submitted yet. Standings will show up once the season starts.</p>
 {% else %}
 
     <div class="page-controls">
@@ -61,7 +61,7 @@
     </div>
 
     {% if standings %}
-    <h2 class="standings-section-title">Season Standings — Lowest Week Dropped</h2>
+    <h2 class="standings-section-title">Season Standings (Lowest Week Dropped)</h2>
     <div class="table-wrapper">
         <table id="standings-table">
             <thead>
@@ -98,10 +98,10 @@
     </div>
     <p class="standings-note">
         Struck-through score = each participant's dropped (lowest) week.
-        "pending" = that week's lineup isn't fully scored yet (game results not yet available/scraped).
+        "pending" = results for that week aren't in yet.
     </p>
 
-    <h2 class="standings-section-title">Season Standings — No Drop</h2>
+    <h2 class="standings-section-title">Season Standings (No Drop)</h2>
     <div class="table-wrapper">
         <table id="standings-no-drop-table">
             <thead>
@@ -150,7 +150,7 @@
                         {% if w['winners'] %}
                             {{ w['winners'] | join(', ') }}
                             {% if w['winners']|length > 1 %}<span class="tie-badge">TIE</span>{% endif %}
-                        {% else %}—{% endif %}
+                        {% else %}-{% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -189,7 +189,7 @@
                             {% if week_result is none %}
                                 {% if w in row['week_scores'] %}
                                 <span class="pending-week" title="Not yet fully scored">pending</span>
-                                {% else %}—{% endif %}
+                                {% else %}-{% endif %}
                             {% else %}
                                 {{ week_result[0] }}/{{ week_result[1] }}
                             {% endif %}
@@ -197,17 +197,16 @@
                     {% endfor %}
                     <td class="right"><strong>{{ row['correct'] }}</strong></td>
                     <td class="right">{{ row['total_scored'] }}</td>
-                    <td class="right">{{ "%.1f"|format(row['accuracy_pct']) if row['accuracy_pct'] is not none else '—' }}%</td>
+                    <td class="right">{{ "%.1f%%"|format(row['accuracy_pct']) if row['accuracy_pct'] is not none else '-' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     <p class="standings-note">
-        Ranked by total correct picks over the season (not accuracy %). Per-week columns show
-        "pending" until that week's picks are fully scored (game results not yet available/
-        scraped) — a dash means that participant didn't submit picks that week at all. Pending
-        and push results aren't counted in the season totals either way.
+        Ranked by total correct picks for the season (not accuracy %). "pending" means results
+        for that week aren't in yet. A dash means no picks that week. Pending and push results
+        don't count toward season totals.
     </p>
     {% else %}
     <p class="empty-state">No prop picks scored yet for {{ year }}.</p>

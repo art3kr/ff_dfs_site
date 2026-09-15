@@ -2976,7 +2976,7 @@ def slate():
         lookup = _get_depth_chart_lookup(names_normalized)
         for p in players:
             string_rank, _pos = lookup.get(normalize_name(p["name"]), (None, None))
-            depth_chart_strings[p["name"]] = STRING_LABELS.get(string_rank, "—")
+            depth_chart_strings[p["name"]] = STRING_LABELS.get(string_rank, "-")
 
     # Reuses the same shared computation as the standalone Implied
     # Points page and Best Matchups — one source of truth for how
@@ -3464,7 +3464,7 @@ def _compute_implied_points_table(sel_year: int, sel_week: int) -> list:
         rows.append({
             "name": p["name"], "position": p["position"], "team": p["team"],
             "opponent": p["opponent"], "salary": p["salary"],
-            "depth_chart_string": STRING_LABELS.get(string_rank, str(string_rank) if string_rank else "—"),
+            "depth_chart_string": STRING_LABELS.get(string_rank, str(string_rank) if string_rank else "-"),
             "implied_points": implied_pts if has_data else None,
             "value": value,
             "categories_used": categories_used,
@@ -3966,7 +3966,7 @@ def _compute_best_matchups(sel_year: int, sel_week: int, sel_position: str) -> l
             "player_avg_dk_pts": player_avg, "player_games_count": player_games,
             "player_rank": player_rank, "player_rank_total": player_rank_total,
             "player_rank_color": _rank_to_color(player_rank, player_rank_total),
-            "depth_chart_string": STRING_LABELS.get(string_rank, str(string_rank) if string_rank else "—"),
+            "depth_chart_string": STRING_LABELS.get(string_rank, str(string_rank) if string_rank else "-"),
             "roof_type": roof_type,
             "over_under": odds_row["over_under"] if odds_row else None,
             "spread": odds_row["spread"] if odds_row else None,
@@ -4708,7 +4708,7 @@ def submit_props():
     """, (year, week))
     prop_by_id = {r["id"]: r for r in week_props}
     if not set(prop_bet_ids).issubset(prop_by_id.keys()):
-        return jsonify(error="One or more selected props are invalid for this week."), 400
+        return jsonify(error="One or more props aren't on this week's board."), 400
 
     # --- Per-game lock enforcement (the real boundary — same reasoning
     # as submit_lineup()'s own check: anything the page does client-side
@@ -4743,8 +4743,7 @@ def submit_props():
             if _is_locked(prop_bet_id) and existing.get(prop_bet_id) != pick:
                 return jsonify(error=(
                     f"{prop_by_id[prop_bet_id]['player_name']}'s game has already "
-                    f"started — you can't add or change a pick on a game that's "
-                    f"already kicked off."
+                    f"started. You can't add or change that pick."
                 )), 400
 
         # Dropping a locked pick has to be blocked too, or a losing pick
@@ -4753,7 +4752,7 @@ def submit_props():
             if prop_bet_id not in submitted and _is_locked(prop_bet_id):
                 return jsonify(error=(
                     f"{prop_by_id[prop_bet_id]['player_name']}'s game has already "
-                    f"started — you can't remove a pick you already made on it."
+                    f"started. You can't remove a pick on it."
                 )), 400
 
     conn = get_db()
@@ -5819,8 +5818,7 @@ def submit_lineup():
 
             if team and team in locked_teams:
                 return jsonify(ok=False, error=(
-                    f"{name}'s game has already started — you can't select "
-                    f"a new player from a game that's already kicked off."
+                    f"{name}'s game has already started. You can't add them now."
                 ))
 
     try:

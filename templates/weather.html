@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DFS Challenge — Weather{% if week %} — Week {{ week }}, {{ year }}{% endif %}</title>
+    <title>FF DFS Challenge - Weather{% if week %} - Week {{ week }}, {{ year }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -32,7 +32,7 @@
             <a href="{{ url_for('implied_team_points') }}" class="nav-link">Implied Team Points</a>
         </nav>
         {% if year %}
-            <p class="subtitle">Week {{ week }}, {{ year }} &mdash; Game Conditions</p>
+            <p class="subtitle">Week {{ week }}, {{ year }}: Game Conditions</p>
         {% else %}
             <p class="subtitle">No weather data loaded yet.</p>
         {% endif %}
@@ -72,8 +72,8 @@
         {{ dl.bar([
             {'href': url_for('download_csv', data_type='weather', year=year, week=week), 'label': 'This Week'},
             {'href': url_for('download_csv', data_type='weather'), 'label': 'All Data', 'secondary': True},
-            {'href': url_for('download_csv', data_type='weather-by-team', year=year, week=week), 'label': 'Merge-Friendly: This Week', 'title': 'One row per team instead of one per game - lets you merge on year/week/team like every other export, instead of checking both away_team and home_team'},
-            {'href': url_for('download_csv', data_type='weather-by-team'), 'label': 'Merge-Friendly: All Data', 'secondary': True, 'title': 'The same one-row-per-team reshape, but for every week of every season at once'},
+            {'href': url_for('download_csv', data_type='weather-by-team', year=year, week=week), 'label': 'Merge-Friendly: This Week', 'title': 'One row per team instead of one per game. Merges on year/week/team like the other exports.'},
+            {'href': url_for('download_csv', data_type='weather-by-team'), 'label': 'Merge-Friendly: All Data', 'secondary': True, 'title': 'Same one-row-per-team layout, for every week of every season'},
         ]) }}
     </div>
 
@@ -97,7 +97,7 @@
                 {% set has_weather = g['temp_f'] is not none or g['condition'] %}
                 <tr>
                     <td class="player-name">{{ g['away_team'] | upper }} @ {{ g['home_team'] | upper }}</td>
-                    <td>{{ g['game_date'] or '—' }}</td>
+                    <td>{{ g['game_date'] or '-' }}</td>
                     <td>
                         {% if is_final %}
                             <span class="status-badge status-final">Final</span>
@@ -108,18 +108,18 @@
                     <td class="right">
                         {% if g['away_score'] is not none and g['home_score'] is not none %}
                             {{ g['away_score'] }} - {{ g['home_score'] }}
-                        {% else %}—{% endif %}
+                        {% else %}-{% endif %}
                     </td>
                     <td class="right {% if not is_final and has_weather %}forecast-value{% endif %}">
-                        {{ g['temp_f'] ~ '°F' if g['temp_f'] is not none else '—' }}
+                        {{ g['temp_f'] ~ '°F' if g['temp_f'] is not none else '-' }}
                     </td>
                     <td class="{% if not is_final and has_weather %}forecast-value{% endif %}">
-                        {{ g['condition'] or '—' }}
+                        {{ g['condition'] or '-' }}
                     </td>
                     <td class="right {% if not is_final and has_weather %}forecast-value{% endif %}">
                         {% if g['wind_mph'] is not none %}
                             {{ g['wind_mph'] }} mph {{ g['wind_direction'] or '' }}
-                        {% else %}—{% endif %}
+                        {% else %}-{% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -127,10 +127,9 @@
         </table>
     </div>
     <p class="standings-note">
-        <span class="status-badge status-forecast">Forecast</span> = predicted conditions for a game that hasn't
-        been played yet — subject to change as kickoff approaches, and blank until nflweather.com has a forecast
-        available (usually not more than about a week out).
-        <span class="status-badge status-final">Final</span> = actual recorded conditions from the completed game.
+        <span class="status-badge status-forecast">Forecast</span> = predicted conditions for an upcoming game.
+        May change before kickoff, and stays blank until nflweather.com posts a forecast (usually about a week out).
+        <span class="status-badge status-final">Final</span> = recorded conditions from the completed game.
     </p>
     {% else %}
     <p class="empty-state">No games found for Week {{ week }}, {{ year }}.</p>
