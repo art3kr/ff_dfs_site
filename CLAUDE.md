@@ -493,7 +493,7 @@ Evening (Week 2 prep, all loaded to prod):
   order was already sensible and is untouched.
 
 Wednesday 2026-09-16 (personal betting research, not the site; see
-`scoresandodds_workflow.md`, uncommitted as of this entry):
+`scoresandodds_workflow.md`; committed in 4a9d7ff):
 - New DraftKings/Caesars tools in `scrapers/`: `find_ev_bets.py` (price
   vs no-vig consensus of the other books), `td_model.py` +
   `find_td_bets.py` (anytime TD model, fitted 2015–2023, tested on
