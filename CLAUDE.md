@@ -513,9 +513,21 @@ Wednesday 2026-09-16 (personal betting research, not the site; see
   snapshot` (that's the closing line), then after `weekly_after.bat`,
   `bet_tracker.py grade --year 2026 --week 2`.
 
+Thursday 2026-09-17, ~6:15 PM (pre-TNF refresh, all loaded to prod):
+- `flask export-critical-data` first (14 lineups, 20 prop picks, 170
+  prop bets) — the Tuesday backup predated every Week 2 submission.
+- Re-scraped and loaded depth charts (454), injuries (16 Ourlads + 368
+  Draftedge gap-fill; Kamara/Bowers/Ty Johnson out, Flowers/McConkey
+  questionable), weather (16 games, wetter Sunday than Tuesday's
+  forecast, nothing windy), game odds (BUF -4.5 -> -5.5, total 54.5),
+  FirstDown rankings (181).
+- `scrape_weekly_weather.py` crashes on its final "Done ... -> file"
+  print when output is redirected to a file on Windows (cp1252 can't
+  encode the arrow). It saves first, so the data is fine, but the run
+  looks failed. Same class as the unflushed-print issue below; worth
+  replacing the arrow with ASCII.
+
 Not yet done:
-- Weather forecast refresh closer to kickoff, then
-  `flask load-history --weather-only`.
 - `flask load-history` finished cleanly at ~5:21 AM (took ~38 min; it
   re-loads every historical file on each run). A second full load with
   the DEN @ KC data finished cleanly at 11:42 AM, so all 16 Week 1
