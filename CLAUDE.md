@@ -492,6 +492,27 @@ Evening (Week 2 prep, all loaded to prod):
   giving Henry/McCaffrey/Gibbs/Robinson. Every other category's own
   order was already sensible and is untouched.
 
+Wednesday 2026-09-16 (personal betting research, not the site; see
+`scoresandodds_workflow.md`, uncommitted as of this entry):
+- New DraftKings/Caesars tools in `scrapers/`: `find_ev_bets.py` (price
+  vs no-vig consensus of the other books), `td_model.py` +
+  `find_td_bets.py` (anytime TD model, fitted 2015–2023, tested on
+  2024–2025), `find_low_line_props.py` (0.5–1.5 lines vs game logs),
+  `weather_flags.py`, and `bet_tracker.py` (odds archive in
+  `data/odds_archive/`, bet log + grading with closing line value in
+  `data/bet_log/`). Week 2 snapshot and 111 flagged bets logged.
+- `scrape_scoresandodds_market_comparison.py` now saves the API's
+  per-book `available` flag; pulled/suspended quotes otherwise look like
+  edges. The finder scripts drop `available == False`.
+- Gotchas found: pick'em apps (PrizePicks/Underdog, -137/-137) aren't
+  prices; ScoresAndOdds only carries main lines, never alt ladders;
+  books' TD-scorer margin grows toward longshots, so a flat assumed
+  margin manufactures fake longshot edges; schedule CSV date formats
+  differ by year (`9/4/25` vs `2026-09-09`).
+- To grade Week 2: re-scrape the market Sunday morning + `bet_tracker.py
+  snapshot` (that's the closing line), then after `weekly_after.bat`,
+  `bet_tracker.py grade --year 2026 --week 2`.
+
 Not yet done:
 - Weather forecast refresh closer to kickoff, then
   `flask load-history --weather-only`.

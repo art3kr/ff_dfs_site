@@ -1,0 +1,25 @@
+{
+  "halflife": 4.0,
+  "team_a": -3.329178842304026,
+  "team_b": 1.3218359907990245,
+  "weights": {
+    "share_carries": 0.20477964405554427,
+    "share_targets": 0.5230903852804039,
+    "share_rz_carries": 0.017772771648373275,
+    "share_rz_targets": 0.026023489926485018,
+    "share_i10_carries": 0.002151615688859823,
+    "share_i10_targets": 0.0,
+    "share_tds": 0.17272553889910208
+  },
+  "adjustments": {
+    "adj_qb": 0.5009149428290726,
+    "adj_te": 0.10696447014419531,
+    "adj_fb": 0.035768254382944335,
+    "adj_new_team": -0.19569442573739879,
+    "adj_new_season": -0.10203757334877836,
+    "adj_snap_trend": 0.9328235814300952,
+    "adj_low_snap": -0.044014204646075195
+  },
+  "test_log_loss": 0.36481079548184037,
+  "min_prior_games": 3
+}

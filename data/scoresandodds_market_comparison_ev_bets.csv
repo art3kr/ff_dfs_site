@@ -1,0 +1,5 @@
+book,player_name,category,team,side,line,odds,fair_prob,implied_prob,ev_pct,quarter_kelly_pct,fair_odds,ref_books,ref_lines,same_line_refs,best_other_same_line,line_adjusted,market,model,home_team,roof,forecast_wind_mph,forecast_temp_f,condition,weather_note,bad_passing_weather,weather_lean
+draftkings,Malik Washington,receiving-yards,mia,Over,27.5,-115,0.5634,0.5349,5.34,1.53,-129,4,"30.5,31.5",0,,True,two-way,normal,sfo,outdoor,9.0,74.0,Partly Cloudy,,False,
+caesars,Saquon Barkley,receptions,phi,Over,1.5,-179,0.6598,0.6416,2.83,1.27,-194,3,"1.5,2.5",1,fanduel -188,True,two-way,poisson,ten,outdoor,6.0,92.0,Slight Chance Thunderstorms,,False,
+draftkings,Greg Dulcich,receiving-yards,mia,Over,21.5,-108,0.5314,0.5192,2.35,0.63,-113,5,"20.5,22.5,23.5",0,,True,two-way,normal,sfo,outdoor,9.0,74.0,Partly Cloudy,,False,
+draftkings,Lamar Jackson,pass-attempts,bal,Under,28.5,-101,0.5136,0.5025,2.22,0.56,-106,4,"27.5,28.5",3,hardrock -110,True,two-way,normal,bal,outdoor,9.0,84.0,Chance Rain Showers,,False,

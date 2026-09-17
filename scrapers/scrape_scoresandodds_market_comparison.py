@@ -21,7 +21,8 @@ Response JSON's relevant shape:
         "player": {"first_name": ..., "last_name": ..., "team": {"key": ...}},
         "projection": <site's consensus projection>,
         "comparison": {
-          "<book_slug>": {"value": <line>, "over": <odds>, "under": <odds>, ...},
+          "<book_slug>": {"value": <line>, "over": <odds>, "under": <odds>,
+                          "available": <bool>, ...},
           ...
         }
       }]
@@ -35,7 +36,12 @@ specifically to support this script) — run that first.
 
 Output: data/scoresandodds_market_comparison.csv.gz
   Columns: category, player_name, team, book, line, over_odds,
-           under_odds, site_projection
+           under_odds, site_projection, available
+
+`available` is the API's own per-book flag. A book can keep returning a
+line and prices for a market it has pulled or suspended, and that stale
+price is exactly what looks like an edge in find_ev_bets.py, so analysis
+scripts should drop available == False.
 
 Usage:
     python scrapers/scrape_scoresandodds_market_comparison.py \\
@@ -89,7 +95,7 @@ CATEGORY_SLUG_TO_MARKET_NAME = {
 }
 
 OUT_COLUMNS = ['category', 'player_name', 'team', 'book',
-               'line', 'over_odds', 'under_odds', 'site_projection']
+               'line', 'over_odds', 'under_odds', 'site_projection', 'available']
 
 
 def fetch_comparison(event_id: str, category: str, player_name: str) -> list:
@@ -136,6 +142,7 @@ def fetch_comparison(event_id: str, category: str, player_name: str) -> list:
             'over_odds': book_data.get('over'),
             'under_odds': book_data.get('under'),
             'site_projection': projection,
+            'available': book_data.get('available'),
         })
     return rows
 
