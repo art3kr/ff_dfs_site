@@ -546,12 +546,17 @@ needed nothing):
   market" (Hard Rock had Kendre Miller at -1800 anytime TD while every
   other book was +750 to +1000 and ScoresAndOdds projected 0.000).
 - Logged 72 more bets for the late games (183 total for Week 2).
+- Later closing snapshots: 3:41 PM (4:05/4:25 games, 848 props) and
+  7:27 PM (SNF IND-KC, 167 props). 219 bets logged for Week 2 in all.
+- **The TD finder ignores broken book feeds in its market median**
+  (`find_td_bets.market_implied()`, `OUTLIER_RATIO`): Hard Rock listed
+  Troy Franklin at -1600 and RJ Harvey at -350 while every other book
+  was +210 to +800. It can only do this with 3+ books quoting; with two
+  left (RJ Harvey by 3:41 PM) there's no telling which is wrong.
 
 Not yet done:
-- Closing-line snapshots for the late windows: re-scrape those props
-  and `bet_tracker.py snapshot` shortly before 4:05 PM, 8:20 PM Sunday
-  and 8:15 PM Monday. Without one, those bets grade against the 12:43
-  snapshot, which is hours stale for them.
+- Monday's closing snapshot for NYG-LAR (8:15 PM ET): re-scrape those
+  props and `bet_tracker.py snapshot` around 8:00 PM Monday.
 - `flask load-history` finished cleanly at ~5:21 AM (took ~38 min; it
   re-loads every historical file on each run). A second full load with
   the DEN @ KC data finished cleanly at 11:42 AM, so all 16 Week 1

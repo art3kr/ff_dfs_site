@@ -1,48 +1,12 @@
 book,player_name,team,position,odds,implied_prob,model_prob,fair_odds,ev_pct,other_books_implied,other_books,gap_pp,implied_team_total,carry_share,target_share,td_share,games,last_game,last_snap_pct,new_team,confidence,check_reason
-draftkings,Bam Knight,ari,RB,5500,0.018,0.138,625,672.5,0.024,5,11.4,19.0,0.257,0.06,0.133,22,2026 wk1 ari,4.0,False,check,4% snaps last game
-caesars,Bam Knight,ari,RB,3500,0.028,0.138,625,396.6,0.024,5,11.4,19.0,0.257,0.06,0.133,22,2026 wk1 ari,4.0,False,check,4% snaps last game
-caesars,Treylon Burks,was,WR,1700,0.056,0.142,602,156.5,0.053,4,8.9,23.0,0.003,0.118,0.044,35,2025 wk18 was,68.0,False,check,no game this season
-draftkings,Treylon Burks,was,WR,1600,0.059,0.142,602,142.2,0.052,4,9.1,23.0,0.003,0.118,0.044,35,2025 wk18 was,68.0,False,check,no game this season
-caesars,Brashard Smith,kan,RB,1500,0.062,0.142,605,127.0,0.062,3,7.9,26.5,0.101,0.063,0.063,18,2026 wk1 kan,0.0,False,check,0% snaps last game
-draftkings,Brashard Smith,kan,RB,1500,0.062,0.142,605,127.0,0.062,3,7.9,26.5,0.101,0.063,0.063,18,2026 wk1 kan,0.0,False,check,0% snaps last game
-caesars,Tory Horton,sea,WR,900,0.1,0.217,360,117.5,0.103,4,11.5,22.5,0.0,0.111,0.211,8,2025 wk9 sea,73.0,False,check,no game this season
-draftkings,Tory Horton,sea,WR,900,0.1,0.217,360,117.5,0.103,4,11.5,22.5,0.0,0.111,0.211,8,2025 wk9 sea,73.0,False,check,no game this season
+draftkings,Brashard Smith,kan,RB,2000,0.048,0.142,605,197.9,0.048,3,9.4,26.5,0.101,0.063,0.063,18,2026 wk1 kan,0.0,False,check,0% snaps last game
+caesars,Brashard Smith,kan,RB,1900,0.05,0.142,605,183.7,0.048,3,9.4,26.5,0.101,0.063,0.063,18,2026 wk1 kan,0.0,False,check,0% snaps last game
 draftkings,Tyrone Tracy,nyg,RB,900,0.1,0.173,478,73.1,0.125,2,4.8,20.5,0.39,0.108,0.09,33,2026 wk1 nyg,3.0,False,check,3% snaps last game
-caesars,Lil'Jordan Humphrey,den,WR,2000,0.048,0.076,1223,58.7,0.046,4,3.0,24.0,0.0,0.067,0.048,68,2025 wk18 den,27.0,True,check,no game this season; new team
-draftkings,Lil'Jordan Humphrey,den,WR,2000,0.048,0.076,1223,58.7,0.046,4,3.0,24.0,0.0,0.067,0.048,68,2025 wk18 den,27.0,True,check,no game this season; new team
-draftkings,RJ Harvey,den,RB,275,0.267,0.398,151,49.2,0.778,1,-38.0,24.0,0.398,0.12,0.331,18,2026 wk1 den,51.0,False,clean,
 draftkings,Ronnie Rivers,lar,RB,2800,0.034,0.051,1848,48.9,0.032,5,1.9,28.0,0.06,0.008,0.0,46,2026 wk1 lar,13.0,False,check,13% snaps last game
-draftkings,Troy Franklin,den,WR,750,0.118,0.174,475,47.7,0.118,4,5.6,24.0,0.013,0.129,0.108,34,2026 wk1 den,33.0,False,clean,
-caesars,Troy Franklin,den,WR,750,0.118,0.174,475,47.7,0.118,4,5.6,24.0,0.013,0.129,0.108,34,2026 wk1 den,33.0,False,clean,
 caesars,Ronnie Rivers,lar,RB,2700,0.036,0.051,1848,43.7,0.032,5,1.9,28.0,0.06,0.008,0.0,46,2026 wk1 lar,13.0,False,check,13% snaps last game
-draftkings,Kimani Vidal,lac,RB,750,0.118,0.169,492,43.7,0.111,4,5.8,25.0,0.317,0.039,0.094,24,2026 wk1 lac,7.0,False,check,7% snaps last game
-caesars,Kimani Vidal,lac,RB,750,0.118,0.169,492,43.7,0.111,4,5.8,25.0,0.317,0.039,0.094,24,2026 wk1 lac,7.0,False,check,7% snaps last game
 draftkings,Theo Johnson,nyg,TE,850,0.105,0.135,642,28.1,0.118,5,1.7,20.5,0.0,0.15,0.062,28,2026 wk1 nyg,46.0,False,clean,
-caesars,Kirk Cousins,lvr,QB,2000,0.048,0.058,1624,21.8,0.043,5,1.5,18.5,0.074,0.0,0.047,175,2026 wk1 lvr,100.0,True,check,new team
-draftkings,Kirk Cousins,lvr,QB,2000,0.048,0.058,1624,21.8,0.043,5,1.5,18.5,0.074,0.0,0.047,175,2026 wk1 lvr,100.0,True,check,new team
-draftkings,Justin Herbert,lac,QB,450,0.182,0.22,354,21.1,0.165,4,5.5,25.0,0.194,0.0,0.083,96,2026 wk1 lac,100.0,False,clean,
-caesars,Justin Herbert,lac,QB,450,0.182,0.22,354,21.1,0.165,4,5.5,25.0,0.194,0.0,0.083,96,2026 wk1 lac,100.0,False,clean,
-draftkings,Michael Wilson,ari,WR,370,0.213,0.253,295,18.9,0.204,5,4.9,19.0,0.0,0.231,0.238,47,2026 wk1 ari,85.0,False,clean,
 draftkings,Devin Singletary,nyg,RB,425,0.19,0.226,343,18.4,0.191,4,3.5,20.5,0.26,0.063,0.192,111,2026 wk1 nyg,36.0,False,clean,
-draftkings,Jaylen Wright,mia,RB,1100,0.083,0.098,916,18.1,0.077,4,2.1,16.0,0.239,0.032,0.092,26,2026 wk1 mia,7.0,False,check,7% snaps last game
-caesars,Jaylen Wright,mia,RB,1100,0.083,0.098,916,18.1,0.077,4,2.1,16.0,0.239,0.032,0.092,26,2026 wk1 mia,7.0,False,check,7% snaps last game
-caesars,Michael Wilson,ari,WR,360,0.217,0.253,295,16.4,0.204,5,4.9,19.0,0.0,0.231,0.238,47,2026 wk1 ari,85.0,False,clean,
-draftkings,Evan Engram,den,TE,360,0.217,0.252,297,15.8,0.222,5,2.9,24.0,0.001,0.141,0.093,125,2026 wk1 den,63.0,False,clean,
 caesars,Theo Johnson,nyg,TE,750,0.118,0.135,642,14.6,0.118,5,1.7,20.5,0.0,0.15,0.062,28,2026 wk1 nyg,46.0,False,clean,
-caesars,Ryan Flournoy,dal,WR,340,0.227,0.259,286,14.1,0.227,5,3.2,27.5,0.003,0.128,0.124,28,2026 wk1 dal,71.0,False,clean,
 caesars,Devin Singletary,nyg,RB,400,0.2,0.226,343,12.8,0.186,4,3.9,20.5,0.26,0.063,0.192,111,2026 wk1 nyg,36.0,False,clean,
-caesars,Nate Adkins,den,TE,2000,0.048,0.053,1770,12.3,0.048,4,0.6,24.0,0.0,0.027,0.037,37,2026 wk1 den,25.0,False,clean,
-draftkings,Nate Adkins,den,TE,2000,0.048,0.053,1770,12.3,0.048,4,0.6,24.0,0.0,0.027,0.037,37,2026 wk1 den,25.0,False,clean,
-draftkings,Ryan Flournoy,dal,WR,330,0.233,0.259,286,11.5,0.227,5,3.2,27.5,0.003,0.128,0.124,28,2026 wk1 dal,71.0,False,clean,
-draftkings,Greg Dulcich,mia,TE,650,0.133,0.148,575,11.2,0.148,5,0.0,16.0,0.004,0.117,0.069,32,2026 wk1 mia,77.0,False,clean,
-draftkings,Bo Nix,den,QB,360,0.217,0.236,323,8.7,0.222,4,1.4,24.0,0.2,0.001,0.124,35,2026 wk1 den,100.0,False,clean,
-draftkings,David Njoku,lac,TE,400,0.2,0.217,361,8.5,0.192,5,2.5,25.0,0.0,0.126,0.181,119,2026 wk1 lac,55.0,True,check,new team
-caesars,Evan Engram,den,TE,330,0.233,0.252,297,8.2,0.217,5,3.4,24.0,0.001,0.141,0.093,125,2026 wk1 den,63.0,False,clean,
-draftkings,Rashee Rice,kan,WR,150,0.4,0.432,132,7.9,0.41,5,2.2,26.5,0.012,0.256,0.265,29,2026 wk1 kan,83.0,False,clean,
-draftkings,Jaxon Smith-Njigba,sea,WR,140,0.417,0.447,124,7.3,0.424,5,2.4,22.5,0.008,0.362,0.313,52,2026 wk1 sea,90.0,False,clean,
-draftkings,AJ Barner,sea,TE,320,0.238,0.255,293,7.0,0.243,4,1.2,22.5,0.013,0.142,0.157,35,2026 wk1 sea,88.0,False,clean,
-draftkings,Patrick Mahomes,kan,QB,320,0.238,0.254,294,6.5,0.233,5,2.1,26.5,0.156,0.003,0.154,127,2026 wk1 kan,100.0,False,clean,
-caesars,Bo Nix,den,QB,350,0.222,0.236,323,6.3,0.222,4,1.4,24.0,0.2,0.001,0.124,35,2026 wk1 den,100.0,False,clean,
-caesars,Jaxon Smith-Njigba,sea,WR,136,0.424,0.447,124,5.6,0.417,5,3.1,22.5,0.008,0.362,0.313,52,2026 wk1 sea,90.0,False,clean,
-draftkings,Jalen Brooks,ari,WR,4500,0.022,0.023,4267,5.3,0.024,4,-0.1,19.0,0.0,0.028,0.019,28,2026 wk1 ari,5.0,True,check,5% snaps last game; new team
-caesars,Rashee Rice,kan,WR,144,0.41,0.432,132,5.3,0.408,5,2.4,26.5,0.012,0.256,0.265,29,2026 wk1 kan,83.0,False,clean,
+draftkings,Rashee Rice,kan,WR,155,0.392,0.432,132,10.1,0.408,5,2.4,26.5,0.012,0.256,0.265,29,2026 wk1 kan,83.0,False,clean,
+caesars,Rashee Rice,kan,WR,152,0.397,0.432,132,8.8,0.408,5,2.4,26.5,0.012,0.256,0.265,29,2026 wk1 kan,83.0,False,clean,

@@ -209,3 +209,12 @@ logged_at,source,year,week,book,player_name,team,category,side,line,odds,model_p
 2026-09-20 19:43:02,td_bets,2026,2,draftkings,AJ Barner,sea,touchdowns,Over,0.5,320,0.255,7.0,clean
 2026-09-20 19:43:02,td_bets,2026,2,caesars,Bo Nix,den,touchdowns,Over,0.5,350,0.236,6.3,clean
 2026-09-20 19:43:02,td_bets,2026,2,draftkings,Jalen Brooks,ari,touchdowns,Over,0.5,4500,0.023,5.3,check
+2026-09-20 23:28:04,ev_bets,2026,2,draftkings,Tyquan Thornton,kan,receiving-yards,Under,17.5,-116,0.5523,2.84,
+2026-09-20 23:28:04,ev_bets,2026,2,draftkings,Emmett Johnson,kan,receiving-yards,Under,8.5,-112,0.5397,2.15,
+2026-09-20 23:28:04,ev_bets,2026,2,draftkings,Xavier Worthy,kan,receptions,Under,3.5,-116,0.5482,2.07,
+2026-09-20 23:28:04,td_bets,2026,2,draftkings,Brashard Smith,kan,touchdowns,Over,0.5,2000,0.142,197.9,check
+2026-09-20 23:28:04,td_bets,2026,2,caesars,Brashard Smith,kan,touchdowns,Over,0.5,1900,0.142,183.7,check
+2026-09-20 23:28:04,td_bets,2026,2,caesars,Rashee Rice,kan,touchdowns,Over,0.5,152,0.432,8.8,clean
+2026-09-20 23:28:04,low_line_props,2026,2,draftkings,Noah Gray,kan,receptions,Under,1.5,-168,0.697,11.2,
+2026-09-20 23:28:04,low_line_props,2026,2,caesars,Noah Gray,kan,receptions,Under,1.5,-190,0.696,6.2,
+2026-09-20 23:28:04,low_line_props,2026,2,draftkings,Tyquan Thornton,kan,receptions,Under,1.5,-167,0.636,1.6,
