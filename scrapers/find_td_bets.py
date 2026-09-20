@@ -19,6 +19,9 @@ Columns worth reading before betting:
   - gap_pp: model_prob minus other_books_implied, in percentage points.
     A huge gap is more often something the model can't see (injury,
     new role, goal-line back signed this week) than a free 40% edge.
+    Quotes wildly out of line with the other books are left out of that
+    median (OUTLIER_RATIO) — a broken feed otherwise becomes "the market"
+    once the sane books go unavailable near kickoff.
   - new_team / last_snap_pct / games: the model already discounts a new
     team, a falling snap share and a new season (td_model.ADJUSTMENTS,
     each measured on held-out years), but it still can't see this week's
@@ -85,6 +88,30 @@ def american(p: float):
     if p <= 0 or p >= 1:
         return None
     return int(round(-100 * p / (1 - p))) if p >= 0.5 else int(round(100 * (1 - p) / p))
+
+
+# A book whose implied probability is this many times the median of the
+# others is a broken feed, not a price. Confirmed 2026-09-20: Hard Rock
+# listed Troy Franklin's anytime TD at -1600 (94%) while all five other
+# books were +750/+800 (~12%), and RJ Harvey at -350 against +210 to +290.
+# Left in the market median it turns a normal price into a fake 38-point
+# "disagreement", especially near kickoff when the sane books have already
+# gone available: false.
+OUTLIER_RATIO = 2.5
+
+
+def market_implied(probs: pd.Series):
+    """Median implied probability of the other books, ignoring quotes that
+    are wildly out of line with the rest (see OUTLIER_RATIO)."""
+    probs = probs.dropna()
+    if probs.empty:
+        return None, 0
+    if len(probs) >= 3:
+        med = probs.median()
+        keep = probs[(probs <= med * OUTLIER_RATIO) & (probs >= med / OUTLIER_RATIO)]
+        if not keep.empty:
+            probs = keep
+    return float(probs.median()), len(probs)
 
 
 def implied_totals(game_odds_path: str) -> dict:
@@ -168,7 +195,7 @@ def main():
 
         for t in group[group['book'].isin(target_books)].itertuples():
             others = group[group['book'] != t.book]['over_odds'].map(implied_prob)
-            other_implied = float(others.median()) if len(others) else None
+            other_implied, other_n = market_implied(others)
             rows.append({
                 'book': t.book, 'player_name': t.player_name, 'team': team,
                 'position': f['position'], 'odds': int(t.over_odds),
@@ -176,7 +203,7 @@ def main():
                 'model_prob': round(p, 3), 'fair_odds': american(p),
                 'ev_pct': round((p * decimal_odds(t.over_odds) - 1) * 100, 1),
                 'other_books_implied': None if other_implied is None else round(other_implied, 3),
-                'other_books': len(others),
+                'other_books': other_n,
                 'gap_pp': None if other_implied is None else round((p - other_implied) * 100, 1),
                 'implied_team_total': round(totals[team], 1),
                 'carry_share': round(f['share_carries'], 3),
