@@ -53,9 +53,15 @@ Usage:
 """
 
 import argparse
+import os
 import re
+import sys
 
 import pandas as pd
+
+sys.path.insert(0, os.path.dirname(__file__))
+from bet_tracker import drop_started
+
 
 PICKEM_BOOKS = {'prizepicks', 'underdog', 'sleeper'}
 
@@ -111,9 +117,11 @@ def team_context(stats: pd.DataFrame) -> pd.DataFrame:
 
 
 def analyze(market: pd.DataFrame, stats: pd.DataFrame, target_books: set,
-            max_line: float) -> pd.DataFrame:
+            max_line: float, include_started: bool = False) -> pd.DataFrame:
     market = market.copy()
     market['book'] = market['book'].str.lower()
+    if not include_started:
+        market = drop_started(market)
     if 'available' in market.columns:
         market = market[market['available'].astype(str).str.lower() != 'false']
     market = market[market['category'].isin(CATEGORY_STATS)
@@ -202,12 +210,15 @@ def main():
     parser.add_argument("--stats", default="data/pfr_player_stats_2014_2025.csv.gz")
     parser.add_argument("--books", default="draftkings,caesars")
     parser.add_argument("--max-line", type=float, default=1.0)
+    parser.add_argument("--include-started", action="store_true",
+                        help="Keep props on games that already kicked off.")
     parser.add_argument("--output", default=None,
                         help="Default: <input>_low_line_props.csv")
     args = parser.parse_args()
 
     target_books = {b.strip().lower() for b in args.books.split(',')}
-    result = analyze(pd.read_csv(args.input), pd.read_csv(args.stats), target_books, args.max_line)
+    result = analyze(pd.read_csv(args.input), pd.read_csv(args.stats), target_books,
+                     args.max_line, args.include_started)
     out_path = args.output or (args.input.replace('.csv.gz', '').replace('.csv', '')
                                + '_low_line_props.csv')
 

@@ -76,10 +76,15 @@ Usage:
 
 import argparse
 import math
+import os
 import statistics
+import sys
 
 import pandas as pd
 from scipy import stats
+
+sys.path.insert(0, os.path.dirname(__file__))
+from bet_tracker import drop_started
 
 DEFAULT_INPUT = "data/scoresandodds_market_comparison.csv.gz"
 
@@ -335,6 +340,9 @@ def main():
                         help="Assumed per-player margin on first/last TD prices (default "
                              "20%%; check --print-td-overround).")
     parser.add_argument("--print-td-overround", action="store_true")
+    parser.add_argument("--include-started", action="store_true",
+                        help="Keep props on games that already kicked off (they aren't "
+                             "bettable, and their quotes go stale book by book).")
     parser.add_argument("--one-way", action="store_true",
                         help="Also score TD scorer props with an assumed margin (unreliable "
                              "for longshots; see module docstring). find_td_bets.py is better.")
@@ -345,6 +353,8 @@ def main():
 
     df = pd.read_csv(args.input)
     df['book'] = df['book'].str.lower()
+    if not args.include_started:
+        df = drop_started(df)
     if 'available' in df.columns:
         unavailable = df['available'].astype(str).str.lower() == 'false'
         if unavailable.any():

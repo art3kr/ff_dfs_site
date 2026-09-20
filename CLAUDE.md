@@ -527,7 +527,31 @@ Thursday 2026-09-17, ~6:15 PM (pre-TNF refresh, all loaded to prod):
   looks failed. Same class as the unflushed-print issue below; worth
   replacing the arrow with ASCII.
 
+Sunday 2026-09-20, ~12:15-1:10 PM (betting research only; the site
+needed nothing):
+- Re-scraped props (2,740 rows, more markets than Tuesday) and the
+  market comparison **in kickoff order**, since a full run takes ~50 min
+  and the normal scraper walks categories, which would have fetched the
+  1 PM games' closing lines after they kicked off. Wave 1 (1,553 props,
+  everything through the 1 PM window) finished 12:43, `bet_tracker.py
+  snapshot` archived it 17 minutes before kickoff; wave 2 (1,187 props,
+  4:05 PM onward) finished 13:03. The one-off script is in the session
+  scratchpad; worth folding a `--by-kickoff` flag into the real scraper
+  before next Sunday.
+- **The finders now drop props on games that already kicked off**
+  (`bet_tracker.drop_started()`, `--include-started` to override). Two
+  real problems it fixes: Thursday's DET-BUF props were still being
+  priced on Sunday, and as kickoff nears each book's quotes flip to
+  `available: false` one at a time, so one bad price becomes "the
+  market" (Hard Rock had Kendre Miller at -1800 anytime TD while every
+  other book was +750 to +1000 and ScoresAndOdds projected 0.000).
+- Logged 72 more bets for the late games (183 total for Week 2).
+
 Not yet done:
+- Closing-line snapshots for the late windows: re-scrape those props
+  and `bet_tracker.py snapshot` shortly before 4:05 PM, 8:20 PM Sunday
+  and 8:15 PM Monday. Without one, those bets grade against the 12:43
+  snapshot, which is hours stale for them.
 - `flask load-history` finished cleanly at ~5:21 AM (took ~38 min; it
   re-loads every historical file on each run). A second full load with
   the DEN @ KC data finished cleanly at 11:42 AM, so all 16 Week 1

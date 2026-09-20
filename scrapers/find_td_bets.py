@@ -55,6 +55,7 @@ import pandas as pd
 
 sys.path.insert(0, os.path.dirname(__file__))
 import td_model
+from bet_tracker import drop_started
 from team_mapping import normalize_team
 
 DATA_DIR = td_model.DATA_DIR
@@ -105,6 +106,8 @@ def main():
     parser.add_argument('--books', default='draftkings,caesars')
     parser.add_argument('--min-ev-pct', type=float, default=0.0)
     parser.add_argument('--top', type=int, default=40)
+    parser.add_argument('--include-started', action='store_true',
+                        help="Keep props on games that already kicked off.")
     parser.add_argument('--year', type=int, default=2026,
                         help='Season of the games being priced (for the new-season adjustment).')
     parser.add_argument('--output', default=None,
@@ -126,6 +129,8 @@ def main():
         return
     market['key'] = market['player_name'].map(normalize_name)
     market['team'] = market['team'].map(lambda t: normalize_team(t) if isinstance(t, str) else t)
+    if not args.include_started:
+        market = drop_started(market, game_odds_path=args.game_odds)
 
     feats = td_model.current_features(td_model.load_player_games(), params['halflife'])
     feats['key'] = feats['name_normalized'].map(normalize_name)

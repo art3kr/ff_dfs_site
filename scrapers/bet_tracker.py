@@ -120,6 +120,42 @@ def current_week(today: date = None) -> tuple:
     raise SystemExit("Couldn't work out the current week from data/schedules; pass --year/--week.")
 
 
+def kickoffs_by_team(game_odds_path: str = None) -> dict:
+    """team -> kickoff (UTC), from the scraped game odds file."""
+    path = game_odds_path or os.path.join(DATA_DIR, 'scoresandodds_game_odds.csv.gz')
+    if not os.path.exists(path):
+        return {}
+    odds = pd.read_csv(path)
+    out = {}
+    for r in odds.itertuples():
+        try:
+            out[r.team] = datetime.strptime(r.kickoff, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc)
+        except (TypeError, ValueError):
+            continue
+    return out
+
+
+def started_teams(now: datetime = None, game_odds_path: str = None) -> set:
+    """Teams whose game has already kicked off. A prop on one of those is not
+    bettable, and near kickoff its quotes go stale or get pulled one book at a
+    time, which is exactly when a single bad price looks like the whole market
+    (Hard Rock had Kendre Miller at -1800 anytime TD on 2026-09-20 while every
+    other book was +750 to +1000 and ScoresAndOdds projected 0.0)."""
+    now = now or datetime.now(timezone.utc)
+    return {team for team, kick in kickoffs_by_team(game_odds_path).items() if kick <= now}
+
+
+def drop_started(market: pd.DataFrame, label: str = '', game_odds_path: str = None) -> pd.DataFrame:
+    started = started_teams(game_odds_path=game_odds_path)
+    if not started or 'team' not in market.columns:
+        return market
+    mask = market['team'].isin(started)
+    if mask.any():
+        print(f"Dropping {int(mask.sum()):,} quotes on games already kicked off"
+              f"{(' (' + label + ')') if label else ''}: {', '.join(sorted(started))}")
+    return market[~mask]
+
+
 def cmd_snapshot(args):
     year, week = (args.year, args.week) if args.week else current_week()
     out_dir = os.path.join(ARCHIVE_DIR, f'{year}_wk{week:02d}')
