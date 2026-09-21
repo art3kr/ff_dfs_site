@@ -1,3 +1,5 @@
 book,player_name,category,team,side,line,odds,fair_prob,implied_prob,ev_pct,quarter_kelly_pct,fair_odds,ref_books,ref_lines,same_line_refs,best_other_same_line,line_adjusted,market,model
-draftkings,Devin Singletary,rushing-and-receiving-yards,nyg,Under,27.5,-110,0.5418,0.5238,3.43,0.94,-118,5,25.5,0,,True,two-way,normal
-caesars,Cam Skattebo,rush-attempts,nyg,Under,13.5,102,0.511,0.495,3.22,0.79,-104,4,"12.5,13.5",3,betmgm +100,True,two-way,normal
+draftkings,Cam Skattebo,rush-attempts,nyg,Under,14.5,-122,0.5792,0.5495,5.4,1.65,-138,4,"12.5,13.5,14.5",1,caesars -130,True,two-way,normal
+caesars,Jaxson Dart,rush-attempts,nyg,Under,6.5,102,0.5102,0.495,3.05,0.75,-104,4,6.5,4,draftkings -107,False,two-way,normal
+caesars,Cam Skattebo,rush-attempts,nyg,Under,14.5,-130,0.5792,0.5652,2.48,0.81,-138,4,"12.5,13.5,14.5",1,draftkings -122,True,two-way,normal
+draftkings,Odell Beckham,receiving-yards,nyg,Over,3.5,-111,0.5388,0.5261,2.41,0.67,-117,4,"10.5,3.5,4.5,5.5",1,caesars -120,True,two-way,normal

@@ -560,9 +560,17 @@ and it ran against the TD model: Devin Singletary anytime TD drifted
 +425 -> +500 at DraftKings between Sunday and Monday (other books 19% ->
 16%), so the Sunday flag got a worse price than Monday's.
 
+- 7:44 PM: closer NYG-LAR snapshot (31 minutes before kickoff), 18 more
+  bets logged (253 for Week 2). Singletary kept drifting (+600 DK, other
+  books ~15%); Theo Johnson shortened +850 -> +800, the model's way.
+- Also Monday: full backup of prod ahead of the Render free-tier expiry,
+  `backups/full_20260921_163527/` (all 20 tables, 272,087 rows, verified
+  against row counts; plus `export-critical-data`). `backups/` is
+  gitignored because `users` holds password hashes, so copy it off the
+  machine. Owner deciding between paying Render ($6/mo) and moving to
+  a free Postgres (Neon fits: the DB is 118 MB).
+
 Not yet done:
-- A closer NYG-LAR snapshot around 8:00 PM Monday, if anyone's around;
-  otherwise those bets grade against the 4:08 PM one.
 - Tuesday, after `weekly_after.bat`: `python scrapers/bet_tracker.py
   grade --year 2026 --week 2`, then commit the graded file.
 - `flask load-history` finished cleanly at ~5:21 AM (took ~38 min; it
