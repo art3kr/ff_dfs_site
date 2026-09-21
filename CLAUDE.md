@@ -563,7 +563,7 @@ and it ran against the TD model: Devin Singletary anytime TD drifted
 Not yet done:
 - A closer NYG-LAR snapshot around 8:00 PM Monday, if anyone's around;
   otherwise those bets grade against the 4:08 PM one.
-- Tuesday, after `weekly_after.bat`: `python scraperset_tracker.py
+- Tuesday, after `weekly_after.bat`: `python scrapers/bet_tracker.py
   grade --year 2026 --week 2`, then commit the graded file.
 - `flask load-history` finished cleanly at ~5:21 AM (took ~38 min; it
   re-loads every historical file on each run). A second full load with
