@@ -40,7 +40,8 @@ model's real blind spot is offseason role change: Week 2 shares still lean
 on last year, so a back who lost his job in the offseason (Bam Knight:
 46% snaps late 2025, 2% in his last game) still carries an old share.
 The 'check' rows are printed separately and shouldn't be bet on the EV
-number alone.
+number alone. A player who is himself on the injury report, or whose key
+teammate is out or doubtful (market_context.NewsContext), is also 'check'.
 
 Usage:
     python scrapers/find_td_bets.py
@@ -59,6 +60,7 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(__file__))
 import td_model
 from bet_tracker import drop_started
+from market_context import NewsContext
 from team_mapping import normalize_team
 
 DATA_DIR = td_model.DATA_DIR
@@ -164,6 +166,7 @@ def main():
     feats['last_name'] = feats['key'].str.split().str[-1]
     totals = implied_totals(args.game_odds)
 
+    news = NewsContext()
     rows, unmatched, stale = [], set(), set()
     for (key, team), group in market.groupby(['key', 'team'], dropna=False):
         f = feats[feats['key'] == key]
@@ -192,6 +195,10 @@ def main():
         # 8 or fewer games here, when the shares still mostly reflect the old team.
         if adj['adj_new_team'] > 0.25:
             reasons.append('new team')
+        # A key teammate out moves this player's share in a way the model's
+        # history can't see (Puka Nacua out, 2026-09-21: Davante Adams went
+        # +115 -> -120, Konata Mumpfield +1600 -> +500).
+        reasons += news.news_for(group['player_name'].iloc[0], team)
 
         for t in group[group['book'].isin(target_books)].itertuples():
             others = group[group['book'] != t.book]['over_odds'].map(implied_prob)

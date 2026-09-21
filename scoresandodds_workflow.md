@@ -51,9 +51,26 @@ Single bets, no second leg: flags a price at a target book that beats the no-vig
 - **TD scorer props** (anytime/first/last) are skipped unless you pass `--one-way`. They have no "No" side, so that mode assumes a flat margin, and books' margin grows sharply toward longshots, so it floods with fake longshot "edges". Use the TD model below instead.
 - Output columns: `fair_odds` (the no-vig price), `ev_pct`, `quarter_kelly_pct` (bankroll % at 1/4 Kelly), `ref_lines` (lines the other books hang), `best_other_same_line`.
 
+- **Clean vs check first.** A bet prints under *check first* (with `check_reason`) when the other books' lines are spread widely (a market mid-move on news), or when the player or a key teammate is on the injury report (`market_context.py`). Built from Week 2: after Puka Nacua was ruled out, DraftKings moved Davante Adams' receptions to 5.5 first while other books sat at 3.5–4.5, and this script called DraftKings' already-correct Under a 14% edge. The injury part is only as fresh as the last Ourlads/Draftedge scrape, so re-run those two before a Sunday or Monday run.
+
 **Real limitations:** "fair" means "the other books' consensus", and none of these books is a sharp market-maker (no Pinnacle/Circa). Props at 2–5% EV are the realistic range. Anything much higher is usually stale data, a line that moved, or injury news, so check the live price and the player's status first. Books limit accounts that win consistently.
 
 Output: `..._ev_bets.csv`, sorted by EV.
+
+### Stale lines: your book hasn't caught up with news (DraftKings / Caesars)
+
+```cmd
+python scrapers\find_stale_lines.py
+```
+
+Compares the latest scrape to this week's first archived snapshot (or `--baseline <file>`) and finds where the rest of the market moved but DraftKings or Caesars didn't. Needs at least one earlier `bet_tracker.py snapshot` this week, so snapshot Tuesday/Wednesday and run this Sunday.
+
+- **Team news:** teams where several props moved at once (the Rams after Nacua was ruled out; Houston and Pittsburgh on Sunday of Week 2). That's where lagging books are most likely.
+- **Lagging:** the other books moved a prop by 0.5+ standard deviations (4+ points for an anytime TD) and your book moved less than a third as much. Bet the side the market moved toward; `ev_pct` prices it with the other books' current consensus.
+- **Still priced for an old role (avoid):** the market lowered a player's TD chances and your book didn't. There's no "No" side to bet, so it's a warning.
+- **Pulled elsewhere:** two-thirds or more of the other books took the prop down while your book still has it up, usually injury or status news. Monday of Week 2: every Nacua prop was still up at DraftKings (TD +190) after the other books pulled them. The bet voids if he doesn't play, so this means *go check the news*, not *bet it*. A lone pull on a team with no other movement is weak evidence, since books also pull routinely near kickoff.
+
+Lagging rows can be logged like any finder output (`bet_tracker.py log ..._stale_lines.csv`); the pulled and avoid rows have no EV, so they're skipped.
 
 ### Anytime TD model (DraftKings / Caesars)
 
@@ -176,14 +193,17 @@ python scrapers\bet_tracker.py grade --year 2026 --week 2
 ## One-shot version (everything)
 
 ```cmd
+python scrapers\scrape_ourlads_depth_charts.py
+python scrapers\scrape_draftedge_injuries.py
 python scrapers\scrape_scoresandodds_props.py --all --combine
 python scrapers\scrape_scoresandodds_market_comparison.py
 python scrapers\bet_tracker.py snapshot
+python scrapers\find_stale_lines.py
 python scrapers\find_ev_bets.py --books draftkings,caesars --min-ev-pct 2
 python scrapers\find_td_bets.py --books draftkings,caesars
 python scrapers\find_low_line_props.py --books draftkings,caesars --max-line 1.5
 python scrapers\weather_flags.py data\scoresandodds_market_comparison_ev_bets.csv data\scoresandodds_market_comparison_low_line_props.csv
-python scrapers\bet_tracker.py log data\scoresandodds_market_comparison_ev_bets.csv data\scoresandodds_market_comparison_td_bets.csv data\scoresandodds_market_comparison_low_line_props.csv
+python scrapers\bet_tracker.py log data\scoresandodds_market_comparison_ev_bets.csv data\scoresandodds_market_comparison_td_bets.csv data\scoresandodds_market_comparison_low_line_props.csv data\scoresandodds_market_comparison_stale_lines.csv
 python scrapers\find_middling_opportunities.py --input data\scoresandodds_market_comparison.csv.gz --min-width 2 --total-stake 100 --with-ev
 python scrapers\find_arbitrage_opportunities.py --input data\scoresandodds_market_comparison.csv.gz --min-profit-pct 1.0 --total-stake 100
 python scrapers\find_value_bets.py --input data\scoresandodds_market_comparison.csv.gz --min-diff-pct 8.0

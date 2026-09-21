@@ -56,6 +56,17 @@ projection; at 14.8%, 11.1%), so that section fills up with fake longshot
 "edges". Use find_td_bets.py for anytime TDs instead; it prices them from
 a model, not from other books.
 
+Every bet is marked 'clean' or 'check' (check_reason says why), and the
+check ones print separately:
+  - the other books' lines are spread over REF_SPREAD_SD or more standard
+    deviations. That's what a market mid-move looks like. On 2026-09-21
+    Davante Adams' receptions were 3.5 at some books and 5.5 at others after
+    Puka Nacua was ruled out; DraftKings had already moved to 5.5, and this
+    script called its Under a 14% edge because the lagging books were
+    "consensus". The book that moves first on news is usually right.
+  - the player, or a key teammate (market_context.key_players()), is on the
+    injury report. Only as good as the last injury scrape.
+
 Real caveats, not glossed over:
   - "Fair" here means "consensus of the other books", not truth. None
     of the books ScoresAndOdds shows is a sharp, market-making book
@@ -85,6 +96,7 @@ from scipy import stats
 
 sys.path.insert(0, os.path.dirname(__file__))
 from bet_tracker import drop_started
+from market_context import NewsContext
 
 DEFAULT_INPUT = "data/scoresandodds_market_comparison.csv.gz"
 
@@ -119,6 +131,30 @@ CATEGORY_MODELS = {
 MIN_NORMAL_LINE = 5.0
 
 ONE_WAY_CATEGORIES = {'touchdowns', 'first-touchdown-scorer', 'last-touchdown-scorer'}
+
+# Reference lines spread over this many standard deviations = a market that's
+# mid-move on news, where "consensus" is partly stale. See module docstring.
+REF_SPREAD_SD = 0.75
+
+
+def ref_spread_sd(category: str, ref_lines: str) -> float:
+    """Max minus min of the other books' lines, in the stat's standard
+    deviations (the same spreads the pricing uses)."""
+    try:
+        lines = [float(x) for x in str(ref_lines).split(',') if x]
+    except ValueError:
+        return 0.0
+    if len(lines) < 2:
+        return 0.0
+    model, spread = CATEGORY_MODELS.get(category, ('same_line', None))
+    mid = statistics.median(lines)
+    if model == 'normal' and mid >= MIN_NORMAL_LINE:
+        sd = spread[0] * mid ** spread[1]
+    elif model == 'poisson':
+        sd = max(mid, 0.5) ** 0.5
+    else:
+        return 0.0
+    return (max(lines) - min(lines)) / sd
 
 
 def implied_prob(odds: float) -> float:
@@ -381,6 +417,17 @@ def main():
         return
 
     result = result[result['ev_pct'] >= args.min_ev_pct].sort_values('ev_pct', ascending=False)
+    news = NewsContext()
+    reasons = []
+    for r in result.itertuples():
+        why = []
+        spread_sd = ref_spread_sd(r.category, r.ref_lines)
+        if spread_sd >= REF_SPREAD_SD:
+            why.append(f"books disagree ({r.ref_lines}, {spread_sd:.1f} sd)")
+        why += news.news_for(r.player_name, r.team)
+        reasons.append('; '.join(why))
+    result['check_reason'] = reasons
+    result['confidence'] = ['check' if w else 'clean' for w in reasons]
     base = args.input.replace('.csv.gz', '').replace('.csv', '')
     out_path = base + '_ev_bets.csv'
     result.to_csv(out_path, index=False)
@@ -388,14 +435,18 @@ def main():
     cols = ['book', 'player_name', 'category', 'side', 'line', 'odds', 'fair_odds',
             'ev_pct', 'quarter_kelly_pct', 'ref_books', 'ref_lines', 'best_other_same_line']
     shown = result[result['ev_pct'] <= args.max_ev_pct]
-    sections = [('two-way', 'Over/Under props')]
+    sections = [('two-way', 'clean', 'Over/Under props'),
+                ('two-way', 'check', 'Over/Under props, check first (market mid-move or injury news)')]
     if args.one_way:
-        sections.append(('one-way', 'TD scorer props (margin ASSUMED, unreliable for longshots)'))
-    for market, label in sections:
+        sections.append(('one-way', None, 'TD scorer props (margin ASSUMED, unreliable for longshots)'))
+    for market, conf, label in sections:
         part = shown[shown['market'] == market]
+        if conf:
+            part = part[part['confidence'] == conf]
         print(f"\n=== {label}: {len(part)} bets >= {args.min_ev_pct}% EV ===")
         if not part.empty:
-            print(part[cols].head(args.top).to_string(index=False))
+            extra = ['check_reason'] if conf == 'check' else []
+            print(part[cols + extra].head(args.top).to_string(index=False))
     hidden = len(result) - len(shown)
     if hidden:
         print(f"\n{hidden} results above {args.max_ev_pct}% EV hidden (likely stale/bad data).")

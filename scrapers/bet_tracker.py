@@ -145,8 +145,9 @@ def started_teams(now: datetime = None, game_odds_path: str = None) -> set:
     return {team for team, kick in kickoffs_by_team(game_odds_path).items() if kick <= now}
 
 
-def drop_started(market: pd.DataFrame, label: str = '', game_odds_path: str = None) -> pd.DataFrame:
-    started = started_teams(game_odds_path=game_odds_path)
+def drop_started(market: pd.DataFrame, label: str = '', game_odds_path: str = None,
+                 now: datetime = None) -> pd.DataFrame:
+    started = started_teams(now=now, game_odds_path=game_odds_path)
     if not started or 'team' not in market.columns:
         return market
     mask = market['team'].isin(started)

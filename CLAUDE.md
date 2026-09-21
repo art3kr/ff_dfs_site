@@ -570,6 +570,29 @@ and it ran against the TD model: Devin Singletary anytime TD drifted
   machine. Owner deciding between paying Render ($6/mo) and moving to
   a free Postgres (Neon fits: the DB is 118 MB).
 
+- Line movement over Week 2 was almost all injury news: Sean Tucker TD
+  +190 -> +475 (listed out Thursday), Puka Nacua ruled out Monday and the
+  Rams' TD prices redistributed (Adams +115 -> -120, Mumpfield +1600 ->
+  +500). Our logged bets vs the close: TD model clean list 36 beat / 44
+  unchanged / 38 worse (no edge shown yet either way); the check-first
+  list held the worst moves (Kiner, Bam Knight, Brashard Smith, Burton),
+  which is what it's for; consensus over/unders mostly didn't move.
+- **Added before Week 3, both built from the Nacua case:**
+  - `find_ev_bets.py` / `find_td_bets.py` mark a bet 'check' when the
+    other books' lines are spread 0.75+ sd (market mid-move; the Adams
+    Under 5.5 "14% edge" was DraftKings already right and the others
+    stale) or when the player or a key teammate is on the injury report
+    (`scrapers/market_context.py`: key = 15%+ target share, 30%+ carry
+    share, or starting QB). Injury data only knows what the last Ourlads/
+    Draftedge scrape knew; Thursday's files never had Nacua.
+  - `scrapers/find_stale_lines.py`: latest scrape vs this week's first
+    snapshot. Flags DK/Caesars quotes lagging a market move (priced),
+    TD prices still set for an old role (avoid), props pulled at 2/3+ of
+    other books but still up at yours (check news), and team news
+    clusters. On Week 2's archive it named the Rams (Nacua, Whittington,
+    Daniels still up at DraftKings) and, at 12:43 Sunday, Houston (Nico
+    Collins) and Pittsburgh (Michael Pittman).
+
 Not yet done:
 - Tuesday, after `weekly_after.bat`: `python scrapers/bet_tracker.py
   grade --year 2026 --week 2`, then commit the graded file.
