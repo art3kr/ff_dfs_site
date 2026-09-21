@@ -1,6 +1,3 @@
 book,player_name,category,team,side,line,odds,fair_prob,implied_prob,ev_pct,quarter_kelly_pct,fair_odds,ref_books,ref_lines,same_line_refs,best_other_same_line,line_adjusted,market,model
-draftkings,Davante Adams,receptions,lar,Under,5.5,-153,0.6922,0.6047,14.47,5.53,-225,3,"3.5,4.5,5.5",1,fanduel -148,True,two-way,poisson
-draftkings,Kyren Williams,rushing-and-receiving-yards,lar,Under,87.5,-114,0.5483,0.5327,2.93,0.83,-121,3,"80.5,82.5,83.5",0,,True,two-way,normal
-draftkings,Tyquan Thornton,receiving-yards,kan,Under,17.5,-116,0.5523,0.537,2.84,0.82,-123,6,"14.5,15.5,16.5",0,,True,two-way,normal
-draftkings,Emmett Johnson,receiving-yards,kan,Under,8.5,-112,0.5397,0.5283,2.15,0.6,-117,4,7.5,0,,True,two-way,normal
-draftkings,Xavier Worthy,receptions,kan,Under,3.5,-116,0.5482,0.537,2.07,0.6,-121,6,3.5,6,caesars -130,False,two-way,poisson
+draftkings,Devin Singletary,rushing-and-receiving-yards,nyg,Under,27.5,-110,0.5418,0.5238,3.43,0.94,-118,5,25.5,0,,True,two-way,normal
+caesars,Cam Skattebo,rush-attempts,nyg,Under,13.5,102,0.511,0.495,3.22,0.79,-104,4,"12.5,13.5",3,betmgm +100,True,two-way,normal

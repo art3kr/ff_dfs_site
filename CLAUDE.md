@@ -554,9 +554,17 @@ needed nothing):
   was +210 to +800. It can only do this with 3+ books quoting; with two
   left (RJ Harvey by 3:41 PM) there's no telling which is wrong.
 
+Monday 2026-09-21, 4:08 PM: fallback snapshot for NYG-LAR (172
+props), 16 more bets logged (235 for Week 2). First closing-line signal,
+and it ran against the TD model: Devin Singletary anytime TD drifted
++425 -> +500 at DraftKings between Sunday and Monday (other books 19% ->
+16%), so the Sunday flag got a worse price than Monday's.
+
 Not yet done:
-- Monday's closing snapshot for NYG-LAR (8:15 PM ET): re-scrape those
-  props and `bet_tracker.py snapshot` around 8:00 PM Monday.
+- A closer NYG-LAR snapshot around 8:00 PM Monday, if anyone's around;
+  otherwise those bets grade against the 4:08 PM one.
+- Tuesday, after `weekly_after.bat`: `python scraperset_tracker.py
+  grade --year 2026 --week 2`, then commit the graded file.
 - `flask load-history` finished cleanly at ~5:21 AM (took ~38 min; it
   re-loads every historical file on each run). A second full load with
   the DEN @ KC data finished cleanly at 11:42 AM, so all 16 Week 1
