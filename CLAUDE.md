@@ -727,6 +727,31 @@ Render's free Postgres month was expiring ($6/mo after). The DB is only
   available, so that entry looks stale. Kept: a player who doesn't play
   voids the prop anyway.
 
+### Tuesday 2026-09-22 (night): market scrape is 5x faster
+
+- **`scrape_scoresandodds_market_comparison.py` now fetches whole markets.**
+  The `filter` (player) parameter on that API is optional: leaving it off
+  returns every player in that market for that game, same structure. So the
+  scrape is one request per (event, category) — 224 instead of 1,689, a
+  measured **6m18s instead of ~34 minutes**. `--per-player` keeps the old
+  form as a fallback.
+- Verified before switching, per the diagnostic-first rule:
+  `scrapers/diagnose_scoresandodds_bulk_market.py` checked all 18 categories
+  across 2 games (no player missed, 2 extra found, every field name
+  confirmed), then a full run was compared against the previous per-player
+  file: 3,418 of its 3,419 quotes present (the one missing was a bet365
+  market pulled in between), 1,127 quotes gained, 92% identical lines with a
+  median change of 0. Re-run that diagnostic if the API ever changes shape.
+- `_save()` now writes every 25 markets instead of after every single one;
+  it rewrites the whole gzip each time, so per-row saving made long runs
+  progressively slower.
+- Practical effect on Sundays: no more scraping in kickoff-ordered waves.
+  Run the scrape and `bet_tracker.py snapshot` shortly before each window.
+- Also packaged the reusable code and data for the new prop-movement site
+  into `Desktop/FantasyProps/` (see its `reuse/REUSE.md`, `CLAUDE.md`,
+  `OUTLINE.md`). The old `fantasyprops/` folder inside this repo was
+  deleted.
+
 ### Open items (confirmed, not yet resolved)
 
 - **PFR can post Monday night results hours late.** On 9/15 DEN @ KC

@@ -30,7 +30,9 @@ For every prop from Step 1, fetches the full multi-book comparison (not just the
 - **Default behavior does a full refresh** every time (lines change over time, so you generally want current data).
 - If a run gets interrupted and you want to pick up where it left off instead of refreshing everything: add `--resume`.
 
-This step takes a while (one request per player/category pair) — budget accordingly.
+Takes about 6 minutes for a full slate: one request per (game, market) rather than per player, which is 224 requests instead of 1,689. Add `--per-player` to fall back to the old form if a category ever misbehaves in bulk.
+
+Because it's quick now, a Sunday closing-line pass is just "run it again, then `bet_tracker.py snapshot`" shortly before each kickoff window, instead of splitting the slate into waves by kickoff.
 
 ---
 
