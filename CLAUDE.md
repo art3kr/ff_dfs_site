@@ -697,6 +697,27 @@ Render's free Postgres month was expiring ($6/mo after). The DB is only
   2026-09-22, and `backups/lineups_*.csv`, `prop_bets_*.csv`,
   `prop_picks_*.csv` are now committed (see .gitignore's note).
 
+### Tuesday 2026-09-22 (late): Week 3 props published
+
+- Re-scraped props in the evening (1,689 rows vs 1,329 at 2 PM — markets
+  fill in through Tuesday), all 16 Week 3 games, every team, and no Week 2
+  leftovers. Unlike Week 2, ScoresAndOdds had the new week up on Tuesday.
+- 72 props / 12 categories / 34 players published with `flask add-props`.
+  All 34 resolve through `_get_player_teams()`, so every prop locks at its
+  own kickoff.
+- Review before publishing now runs the slate through
+  `market_context.NewsContext`, which caught a real name collision:
+  **Draftedge lists a Cleveland LINEBACKER named Justin Jefferson as out**,
+  and matching on name alone flagged the Vikings receiver (100% of snaps in
+  Week 2, props live at nine books). `injury_status()` is now keyed by
+  (name, team), and `news_for()` looks up with the team. Any future code
+  joining injury data to players must do the same — names are not unique
+  across the league.
+- One prop's own player is flagged: Michael Penix (ATL) is 'out' in
+  Draftedge, but nine books hang his full passing slate and mark it
+  available, so that entry looks stale. Kept: a player who doesn't play
+  voids the prop anyway.
+
 ### Open items (confirmed, not yet resolved)
 
 - **PFR can post Monday night results hours late.** On 9/15 DEN @ KC

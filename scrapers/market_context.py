@@ -12,8 +12,13 @@ TD +115 -> -120, receptions line 3.5 -> 5.5, receiving yards 44.5 ->
 A finder can't tell stale consensus from real edge on price alone; a key
 teammate on the injury report is the tell.
 
-  injury_status()   player key -> (status, team, position), Ourlads first,
+  injury_status()   (player key, team) -> status/position, Ourlads first,
                     Draftedge gap-fill (same priority as app.py's loaders).
+                    Keyed WITH the team because names collide across the
+                    league: on 2026-09-22 Draftedge listed a Cleveland
+                    linebacker named Justin Jefferson as out, which by name
+                    alone flagged the Vikings receiver (100% of snaps in
+                    Week 2, props live at every book) as injured.
   key_players()     players whose absence moves teammates' lines: recent
                     target share >= KEY_TARGET_SHARE, carry share >=
                     KEY_CARRY_SHARE, or a starting QB.
@@ -55,7 +60,7 @@ def normalize_name(name: str) -> str:
 
 
 def injury_status(data_dir: str = DATA_DIR) -> dict:
-    """player key -> {'status', 'team', 'position', 'name'}. Ourlads wins over
+    """(player key, team) -> {'status', 'position', 'name'}. Ourlads wins over
     Draftedge, matching replace_player_injuries()/fill_gap_player_injuries()."""
     out = {}
     for fname in ('draftedge_injuries.csv.gz', 'ourlads_injuries.csv.gz'):
@@ -64,9 +69,9 @@ def injury_status(data_dir: str = DATA_DIR) -> dict:
             continue
         df = pd.read_csv(path)
         for r in df.itertuples():
-            out[normalize_name(r.player_name)] = {
-                'status': str(r.status).lower(), 'team': r.team,
-                'position': r.position, 'name': r.player_name}
+            out[(normalize_name(r.player_name), str(r.team).lower())] = {
+                'status': str(r.status).lower(), 'position': r.position,
+                'name': r.player_name}
     return out
 
 
@@ -100,14 +105,16 @@ class NewsContext:
         players = key_players(data_dir)
         self.key_by_team = {}
         for r in players[players['is_key']].itertuples():
-            status = self.injuries.get(r.key, {}).get('status')
+            status = (self.injuries.get((r.key, str(r.team).lower())) or {}).get('status')
             if status in OUT_STATUSES:
                 self.key_by_team.setdefault(r.team, []).append((r.name, r.key, status))
 
     def news_for(self, player_name: str, team: str) -> list:
         key = normalize_name(player_name)
         notes = []
-        own = self.injuries.get(key)
+        # (name, team), never name alone: see injury_status()'s docstring for
+        # the Justin Jefferson collision this avoids.
+        own = self.injuries.get((key, str(team).lower()))
         if own and own['status'] in WATCH_STATUSES:
             notes.append(f"{own['status']} himself")
         for name, teammate_key, status in self.key_by_team.get(team, []):
