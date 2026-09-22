@@ -682,8 +682,20 @@ Render's free Postgres month was expiring ($6/mo after). The DB is only
   switch back, `NEON_DATABASE_URL` as a copy. Pre-migration dump:
   `backups/full_20260922_164852/`.
 - Neon free tier sleeps when idle, so the first request after a quiet
-  spell is slower. Don't delete the Render database until a full weekly
-  cycle has run against Neon.
+  spell is slower.
+- **What Neon's free tier actually gives you for recovery** (from its
+  Backup & Restore page, 2026-09-22): point-in-time restore over a
+  **6-hour history window** only, and manual snapshots you create
+  yourself — *scheduled* snapshots need a paid plan. Six hours does not
+  cover "a bad Tuesday load noticed on Wednesday", so the weekly dump
+  (`scrapers/db_backup.py dump`, step 10 of `weekly_after.bat`) and the
+  committed critical CSVs are the real safety net, not a nicety. Create a
+  manual snapshot in the Neon console before anything risky (a big load,
+  a schema change, a `renormalize-names` style rewrite).
+- The Render database was cancelled 2026-09-23, so there is no second
+  database to fall back on. `backups/` was emailed off the machine on
+  2026-09-22, and `backups/lineups_*.csv`, `prop_bets_*.csv`,
+  `prop_picks_*.csv` are now committed (see .gitignore's note).
 
 ### Open items (confirmed, not yet resolved)
 
