@@ -1,0 +1,186 @@
+{
+  "id": "nfl.32144340.0.35539.payds",
+  "sportsbook": 15,
+  "date": 1790110410,
+  "stat": "passing yards",
+  "abbr": "payds",
+  "favorite": "under",
+  "value": 269.5,
+  "description": "Passing Yards",
+  "available": true,
+  "side": "home",
+  "player": {
+    "id": 35539,
+    "xid": 26479,
+    "xml_id": "86197778-8d4b-4eba-affe-08ef7be7c70b",
+    "first_name": "Dak",
+    "last_name": "Prescott",
+    "height": null,
+    "weight": null,
+    "birthDate": null,
+    "birthCity": null,
+    "birthState": null,
+    "team": {
+      "id": 2237,
+      "key": "DAL",
+      "hashtag": "DAL",
+      "city": "Dallas",
+      "mascot": "Cowboys",
+      "conference": "NFC",
+      "division": "NFC East",
+      "logo": "https://static.sprtactn.co/teamlogos/nfl/100/dal.png",
+      "colors": {
+        "primary": "#003594",
+        "secondary": "#869397"
+      },
+      "rank": null,
+      "rotation": 486,
+      "score": null,
+      "records": {
+        "moneyline": {
+          "wins": 1,
+          "losses": 1,
+          "ties": 0
+        },
+        "division": {
+          "wins": 1,
+          "losses": 1,
+          "ties": 0
+        },
+        "spread": {
+          "wins": 1,
+          "losses": 1,
+          "ties": 0
+        },
+        "total": {
+          "wins": 2,
+          "losses": 0,
+          "ties": 0
+        }
+      },
+      "scoring": {
+        "ppg": 28.5,
+        "oppg": 24,
+        "otl": null
+      },
+      "half": 0
+    },
+    "image": "https://assets.actionnetwork.com/200x200/409c19f19f344a85bebafe8b863715d7.png"
+  },
+  "current": null,
+  "projection": 267,
+  "over": -111,
+  "under": -113,
+  "metadata": {
+    "over": "ML2995832999",
+    "under": "ML2995833001",
+    "deeplink": 2
+  },
+  "comparison": {
+    "draftkings": {
+      "sportsbook": 15,
+      "favorite": "under",
+      "value": 269.5,
+      "available": true,
+      "over": -111,
+      "under": -113,
+      "metadata": {
+        "over": "ML2995832999",
+        "under": "ML2995833001",
+        "deeplink": 2
+      }
+    },
+    "riverscasino": {
+      "sportsbook": 110,
+      "favorite": "under",
+      "value": 269.5,
+      "available": true,
+      "over": -115,
+      "under": -115,
+      "metadata": {
+        "over": "ML2997386681",
+        "under": "ML2997386682",
+        "deeplink": 2
+      }
+    },
+    "bet365": {
+      "sportsbook": 120,
+      "favorite": "under",
+      "value": 264.5,
+      "available": true,
+      "over": -115,
+      "under": -115,
+      "metadata": {
+        "over": "ML2994359569",
+        "under": "ML2994359571",
+        "deeplink": 2
+      }
+    },
+    "caesars": {
+      "sportsbook": 276,
+      "favorite": "over",
+      "value": 265.5,
+      "available": true,
+      "over": -115,
+      "under": -114,
+      "metadata": {
+        "over": "ML2995752028",
+        "under": "ML2995752029",
+        "deeplink": 2
+      }
+    },
+    "prizepicks": {
+      "sportsbook": 2194,
+      "favorite": "under",
+      "value": 269.5,
+      "available": true,
+      "over": -137,
+      "under": -137,
+      "metadata": {
+        "over": "ML2993444167",
+        "under": "ML2993444168",
+        "deeplink": 2
+      }
+    },
+    "sleeper": {
+      "sportsbook": 3612,
+      "favorite": "under",
+      "value": 265.5,
+      "available": true,
+      "over": -127,
+      "under": -130,
+      "metadata": {
+        "over": "ML2995657190",
+        "under": "ML2995657191",
+        "deeplink": 2
+      }
+    },
+    "fanatics": {
+      "sportsbook": 2790,
+      "favorite": "under",
+      "value": 260.5,
+      "available": true,
+      "over": -115,
+      "under": -115,
+      "metadata": {
+        "over": "ML2995826713",
+        "under": "ML2995826712",
+        "deeplink": 2
+      }
+    },
+    "fanduel": {
+      "sportsbook": 108,
+      "favorite": "under",
+      "value": 263.5,
+      "available": true,
+      "over": -114,
+      "under": -114,
+      "metadata": {
+        "over": "ML2995627947",
+        "under": "ML2995627949",
+        "deeplink": 2
+      }
+    }
+  },
+  "xid": 25992653
+}
