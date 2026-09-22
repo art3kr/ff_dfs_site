@@ -362,8 +362,8 @@ section whenever the season moves forward or an item opens/closes.
 
 ### Where the season is
 
-- **2026 season. Week 1 is over** (Thu 9/10 – Mon 9/14); **Week 2 is
-  current** (Thu 9/17 – Mon 9/21). `_get_current_nfl_week()` is the
+- **2026 season. Weeks 1-2 are over and scored**; **Week 3 is current**
+  (Thu 9/24 – Mon 9/28). `_get_current_nfl_week()` is the
   source of truth; this line is just orientation.
 - Weekly rhythm: Tuesday morning = score the finished week
   (`weekly_after.bat`) + prep the next one (`weekly_before.bat`).
@@ -600,6 +600,54 @@ Not yet done:
   re-loads every historical file on each run). A second full load with
   the DEN @ KC data finished cleanly at 11:42 AM, so all 16 Week 1
   games are scored.
+
+### Tuesday 2026-09-22 (score Week 2, prep Week 3)
+
+- `weekly_after.bat 2026 2` run from ~2:25 AM. All 16 games' game info,
+  424 player rows (all 32 teams), team points, DST, weather, fantasy
+  points against, usage, loaded to prod.
+- **Scoring before PFR posts Monday night is worse than just "missing".**
+  The 2:25 AM run reached the Giants-Rams players before PFR had posted
+  that game, so their Week 2 rows never existed while `team_points` for
+  the game DID load - and the DNP rule then scores those players 0 in
+  lineups and voids their props. Standings were wrong (Davante Adams 195
+  yards + 2 TDs scoring as a zero) until a re-run. `scrape_pfr.py --years
+  2026 --skip-games` re-fetches only players missing the latest week, so
+  the fix is cheap - but `check_scraper_output.py` should flag "team has
+  points but < N player rows", which would have caught it automatically.
+- PFR cookies refreshed ~2:23 AM lasted until ~10:25 AM (403 mid re-run,
+  matching last week's ~6-8 hours). The scraper stops cleanly after 5
+  consecutive failures and resumes where it left off.
+- The laptop sleeping mid-run looks exactly like a silent PFR rate-limit
+  wait: no output for hours, then it resumes. Check the log file's mtime
+  before assuming PFR.
+- **Running a `.bat` through cmd from Claude Code needs a `.\` prefix**
+  (`cmd //c ".\weekly_after.bat 2026 2"`). This environment sets
+  `NoDefaultCurrentDirectoryInExePath=1`, so cmd refuses to run a script
+  from the working directory by bare name - it reports "not recognized"
+  even though `dir` finds the file.
+- **Week 2 betting results graded** (`data/bet_log/2026_wk02_graded.csv`,
+  253 logged bets, 58 wins / 187 losses / 8 voids):
+  - consensus over/unders: 16 of 32 unique bets won, model expected 17.6,
+    market implied 17.0 - on expectation.
+  - low lines: 12 of 19 won (expected ~11), +13.6 units, but negative EV
+    against the closing consensus, so treat the profit as noise for now.
+  - TD model: its 74 players scored 6 TDs; the model expected 12.8 and
+    the market implied 10.9 (vig included). One week can't settle it
+    (~1.5 sd below the market's own number), but it points the same way
+    as the closing-line data: **the model runs ~15-20% hot**. Shrink its
+    probabilities toward the market before betting it at size.
+  - the 'check' TD list went 0-for-28 players, which is what it's for.
+- Week 3 prep scraped, NOT yet loaded: DK salaries (808), weather (14 of
+  16 games have forecasts), Ourlads depth charts (454) + injuries,
+  Draftedge injuries (479), game odds (16 games, really Week 3 this time
+  - unlike Week 2's Tuesday scrape), FirstDown season projections.
+  FirstDown weekly rankings aren't posted yet ("no <table>"), same as
+  last Tuesday; the scraper leaves the old file alone, so don't load
+  `--firstdown-only` until it scrapes cleanly.
+- Week 3 props scraped (1,329) and the market baseline snapshot archived
+  at 2:20 PM for find_stale_lines.py. Only ~2-3 books per prop this early
+  in the week; re-snapshot Wednesday/Thursday for a fuller baseline.
 
 ### Open items (confirmed, not yet resolved)
 
