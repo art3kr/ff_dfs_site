@@ -53,11 +53,20 @@ run it regularly and keep the output somewhere else entirely.
 week) in some other table" — that was a real, repeatedly-hit bug
 (Weather/Depth Charts defaulted to a stale or wrong week more than
 once before this existed). The correct definition, now centralized:
-the *earliest* week whose games haven't all concluded yet (last
-kickoff + 24h buffer still in the future) — not "the most recently
-*started* week." That distinction specifically matters in the
-pre-season gap, where a new season's Week 1 needs to count as current
-before it's even kicked off. `_get_locked_teams(year, week)` is the
+the *earliest* week whose last kickoff is at or after the current
+week-rollover boundary — not "the most recently *started* week." That
+distinction specifically matters in the pre-season gap, where a new
+season's Week 1 needs to count as current before it's even kicked off.
+
+**The boundary is Tuesday 4 AM ET** (`_week_rollover_cutoff()`,
+`WEEK_ROLLOVER_WEEKDAY` / `WEEK_ROLLOVER_HOUR_ET`), the NFL's own week
+break. It replaced a flat 24-hour buffer past the last kickoff on
+2026-09-22 at the owner's request: with Monday night kicking at 8:15 PM,
+that buffer kept the finished week "current" until 8:15 PM Tuesday, so
+Weather / Schedule / Depth Charts still opened on last week for the whole
+day the new week gets prepped and published — and with a Saturday finale
+it flipped a day early instead. Uses zoneinfo, so 4 AM ET survives the
+November DST change (`test_week_rollover_boundary` pins both). `_get_locked_teams(year, week)` is the
 sibling helper for "has this specific team's game started yet" (used
 for Slate's per-player lock, and My Lineups/My Props' locked-row
 display for a given past week).

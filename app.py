@@ -4157,6 +4157,36 @@ def _get_player_teams(year: int, week: int, names_normalized: set) -> dict:
     return teams
 
 
+# The NFL week rolls over on Tuesday morning: Monday night's game is the
+# last of a week, and by Tuesday everyone is looking at the next one.
+# Owner's call 2026-09-22, replacing a flat 24-hour buffer past the last
+# kickoff — that kept Week 2 "current" until 8:15 PM Tuesday (Monday's
+# 8:15 PM kickoff + 24h), so Weather/Schedule/Depth Charts still opened on
+# the finished week for most of the day the new week was prepped.
+WEEK_ROLLOVER_WEEKDAY = 1      # Monday=0, so 1 = Tuesday
+WEEK_ROLLOVER_HOUR_ET = 4      # 4 AM ET, safely past any Monday night game
+
+
+def _week_rollover_cutoff(now=None) -> str:
+    """The most recent Tuesday 4 AM ET, as the naive-UTC string kickoffs are
+    stored in. A week counts as current while its last kickoff is at or after
+    this, so the switch happens Tuesday morning rather than a fixed number of
+    hours after the last game.
+
+    Uses zoneinfo, not a fixed -5/-4 offset, so the boundary stays 4 AM ET
+    across the DST change in November.
+    """
+    from zoneinfo import ZoneInfo
+    eastern = ZoneInfo("America/New_York")
+    now_et = (now or datetime.datetime.now(datetime.timezone.utc)).astimezone(eastern)
+    boundary = now_et.replace(hour=WEEK_ROLLOVER_HOUR_ET, minute=0, second=0, microsecond=0)
+    boundary -= datetime.timedelta(days=(now_et.weekday() - WEEK_ROLLOVER_WEEKDAY) % 7)
+    if boundary > now_et:                      # early Tuesday, before 4 AM
+        boundary -= datetime.timedelta(days=7)
+    return (boundary.astimezone(datetime.timezone.utc)
+            .replace(tzinfo=None).strftime('%Y-%m-%d %H:%M:%S'))
+
+
 def _get_current_nfl_week():
     """
     The actual current NFL week, derived from game_schedule's real
@@ -4167,9 +4197,9 @@ def _get_current_nfl_week():
     actual progress if that table has rows loaded for future weeks
     already.
 
-    Definition: the EARLIEST week whose games haven't all concluded
-    yet (last kickoff + a buffer for game duration is still in the
-    future) — not "the most recently started week". That distinction
+    Definition: the EARLIEST week whose last kickoff is at or after the
+    most recent week-rollover boundary (Tuesday 4 AM ET) — not "the most
+    recently started week". That distinction
     matters specifically in the pre-season gap: confirmed real bug
     where treating it as "most recently started" meant the tail end of
     the previous season's last completed week won out over the
@@ -4179,9 +4209,12 @@ def _get_current_nfl_week():
     weather forecasts, lineup decisions) is genuinely current before
     its games start, not just after they've begun.
 
-    The 24-hour buffer past the last kickoff comfortably covers a
-    Monday night game's duration and pushes the transition into
-    Tuesday, matching the NFL's own conventional week boundary.
+    The boundary is Tuesday 4 AM ET (_week_rollover_cutoff), so a week
+    stops being current once the NFL week it belongs to is over, not a
+    fixed number of hours after its last game. A flat 24-hour buffer used
+    to leave Week N current until 8:15 PM Tuesday whenever Monday night
+    kicked at 8:15 PM, which is most of the day the next week is prepped
+    and published; with a Saturday finale it flipped a day early instead.
 
     Returns (year, week) or (None, None) if game_schedule is empty.
     """
@@ -4201,8 +4234,7 @@ def _get_current_nfl_week():
     #     and was never affected, which is exactly why this one stayed
     #     invisible in production — the reverse of the usual direction,
     #     where SQLite is the permissive one hiding a Postgres bug.
-    buffer_cutoff = (datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
-                     - datetime.timedelta(hours=24)).strftime('%Y-%m-%d %H:%M:%S')
+    buffer_cutoff = _week_rollover_cutoff()
     ph = _ph()
 
     row = db_fetchone(f"""

@@ -1146,11 +1146,40 @@ def test_game_odds_week():
           result.exit_code == 0 and prop_row is not None and prop_row[0] == 1)
 
 
+def test_week_rollover_boundary():
+    """The NFL week rolls over Tuesday 4 AM ET, not N hours after the last
+    kickoff (owner's call 2026-09-22: a flat 24h buffer left the finished
+    week 'current' until 8:15 PM Tuesday)."""
+    section("week rollover boundary (Tuesday 4 AM ET)")
+    from zoneinfo import ZoneInfo
+    eastern = ZoneInfo("America/New_York")
+
+    def cutoff_at(y, m, d, hh, mm=0):
+        when = datetime.datetime(y, m, d, hh, mm, tzinfo=eastern)
+        return flaskapp._week_rollover_cutoff(when.astimezone(datetime.timezone.utc))
+
+    # Monday night, right after the last game of week N: still week N, so the
+    # cutoff must still be LAST Tuesday.
+    check("Monday 11 PM ET -> previous Tuesday's boundary",
+          cutoff_at(2026, 9, 21, 23) == "2026-09-15 08:00:00")
+    # Before 4 AM Tuesday the week hasn't rolled yet.
+    check("Tuesday 3 AM ET -> still the previous boundary",
+          cutoff_at(2026, 9, 22, 3) == "2026-09-15 08:00:00")
+    check("Tuesday 5 AM ET -> that Tuesday's boundary",
+          cutoff_at(2026, 9, 22, 5) == "2026-09-22 08:00:00")
+    check("Sunday of the new week -> still that Tuesday's boundary",
+          cutoff_at(2026, 9, 27, 13) == "2026-09-22 08:00:00")
+    # Standard time: 4 AM EST is 09:00 UTC, not 08:00 — the reason this uses
+    # zoneinfo rather than a fixed offset.
+    check("after the DST change, 4 AM ET is 09:00 UTC",
+          cutoff_at(2026, 11, 10, 9) == "2026-11-10 09:00:00")
+
+
 def test_timestamp_format():
     """Runs LAST -- it rewrites game_schedule."""
     section("timestamp format vs SQLite lexicographic comparison")
     probe = sqlite3.connect(":memory:")
-    cutoff = NOW - datetime.timedelta(hours=24)
+    cutoff = datetime.datetime.strptime(flaskapp._week_rollover_cutoff(), '%Y-%m-%d %H:%M:%S')
     same_day_kickoff = cutoff.strftime('%Y-%m-%d') + " 23:59:59"
 
     old_ok = probe.execute("SELECT ? >= ?",
@@ -1161,10 +1190,17 @@ def test_timestamp_format():
     check("the old .isoformat() form compares WRONG (bug reproduced)", old_ok == 0)
     check("the strftime form compares correctly", new_ok == 1)
 
+    # Two weeks, both AFTER the cutoff: the same-date one (week 7) and a
+    # clearly-later one (week 8). If the comparison drops the same-date week,
+    # the answer becomes week 8 — without week 8 the function would fall back
+    # to "latest week in the table" and pass for the wrong reason.
     conn = flaskapp._connect()
     conn.execute("DELETE FROM game_schedule")
     conn.execute("INSERT INTO game_schedule (year, week, team, opponent, home_away, kickoff) "
                  "VALUES (?,?,?,?,?,?)", (YEAR, 7, "kan", "den", "h", same_day_kickoff))
+    conn.execute("INSERT INTO game_schedule (year, week, team, opponent, home_away, kickoff) "
+                 "VALUES (?,?,?,?,?,?)", (YEAR, 8, "buf", "mia", "h",
+                                          (cutoff + datetime.timedelta(days=9)).strftime('%Y-%m-%d %H:%M:%S')))
     conn.commit()
     conn.close()
     with flaskapp.app.app_context():
@@ -1194,6 +1230,7 @@ if __name__ == "__main__":
     test_schedule_current_week()
     test_usage()                     # after data_as_of_empty; adds (then removes) weeks 11-12
     test_game_odds_week()            # needs the fixture schedule; adds (then removes) odds
+    test_week_rollover_boundary()
     test_timestamp_format()          # must stay last; rewrites game_schedule
 
     print()
