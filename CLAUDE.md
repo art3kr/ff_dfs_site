@@ -18,7 +18,8 @@ out for* goes here.
 
 A season-long NFL DFS (daily fantasy sports) challenge site for a
 small private group (~10-20 participants). Flask + Python, dual
-SQLite (local dev) / PostgreSQL (production, hosted on Render), plain
+SQLite (local dev) / PostgreSQL (production on Neon since 2026-09-22;
+the web service is still Render), plain
 HTML/CSS/JS (no frontend framework, no build step). GitHub:
 `https://github.com/art3kr/ff_dfs_site` (private).
 
@@ -648,6 +649,41 @@ Not yet done:
 - Week 3 props scraped (1,329) and the market baseline snapshot archived
   at 2:20 PM for find_stale_lines.py. Only ~2-3 books per prop this early
   in the week; re-snapshot Wednesday/Thursday for a fuller baseline.
+
+### Tuesday 2026-09-22 (evening): database moved off Render to Neon
+
+Render's free Postgres month was expiring ($6/mo after). The DB is only
+118 MB, so Neon's free tier fits. The web service stays on Render; only
+`DATABASE_URL` changed.
+
+- Dump + restore + verify script: session scratchpad `migrate_to_neon.py`
+  (worth making a repo tool if this is ever done again). All 20 tables,
+  274,935 rows, zero count mismatches; lineups / prop_picks / prop_bets /
+  users / data_loads verified by md5 over their rows, not just counts.
+- **`COPY ... FROM STDIN WITH CSV HEADER` maps columns BY POSITION, and a
+  fresh `CREATE TABLE` doesn't reproduce a table that grew via
+  `ALTER TABLE ADD COLUMN`.** Three tables differed: `game_schedule`
+  (home_away/kickoff — this one errored, which is how it was caught),
+  `game_odds` (kickoff/updated_at) and `hist_player_usage` (receptions
+  moved) — the last two would have loaded **silently wrong** values into
+  same-typed columns across 94k rows. Always name the columns from the
+  CSV header: `COPY "t" (col, col, ...) FROM STDIN WITH CSV`.
+- SERIAL sequences stay at 1 after a COPY; `setval(pg_get_serial_sequence
+  (...), max(id))` per table, or the next insert collides.
+- Verified the app itself, not just the data: the same helpers
+  (`_get_current_nfl_week`, `_score_lineups_for_year`,
+  `_score_props_for_week`, `_compute_usage_rows`, ...) return identical
+  results against both databases, and `test_app.py` passes.
+- Confirmed the LIVE site reads Neon by writing a distinctive
+  `data_loads.file_modified_at` into Neon only and seeing it on the page's
+  "Data as of" line (that line shows the source file's mtime, not the load
+  time — a load-time change alone proves nothing). Marker reverted after.
+- `.env` now has `DATABASE_URL` = Neon, `RENDER_DATABASE_URL` kept to
+  switch back, `NEON_DATABASE_URL` as a copy. Pre-migration dump:
+  `backups/full_20260922_164852/`.
+- Neon free tier sleeps when idle, so the first request after a quiet
+  spell is slower. Don't delete the Render database until a full weekly
+  cycle has run against Neon.
 
 ### Open items (confirmed, not yet resolved)
 
