@@ -35,12 +35,20 @@ data/*.csv.gz
 data/_pfr_checkpoints/
 
 # -----------------------------------------------------------------------
-# Critical-data backups (flask export-critical-data) — plaintext CSV
-# exports of lineups/prop_bets/prop_picks. Never commit: this is the
-# participants' own submitted data, and the whole point of the backup
-# is that it lives somewhere OTHER than the repo/database.
-# -----------------------------------------------------------------------
-backups/
+# Database backups. Full dumps (scrapers/db_backup.py) stay OUT of git:
+# the users table holds password hashes.
+#
+# The three exports from `flask export-critical-data` are the exception,
+# changed deliberately on 2026-09-22 when the Render database (the second
+# copy of this data) was cancelled. lineups/prop_bets/prop_picks are the
+# only tables no scraper can rebuild, they carry no credentials, and the
+# repo is private — so weekly_after.bat commits them and GitHub becomes
+# the copy that survives this machine. It is still participants' own
+# submitted data: if this repo ever goes public, drop these lines.
+backups/*
+!backups/lineups_*.csv
+!backups/prop_bets_*.csv
+!backups/prop_picks_*.csv
 
 # -----------------------------------------------------------------------
 # Committed data files (small, static — keep in git)

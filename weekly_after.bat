@@ -96,7 +96,7 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [9/9] Checking scraper output, then persisting to the database...
+echo [9/10] Checking scraper output, then persisting to the database...
 REM A scraper can exit 0 and still have written nothing useful (see
 REM check_scraper_output.py's docstring for the two real cases). This
 REM makes that visible before the load instead of weeks later.
@@ -109,6 +109,24 @@ REM --year keeps this to the current season's rows; earlier seasons never
 REM change, and re-loading them all took ~40 minutes.
 flask load-history --year %YEAR%
 
+echo.
+echo [10/10] Off-database backup of the week...
+REM The database is the only live copy of lineups/prop_bets/prop_picks,
+REM and since 2026-09-22 there is no second database to fall back on.
+REM db_backup.py dumps every table to backups\ (gitignored); the three
+REM irreplaceable tables were exported in step 1 and get committed here,
+REM so GitHub holds a copy that survives this machine.
+python scrapers\db_backup.py dump --label db
+if %errorlevel% neq 0 (
+    echo WARNING: the database dump failed — take one by hand before trusting this week.
+)
+git add backups/lineups_*.csv backups/prop_bets_*.csv backups/prop_picks_*.csv
+git diff --cached --quiet && (
+    echo   nothing new to commit
+) || (
+    git commit -m "Critical data backup: %YEAR% week %WEEK%"
+    echo   committed — run: git push origin main
+)
 echo.
 echo ============================================================
 echo DONE. Standings, History, and My Lineups will now reflect
