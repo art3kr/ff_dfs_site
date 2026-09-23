@@ -116,7 +116,7 @@ jobs:
 
       - name: Check what the scrapers actually wrote
         continue-on-error: true
-        run: python scrapers/check_scraper_output.py --year $YEAR --week $WEEK
+        run: python scrapers/check_scraper_output.py --year $YEAR --week $WEEK --only ourlads,draftedge,scoresandodds
 
       # --- load into the database ----------------------------------------
       # Each is its own step so a failure names the source that failed.

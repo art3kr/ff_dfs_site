@@ -85,10 +85,23 @@ def check_file(path: str, min_rows: int, key_columns: list, check_fresh: bool,
     return warnings
 
 
-def main(data_dir: str, year: int, week: int, max_age_hours: float):
+def main(data_dir: str, year: int, week: int, max_age_hours: float, only: str = None):
     print(f"Checking scraper output in {os.path.abspath(data_dir)}")
+    # --only limits the run to the files a particular job actually scrapes.
+    # The cloud refresh (.github/workflows/refresh-live-data.yml) never
+    # touches PFR stats, salaries, weather or usage, and those files aren't
+    # in git, so on a fresh runner every one of them reads as MISSING and
+    # buries the warnings that matter.
+    wanted = [w.strip() for w in only.split(',')] if only else None
+    checks = CHECKS
+    if wanted:
+        checks = [c for c in CHECKS if any(w in c[0] for w in wanted)]
+        unmatched = [w for w in wanted if not any(w in c[0] for c in CHECKS)]
+        if unmatched:
+            print(f"  (nothing in CHECKS matches: {', '.join(unmatched)})")
+
     all_warnings = []
-    for pattern, min_rows, key_columns, check_fresh in CHECKS:
+    for pattern, min_rows, key_columns, check_fresh in checks:
         filename = pattern.format(year=year, week=week)
         path = os.path.join(data_dir, filename)
         all_warnings += check_file(path, min_rows, key_columns, check_fresh, max_age_hours)
@@ -101,7 +114,7 @@ def main(data_dir: str, year: int, week: int, max_age_hours: float):
         print("\nCheck the scraper for that file before trusting the pages it feeds.")
         return 1
 
-    print(f"All {len(CHECKS)} files look fine.")
+    print(f"All {len(checks)} files look fine.")
     return 0
 
 
@@ -112,5 +125,9 @@ if __name__ == '__main__':
     ap.add_argument('--week', type=int, required=True)
     ap.add_argument('--max-age-hours', type=float, default=36,
                     help='Warn when a live file is older than this (0 disables the check).')
+    ap.add_argument('--only', default=None,
+                    help='Comma-separated substrings; only matching files are checked. '
+                         'Use it when a job scrapes a subset, e.g. '
+                         '--only ourlads,draftedge,scoresandodds')
     args = ap.parse_args()
-    raise SystemExit(main(args.data_dir, args.year, args.week, args.max_age_hours))
+    raise SystemExit(main(args.data_dir, args.year, args.week, args.max_age_hours, args.only))
