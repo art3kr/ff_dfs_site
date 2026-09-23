@@ -91,16 +91,20 @@ def fetch_week(year: int, week: int) -> list[dict]:
     rows = []
     for link in game_links:
         try:
-            # Walk up to a reasonably-sized container holding this
-            # game's full card — try a few ancestor levels until we
-            # find one that also contains team links and weather text.
+            # Walk up to this game's own card: the first ancestor holding
+            # both team links. Stop there even if it has no weather yet.
+            # (This used to keep climbing until it found a temperature, so a
+            # game showing "TBD / Forecast coming soon" climbed into the
+            # whole game list, got parsed as the FIRST game on the page,
+            # and silently dropped out: 2026 Week 3 gave 15 of 16 games,
+            # Ravens @ Cowboys missing. Found and fixed 2026-09-23 while
+            # copying this scraper into FantasyProps.)
             container = link
             for _ in range(6):
                 container = container.parent
                 if container is None:
                     break
-                text = container.get_text(' ', strip=True)
-                if '/team/' in str(container) and '°F' in text and 'air' in text.lower():
+                if len(container.find_all('a', href=re.compile(r'^/team/[\w-]+$'))) >= 2:
                     break
 
             if container is None:
@@ -154,6 +158,8 @@ def fetch_week(year: int, week: int) -> list[dict]:
                 start = temp_match.end()
                 end   = wind_match.start()
                 condition = block_text[start:end].strip()
+            elif 'Forecast coming soon' in block_text or 'TBD' in block_text:
+                condition = 'Forecast not posted yet'
 
             rows.append({
                 'year': year, 'week': week,
@@ -167,6 +173,13 @@ def fetch_week(year: int, week: int) -> list[dict]:
         except Exception as e:
             print(f"    Error parsing a game block: {e}")
             continue
+
+    # Each game is linked twice on the page: keep one row per game, so the
+    # count below is games, not links.
+    unique = {}
+    for row in rows:
+        unique[(row['away_team'], row['home_team'])] = row
+    rows = list(unique.values())
 
     if rows:
         print(f"  Week {week}: {len(rows)} games parsed")

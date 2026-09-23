@@ -101,6 +101,13 @@ jobs:
         continue-on-error: true
         run: python scrapers/scrape_draftedge_injuries.py
 
+      # Forecasts firm up through the week and a late game often has none at
+      # all on Tuesday ("Forecast not posted yet"), so this is worth re-running
+      # as often as everything else.
+      - name: Weather forecasts
+        continue-on-error: true
+        run: python scrapers/scrape_weekly_weather.py --year $YEAR --weeks $WEEK
+
       - name: Game odds
         continue-on-error: true
         run: python scrapers/scrape_scoresandodds_game_odds.py
@@ -134,7 +141,7 @@ jobs:
 
       - name: Check what the scrapers actually wrote
         continue-on-error: true
-        run: python scrapers/check_scraper_output.py --year $YEAR --week $WEEK --only ourlads,draftedge,scoresandodds
+        run: python scrapers/check_scraper_output.py --year $YEAR --week $WEEK --only ourlads,draftedge,scoresandodds,weekly_weather
 
       # --- load into the database ----------------------------------------
       # Each is its own step so a failure names the source that failed.
@@ -144,6 +151,9 @@ jobs:
 
       - name: Load injuries
         run: flask load-history --year $YEAR --injuries-only
+
+      - name: Load weather
+        run: flask load-history --year $YEAR --weather-only
 
       - name: Load game odds
         run: flask load-history --year $YEAR --game-odds-only
@@ -197,3 +207,4 @@ jobs:
             data/ourlads_injuries.csv.gz
             data/draftedge_injuries.csv.gz
             data/firstdown_studio_rankings.csv.gz
+            data/weekly_weather.csv.gz
