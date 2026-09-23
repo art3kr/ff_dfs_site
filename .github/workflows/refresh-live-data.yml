@@ -1,0 +1,142 @@
+# Scheduled refresh of everything that changes during the week.
+#
+# What it does NOT do: anything touching Pro Football Reference (player
+# stats, team points, fantasy points against). Those need browser cookies
+# that expire in hours, and they have to stay coordinated with the other
+# app that scrapes PFR. Weekly scoring stays on the laptop.
+#
+# Setup, once:
+#   1. Repo Settings > Secrets and variables > Actions > New secret:
+#        DATABASE_URL = the Neon connection string
+#   2. Repo Settings > Actions > General > Workflow permissions:
+#        "Read and write permissions" (this workflow commits odds snapshots)
+#
+# Cost: about 8 minutes a run, 5 runs a day, so roughly 1,200 of the 2,000
+# free minutes a month on a private repo. Drop a cron line or set
+# skip_market if that gets tight.
+
+name: Refresh live data
+
+on:
+  schedule:
+    # UTC. Eastern is UTC-4 in season (EDT), so these are roughly
+    # 7am, 11am, 3pm, 7pm and 11pm ET. GitHub's scheduler is best-effort
+    # and can start a run late when it's busy.
+    - cron: "0 11,15,19,23 * * *"
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      skip_market:
+        description: "Skip the 6-minute per-book market scrape"
+        type: boolean
+        default: false
+
+concurrency:
+  # Never let a slow run overlap the next one: they write the same files
+  # and load the same full-replace tables.
+  group: refresh-live-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      PYTHONUNBUFFERED: "1"
+      PYTHONIOENCODING: "utf-8"
+      YEAR: "2026"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # --- scrapes -------------------------------------------------------
+      # continue-on-error on each: one blocked site shouldn't stop the rest.
+      # check_scraper_output below reports what actually landed.
+      - name: Depth charts + Ourlads injuries
+        continue-on-error: true
+        run: python scrapers/scrape_ourlads_depth_charts.py
+
+      - name: Draftedge injuries (gap-fill)
+        continue-on-error: true
+        run: python scrapers/scrape_draftedge_injuries.py
+
+      - name: Game odds
+        continue-on-error: true
+        run: python scrapers/scrape_scoresandodds_game_odds.py
+
+      - name: Props (all categories)
+        continue-on-error: true
+        run: python scrapers/scrape_scoresandodds_props.py --all --combine
+
+      - name: Per-book market comparison
+        if: ${{ inputs.skip_market != true }}
+        continue-on-error: true
+        run: python scrapers/scrape_scoresandodds_market_comparison.py
+
+      - name: Check what the scrapers actually wrote
+        continue-on-error: true
+        run: python scrapers/check_scraper_output.py --year $YEAR
+
+      # --- load into the database ----------------------------------------
+      # Each is its own step so a failure names the source that failed.
+      # These tables are full-replace, so a rerun is always safe.
+      - name: Load depth charts
+        run: flask load-history --year $YEAR --depth-charts-only
+
+      - name: Load injuries
+        run: flask load-history --year $YEAR --injuries-only
+
+      - name: Load game odds
+        run: flask load-history --year $YEAR --game-odds-only
+
+      - name: Load props market
+        run: flask load-history --year $YEAR --props-only
+
+      # --- keep the odds history -----------------------------------------
+      # The per-book comparison is never loaded into a table, so without
+      # this the snapshot would die with the runner. bet_tracker writes it
+      # to data/odds_archive/<year>_wk<NN>/, which IS tracked in git.
+      - name: Archive the odds snapshot
+        if: ${{ inputs.skip_market != true }}
+        continue-on-error: true
+        run: python scrapers/bet_tracker.py snapshot
+
+      - name: Commit the snapshot
+        if: ${{ inputs.skip_market != true }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/odds_archive
+          if git diff --cached --quiet; then
+            echo "no new snapshot to commit"
+          else
+            git commit -m "Odds snapshot $(date -u '+%Y-%m-%d %H:%M UTC') [skip ci]"
+            # Someone may have pushed while this run was scraping.
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+          fi
+
+      # The raw files for anyone who wants them without waiting for a
+      # snapshot: props list, market comparison, injuries, odds.
+      - name: Upload scraped files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraped-data
+          retention-days: 14
+          path: |
+            data/scoresandodds_props_all.csv.gz
+            data/scoresandodds_market_comparison.csv.gz
+            data/scoresandodds_game_odds.csv.gz
+            data/ourlads_depth_charts.csv.gz
+            data/ourlads_injuries.csv.gz
+            data/draftedge_injuries.csv.gz

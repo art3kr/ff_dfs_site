@@ -233,6 +233,35 @@ pass unless you pass `--skip-games`. `weekly_after.bat` likewise opens
 with `flask export-critical-data`, which is the most valuable backup
 point of the week since every lineup and prop pick is now final.
 
+### Running in the cloud: live data refreshes
+
+`.github/workflows/refresh-live-data.yml` refreshes everything that changes
+during the week, five times a day, without your laptop: depth charts, both
+injury sources, game odds, props, and the per-book market scrape, each
+loaded into the database, then the odds snapshot archived and committed.
+
+**PFR is deliberately not in it.** Those scrapes need browser cookies that
+expire within hours and have to stay coordinated with the other app that
+scrapes PFR, so the weekly scoring run above stays local.
+
+To run it by hand: Actions tab > Refresh live data > Run workflow (tick
+`skip_market` to skip the 6-minute market scrape). Two one-time settings:
+the `DATABASE_URL` secret, and workflow permissions set to read/write so
+the snapshot commit can push.
+
+To bring it all back to this machine:
+
+```cmd
+git pull
+python scrapers\pull_live_data.py
+python scrapers\pull_live_data.py --from-db     REM also export the live tables
+```
+
+That downloads the exact scraped files from the latest successful run
+(`gh run download`), and copies the newest archived market snapshot to
+`data/scoresandodds_market_comparison.csv.gz`, since the per-book
+comparison is never loaded into any table.
+
 ### Separately: market analysis / arbitrage research
 
 Not part of the core weekly operations above — this is personal

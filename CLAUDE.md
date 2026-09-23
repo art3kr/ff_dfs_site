@@ -752,6 +752,37 @@ Render's free Postgres month was expiring ($6/mo after). The DB is only
   `OUTLINE.md`). The old `fantasyprops/` folder inside this repo was
   deleted.
 
+### Tuesday 2026-09-22 (night): live data refreshes moved to GitHub Actions
+
+- `.github/workflows/refresh-live-data.yml` runs 5x a day (11/15/19/23 and
+  03 UTC) plus on demand: depth charts, both injury sources, game odds,
+  props, the per-book market scrape, then `load-history` for each of those
+  four sources, then `bet_tracker.py snapshot` and a commit of
+  `data/odds_archive/`. **PFR is deliberately not in it** (cookies expire in
+  hours and it has to stay coordinated with the other app that scrapes PFR),
+  so weekly scoring stays local.
+- Two things it needs, set by hand in GitHub: the `DATABASE_URL` secret
+  (Neon), and Settings > Actions > Workflow permissions set to read/write so
+  the snapshot commit can push.
+- Cost: ~8 minutes a run, ~1,200 of the 2,000 free private-repo minutes a
+  month. `skip_market: true` on a manual run drops it to ~2 minutes.
+- Untested until it runs on GitHub: whether Ourlads/Draftedge/ScoresAndOdds
+  serve GitHub's datacenter IPs. If a scrape comes back empty there but
+  works locally, that's the reason, and the fallback is a small always-on
+  host with a residential-ish IP.
+- `scrapers/pull_live_data.py` brings it all back to this machine:
+  `gh run download` for the exact scraped files, the newest archived
+  snapshot for the market comparison (which is never loaded into a table),
+  and `--from-db` to export the live tables (written `*_from_db.csv.gz`,
+  since the tables don't carry every scraped column - `game_odds` has no
+  `event_id`).
+- **Fixed while testing it:** `bet_tracker.current_week()` still used the old
+  "last game today or later" rule, so on Tuesday it returned the finished
+  week and the pull copied last week's snapshot over a fresh scrape. It now
+  steps back to the most recent Tuesday, matching
+  `app._week_rollover_cutoff()`. Schedule CSVs only carry dates, so it rolls
+  at midnight ET rather than 4 AM; the gap is the small hours of Tuesday.
+
 ### Open items (confirmed, not yet resolved)
 
 - **PFR can post Monday night results hours late.** On 9/15 DEN @ KC

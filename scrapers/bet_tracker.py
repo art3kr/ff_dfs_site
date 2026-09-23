@@ -105,15 +105,28 @@ def decimal_odds(odds: float) -> float:
 
 
 def current_week(today: date = None) -> tuple:
-    """Earliest week whose last game date is today or later (dates are ET;
-    2025 writes 9/4/25, 2026 writes 2026-09-09, hence format="mixed").
-    Same idea as app._get_current_nfl_week(), from the schedule CSVs so this
-    script never has to import app.py."""
-    today = today or date.today()
+    """Earliest week whose last game falls on or after the current week's
+    rollover, i.e. the most recent Tuesday. Mirrors
+    app._get_current_nfl_week() / app._week_rollover_cutoff(), but reads the
+    schedule CSVs so this script never has to import app.py.
+
+    One deliberate difference: app.py rolls over at 4 AM ET Tuesday, and the
+    schedule CSVs only carry dates, so this rolls at the start of Tuesday
+    Eastern. The gap is the small hours of Tuesday morning, when nothing is
+    being scraped anyway.
+
+    Dates are ET and the two seasons spell them differently (2025 writes
+    9/4/25, 2026 writes 2026-09-09), hence format="mixed".
+    """
+    from zoneinfo import ZoneInfo
+    today = today or datetime.now(ZoneInfo("America/New_York")).date()
+    # Monday=0, Tuesday=1: step back to the most recent Tuesday (today, if
+    # today is Tuesday).
+    rollover = today - timedelta(days=(today.weekday() - 1) % 7)
     for path in sorted(glob.glob(os.path.join(DATA_DIR, 'schedules', '*_schedule_df.csv')))[-2:]:
         sched = pd.read_csv(path)
         last_game = sched.groupby(['year', 'week'])['date'].max().reset_index()
-        upcoming = last_game[pd.to_datetime(last_game['date'], format='mixed').dt.date >= today - timedelta(days=1)]
+        upcoming = last_game[pd.to_datetime(last_game['date'], format='mixed').dt.date >= rollover]
         if not upcoming.empty:
             row = upcoming.sort_values(['year', 'week']).iloc[0]
             return int(row['year']), int(row['week'])
