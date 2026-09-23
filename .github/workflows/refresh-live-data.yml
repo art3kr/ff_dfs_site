@@ -58,6 +58,23 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      # app.py falls back to a local SQLite file whenever DATABASE_URL
+      # doesn't start with "postgres". Without this check a wrong or missing
+      # secret means every load "succeeds" into a throwaway file on the
+      # runner and the whole job goes green while the real database sits
+      # untouched. That happened on the first run, 2026-09-23.
+      - name: Confirm we're pointed at Postgres
+        run: |
+          python - <<'PY'
+          import os, sys
+          url = os.environ.get("DATABASE_URL", "")
+          if not url.startswith("postgres"):
+              sys.exit("DATABASE_URL is missing or not a Postgres URL "
+                       f"(starts with {url[:12]!r}). Loads would go to a throwaway "
+                       "SQLite file on this runner. Check the repository secret.")
+          print("database host:", url.split("@")[-1].split("/")[0])
+          PY
+
       # --- scrapes -------------------------------------------------------
       # continue-on-error on each: one blocked site shouldn't stop the rest.
       # check_scraper_output below reports what actually landed.
