@@ -1,4 +1,156 @@
-# CHANGELOG — FF DFS Challenge Site
+# CHANGELOG - FF DFS Challenge Site
+
+What happened, in order. `README.md` is how to run things and `CLAUDE.md`
+is where things stand and what to watch out for; this file is the history.
+
+Steps 1 to 4a below are the original build log from August 2026, kept as
+written. Everything after them is grouped by date, because the work stopped
+arriving in neat numbered steps once the season started.
+
+---
+
+# Part 2 - September 2026: the season
+
+## Sept 2-7 - the research tabs
+
+Most of the site's pages arrived in one stretch, each one a scraper plus a
+page plus a download:
+
+- **Best Matchups**, built on fantasy points allowed by position, with a
+  trailing-10-game window that crosses season boundaries.
+- **Depth Charts** (Ourlads), with injury designations alongside.
+- **Props**, the pick-5 over/under challenge, with the weekly slate coming
+  from ScoresAndOdds.
+- **Implied Team Points** and **Implied Player Points**, both from the
+  Vegas spread and total, plus FirstDown Studio's own numbers as a
+  side-by-side comparison column.
+- **Weather / Game Info**, **Team Points**, **Fantasy Points Against**,
+  **Schedule**, **Standings** and the player career pages.
+- Every tab got a download, and the CSVs were made merge-friendly: same
+  join keys in the same place, so two downloads line up in a spreadsheet.
+
+## Sept 8-11 - challenges running, and the first real bugs
+
+- Week 1 props published; standings tracking for both challenges.
+- Slate gained player search and filters for third string, second string
+  and locked players.
+- Prop picks got **server-side lock enforcement**, not just a hidden
+  button: the server rejects adding a locked prop, flipping a pick, and
+  dropping one already made. That last case matters, since without it a
+  losing pick could simply be swapped out.
+- **A SQLite/Postgres divergence bit production.** `psycopg2` returns
+  timestamps as real datetimes while SQLite returns strings, so a template
+  slicing `value[:16]` crashed only in production.
+- `test_app.py` became the permanent harness: it builds a throwaway SQLite
+  database and asserts on real rendered output, never touching Render.
+- `CLAUDE.md` written.
+
+## Sept 15 - Week 1 scored, and five scrapers found lying
+
+Scoring the first week exposed more than it fixed, which is why this date
+has the longest list:
+
+- **`scrape_pfr.py` was saving unplayed games**, writing empty rows for
+  Week 2 that would have marked those games done forever.
+- **It was also skipping returning players mid-season**, because a season
+  counted as "done" for a player as soon as he had any row in it.
+- **Players with 0 DK points were being dropped**, so six Week 1 players
+  with real snaps and targets never scored.
+- **Name keys kept generational suffixes**, so Brian Thomas Jr. and James
+  Cook III sat unscored. `normalize_name()` now drops them and
+  `flask renormalize-names` rewrote 2,003 stored keys.
+- **Three scrapers were silently broken at once**: ScoresAndOdds writes the
+  Rams as bare "LA" (so every Rams prop had no team and would never have
+  locked), FirstDown's team column was reading the player's initials, and
+  Ourlads' injury scrape had been returning nothing for a week because the
+  CSS class it looked for no longer exists.
+- **DNP now scores 0** once a team's result is in, since inactive players
+  never get a stats row.
+- Week 1 left out of season totals (`NON_COUNTING_WEEKS`), and a week is
+  only dropped once a participant has two counting weeks.
+- `load-history` got `--year` and batched inserts: a 90k-row load went from
+  about 20 minutes to under 4.
+- **`check_scraper_output.py` added**, because all of the above shared one
+  shape: a scraper exiting 0 having written nothing useful.
+- Usage tab added, built on nflverse snap counts, air yards and red zone
+  data rather than PFR, whose older seasons are missing players.
+
+## Sept 16-21 - betting research, and Week 2
+
+Personal research, separate from the site, documented in
+`scoresandodds_workflow.md`:
+
+- **`find_ev_bets.py`**: prices DraftKings and Caesars against the no-vig
+  consensus of every other book, converting line differences into
+  probability with per-stat spreads fitted from 2018-2025 game logs.
+- **`td_model.py` / `find_td_bets.py`**: an anytime-TD model from the Vegas
+  implied team total and a player's recent opportunity share, fitted on
+  2015-2023 and tested on 2024-2025 before being trusted.
+- **`bet_tracker.py`**: archives every odds scrape, logs every flagged bet,
+  and grades them afterwards with closing line value.
+- **`find_stale_lines.py`** and **`market_context.py`**, both built from the
+  Puka Nacua case: when he was ruled out, the other books moved his
+  teammates within hours and DraftKings didn't, which the consensus method
+  read as an edge at the *stale* book rather than news.
+- Week 2 graded: the consensus method landed on expectation, while the TD
+  model's picks scored 6 touchdowns against its own estimate of 12.8, so it
+  runs hot and gets small stakes until proven.
+
+## Sept 22 - a busy day
+
+- **Week 2 scored.** The 2:25 AM run reached the Giants-Rams players before
+  PFR had posted that game, so their rows never existed while the game's
+  team points did, and the DNP rule scored Davante Adams' 195-yard, 2-TD
+  night as a zero. Caught by checking row counts per team, fixed by a
+  re-run.
+- **The database moved from Render to Neon** before Render's free month
+  expired. Every table verified by checksum, and the app's own scoring
+  logic run against both databases to confirm identical answers. The trap:
+  `COPY` maps columns **by position**, and three tables had grown columns
+  via `ALTER TABLE`, so a naive restore would have silently loaded 94k rows
+  of `hist_player_usage` into the wrong columns.
+- **`db_backup.py`** added (dump / restore / verify), and the three tables
+  no scraper can rebuild are now committed weekly.
+- **The current-week rule changed** to the NFL's own boundary, Tuesday
+  4 AM ET, after the old "24 hours past the last kickoff" left Weather,
+  Schedule and Depth Charts showing the finished week until 8:15 PM Tuesday.
+- **The market scrape got 5x faster.** The ScoresAndOdds API's player
+  filter turns out to be optional, so one request returns a whole market:
+  224 requests instead of 1,689, six minutes instead of thirty-four.
+  Verified with a diagnostic across all 18 categories before switching.
+- Week 3 props published, which caught a name collision: Draftedge lists a
+  Cleveland linebacker named Justin Jefferson, and matching on name alone
+  flagged the Vikings receiver as out.
+
+## Sept 23 - the laptop stops being required
+
+- **`.github/workflows/refresh-live-data.yml`**: depth charts, injuries,
+  game odds, props, the per-book market scrape and FirstDown rankings, five
+  times a day, loaded straight into Neon, with the odds snapshot committed
+  back to the repo. PFR stays local, since its cookies expire in hours and
+  it has to stay coordinated with another app.
+- **The first run silently did nothing.** `app.py` falls back to a local
+  SQLite file whenever `DATABASE_URL` isn't a Postgres URL, so a malformed
+  secret meant every load "succeeded" into a throwaway file on the runner
+  while the real database sat untouched, and the job went green. The
+  workflow now fails in 20 seconds if it isn't pointed at Postgres.
+- **`pull_live_data.py`** brings it all back to the laptop: the exact
+  scraped files from the last run, the newest archived market snapshot, and
+  optionally the live tables.
+- `scrape_weekly_weather.py` prints ASCII only. It had been saving its file
+  and then crashing on the final line, because Windows' cp1252 can't encode
+  an arrow, so a successful run looked like a failure.
+
+## Where things stand (Sept 23, 2026)
+
+Weeks 1 and 2 are scored, Week 3 is live with salaries, props and research
+tabs current. The site runs on Neon with backups in three places, and the
+live data refreshes itself five times a day without the laptop. What still
+needs a person: the Tuesday scoring run (PFR), and grading the week's bets.
+
+---
+
+# Part 1 - August 2026: the original build log
 
 ---
 
