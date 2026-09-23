@@ -109,6 +109,24 @@ jobs:
         continue-on-error: true
         run: python scrapers/scrape_scoresandodds_props.py --all --combine
 
+      # FirstDown only posts a week's rankings partway through the week, and
+      # its scraper writes nothing at all when it finds no table - so a run
+      # before they post leaves the previous week's file in place. That's why
+      # the load below is allowed to fail and why the next step says plainly
+      # whether this run got new numbers.
+      - name: FirstDown Studio rankings
+        continue-on-error: true
+        run: python scrapers/scrape_firstdown_studio_rankings.py
+
+      - name: Did FirstDown post yet?
+        run: |
+          f=data/firstdown_studio_rankings.csv.gz
+          if [ -f "$f" ]; then
+            echo "rankings file present, $(python -c "import pandas,sys;print(len(pandas.read_csv(sys.argv[1])))" "$f") rows"
+          else
+            echo "no rankings file: FirstDown has not posted week $WEEK yet. The FDS Pts column keeps last week's numbers."
+          fi
+
       - name: Per-book market comparison
         if: ${{ inputs.skip_market != true }}
         continue-on-error: true
@@ -132,6 +150,12 @@ jobs:
 
       - name: Load props market
         run: flask load-history --year $YEAR --props-only
+
+      # Allowed to fail: on a runner where FirstDown hasn't posted, there is
+      # no file to load and load-history just reports it as skipped.
+      - name: Load FirstDown rankings
+        continue-on-error: true
+        run: flask load-history --year $YEAR --firstdown-only
 
       # --- keep the odds history -----------------------------------------
       # The per-book comparison is never loaded into a table, so without
@@ -172,3 +196,4 @@ jobs:
             data/ourlads_depth_charts.csv.gz
             data/ourlads_injuries.csv.gz
             data/draftedge_injuries.csv.gz
+            data/firstdown_studio_rankings.csv.gz

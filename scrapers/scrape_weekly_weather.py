@@ -83,7 +83,7 @@ def fetch_week(year: int, week: int) -> list[dict]:
     game_links = soup.find_all('a', href=re.compile(rf'^/games/{year}/week-{week}/[\w-]+-at-[\w-]+'))
 
     if not game_links:
-        print(f"  Week {week}: no game links found — dumping page structure for diagnosis:")
+        print(f"  Week {week}: no game links found - dumping page structure for diagnosis:")
         all_links = [a.get('href') for a in soup.find_all('a', href=True)][:20]
         print(f"  First 20 links on page: {all_links}")
         return []
@@ -124,7 +124,7 @@ def fetch_week(year: int, week: int) -> list[dict]:
                 if not home_team:
                     failed.append(f"home='{home_slug}'")
                 print(f"    WARNING: couldn't normalize team slug(s): "
-                      f"{', '.join(failed)} — skipping this game")
+                      f"{', '.join(failed)} - skipping this game")
                 continue
 
             # Date/time: e.g. "09/04/25 08:20 PM EDT"
@@ -171,7 +171,7 @@ def fetch_week(year: int, week: int) -> list[dict]:
     if rows:
         print(f"  Week {week}: {len(rows)} games parsed")
     else:
-        print(f"  Week {week}: 0 games parsed despite finding {len(game_links)} game links — "
+        print(f"  Week {week}: 0 games parsed despite finding {len(game_links)} game links - "
               f"container-detection logic may need adjusting")
 
     return rows
@@ -203,7 +203,7 @@ def main(year: int, weeks: list[int]):
         existing = _save(existing, rows)
         time.sleep(SLEEP_SEC)
 
-    print(f"\nDone. {len(existing):,} rows total → {OUTPUT_FILE}")
+    print(f"\nDone. {len(existing):,} rows total -> {OUTPUT_FILE}")
 
 
 def parse_weeks(s: str) -> list[int]:
