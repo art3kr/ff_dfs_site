@@ -45,7 +45,6 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       PYTHONUNBUFFERED: "1"
       PYTHONIOENCODING: "utf-8"
-      YEAR: "2026"
 
     steps:
       - uses: actions/checkout@v4
@@ -75,6 +74,22 @@ jobs:
           print("database host:", url.split("@")[-1].split("/")[0])
           PY
 
+      # YEAR and WEEK for every step below. Same rollover as the site
+      # (bet_tracker.current_week mirrors app._week_rollover_cutoff), so on a
+      # Tuesday this is already the new week, which is what the scrapes are
+      # fetching.
+      - name: Work out the current NFL week
+        run: |
+          python - >> "$GITHUB_ENV" <<'PY'
+          import sys
+          sys.path.insert(0, "scrapers")
+          from bet_tracker import current_week
+          year, week = current_week()
+          print(f"YEAR={year}")
+          print(f"WEEK={week}")
+          PY
+          echo "scraping for $YEAR week $WEEK"
+
       # --- scrapes -------------------------------------------------------
       # continue-on-error on each: one blocked site shouldn't stop the rest.
       # check_scraper_output below reports what actually landed.
@@ -101,7 +116,7 @@ jobs:
 
       - name: Check what the scrapers actually wrote
         continue-on-error: true
-        run: python scrapers/check_scraper_output.py --year $YEAR
+        run: python scrapers/check_scraper_output.py --year $YEAR --week $WEEK
 
       # --- load into the database ----------------------------------------
       # Each is its own step so a failure names the source that failed.
